@@ -10,12 +10,12 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase
 // CONFIGURACIÓN FIREBASE
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBV_kc6922rgTsCX1AapGAAnjZU--QhPFI",
-  authDomain: "moti-c1c5e.firebaseapp.com",
-  projectId: "moti-c1c5e",
-  storageBucket: "moti-c1c5e.firebasestorage.app",
-  messagingSenderId: "348090491214",
-  appId: "1:348090491214:web:794845834e6078a1847e1f"
+  apiKey: "AIzaSyBQyULHw9P6V_nukIe_Np3_6LA2hdWuu5A",
+  authDomain: "moti-go-c562c.firebaseapp.com",
+  projectId: "moti-go-c562c",
+  storageBucket: "moti-go-c562c.firebasestorage.app",
+  messagingSenderId: "403488200433",
+  appId: "1:403488200433:web:695fd2eee203846546bb50"
 };
 
 // Inicializar Firebase
