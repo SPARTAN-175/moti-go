@@ -11,7 +11,8 @@ import {
 
 
 const btnRegistro =
-document.getElementById("btnRegistro");
+    document.getElementById("btnRegistro");
+
 
 btnRegistro.addEventListener(
     "click",
@@ -22,33 +23,36 @@ btnRegistro.addEventListener(
 async function registrarUsuario() {
 
     const nombre =
-    document.getElementById("nombre").value.trim();
+        document.getElementById("nombre").value.trim();
 
     const telefono =
-    document.getElementById("telefono").value.trim();
+        document.getElementById("telefono").value.trim();
 
     const municipio =
-    document.getElementById("municipio").value.trim();
+        document.getElementById("municipio").value.trim();
 
     const localidad =
-    document.getElementById("localidad").value.trim();
+        document.getElementById("localidad").value.trim();
 
     const password =
-    document.getElementById("password").value;
+        document.getElementById("password").value;
 
     const confirmPassword =
-    document.getElementById("confirmPassword").value;
+        document.getElementById("confirmPassword").value;
 
-    // Validaciones
 
-    if(
+    // ============================
+    // VALIDACIONES
+    // ============================
+
+    if (
         !nombre ||
         !telefono ||
         !municipio ||
         !localidad ||
         !password ||
         !confirmPassword
-    ){
+    ) {
 
         alert(
             "Completa todos los campos."
@@ -57,7 +61,8 @@ async function registrarUsuario() {
         return;
     }
 
-    if(password !== confirmPassword){
+
+    if (password !== confirmPassword) {
 
         alert(
             "Las contraseñas no coinciden."
@@ -66,29 +71,53 @@ async function registrarUsuario() {
         return;
     }
 
-    try{
 
-        // Email interno para Firebase
+    if (password.length < 6) {
 
-        const email =
-        `${telefono}@moti.app`;
-
-        // Crear usuario Authentication
-
-        const cred =
-        await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
+        alert(
+            "La contraseña debe tener al menos 6 caracteres."
         );
 
-        const uid =
-        cred.user.uid;
+        return;
+    }
 
-        // Guardar en Firestore
+
+    try {
+
+        // ============================
+        // EMAIL INTERNO DE FIREBASE
+        // ============================
+
+        const email =
+            `${telefono}@motigo.app`;
+
+
+        // ============================
+        // CREAR CUENTA
+        // ============================
+
+        const cred =
+            await createUserWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
+
+
+        const uid =
+            cred.user.uid;
+
+
+        // ============================
+        // PERFIL DEL CLIENTE
+        // ============================
 
         await setDoc(
-            doc(db, "usuarios", uid),
+            doc(
+                db,
+                "usuarios",
+                uid
+            ),
             {
 
                 nombre,
@@ -99,12 +128,13 @@ async function registrarUsuario() {
 
                 localidad,
 
-                tipo: "pasajero",
+                // NUEVO ROL MOTI GO
+                tipo: "cliente",
 
                 passwordTemporal: false,
 
                 fechaRegistro:
-                new Date().toISOString(),
+                    new Date().toISOString(),
 
                 latitud: null,
 
@@ -113,34 +143,68 @@ async function registrarUsuario() {
             }
         );
 
+
+        // ============================
+        // ÉXITO
+        // ============================
+
         alert(
-            "Cuenta creada correctamente."
+            "¡Cuenta creada correctamente! Bienvenido a MOTI GO."
         );
+
 
         window.location.href =
-        "dashboard-pasajero.html";
+            "dashboard-cliente.html";
+
 
     }
-    catch(error){
+    catch (error) {
 
-    console.error(error);
+        console.error(error);
 
-    if(
-        error.code ===
-        "auth/email-already-in-use"
-    ){
+
+        if (
+            error.code ===
+            "auth/email-already-in-use"
+        ) {
+
+            alert(
+                "Ya existe una cuenta registrada con este número telefónico."
+            );
+
+            return;
+        }
+
+
+        if (
+            error.code ===
+            "auth/invalid-phone-number"
+        ) {
+
+            alert(
+                "Verifica el número telefónico."
+            );
+
+            return;
+        }
+
+
+        if (
+            error.code ===
+            "auth/weak-password"
+        ) {
+
+            alert(
+                "La contraseña es demasiado débil."
+            );
+
+            return;
+        }
+
 
         alert(
-            "Ya existe una cuenta registrada con este número telefónico."
+            "No se pudo crear la cuenta."
         );
-
-        return;
-
-    }
-
-    alert(
-        "No se pudo crear la cuenta."
-    );
 
     }
 
