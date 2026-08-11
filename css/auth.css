@@ -1,0 +1,236 @@
+/* ===================================
+   FORMULARIO LOGIN
+   =================================== */
+
+.login-form{
+
+    margin-top:30px;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:20px;
+}
+
+/* ===================================
+   GRUPO INPUT
+   =================================== */
+
+.input-group{
+
+    display:flex;
+    flex-direction:column;
+
+    text-align:left;
+}
+
+/* ===================================
+   LABEL
+   =================================== */
+
+.input-group label{
+
+    margin-bottom:8px;
+
+    font-size:14px;
+
+    color:var(--text);
+
+    font-weight:500;
+}
+
+/* ===================================
+   INPUT
+   =================================== */
+
+.input-group input{
+
+    width:100%;
+
+    height:56px;
+
+    padding:0 16px;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:16px;
+
+    outline:none;
+
+    font-size:15px;
+
+    font-family:var(--font);
+}
+
+/* ===================================
+   EFECTO INPUT
+   =================================== */
+
+.input-group input:focus{
+
+    border-color:var(--primary);
+}
+
+/* ===================================
+   SEPARADOR
+   =================================== */
+
+.separator{
+
+    margin:25px 0;
+
+    position:relative;
+
+    text-align:center;
+}
+
+.separator::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+
+    top:50%;
+
+    width:100%;
+
+    height:1px;
+
+    background:#e2e8f0;
+}
+
+.separator span{
+
+    background:white;
+
+    padding:0 12px;
+
+    position:relative;
+
+    color:var(--text-light);
+}
+
+/* ===================================
+   BOTÓN SECUNDARIO
+   =================================== */
+
+.btn-secondary{
+
+    width:100%;
+
+    height:56px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    text-decoration:none;
+
+    border-radius:16px;
+
+    border:2px solid var(--primary);
+
+    color:var(--primary);
+
+    font-weight:600;
+
+    transition:.3s;
+}
+
+.btn-secondary:hover{
+
+    background:var(--primary);
+
+    color:white;
+}
+
+/* ===================================
+   TARJETAS DE REGISTRO
+   =================================== */
+
+.user-card{
+
+    margin-top:20px;
+
+    width:100%;
+
+    padding:20px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    gap:10px;
+
+    text-decoration:none;
+
+    color:var(--text);
+
+    background:white;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:20px;
+
+    transition:.3s;
+}
+
+.user-card:hover{
+
+    border-color:var(--primary);
+
+    transform:translateY(-2px);
+}
+
+.user-icon{
+
+    font-size:42px;
+
+    color:var(--primary);
+}
+
+.user-card p{
+
+    color:var(--text-light);
+
+    font-size:14px;
+}
+
+/* ===================================
+   CHECKBOX
+   =================================== */
+
+.checkbox-group{
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:10px;
+
+    margin-top:10px;
+
+    text-align:left;
+}
+
+.checkbox-group input{
+
+    margin-top:4px;
+}
+
+.checkbox-group label{
+
+    font-size:14px;
+
+    color:var(--text-light);
+
+    line-height:1.4;
+}
+
+

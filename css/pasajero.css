@@ -1,0 +1,313 @@
+/* CONTENEDOR */
+
+.dashboard{
+
+    max-width:420px;
+
+    margin:auto;
+
+    padding:20px 20px 90px;
+}
+
+/* ENCABEZADO */
+
+.header{
+
+    margin-bottom:20px;
+}
+
+.header h2{
+
+    margin-bottom:5px;
+}
+
+.header p{
+
+    color:#6b7280;
+}
+
+/* TARJETAS */
+
+.location-card,
+.map-link-card,
+.fare-card{
+
+    background:white;
+
+    border-radius:18px;
+
+    padding:16px;
+
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+
+    margin-bottom:15px;
+}
+
+/* UBICACIÓN */
+
+.location-card{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+}
+
+.location-card .material-symbols-outlined{
+
+    color:#16a34a;
+
+    font-size:30px;
+}
+
+/* MAPA */
+
+.map-link-card{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    cursor:pointer;
+}
+
+.map-link-card .material-symbols-outlined{
+
+    color:#16a34a;
+
+    font-size:30px;
+}
+
+.map-link-card p{
+
+    font-size:13px;
+
+    color:#6b7280;
+
+    margin-top:4px;
+}
+
+/* SELECTOR LOCAL | ESPECIAL */
+
+.trip-selector{
+
+    display:flex;
+
+    background:#f3f4f6;
+
+    border-radius:14px;
+
+    padding:4px;
+
+    margin-bottom:15px;
+}
+
+.trip-option{
+
+    flex:1;
+
+    border:none;
+
+    background:none;
+
+    padding:12px;
+
+    border-radius:10px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    font-family:'Poppins',sans-serif;
+}
+
+.trip-option.active{
+
+    background:#16a34a;
+
+    color:white;
+}
+
+/* FORMULARIOS */
+
+.destination{
+
+    margin-bottom:15px;
+}
+
+.destination label{
+
+    display:block;
+
+    margin-bottom:8px;
+
+    font-weight:500;
+}
+
+.destination input,
+.destination select,
+.destination textarea{
+
+    width:100%;
+
+    padding:12px;
+
+    border:1px solid #d1d5db;
+
+    border-radius:12px;
+
+    font-family:'Poppins',sans-serif;
+}
+
+.destination textarea{
+
+    min-height:90px;
+
+    resize:none;
+}
+
+/* TARIFA */
+
+.fare-card{
+
+    text-align:center;
+}
+
+.fare-card span{
+
+    color:#6b7280;
+}
+
+.fare-card strong{
+
+    display:block;
+
+    margin-top:5px;
+
+    font-size:26px;
+
+    color:#16a34a;
+}
+
+/* BOTÓN */
+
+.btn-primary{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    width:100%;
+
+    height:55px;
+
+    background:#16a34a;
+
+    color:white;
+
+    text-decoration:none;
+
+    border-radius:14px;
+
+    font-weight:600;
+
+    margin-top:15px;
+}
+
+/* MENÚ INFERIOR */
+
+.bottom-nav{
+
+    position:fixed;
+
+    bottom:0;
+
+    left:0;
+
+    width:100%;
+
+    height:70px;
+
+    background:white;
+
+    display:flex;
+
+    justify-content:space-around;
+
+    align-items:center;
+
+    box-shadow:0 -2px 10px rgba(0,0,0,.08);
+}
+
+.bottom-nav a{
+
+    text-decoration:none;
+
+    color:#6b7280;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    gap:4px;
+
+    font-size:12px;
+}
+
+.bottom-nav .material-symbols-outlined{
+
+    font-size:24px;
+}
+
+
+
+.lista-destinos{
+
+    margin-top:10px;
+
+    border:1px solid #ddd;
+
+    border-radius:10px;
+
+    background:#fff;
+
+    overflow:hidden;
+
+    display:none;
+
+    max-height:220px;
+
+    overflow-y:auto;
+
+}
+
+.item-destino{
+
+    padding:12px;
+
+    cursor:pointer;
+
+    border-bottom:1px solid #eee;
+
+    transition:.2s;
+
+}
+
+.item-destino:hover{
+
+    background:#f5f5f5;
+
+}
+
+.item-destino:last-child{
+
+    border-bottom:none;
+
+}

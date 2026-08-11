@@ -1,0 +1,33 @@
+.loader{
+
+width:60px;
+
+height:60px;
+
+border:6px solid #ddd;
+
+border-top:6px solid #16a34a;
+
+border-radius:50%;
+
+margin:30px auto;
+
+animation:girar 1s linear infinite;
+
+}
+
+@keyframes girar{
+
+from{
+
+transform:rotate(0deg);
+
+}
+
+to{
+
+transform:rotate(360deg);
+
+}
+
+}

@@ -1,0 +1,142 @@
+
+/* ===================================
+   CONFIGURACIÓN GENERAL
+   =================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+/* ===================================
+   BODY
+   =================================== */
+
+body{
+    font-family:var(--font);
+    background:var(--background);
+
+    min-height:100vh;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    padding:20px;
+}
+
+/* ===================================
+   CONTENEDOR PRINCIPAL
+   =================================== */
+
+.container{
+    width:100%;
+    max-width:420px;
+
+    background:var(--card);
+
+    border-radius:var(--radius);
+
+    box-shadow:var(--shadow);
+
+    padding:40px 25px;
+
+    text-align:center;
+}
+
+/* ===================================
+   LOGO
+   =================================== */
+
+.logo-icon{
+    font-size:70px;
+    color:var(--primary);
+}
+
+.logo-text{
+    margin-top:10px;
+
+    font-size:36px;
+    font-weight:700;
+
+    color:var(--text);
+}
+
+.slogan{
+    margin-top:10px;
+
+    color:var(--text-light);
+
+    font-size:15px;
+
+    line-height:1.5;
+}
+
+/* ===================================
+   BOTÓN PRINCIPAL
+   =================================== */
+
+.btn-primary{
+
+    margin-top:40px;
+
+    width:100%;
+
+    height:56px;
+
+    border:none;
+
+    border-radius:16px;
+
+    background:var(--primary);
+
+    color:white;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.3s;
+}
+
+.btn-primary:hover{
+    opacity:.9;
+}
+
+/* ===================================
+   PIE
+   =================================== */
+
+.version{
+
+    margin-top:25px;
+
+    color:var(--text-light);
+
+    font-size:12px;
+}
+
+/* ===================================
+   ENLACES COMO BOTÓN
+   =================================== */
+
+.btn-primary{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    text-decoration:none;
+}
+
+a{
+
+    text-decoration:none;
+
+    color:inherit;
+}

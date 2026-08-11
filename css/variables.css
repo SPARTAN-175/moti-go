@@ -1,0 +1,29 @@
+
+/* ===================================
+   VARIABLES GLOBALES MOTI
+   =================================== */
+
+:root{
+
+    /* Colores principales */
+    --primary:#22c55e;
+    --secondary:#f97316;
+
+    /* Fondos */
+    --background:#f8fafc;
+    --card:#ffffff;
+
+    /* Textos */
+    --text:#1e293b;
+    --text-light:#64748b;
+
+    /* Bordes */
+    --radius:20px;
+
+    /* Sombras */
+    --shadow:
+        0 4px 15px rgba(0,0,0,.08);
+
+    /* Tipografía */
+    --font:'Poppins', sans-serif;
+}
