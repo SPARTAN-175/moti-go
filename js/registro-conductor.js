@@ -11,41 +11,46 @@ import {
 
 
 const btnRegistro =
-document.getElementById(
-    "btnRegistroConductor"
-);
+    document.getElementById(
+        "btnRegistroConductor"
+    );
+
 
 btnRegistro.addEventListener(
     "click",
-    registrarConductor
+    registrarRepartidor
 );
 
 
-async function registrarConductor(){
+async function registrarRepartidor() {
 
     const nombre =
-    document.getElementById("nombre").value.trim();
+        document.getElementById("nombre").value.trim();
 
     const telefono =
-    document.getElementById("telefono").value.trim();
+        document.getElementById("telefono").value.trim();
 
     const municipio =
-    document.getElementById("municipio").value.trim();
+        document.getElementById("municipio").value.trim();
 
     const localidad =
-    document.getElementById("localidad").value.trim();
+        document.getElementById("localidad").value.trim();
 
     const placa =
-    document.getElementById("placa").value.trim();
+        document.getElementById("placa").value.trim();
 
     const password =
-    document.getElementById("password").value;
+        document.getElementById("password").value;
 
     const confirmPassword =
-    document.getElementById("confirmPassword").value;
+        document.getElementById("confirmPassword").value;
 
 
-    if(
+    // ============================
+    // VALIDACIONES
+    // ============================
+
+    if (
         !nombre ||
         !telefono ||
         !municipio ||
@@ -53,7 +58,7 @@ async function registrarConductor(){
         !placa ||
         !password ||
         !confirmPassword
-    ){
+    ) {
 
         alert(
             "Completa todos los campos."
@@ -62,7 +67,8 @@ async function registrarConductor(){
         return;
     }
 
-    if(password !== confirmPassword){
+
+    if (password !== confirmPassword) {
 
         alert(
             "Las contraseñas no coinciden."
@@ -71,23 +77,53 @@ async function registrarConductor(){
         return;
     }
 
-    try{
 
-        const email =
-        `${telefono}@moti.app`;
+    if (password.length < 6) {
 
-        const cred =
-        await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
+        alert(
+            "La contraseña debe tener al menos 6 caracteres."
         );
 
+        return;
+    }
+
+
+    try {
+
+        // ============================
+        // EMAIL INTERNO MOTI GO
+        // ============================
+
+        const email =
+            `${telefono}@motigo.app`;
+
+
+        // ============================
+        // CREAR CUENTA AUTH
+        // ============================
+
+        const cred =
+            await createUserWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
+
+
         const uid =
-        cred.user.uid;
+            cred.user.uid;
+
+
+        // ============================
+        // PERFIL DEL REPARTIDOR
+        // ============================
 
         await setDoc(
-            doc(db, "usuarios", uid),
+            doc(
+                db,
+                "usuarios",
+                uid
+            ),
             {
 
                 nombre,
@@ -100,10 +136,13 @@ async function registrarConductor(){
 
                 placa,
 
-                tipo: "conductor",
+                // NUEVO ROL MOTI GO
+                tipo: "repartidor",
 
+                // Estado de aprobación
                 estado: "pendiente",
 
+                // Estado para el motor de asignación
                 estadoServicio: "disponible",
 
                 verificado: false,
@@ -116,48 +155,72 @@ async function registrarConductor(){
 
                 longitud: null,
 
-// ======================
-// ESTADÍSTICAS MOTI
-// ======================
+                // ======================
+                // ESTADÍSTICAS
+                // ======================
 
-viajesHoy: 0,
+                viajesHoy: 0,
 
-viajesTotales: 0,
+                viajesTotales: 0,
 
-fechaRegistro:
-new Date().toISOString()
+                fechaRegistro:
+                    new Date().toISOString()
 
             }
         );
+
+
+        // ============================
+        // ÉXITO
+        // ============================
 
         alert(
             "Solicitud enviada correctamente."
         );
 
+
         window.location.href =
-        "conductor-pendiente.html";
+            "conductor-pendiente.html";
+
 
     }
-    catch(error){
+    catch (error) {
 
-    console.error(error);
-
-    if(
-        error.code ===
-        "auth/email-already-in-use"
-    ){
-
-        alert(
-            "Ya existe una cuenta registrada con este número telefónico."
+        console.error(
+            "Error registrando repartidor:",
+            error
         );
 
-        return;
 
-    }
+        if (
+            error.code ===
+            "auth/email-already-in-use"
+        ) {
 
-    alert(
-        "No se pudo crear la cuenta."
-    );
+            alert(
+                "Ya existe una cuenta registrada con este número telefónico."
+            );
+
+            return;
+        }
+
+
+        if (
+            error.code ===
+            "auth/weak-password"
+        ) {
+
+            alert(
+                "La contraseña debe tener al menos 6 caracteres."
+            );
+
+            return;
+        }
+
+
+        alert(
+            "No se pudo crear la cuenta."
+        );
 
     }
 
