@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>MOTI | Agregar Ruta</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+rel="stylesheet">
+
+<link rel="stylesheet"
+href="../css/variables.css">
+
+<link rel="stylesheet"
+href="../css/main.css">
+
+<link rel="stylesheet"
+href="../css/agregar-ruta.css">
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>
+
+Agregar Ruta Especial
+
+</h2>
+
+<p class="subtitle">
+
+Busca una ruta existente o registra una nueva.
+
+</p>
+
+
+<label>
+
+Buscar destino
+
+</label>
+
+<input
+
+type="text"
+
+id="buscarDestino"
+
+placeholder="Escribe un destino...">
+
+
+<div
+
+id="listaDestinos"
+
+class="lista-destinos">
+
+</div>
+
+
+<button
+
+id="btnNuevoDestino"
+
+class="btn-secondary"
+
+style="display:none;">
+
+➕ Registrar nuevo destino
+
+</button>
+
+
+<div
+
+id="nuevoDestino"
+
+style="display:none;">
+
+<label>
+
+Nombre del destino
+
+</label>
+
+<input
+
+type="text"
+
+id="nombreDestino"
+
+placeholder="Nombre del destino">
+
+
+<label>
+
+Selecciona la ubicación
+
+</label>
+
+<div
+
+id="map"
+
+style="height:300px;border-radius:12px;margin-top:10px;">
+
+</div>
+
+</div>
+
+
+<label>
+
+Tarifa
+
+</label>
+
+<input
+
+type="number"
+
+id="tarifa"
+
+placeholder="$0.00">
+
+
+<div class="buttons">
+
+<button
+
+id="btnGuardar"
+
+class="save-btn">
+
+Guardar Ruta
+
+</button>
+
+<a
+
+href="rutas-tarifas.html"
+
+class="cancel-btn">
+
+Cancelar
+
+</a>
+
+</div>
+
+</div>
+
+
+<script
+src="https://unpkg.com/leaflet/dist/leaflet.js">
+</script>
+
+<script
+type="module"
+src="../js/agregar-ruta.js">
+</script>
+
+<script
+type="module"
+src="../js/auth-guard.js">
+</script>
+
+</body>
+
+</html>

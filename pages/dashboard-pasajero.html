@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MOTI | Inicio</title>
+
+    <!-- Fuente -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <!-- Material Symbols -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
+    <!-- Estilos -->
+    <link rel="stylesheet"
+          href="../css/variables.css">
+
+    <link rel="stylesheet"
+          href="../css/main.css">
+
+    <link rel="stylesheet"
+          href="../css/pasajero.css">
+
+</head>
+
+<body>
+
+    <div class="dashboard">
+
+        <!-- Encabezado -->
+
+        <header class="header">
+
+            <h2 id="userName">
+             Hola...
+            </h2>
+
+            <p>
+                Bienvenido a MOTI
+            </p>
+
+        </header>
+
+        <!-- Ubicación -->
+
+<section class="location-card">
+
+    <span class="material-symbols-outlined">
+
+        location_on
+
+    </span>
+
+    <div>
+
+        <strong>
+
+            Mi ubicación
+
+        </strong>
+
+        <p id="currentLocation">
+
+            Detectando ubicación...
+
+        </p>
+
+    </div>
+
+</section>
+
+        <!-- Ver ubicación -->
+
+<a
+href="seleccionar-destino.html"
+class="map-link-card">
+
+    <span class="material-symbols-outlined">
+
+        map
+
+    </span>
+
+    <div>
+
+        <strong>
+
+            Elegir destino en el mapa
+
+        </strong>
+
+        <p>
+
+            Selecciona exactamente a dónde deseas ir
+
+        </p>
+
+    </div>
+
+</a>
+        
+        <!-- Tipo de viaje -->
+
+        <section class="trip-selector">
+
+            <button class="trip-option active"
+                    id="btnLocal">
+
+                LOCAL
+
+            </button>
+
+            <button class="trip-option"
+                    id="btnEspecial">
+
+                ESPECIAL
+
+            </button>
+
+        </section>
+
+        <!-- Destino Especial -->
+
+<section id="specialFields"
+         class="destination"
+         style="display:none;">
+
+    <label>
+
+        Buscar destino especial
+
+    </label>
+
+    <input
+
+        type="text"
+
+        id="buscarDestinoEspecial"
+
+        placeholder="Escribe un destino...">
+
+    <div
+
+        id="listaDestinos"
+
+        class="lista-destinos">
+
+    </div>
+
+</section>
+
+        <!-- Destino -->
+
+<section class="destination">
+
+    <label>
+
+        Destino
+
+    </label>
+
+    <input
+        type="text"
+        id="destino"
+        placeholder="¿A dónde vas?">
+
+</section>
+
+        <!-- Observaciones -->
+
+        <section class="destination">
+
+            <label>
+
+                Observaciones
+
+            </label>
+
+<textarea
+    id="observaciones"
+    placeholder="Ejemplo: Estoy frente a urgencias"></textarea>
+
+        </section>
+
+        <!-- Tarifa -->
+
+        <section class="fare-card">
+
+            <span>
+
+                Tarifa estimada
+
+            </span>
+
+            <strong id="fareAmount">
+
+                $10
+
+            </strong>
+
+        </section>
+
+        <!-- Botón -->
+
+        <a href="#"
+   id="btnSolicitar"
+   class="btn-primary">
+
+    Solicitar Mototaxi
+
+</a>
+
+    </div>
+
+    <!-- Menú inferior -->
+
+    <nav class="bottom-nav">
+
+        <a href="#">
+
+            <span class="material-symbols-outlined">
+
+                home
+
+            </span>
+
+            Inicio
+
+        </a>
+
+        <a href="#">
+
+            <span class="material-symbols-outlined">
+
+                receipt_long
+
+            </span>
+
+            Mis Viajes
+
+        </a>
+
+        <a href="perfil-pasajero.html">
+
+            <span class="material-symbols-outlined">
+
+                person
+
+            </span>
+
+            Perfil
+
+        </a>
+
+    </nav>
+
+    <script type="module"
+        src="../js/dashboard-pasajero.js"></script>
+
+<script type="module"
+        src="../js/solicitar-viaje.js">
+</script>
+
+    <script type="module"
+        src="../js/firebase-test.js">
+    </script>
+
+<script type="module"
+        src="../js/auth-guard.js">
+</script>
+
+<script type="module"
+        src="../js/user-data.js">
+</script>
+
+<script
+type="module"
+src="../js/gps.js">
+</script>
+    
+</body>
+
+</html>

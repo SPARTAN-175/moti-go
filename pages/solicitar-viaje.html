@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MOTI | Solicitar Viaje</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="../css/variables.css">
+
+    <link rel="stylesheet"
+          href="../css/main.css">
+
+    <link rel="stylesheet"
+          href="../css/solicitar-viaje.css">
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h2>Solicitar Viaje</h2>
+
+        <!-- Selector -->
+
+        <div class="trip-selector">
+
+            <button class="trip-option active"
+                    id="btnLocal">
+
+                LOCAL
+
+            </button>
+
+            <button class="trip-option"
+                    id="btnEspecial">
+
+                ESPECIAL
+
+            </button>
+
+        </div>
+
+        <!-- Tarjeta -->
+
+        <div class="trip-card">
+
+            <div class="location-card">
+
+                <span class="label">
+
+                    Lugar de recogida
+
+                </span>
+
+                <strong>
+
+                    📍 Mi ubicación actual
+
+                </strong>
+
+            </div>
+
+            <!-- Destino especial -->
+
+            <div id="specialFields"
+                 style="display:none;">
+
+                <label>
+
+                    Destino
+
+                </label>
+
+                <select>
+
+                    <option>
+
+                        Seleccionar destino
+
+                    </option>
+
+                    <option>
+
+                        Plan de Ayala
+
+                    </option>
+
+                    <option>
+
+                        Nuevo Xochimilco
+
+                    </option>
+
+                    <option>
+
+                        Tapalapa
+
+                    </option>
+
+                </select>
+
+            </div>
+
+            <!-- Observaciones -->
+
+            <label>
+
+                Observaciones
+
+            </label>
+
+            <textarea
+                placeholder="Ejemplo: Estoy frente a urgencias">
+            </textarea>
+
+            <!-- Tarifa -->
+
+            <div class="fare-card">
+
+                <span>
+
+                    Tarifa estimada
+
+                </span>
+
+                <strong id="fareAmount">
+
+                    $10
+
+                </strong>
+
+            </div>
+
+            <button class="request-btn">
+
+                Solicitar Mototaxi
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <script src="../js/solicitar-viaje.js"></script>
+    
+<script type="module"
+        src="../js/auth-guard.js">
+</script>
+
+<script
+type="module"
+src="../js/gps.js">
+</script>
+    
+</body>
+
+  </html>

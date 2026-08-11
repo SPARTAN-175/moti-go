@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MOTI | Conductor</title>
+
+    <!-- Fuente -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <!-- Material Symbols -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
+    <!-- Estilos -->
+    <link rel="stylesheet"
+          href="../css/variables.css">
+
+    <link rel="stylesheet"
+          href="../css/main.css">
+
+    <link rel="stylesheet"
+          href="../css/conductor.css">
+
+</head>
+
+<body>
+
+    <div class="dashboard">
+
+    <!-- Saludo -->
+    <header class="header">
+
+      <h2 id="userName">
+    Hola...
+      </h2>  
+
+    </header>
+
+        <section
+    id="activeTripCard"
+    class="active-trip-card"
+    style="display:none;">
+
+    <h3>
+
+        Viaje en curso
+
+    </h3>
+
+    <p>
+
+        <strong id="activePassenger">
+
+        </strong>
+
+    </p>
+
+    <p>
+
+        Destino:
+
+        <span id="activeDestination">
+
+        </span>
+
+    </p>
+
+    <p>
+
+        Estado:
+
+        <span id="activeStatus">
+
+        </span>
+
+    </p>
+
+    <button
+        id="continueTrip"
+        class="btn-primary">
+
+        Continuar viaje
+
+    </button>
+
+</section>
+        
+
+        <!-- Solicitud Emergente -->
+
+<section
+    id="requestPopup"
+    class="request-popup"
+    style="display:none;">
+
+    <div
+        id="requestContent">
+    </div>
+
+</section>
+
+    <!-- Estado -->
+    <section class="status-section">
+
+        <p class="status-title">
+            Estado Actual
+        </p>
+
+        <button 
+            id="statusButton"
+            class="status-button">
+
+            Disponible
+
+        </button>
+
+        <p 
+            id="statusDescription"
+            class="status-description">
+            Estás recibiendo solicitudes
+        </p>
+
+    </section>
+
+    <!-- Estadísticas -->
+    <section class="stats-grid">
+
+        <div class="stat-card large">
+
+            <span>Viajes Hoy</span>
+
+            <h3>15</h3>
+
+        </div>
+
+        <div class="stat-card large">
+
+            <span>Ganancias Hoy</span>
+
+            <h3>$450</h3>
+
+        </div>
+
+    </section>
+
+    <!-- Accesos rápidos -->
+    <section class="menu-grid">
+
+        <a href="solicitudes.html" class="menu-card">
+        <span class="badge">3</span>
+            
+        <p>Solicitudes</p>
+
+        </a>
+
+        
+<a
+href="historial-conductor.html"
+class="menu-card">
+
+<p>
+
+Historial
+
+</p>
+
+</a>
+       <a href="rutas-tarifas.html" class="menu-card">
+
+        <p>Rutas y Tarifas</p>
+
+        </a>
+
+        <a href="perfil-conductor.html" class="menu-card">
+
+    <p>Perfil</p>
+
+        </a>
+
+    </section>
+
+        <section class="logout-section">
+
+    <a href="#"
+   id="btnLogout"
+   class="menu-card logout">
+
+    🚪
+
+    <p>
+        Cerrar Sesión
+    </p>
+
+</a>
+
+</section>
+
+</div>
+
+
+<script type="module"
+        src="../js/logout.js">
+</script>
+    
+<script type="module"
+        src="../js/auth-guard.js">
+</script>
+
+<script type="module"
+        src="../js/user-data.js">
+</script>
+<script type="module"
+        src="../js/dashboard-conductor.js">
+</script>
+
+<script
+type="module"
+src="../js/gps.js">
+</script>
+
+    
+</body>
+
+</html>

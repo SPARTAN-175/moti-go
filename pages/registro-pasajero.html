@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Registro Pasajero | MOTI</title>
+
+    <!-- Fuente -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <!-- Material Symbols -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
+    <!-- Estilos -->
+    <link rel="stylesheet"
+          href="../css/variables.css">
+
+    <link rel="stylesheet"
+          href="../css/main.css">
+
+    <link rel="stylesheet"
+          href="../css/auth.css">
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <span class="material-symbols-outlined logo-icon">
+            person
+        </span>
+
+        <h1 class="logo-text">
+            Pasajero
+        </h1>
+
+        <p class="slogan">
+            Crea tu cuenta para solicitar viajes
+        </p>
+
+        <form class="login-form">
+
+            <!-- Nombre -->
+            <div class="input-group">
+
+                <label>
+                    Nombre completo
+                </label>
+
+                <input
+                 type="text"
+                 id="nombre"
+                 placeholder="Ingresa tu nombre">
+
+            </div>
+
+            <!-- Teléfono -->
+            <div class="input-group">
+
+                <label>
+                    Teléfono
+                </label>
+
+                <input
+                type="tel"
+                id="telefono"
+              placeholder="9611234567">
+
+            </div>
+
+            <!-- Municipio -->
+            <div class="input-group">
+
+             <label>
+             Municipio
+             </label>
+
+    <input
+        type="text"
+        id="municipio"
+        placeholder="Ostuacán">
+
+</div>
+            <!-- Localidad -->
+            <div class="input-group">
+
+    <label>
+        Localidad
+    </label>
+
+    <input
+        type="text"
+        id="localidad"
+        placeholder="Centro">
+
+</div>
+
+            <!-- Contraseña -->
+            <div class="input-group">
+
+                <label>
+                    Contraseña
+                </label>
+
+                <input
+                type="password"
+                id="password"
+                placeholder="********">
+
+            </div>
+
+            <!-- Confirmar -->
+            <div class="input-group">
+
+                <label>
+                    Confirmar contraseña
+                </label>
+
+                <input
+                type="password"
+                id="confirmPassword"
+                placeholder="********">
+
+            </div>
+
+            <!-- Términos -->
+            <div class="checkbox-group">
+
+                <input
+                    type="checkbox"
+                    id="terminos">
+
+                <label for="terminos">
+                    Acepto los términos y condiciones
+                </label>
+
+            </div>
+
+            <!-- Botón -->
+            <button
+             type="button"
+             id="btnRegistro"
+             class="btn-primary">
+
+              Crear cuenta
+
+            </button>
+
+        </form>
+
+    </div>
+
+
+
+
+    <script type="module"
+        src="../js/registro-pasajero.js">
+    </script>
+</body>
+
+</html>

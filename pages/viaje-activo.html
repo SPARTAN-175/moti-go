@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>
+
+Viaje Activo
+
+</title>
+
+<link rel="stylesheet"
+href="../css/variables.css">
+
+<link rel="stylesheet"
+href="../css/main.css">
+
+<link
+rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link
+rel="stylesheet"
+href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
+<link rel="stylesheet"
+href="../css/viaje-activo.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>
+
+Viaje Activo
+
+</h2>
+
+<div class="status-card">
+
+<p id="estadoViaje">
+
+En camino al pasajero
+
+</p>
+
+</div>
+
+<div class="card">
+
+<h3 id="nombrePasajero">
+
+Cargando...
+
+</h3>
+
+<p>
+
+<strong>
+
+Destino
+
+</strong>
+
+</p>
+
+<p id="destinoViaje">
+
+...
+
+</p>
+
+<p>
+
+<strong>
+
+Referencia
+
+</strong>
+
+</p>
+
+<p id="referenciaViaje">
+
+...
+
+</p>
+
+</div>
+
+   <div class="map-card">
+
+      <div class="navigation-card">
+
+    <div class="navigation-title"
+         id="navigationTitle">
+
+        Recogiendo pasajero
+
+    </div>
+
+    <div class="navigation-info">
+
+        <div>
+
+            <span class="label">
+
+                Distancia
+
+            </span>
+
+            <strong id="distanceText">
+
+                --
+
+            </strong>
+
+        </div>
+
+        <div>
+
+            <span class="label">
+
+                Tiempo
+
+            </span>
+
+            <strong id="timeText">
+
+                --
+
+            </strong>
+
+        </div>
+
+    </div>
+
+</div>
+      
+    <div id="map">
+
+    </div>
+
+</div> 
+
+<button
+id="btnAccion"
+class="btn-primary">
+
+Iniciar recorrido
+
+</button>
+
+</div>
+
+
+<script
+src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+    
+<script
+src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js">
+</script>
+   
+<script type="module"
+src="../js/viaje-activo.js">
+
+</script>
+
+<script
+type="module"
+src="../js/gps.js">
+</script>
+
+
+
+   
+</body>
+
+</html>

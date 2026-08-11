@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MOTI | Mi Perfil</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="../css/variables.css">
+
+    <link rel="stylesheet"
+          href="../css/main.css">
+
+    <link rel="stylesheet"
+          href="../css/perfil-pasajero.css">
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h2>Mi Perfil</h2>
+
+        <!-- Tarjeta Principal -->
+
+        <div class="profile-header">
+
+            <h3 id="profileName">
+    Cargando...
+            </h3>
+
+            <p>
+                Usuario de MOTI
+            </p>
+
+            <span class="status">
+
+                🟢 Cuenta Activa
+
+            </span>
+
+        </div>
+
+        <!-- Información -->
+
+        <div class="card">
+
+            <h4>Información Personal</h4>
+
+            <div class="info-item">
+
+                <span>Nombre</span>
+
+                <strong id="infoName">
+    Cargando...
+                </strong>
+
+            </div>
+
+            <div class="info-item">
+
+                <span>Teléfono</span>
+
+                <strong id="infoPhone">
+    Cargando...
+                </strong>
+
+            </div>
+
+            <div class="info-item">
+
+                <span>Municipio</span>
+
+                <strong id="infoMunicipio">
+    Cargando...
+                </strong>
+
+            </div>
+
+            <div class="info-item">
+
+                <span>Localidad</span>
+
+                <strong id="infoLocalidad">
+    Cargando...
+                </strong>
+
+            </div>
+
+        </div>
+
+        <!-- Acciones -->
+
+        <div class="menu-grid">
+
+            <a href="#"
+               class="menu-card">
+
+                ✏️
+
+                <p>
+
+                    Editar Información
+
+                </p>
+
+            </a>
+
+            <a href="#"
+               class="menu-card">
+
+                🔒
+
+                <p>
+
+                    Cambiar Contraseña
+
+                </p>
+
+            </a>
+
+            <a href="#"
+               class="menu-card">
+
+                📄
+
+                <p>
+
+                    Términos
+
+                </p>
+
+            </a>
+
+            <a href="#"
+   id="btnLogout"
+   class="menu-card logout">
+
+    🚪
+
+    <p>
+        Cerrar Sesión
+    </p>
+
+</a>
+
+        </div>
+
+    </div>
+
+
+    <script type="module"
+        src="../js/logout.js">
+</script>
+
+    <script type="module"
+        src="../js/auth-guard.js">
+</script>
+
+<script type="module"
+        src="../js/perfil-pasajero.js">
+</script>
+    
+</body>
+
+</html>
