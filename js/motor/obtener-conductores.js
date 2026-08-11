@@ -21,7 +21,7 @@ export async function obtenerConductores(){
 
         collection(db,"usuarios"),
 
-        where("tipo","==","conductor"),
+        where("tipo","==","repartidor"),
 
         where("estadoServicio","==","disponible")
 
@@ -51,8 +51,12 @@ export async function obtenerConductores(){
 
     );
 
+     console.log(
+        "🚴 Repartidores encontrados:",
+        conductores
+    );
 
-    console.log(conductores);
+
     return conductores;
 
 }
