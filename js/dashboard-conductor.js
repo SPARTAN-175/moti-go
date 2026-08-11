@@ -1,11 +1,8 @@
-import { auth, db }
-from "./firebase-config.js";
-
+import { auth, db } from "./firebase-config.js";
 
 import {
     onAuthStateChanged
-}
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import {
     doc,
@@ -18,69 +15,136 @@ import {
     limit,
     onSnapshot,
     serverTimestamp
-}
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
+
+// =========================================
+// ELEMENTOS
+// =========================================
 
 const statusButton =
-document.getElementById(
-    "statusButton"
-);
+    document.getElementById("statusButton");
 
 const statusDescription =
-document.getElementById(
-    "statusDescription"
+    document.getElementById("statusDescription");
+
+const statusIndicator =
+    document.getElementById("statusIndicator");
+
+const statusToggle =
+    document.getElementById("statusToggle");
+
+const requestPopup =
+    document.getElementById("requestPopup");
+
+const requestContent =
+    document.getElementById("requestContent");
+
+const activeTripCard =
+    document.getElementById("activeTripCard");
+
+const activePassenger =
+    document.getElementById("activePassenger");
+
+const activeDestination =
+    document.getElementById("activeDestination");
+
+const activeStatus =
+    document.getElementById("activeStatus");
+
+const continueTrip =
+    document.getElementById("continueTrip");
+
+const userName =
+    document.getElementById("userName");
+
+const sideUserName =
+    document.getElementById("sideUserName");
+
+const todayOrders =
+    document.getElementById("todayOrders");
+
+const todayEarnings =
+    document.getElementById("todayEarnings");
+
+const walletBalance =
+    document.getElementById("walletBalance");
+
+const walletEarnings =
+    document.getElementById("walletEarnings");
+
+const walletFees =
+    document.getElementById("walletFees");
+
+const todayDate =
+    document.getElementById("todayDate");
+
+
+// =========================================
+// MENU LATERAL
+// =========================================
+
+const sideMenu =
+    document.getElementById("sideMenu");
+
+const menuOverlay =
+    document.getElementById("menuOverlay");
+
+const openMenu =
+    document.getElementById("openMenu");
+
+const closeMenu =
+    document.getElementById("closeMenu");
+
+
+function abrirMenu() {
+
+    sideMenu.classList.add("open");
+
+    menuOverlay.classList.add("open");
+
+}
+
+
+function cerrarMenu() {
+
+    sideMenu.classList.remove("open");
+
+    menuOverlay.classList.remove("open");
+
+}
+
+
+openMenu.addEventListener(
+    "click",
+    abrirMenu
 );
+
+
+closeMenu.addEventListener(
+    "click",
+    cerrarMenu
+);
+
+
+menuOverlay.addEventListener(
+    "click",
+    cerrarMenu
+);
+
+
+// =========================================
+// ESTADO
+// =========================================
 
 let currentState = null;
 
-const requestPopup =
-document.getElementById(
-    "requestPopup"
-);
 
-const requestContent =
-document.getElementById(
-    "requestContent"
-);
+// =========================================
+// SOLICITUD ACTUAL
+// =========================================
 
-const activeTripCard =
-document.getElementById(
-    "activeTripCard"
-);
-
-const activePassenger =
-document.getElementById(
-    "activePassenger"
-);
-
-const activeDestination =
-document.getElementById(
-    "activeDestination"
-);
-
-const activeStatus =
-document.getElementById(
-    "activeStatus"
-);
-
-const continueTrip =
-document.getElementById(
-    "continueTrip"
-);
-
-continueTrip.addEventListener(
-    "click",
-    ()=>{
-
-        window.location.href =
-        "viaje-activo.html";
-
-    }
-);
-
-let ultimaSolicitud =
-null;
+let ultimaSolicitud = null;
 
 let temporizador = null;
 
@@ -88,15 +152,53 @@ let segundosRestantes = 15;
 
 let listenerSolicitud = null;
 
+let listenerSolicitudes = null;
+
+
+// =========================================
+// FECHA
+// =========================================
+
+const ahora = new Date();
+
+todayDate.textContent =
+    ahora.toLocaleDateString(
+        "es-MX",
+        {
+            day: "numeric",
+            month: "short"
+        }
+    );
+
+
+// =========================================
+// CONTINUAR PEDIDO / VIAJE
+// =========================================
+
+continueTrip.addEventListener(
+    "click",
+    () => {
+
+        window.location.href =
+            "viaje-activo.html";
+
+    }
+);
+
+
+// =========================================
+// BOTONES DEL POPUP
+// =========================================
+
 requestContent.addEventListener(
     "click",
-    (e)=>{
+    (event) => {
 
-        if(
-            e.target.classList.contains(
+        if (
+            event.target.classList.contains(
                 "accept-trip"
             )
-        ){
+        ) {
 
             aceptarSolicitud(
                 ultimaSolicitud
@@ -104,93 +206,214 @@ requestContent.addEventListener(
 
         }
 
-        if(
-            e.target.classList.contains(
+
+        if (
+            event.target.classList.contains(
                 "reject-trip"
             )
-        ){
+        ) {
 
             rechazarSolicitud(
-    ultimaSolicitud
-);
+                ultimaSolicitud
+            );
 
         }
 
     }
 );
 
+
+// =========================================
+// AUTENTICACIÓN
+// =========================================
+
 onAuthStateChanged(
     auth,
     async (user) => {
 
-        if(!user) return;
+        if (!user) {
+            return;
+        }
 
-        const docRef =
-        doc(
-            db,
-            "usuarios",
-            user.uid
-        );
 
-        const docSnap =
-        await getDoc(docRef);
+        try {
 
-        if(!docSnap.exists()) return;
-
-        const datos =
-        docSnap.data();
-
-        currentState =
-        datos.estadoServicio ||
-        "disponible";
-
-       actualizarVista();
-
-       await verificarViajeActivo();
-
-       if(currentState === "disponible"){
-
-       escucharSolicitudes();
-
-       }
-
-        statusButton.addEventListener(
-            "click",
-            async () => {
-
-                if(
-                    currentState ===
-                    "en_viaje"
-                ){
-                    return;
-                }
-
-                currentState =
-                currentState ===
-                "disponible"
-                ?
-                "no_disponible"
-                :
-                "disponible";
-
-                await updateDoc(
-                    docRef,
-                    {
-                        estadoServicio:
-                        currentState
-                    }
+            const docRef =
+                doc(
+                    db,
+                    "usuarios",
+                    user.uid
                 );
 
-                actualizarVista();
+
+            const docSnap =
+                await getDoc(
+                    docRef
+                );
+
+
+            if (!docSnap.exists()) {
+                return;
+            }
+
+
+            const datos =
+                docSnap.data();
+
+
+            // =============================
+            // NOMBRE
+            // =============================
+
+            const nombre =
+                datos.nombre ||
+                "Repartidor";
+
+
+            if (userName) {
+
+                userName.textContent =
+                    `Hola ${nombre}`;
 
             }
-        );
+
+
+            if (sideUserName) {
+
+                sideUserName.textContent =
+                    nombre;
+
+            }
+
+
+            // =============================
+            // ESTADO
+            // =============================
+
+            currentState =
+                datos.estadoServicio ||
+                "disponible";
+
+
+            actualizarVista();
+
+
+            // =============================
+            // ESTADÍSTICAS
+            // =============================
+
+            cargarEstadisticas(
+                datos
+            );
+
+
+            // =============================
+            // CARTERA
+            // =============================
+
+            cargarCartera(
+                datos
+            );
+
+
+            // =============================
+            // VIAJE ACTIVO
+            // =============================
+
+            await verificarViajeActivo();
+
+
+            // =============================
+            // SOLICITUDES
+            // =============================
+
+            if (
+                currentState ===
+                "disponible"
+            ) {
+
+                escucharSolicitudes();
+
+            }
+
+
+            // =============================
+            // CAMBIO DE ESTADO
+            // =============================
+
+            statusToggle.addEventListener(
+                "click",
+                async () => {
+
+                    if (
+                        currentState ===
+                        "en_viaje"
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    const nuevoEstado =
+                        currentState ===
+                        "disponible"
+                            ? "no_disponible"
+                            : "disponible";
+
+
+                    currentState =
+                        nuevoEstado;
+
+
+                    await updateDoc(
+                        docRef,
+                        {
+                            estadoServicio:
+                                currentState
+                        }
+                    );
+
+
+                    actualizarVista();
+
+
+                    if (
+                        currentState ===
+                        "disponible"
+                    ) {
+
+                        escucharSolicitudes();
+
+                    }
+                    else {
+
+                        detenerEscuchaSolicitudes();
+
+                    }
+
+                }
+            );
+
+        }
+        catch (error) {
+
+            console.error(
+                "Error cargando dashboard:",
+                error
+            );
+
+        }
 
     }
 );
 
 
-function actualizarVista(){
+// =========================================
+// VISTA DEL ESTADO
+// =========================================
+
+function actualizarVista() {
 
     statusButton.classList.remove(
         "status-green",
@@ -198,331 +421,555 @@ function actualizarVista(){
         "status-yellow"
     );
 
-    if(
+
+    if (
         currentState ===
         "disponible"
-    ){
+    ) {
 
         statusButton.textContent =
-        "Disponible";
+            "Disponible";
+
 
         statusDescription.textContent =
-        "Estás recibiendo solicitudes";
+            "Estás recibiendo pedidos";
+
 
         statusButton.classList.add(
             "status-green"
         );
 
+
+        statusIndicator.style.background =
+            "var(--go-green)";
+
+        return;
+
     }
 
-    if(
+
+    if (
         currentState ===
         "no_disponible"
-    ){
+    ) {
 
         statusButton.textContent =
-        "No disponible";
+            "No disponible";
+
 
         statusDescription.textContent =
-        "No estás recibiendo solicitudes";
+            "No estás recibiendo pedidos";
+
 
         statusButton.classList.add(
             "status-gray"
         );
 
+
+        statusIndicator.style.background =
+            "#64706a";
+
+        return;
+
     }
 
-    if(
+
+    if (
         currentState ===
         "en_viaje"
-    ){
+    ) {
 
         statusButton.textContent =
-        "En viaje";
+            "En entrega";
+
 
         statusDescription.textContent =
-        "Tienes un viaje activo";
+            "Tienes un pedido activo";
+
 
         statusButton.classList.add(
             "status-yellow"
         );
 
+
+        statusIndicator.style.background =
+            "var(--go-warning)";
+
     }
 
 }
 
 
-// ======================
-// SOLICITUDES EN TIEMPO REAL
-// ======================
+// =========================================
+// ESTADÍSTICAS
+// =========================================
 
-function escucharSolicitudes(){
-   
-   const uid =
+function cargarEstadisticas(
+    datos
+) {
 
-auth.currentUser.uid;
+    const pedidos =
+        datos.pedidosHoy ??
+        datos.viajesHoy ??
+        0;
 
-const q =
 
-query(
+    const ganancias =
+        datos.gananciasHoy ??
+        0;
 
-collection(
 
-db,
+    todayOrders.textContent =
+        pedidos;
 
-"solicitudes"
 
-),
+    todayEarnings.textContent =
+        formatearDinero(
+            ganancias
+        );
 
-where(
+}
 
-"conductorId",
 
-"==",
+// =========================================
+// CARTERA
+// =========================================
 
-uid
+function cargarCartera(
+    datos
+) {
 
-),
+    const saldo =
+        datos.saldoCartera ??
+        0;
 
-where(
 
-"estado",
+    const ganancias =
+        datos.gananciasTotales ??
+        0;
 
-"==",
 
-"pendiente"
+    const comisiones =
+        datos.comisionesTotales ??
+        0;
 
-),
 
-orderBy(
+    walletBalance.textContent =
+        formatearDinero(
+            saldo
+        );
 
-"fechaSolicitud",
 
-"desc"
+    walletEarnings.textContent =
+        formatearDinero(
+            ganancias
+        );
 
-),
 
-limit(1)
+    walletFees.textContent =
+        formatearDinero(
+            comisiones
+        );
 
-);
-    console.log("UID del conductor:", uid);
+}
 
-    onSnapshot(
 
-        q,
+// =========================================
+// FORMATO DINERO
+// =========================================
 
-        (snapshot)=>{
-            console.log("Documentos encontrados:", snapshot.size);
+function formatearDinero(
+    cantidad
+) {
 
-            if(snapshot.empty){
+    const numero =
+        Number(cantidad) || 0;
 
-                requestPopup.style.display =
-                "none";
 
-                ultimaSolicitud =
-                null;
-
-                return;
-
-            }
-
-            const solicitud =
-            snapshot.docs[0];
-
-            if(
-                ultimaSolicitud ===
-                solicitud.id
-            ){
-                return;
-            }
-
-            ultimaSolicitud =
-            solicitud.id;
-
-            mostrarPopup(
-                solicitud.id,
-                solicitud.data()
-            );
-            iniciarTemporizador(
-             solicitud.id
-            );
-
+    return numero.toLocaleString(
+        "es-MX",
+        {
+            style: "currency",
+            currency: "MXN"
         }
-
     );
 
 }
+
+
+// =========================================
+// SOLICITUDES EN TIEMPO REAL
+// =========================================
+
+function escucharSolicitudes() {
+
+    if (listenerSolicitudes) {
+        return;
+    }
+
+
+    const user =
+        auth.currentUser;
+
+
+    if (!user) {
+        return;
+    }
+
+
+    const uid =
+        user.uid;
+
+
+    const q =
+        query(
+
+            collection(
+                db,
+                "solicitudes"
+            ),
+
+            where(
+                "conductorId",
+                "==",
+                uid
+            ),
+
+            where(
+                "estado",
+                "==",
+                "pendiente"
+            ),
+
+            orderBy(
+                "fechaSolicitud",
+                "desc"
+            ),
+
+            limit(1)
+
+        );
+
+
+    listenerSolicitudes =
+        onSnapshot(
+
+            q,
+
+            (snapshot) => {
+
+                if (
+                    snapshot.empty
+                ) {
+
+                    requestPopup.style.display =
+                        "none";
+
+
+                    ultimaSolicitud =
+                        null;
+
+
+                    return;
+
+                }
+
+
+                const solicitud =
+                    snapshot.docs[0];
+
+
+                if (
+                    ultimaSolicitud ===
+                    solicitud.id
+                ) {
+
+                    return;
+
+                }
+
+
+                ultimaSolicitud =
+                    solicitud.id;
+
+
+                mostrarPopup(
+                    solicitud.id,
+                    solicitud.data()
+                );
+
+
+                iniciarTemporizador(
+                    solicitud.id
+                );
+
+            },
+
+            (error) => {
+
+                console.error(
+                    "Error escuchando solicitudes:",
+                    error
+                );
+
+            }
+
+        );
+
+}
+
+
+// =========================================
+// DETENER LISTENER
+// =========================================
+
+function detenerEscuchaSolicitudes() {
+
+    if (listenerSolicitudes) {
+
+        listenerSolicitudes();
+
+        listenerSolicitudes =
+            null;
+
+    }
+
+}
+
+
+// =========================================
+// MOSTRAR POPUP
+// =========================================
 
 function mostrarPopup(
     id,
     datos
-){
-
-    const clase =
-    datos.tipoViaje ===
-    "especial"
-    ?
-    "popup-special"
-    :
-    "popup-local";
+) {
 
     const tipoViaje =
-    datos.tipoViaje ===
-    "especial"
-    ?
-    "ESPECIAL"
-    :
-    "LOCAL";
+        datos.tipoViaje ===
+        "especial"
+            ? "ESPECIAL"
+            : "LOCAL";
+
 
     let hora = "";
 
-if(datos.fecha){
 
-    hora =
-    datos.fecha
-    .toDate()
-    .toLocaleTimeString(
-        "es-MX",
-        {
-            hour:"2-digit",
-            minute:"2-digit"
-        }
-    );
+    if (
+        datos.fechaSolicitud &&
+        datos.fechaSolicitud.toDate
+    ) {
 
-}
-
-    requestContent.innerHTML = `
-
-<div class="${clase}">
-
-    <h3>
-
-        Nueva solicitud
-
-    </h3>
-
-    <div class="trip-badge">
-
-        ${tipoViaje}
-
-    </div>
-
-    <p>
-
-        <strong>
-
-            ${datos.nombrePasajero}
-
-        </strong>
-
-    </p>
-
-    <p class="popup-time">
-
-        ${hora}
-
-    </p>
-
-    <p>
-
-        <strong>Destino</strong><br>
-
-        ${datos.destino}
-
-    </p>
-
-    <p>
-
-        <strong>Referencia</strong><br>
-
-        ${datos.observaciones || "-"}
-
-    </p>
-
-    <div class="popup-actions">
-
-        <button
-            class="accept-trip">
-
-            Aceptar
-
-        </button>
-
-        <button
-            class="reject-trip">
-
-            Rechazar
-
-        </button>
-
-    </div>
-
-</div>
-
-`;
-    requestPopup.style.display =
-    "block";
-
-    // ===================================
-// ESCUCHAR CAMBIOS DE ESTA SOLICITUD
-// ===================================
-
-if(listenerSolicitud){
-
-    listenerSolicitud();
-
-}
-
-listenerSolicitud = onSnapshot(
-
-    doc(
-        db,
-        "solicitudes",
-        id
-    ),
-
-    (docSnap)=>{
-
-        if(!docSnap.exists()) return;
-
-        const datos = docSnap.data();
-
-        if(datos.estado !== "pendiente"){
-
-            clearInterval(temporizador);
-
-            requestPopup.style.display = "none";
-
-            ultimaSolicitud = null;
-
-            if(listenerSolicitud){
-
-                listenerSolicitud();
-
-                listenerSolicitud = null;
-
-            }
-
-        }
+        hora =
+            datos.fechaSolicitud
+                .toDate()
+                .toLocaleTimeString(
+                    "es-MX",
+                    {
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    }
+                );
 
     }
 
-);
 
-    console.log("Botón encontrado:",
-document.querySelector(".accept-trip"));
+    requestContent.innerHTML = `
+
+        <div class="popup-local">
+
+            <h3>
+                Nuevo pedido
+            </h3>
+
+            <div class="trip-badge">
+                ${tipoViaje}
+            </div>
+
+            <p>
+
+                <strong>
+                    ${datos.nombrePasajero || "Cliente"}
+                </strong>
+
+            </p>
+
+            ${
+                hora
+                    ? `
+                    <p class="popup-time">
+                        ${hora}
+                    </p>
+                    `
+                    : ""
+            }
+
+            <p>
+
+                <strong>
+                    Destino
+                </strong>
+
+                <br>
+
+                ${datos.destino || "-"}
+
+            </p>
+
+            <p>
+
+                <strong>
+                    Referencia
+                </strong>
+
+                <br>
+
+                ${datos.observaciones || "-"}
+
+            </p>
+
+
+            <div class="popup-actions">
+
+                <button
+                    class="reject-trip"
+                    type="button">
+
+                    Rechazar
+
+                </button>
+
+
+                <button
+                    class="accept-trip"
+                    type="button">
+
+                    Aceptar
+
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    requestPopup.style.display =
+        "block";
+
+
+    // =============================
+    // ESCUCHAR CAMBIOS DEL PEDIDO
+    // =============================
+
+    if (listenerSolicitud) {
+
+        listenerSolicitud();
+
+    }
+
+
+    listenerSolicitud =
+        onSnapshot(
+
+            doc(
+                db,
+                "solicitudes",
+                id
+            ),
+
+            (docSnap) => {
+
+                if (
+                    !docSnap.exists()
+                ) {
+
+                    return;
+
+                }
+
+
+                const solicitud =
+                    docSnap.data();
+
+
+                if (
+                    solicitud.estado !==
+                    "pendiente"
+                ) {
+
+                    clearInterval(
+                        temporizador
+                    );
+
+
+                    requestPopup.style.display =
+                        "none";
+
+
+                    ultimaSolicitud =
+                        null;
+
+
+                    if (
+                        listenerSolicitud
+                    ) {
+
+                        listenerSolicitud();
+
+                        listenerSolicitud =
+                            null;
+
+                    }
+
+                }
+
+            },
+
+            (error) => {
+
+                console.error(
+                    "Error escuchando pedido:",
+                    error
+                );
+
+            }
+
+        );
+
 }
 
-async function aceptarSolicitud(id){
 
-    try{
+// =========================================
+// ACEPTAR
+// =========================================
 
-        const uid =
-        auth.currentUser.uid;
+async function aceptarSolicitud(
+    id
+) {
 
-        // Actualizar solicitud
-        
-        clearInterval(temporizador);
+    if (!id) {
+        return;
+    }
+
+
+    try {
+
+        const user =
+            auth.currentUser;
+
+
+        if (!user) {
+            return;
+        }
+
+
+        clearInterval(
+            temporizador
+        );
+
 
         await updateDoc(
 
@@ -535,191 +982,240 @@ async function aceptarSolicitud(id){
             {
 
                 estado:
-                "aceptada",
+                    "aceptada",
 
                 conductorId:
-                uid,
+                    user.uid,
 
                 fechaAceptacion:
-                serverTimestamp()
+                    serverTimestamp()
 
             }
 
         );
 
-        // Actualizar conductor
 
         await updateDoc(
 
             doc(
                 db,
                 "usuarios",
-                uid
+                user.uid
             ),
 
             {
 
                 estadoServicio:
-                "en_viaje",
+                    "en_viaje",
 
                 viajeActivo:
-                id
+                    id
 
             }
 
         );
 
+
+        requestPopup.style.display =
+            "none";
+
+
         window.location.href =
-        "viaje-activo.html";
+            "viaje-activo.html";
 
     }
+    catch (error) {
 
-    catch(error){
+        console.error(
+            "Error aceptando pedido:",
+            error
+        );
 
-        console.error(error);
 
         alert(
-            "No se pudo aceptar el viaje."
+            "No se pudo aceptar el pedido."
         );
 
     }
 
 }
-        // ===================================
-        // INICIAR TEMPORIZADOR
-        // ===================================
 
-function iniciarTemporizador(solicitudId){
 
-    clearInterval(temporizador);
+// =========================================
+// TEMPORIZADOR
+// =========================================
 
-    segundosRestantes = 15;
+function iniciarTemporizador(
+    solicitudId
+) {
 
-    temporizador = setInterval(()=>{
+    clearInterval(
+        temporizador
+    );
 
-        console.log(
 
-            "Tiempo:",
+    segundosRestantes =
+        15;
 
-            segundosRestantes
+
+    temporizador =
+        setInterval(
+
+            () => {
+
+                segundosRestantes--;
+
+
+                if (
+                    segundosRestantes < 0
+                ) {
+
+                    clearInterval(
+                        temporizador
+                    );
+
+
+                    rechazarSolicitud(
+                        solicitudId
+                    );
+
+                }
+
+            },
+
+            1000
 
         );
 
-        segundosRestantes--;
-
-        if(segundosRestantes < 0){
-
-    clearInterval(temporizador);
-
-    console.log("Tiempo agotado");
-
-    rechazarSolicitud(solicitudId);
-
 }
 
-    },1000);
 
-}
-        // ===================================
-        // RECHAZAR SOLICITUD
-        // ===================================
+// =========================================
+// RECHAZAR
+// =========================================
+
+async function rechazarSolicitud(
+    id
+) {
+
+    if (!id) {
+        return;
+    }
 
 
-async function rechazarSolicitud(id){
+    clearInterval(
+        temporizador
+    );
 
-    clearInterval(temporizador);
-   
-    try{
+
+    try {
 
         const solicitudRef =
+            doc(
+                db,
+                "solicitudes",
+                id
+            );
 
-        doc(
-            db,
-            "solicitudes",
-            id
-        );
 
         const solicitudSnap =
+            await getDoc(
+                solicitudRef
+            );
 
-        await getDoc(
-            solicitudRef
-        );
 
-        if(!solicitudSnap.exists()) return;
+        if (
+            !solicitudSnap.exists()
+        ) {
+
+            return;
+
+        }
+
 
         const solicitud =
+            solicitudSnap.data();
 
-        solicitudSnap.data();
 
         const lista =
+            solicitud.conductoresEvaluados ||
+            [];
 
-        solicitud.conductoresEvaluados || [];
 
         let indice =
+            solicitud.indiceConductor ||
+            0;
 
-        solicitud.indiceConductor || 0;
 
         indice++;
 
-        // ===================================
-        // YA NO HAY MÁS CONDUCTORES
-        // ===================================
 
-        if(indice >= lista.length){
+        // =============================
+        // NO HAY MÁS CANDIDATOS
+        // =============================
+
+        if (
+            indice >=
+            lista.length
+        ) {
 
             await updateDoc(
 
                 solicitudRef,
 
                 {
-
-                    estado:"rechazada"
-
+                    estado:
+                        "rechazada"
                 }
 
             );
 
-            requestPopup.style.display="none";
 
-            ultimaSolicitud=null;
+            requestPopup.style.display =
+                "none";
+
+
+            ultimaSolicitud =
+                null;
+
 
             return;
 
         }
 
-        // ===================================
-        // OBTENER SIGUIENTE CONDUCTOR
-        // ===================================
+
+        // =============================
+        // SIGUIENTE REPARTIDOR
+        // =============================
 
         const siguienteId =
+            lista[indice];
 
-        lista[indice];
 
-        const conductorSnap =
+        const siguienteSnap =
+            await getDoc(
 
-        await getDoc(
+                doc(
+                    db,
+                    "usuarios",
+                    siguienteId
+                )
 
-            doc(
-                db,
-                "usuarios",
-                siguienteId
-            )
+            );
 
-        );
 
-        if(!conductorSnap.exists()){
+        if (
+            !siguienteSnap.exists()
+        ) {
 
             return;
 
         }
 
-        const conductor =
 
-        conductorSnap.data();
+        const siguiente =
+            siguienteSnap.data();
 
-        // ===================================
-        // REASIGNAR
-        // ===================================
 
         await updateDoc(
 
@@ -727,100 +1223,159 @@ async function rechazarSolicitud(id){
 
             {
 
-                conductorId:siguienteId,
+                conductorId:
+                    siguienteId,
 
-                nombreConductor:conductor.nombre,
+                nombreConductor:
+                    siguiente.nombre,
 
-                placa:conductor.placa,
+                placa:
+                    siguiente.placa,
 
-                indiceConductor:indice,
+                indiceConductor:
+                    indice,
 
-                estado:"pendiente"
+                estado:
+                    "pendiente"
 
             }
 
         );
 
-        requestPopup.style.display="none";
 
-        ultimaSolicitud=null;
+        requestPopup.style.display =
+            "none";
+
+
+        ultimaSolicitud =
+            null;
 
     }
+    catch (error) {
 
-    catch(error){
+        console.error(
+            "Error reasignando pedido:",
+            error
+        );
 
-        console.error(error);
 
-        alert("No se pudo reasignar la solicitud.");
+        alert(
+            "No se pudo reasignar el pedido."
+        );
 
     }
 
 }
 
 
-async function verificarViajeActivo(){
+// =========================================
+// VIAJE ACTIVO
+// =========================================
+
+async function verificarViajeActivo() {
 
     const user =
-    auth.currentUser;
+        auth.currentUser;
 
-    if(!user) return;
 
-    const usuarioDoc =
-    await getDoc(
+    if (!user) {
+        return;
+    }
 
-        doc(
-            db,
-            "usuarios",
-            user.uid
-        )
 
-    );
+    try {
 
-    const usuario =
-    usuarioDoc.data();
+        const usuarioDoc =
+            await getDoc(
 
-    if(!usuario.viajeActivo){
+                doc(
+                    db,
+                    "usuarios",
+                    user.uid
+                )
+
+            );
+
+
+        if (
+            !usuarioDoc.exists()
+        ) {
+
+            return;
+
+        }
+
+
+        const usuario =
+            usuarioDoc.data();
+
+
+        if (
+            !usuario.viajeActivo
+        ) {
+
+            activeTripCard.style.display =
+                "none";
+
+            return;
+
+        }
+
+
+        const viajeDoc =
+            await getDoc(
+
+                doc(
+                    db,
+                    "solicitudes",
+                    usuario.viajeActivo
+                )
+
+            );
+
+
+        if (
+            !viajeDoc.exists()
+        ) {
+
+            activeTripCard.style.display =
+                "none";
+
+            return;
+
+        }
+
+
+        const viaje =
+            viajeDoc.data();
+
+
+        activePassenger.textContent =
+            viaje.nombrePasajero ||
+            "Cliente";
+
+
+        activeDestination.textContent =
+            viaje.destino ||
+            "Destino";
+
+
+        activeStatus.textContent =
+            viaje.estado ||
+            "En curso";
+
 
         activeTripCard.style.display =
-        "none";
+            "block";
 
-        return;
+    }
+    catch (error) {
+
+        console.error(
+            "Error verificando pedido activo:",
+            error
+        );
 
     }
 
-    const viajeDoc =
-    await getDoc(
-
-        doc(
-            db,
-            "solicitudes",
-            usuario.viajeActivo
-        )
-
-    );
-
-    if(!viajeDoc.exists()) return;
-
-    const viaje =
-    viajeDoc.data();
-
-    activePassenger.textContent =
-    viaje.nombrePasajero;
-
-    activeDestination.textContent =
-    viaje.destino;
-
-    activeStatus.textContent =
-    viaje.estado;
-
-    activeTripCard.style.display =
-    "block";
-
 }
-
-
-
-
-
-
-
