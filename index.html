@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MOTI</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#16a34a">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <!-- Material Symbols -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
+    <!-- Estilos -->
+    <link rel="stylesheet"
+          href="css/variables.css">
+
+    <link rel="stylesheet"
+          href="css/main.css">
+
+  
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- Icono -->
+        <span class="material-symbols-outlined logo-icon">
+            two_wheeler
+        </span>
+
+        <!-- Nombre -->
+        <h1 class="logo-text">
+            MOTI
+        </h1>
+
+        <!-- Eslogan -->
+        <p class="slogan">
+            Transporte local fácil y rápido
+        </p>
+
+        <!-- Botón -->
+        <a href="pages/login.html" class="btn-primary">
+    Ingresar
+        </a>
+
+        <!-- Versión -->
+        <p class="version">
+            Versión Beta
+        </p>
+
+    </div>
+
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/service-worker.js")
+      .then((registration) => {
+        console.log("✅ Service Worker registrado:", registration.scope);
+      })
+      .catch((error) => {
+        console.error("❌ Error registrando Service Worker:", error);
+      });
+  });
+}
+</script>
+    
+</body>
+
+</html>
