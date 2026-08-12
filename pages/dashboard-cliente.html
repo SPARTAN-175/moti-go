@@ -155,6 +155,22 @@
         </div>
 
 
+        <div class="side-welcome">
+
+    <span class="side-welcome-label">
+        BIENVENIDO A MOTI GO
+    </span>
+
+    <h2 id="sideUserName">
+        Hola...
+    </h2>
+
+    <p>
+        ¿Qué vamos a llevar hoy?
+    </p>
+
+</div>
+        
 
         <nav class="side-navigation">
 
@@ -385,648 +401,597 @@
          CONTENIDO
     ================================================== -->
 
-    <main class="go-main">
+   <main class="go-main">
 
+    <!-- =============================================
+         BUSCADOR FIJO
+    ============================================== -->
 
-        <!-- =============================================
-             BIENVENIDA
-        ============================================== -->
+    <section class="search-section">
 
-        <section class="welcome-section">
+        <div class="search-box">
 
-            <span class="section-kicker">
-                CANASTA BÁSICA
+            <span class="material-symbols-outlined">
+                search
             </span>
 
-            <h1 id="userName">
-                Hola...
-            </h1>
-
-            <p>
-                Arma tu mandado y nosotros te lo llevamos.
-            </p>
-
-        </section>
-
-
-
-        <!-- =============================================
-             BUSCADOR
-        ============================================== -->
-
-        <section class="search-section">
-
-            <div class="search-box">
-
-                <span class="material-symbols-outlined">
-                    search
-                </span>
-
-
-                <input
-                    type="search"
-                    id="buscarProducto"
-                    placeholder="Buscar productos..."
-                    autocomplete="off"
-                >
-
-
-                <button
-                    type="button"
-                    id="btnClearSearch"
-                    class="search-clear"
-                    style="display:none;"
-                    aria-label="Limpiar búsqueda"
-                >
-
-                    <span class="material-symbols-outlined">
-                        close
-                    </span>
-
-                </button>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =============================================
-             RESULTADOS DE BÚSQUEDA
-        ============================================== -->
-
-        <section
-            id="searchResults"
-            class="search-results"
-            style="display:none;"
-        ></section>
-
-
-
-        <!-- =============================================
-             CATEGORÍAS
-        ============================================== -->
-
-        <section class="catalog-section">
-
-            <div class="section-heading">
-
-                <div>
-
-                    <span class="section-label">
-                        EXPLORA
-                    </span>
-
-                    <h2>
-                        Categorías
-                    </h2>
-
-                </div>
-
-
-                <button
-                    type="button"
-                    id="btnVerCategorias"
-                >
-                    Ver todas
-                </button>
-
-            </div>
-
-
-            <div
-                id="categoriesContainer"
-                class="categories-list"
+            <input
+                type="search"
+                id="buscarProducto"
+                placeholder="¿Qué estás buscando?"
+                autocomplete="off"
             >
 
-
-                <button
-                    type="button"
-                    class="category-item active"
-                    data-category="todos"
-                >
-
-                    <span class="category-icon">
-
-                        <span class="material-symbols-outlined">
-                            apps
-                        </span>
-
-                    </span>
-
-                    <span>
-                        Todo
-                    </span>
-
-                </button>
-
-
-
-                <button
-                    type="button"
-                    class="category-item"
-                    data-category="abarrotes"
-                >
-
-                    <span class="category-icon">
-
-                        <span class="material-symbols-outlined">
-                            grocery
-                        </span>
-
-                    </span>
-
-                    <span>
-                        Abarrotes
-                    </span>
-
-                </button>
-
-
-
-                <button
-                    type="button"
-                    class="category-item"
-                    data-category="carnes"
-                >
-
-                    <span class="category-icon">
-
-                        <span class="material-symbols-outlined">
-                            set_meal
-                        </span>
-
-                    </span>
-
-                    <span>
-                        Carnes
-                    </span>
-
-                </button>
-
-
-
-                <button
-                    type="button"
-                    class="category-item"
-                    data-category="lacteos"
-                >
-
-                    <span class="category-icon">
-
-                        <span class="material-symbols-outlined">
-                            egg
-                        </span>
-
-                    </span>
-
-                    <span>
-                        Lácteos
-                    </span>
-
-                </button>
-
-
-
-                <button
-                    type="button"
-                    class="category-item"
-                    data-category="bebidas"
-                >
-
-                    <span class="category-icon">
-
-                        <span class="material-symbols-outlined">
-                            local_drink
-                        </span>
-
-                    </span>
-
-                    <span>
-                        Bebidas
-                    </span>
-
-                </button>
-
-
-
-                <button
-                    type="button"
-                    class="category-item"
-                    data-category="limpieza"
-                >
-
-                    <span class="category-icon">
-
-                        <span class="material-symbols-outlined">
-                            cleaning_services
-                        </span>
-
-                    </span>
-
-                    <span>
-                        Limpieza
-                    </span>
-
-                </button>
-
-
-
-                <button
-                    type="button"
-                    class="category-item"
-                    data-category="higiene"
-                >
-
-                    <span class="category-icon">
-
-                        <span class="material-symbols-outlined">
-                            soap
-                        </span>
-
-                    </span>
-
-                    <span>
-                        Higiene
-                    </span>
-
-                </button>
-
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =============================================
-             PRODUCTOS
-        ============================================== -->
-
-        <section class="catalog-section products-section">
-
-
-            <div class="section-heading">
-
-                <div>
-
-                    <span
-                        id="productsLabel"
-                        class="section-label"
-                    >
-                        DISPONIBLES
-                    </span>
-
-                    <h2 id="productsTitle">
-                        Productos
-                    </h2>
-
-                </div>
-
-
-                <span
-                    id="productsCount"
-                    class="products-count"
-                >
-                    0 productos
-                </span>
-
-            </div>
-
-
-
-            <div
-                id="productsContainer"
-                class="products-list"
-            >
-
-
-                <!-- PRODUCTO DEMO -->
-
-                <article
-                    class="product-item"
-                    data-product-id="demo-leche"
-                    data-category="lacteos"
-                >
-
-                    <div class="product-icon">
-
-                        <span class="material-symbols-outlined">
-                            local_drink
-                        </span>
-
-                    </div>
-
-
-                    <div class="product-info">
-
-                        <strong>
-                            Leche Lala 1 L
-                        </strong>
-
-                        <span>
-                            Por pieza
-                        </span>
-
-                        <b>
-                            $28.00
-                        </b>
-
-                    </div>
-
-
-                    <div class="quantity-control">
-
-                        <button
-                            type="button"
-                            class="quantity-minus"
-                            data-product-id="demo-leche"
-                        >
-                            −
-                        </button>
-
-                        <span
-                            class="quantity-value"
-                            data-product-id="demo-leche"
-                        >
-                            0
-                        </span>
-
-                        <button
-                            type="button"
-                            class="quantity-plus"
-                            data-product-id="demo-leche"
-                        >
-                            +
-                        </button>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- PRODUCTO DEMO -->
-
-                <article
-                    class="product-item"
-                    data-product-id="demo-huevo"
-                    data-category="abarrotes"
-                >
-
-                    <div class="product-icon">
-
-                        <span class="material-symbols-outlined">
-                            egg
-                        </span>
-
-                    </div>
-
-
-                    <div class="product-info">
-
-                        <strong>
-                            Huevo 18 piezas
-                        </strong>
-
-                        <span>
-                            Por paquete
-                        </span>
-
-                        <b>
-                            $55.00
-                        </b>
-
-                    </div>
-
-
-                    <div class="quantity-control">
-
-                        <button
-                            type="button"
-                            class="quantity-minus"
-                            data-product-id="demo-huevo"
-                        >
-                            −
-                        </button>
-
-                        <span
-                            class="quantity-value"
-                            data-product-id="demo-huevo"
-                        >
-                            0
-                        </span>
-
-                        <button
-                            type="button"
-                            class="quantity-plus"
-                            data-product-id="demo-huevo"
-                        >
-                            +
-                        </button>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- PRODUCTO DEMO -->
-
-                <article
-                    class="product-item"
-                    data-product-id="demo-arroz"
-                    data-category="abarrotes"
-                >
-
-                    <div class="product-icon">
-
-                        <span class="material-symbols-outlined">
-                            grocery
-                        </span>
-
-                    </div>
-
-
-                    <div class="product-info">
-
-                        <strong>
-                            Arroz Verde Valle 1 kg
-                        </strong>
-
-                        <span>
-                            Por pieza
-                        </span>
-
-                        <b>
-                            $32.00
-                        </b>
-
-                    </div>
-
-
-                    <div class="quantity-control">
-
-                        <button
-                            type="button"
-                            class="quantity-minus"
-                            data-product-id="demo-arroz"
-                        >
-                            −
-                        </button>
-
-                        <span
-                            class="quantity-value"
-                            data-product-id="demo-arroz"
-                        >
-                            0
-                        </span>
-
-                        <button
-                            type="button"
-                            class="quantity-plus"
-                            data-product-id="demo-arroz"
-                        >
-                            +
-                        </button>
-
-                    </div>
-
-                </article>
-
-
-
-                <!-- PRODUCTO DEMO -->
-
-                <article
-                    class="product-item"
-                    data-product-id="demo-chuleta"
-                    data-category="carnes"
-                >
-
-                    <div class="product-icon">
-
-                        <span class="material-symbols-outlined">
-                            set_meal
-                        </span>
-
-                    </div>
-
-
-                    <div class="product-info">
-
-                        <strong>
-                            Chuleta de cerdo
-                        </strong>
-
-                        <span>
-                            Por kilogramo
-                        </span>
-
-                        <b>
-                            $135.00 / kg
-                        </b>
-
-                    </div>
-
-
-                    <div class="quantity-control">
-
-                        <button
-                            type="button"
-                            class="quantity-minus"
-                            data-product-id="demo-chuleta"
-                        >
-                            −
-                        </button>
-
-                        <span
-                            class="quantity-value"
-                            data-product-id="demo-chuleta"
-                        >
-                            0
-                        </span>
-
-                        <button
-                            type="button"
-                            class="quantity-plus"
-                            data-product-id="demo-chuleta"
-                        >
-                            +
-                        </button>
-
-                    </div>
-
-                </article>
-
-
-            </div>
-
-
-            <!-- Sin resultados -->
-
-            <div
-                id="emptyProducts"
-                class="empty-products"
+            <button
+                type="button"
+                id="btnClearSearch"
+                class="search-clear"
                 style="display:none;"
+                aria-label="Limpiar búsqueda"
             >
 
                 <span class="material-symbols-outlined">
-                    search_off
+                    close
                 </span>
 
-                <strong>
-                    No encontramos productos
-                </strong>
+            </button>
 
-                <p>
-                    Prueba con otro nombre o categoría.
-                </p>
+        </div>
 
-            </div>
+    </section>
 
 
-        </section>
+    <!-- =============================================
+         RESULTADOS DE BÚSQUEDA
+    ============================================== -->
+
+    <section
+        id="searchResults"
+        class="search-results"
+        style="display:none;"
+    ></section>
 
 
+    <!-- =============================================
+         CATEGORÍAS
+    ============================================== -->
 
-        <!-- =============================================
-             UBICACIÓN DE ENTREGA
-        ============================================== -->
+    <section class="catalog-section categories-section">
 
-        <section class="delivery-location">
-
-            <div class="delivery-icon">
-
-                <span class="material-symbols-outlined">
-                    location_on
-                </span>
-
-            </div>
-
+        <div class="section-heading">
 
             <div>
 
-                <span>
-                    ENTREGAR EN
+                <span class="section-label">
+                    EXPLORA
                 </span>
 
-                <strong id="currentLocation">
-                    Detectando ubicación...
-                </strong>
+                <h2>
+                    Categorías
+                </h2>
 
             </div>
 
+            <button
+                type="button"
+                id="btnVerCategorias"
+            >
+                Ver todas
+            </button>
 
-            <span class="material-symbols-outlined arrow">
-                chevron_right
+        </div>
+
+
+        <div
+            id="categoriesContainer"
+            class="categories-list"
+        >
+
+            <button
+                type="button"
+                class="category-item active"
+                data-category="todos"
+            >
+
+                <span class="category-icon">
+
+                    <span class="material-symbols-outlined">
+                        apps
+                    </span>
+
+                </span>
+
+                <span>
+                    Todo
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="category-item"
+                data-category="abarrotes"
+            >
+
+                <span class="category-icon">
+
+                    <span class="material-symbols-outlined">
+                        grocery
+                    </span>
+
+                </span>
+
+                <span>
+                    Abarrotes
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="category-item"
+                data-category="carnes"
+            >
+
+                <span class="category-icon">
+
+                    <span class="material-symbols-outlined">
+                        set_meal
+                    </span>
+
+                </span>
+
+                <span>
+                    Carnes
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="category-item"
+                data-category="lacteos"
+            >
+
+                <span class="category-icon">
+
+                    <span class="material-symbols-outlined">
+                        egg
+                    </span>
+
+                </span>
+
+                <span>
+                    Lácteos
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="category-item"
+                data-category="bebidas"
+            >
+
+                <span class="category-icon">
+
+                    <span class="material-symbols-outlined">
+                        local_drink
+                    </span>
+
+                </span>
+
+                <span>
+                    Bebidas
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="category-item"
+                data-category="limpieza"
+            >
+
+                <span class="category-icon">
+
+                    <span class="material-symbols-outlined">
+                        cleaning_services
+                    </span>
+
+                </span>
+
+                <span>
+                    Limpieza
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="category-item"
+                data-category="higiene"
+            >
+
+                <span class="category-icon">
+
+                    <span class="material-symbols-outlined">
+                        soap
+                    </span>
+
+                </span>
+
+                <span>
+                    Higiene
+                </span>
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- =============================================
+         PRODUCTOS
+    ============================================== -->
+
+    <section class="catalog-section products-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <span
+                    id="productsLabel"
+                    class="section-label"
+                >
+                    DISPONIBLES
+                </span>
+
+                <h2 id="productsTitle">
+                    Productos
+                </h2>
+
+            </div>
+
+            <span
+                id="productsCount"
+                class="products-count"
+            >
+                0 productos
             </span>
 
-        </section>
+        </div>
 
 
-    </main>
+        <div
+            id="productsContainer"
+            class="products-list"
+        >
 
+            <!-- PRODUCTO DEMO -->
+
+            <article
+                class="product-item"
+                data-product-id="demo-leche"
+                data-category="lacteos"
+            >
+
+                <div class="product-icon">
+
+                    <span class="material-symbols-outlined">
+                        local_drink
+                    </span>
+
+                </div>
+
+
+                <div class="product-info">
+
+                    <strong>
+                        Leche Lala 1 L
+                    </strong>
+
+                    <span>
+                        Por pieza
+                    </span>
+
+                    <b>
+                        $28.00
+                    </b>
+
+                </div>
+
+
+                <div class="quantity-control">
+
+                    <button
+                        type="button"
+                        class="quantity-minus"
+                        data-product-id="demo-leche"
+                    >
+                        −
+                    </button>
+
+                    <span
+                        class="quantity-value"
+                        data-product-id="demo-leche"
+                    >
+                        0
+                    </span>
+
+                    <button
+                        type="button"
+                        class="quantity-plus"
+                        data-product-id="demo-leche"
+                    >
+                        +
+                    </button>
+
+                </div>
+
+            </article>
+
+
+            <!-- PRODUCTO DEMO -->
+
+            <article
+                class="product-item"
+                data-product-id="demo-huevo"
+                data-category="abarrotes"
+            >
+
+                <div class="product-icon">
+
+                    <span class="material-symbols-outlined">
+                        egg
+                    </span>
+
+                </div>
+
+
+                <div class="product-info">
+
+                    <strong>
+                        Huevo 18 piezas
+                    </strong>
+
+                    <span>
+                        Por paquete
+                    </span>
+
+                    <b>
+                        $55.00
+                    </b>
+
+                </div>
+
+
+                <div class="quantity-control">
+
+                    <button
+                        type="button"
+                        class="quantity-minus"
+                        data-product-id="demo-huevo"
+                    >
+                        −
+                    </button>
+
+                    <span
+                        class="quantity-value"
+                        data-product-id="demo-huevo"
+                    >
+                        0
+                    </span>
+
+                    <button
+                        type="button"
+                        class="quantity-plus"
+                        data-product-id="demo-huevo"
+                    >
+                        +
+                    </button>
+
+                </div>
+
+            </article>
+
+
+            <!-- PRODUCTO DEMO -->
+
+            <article
+                class="product-item"
+                data-product-id="demo-arroz"
+                data-category="abarrotes"
+            >
+
+                <div class="product-icon">
+
+                    <span class="material-symbols-outlined">
+                        grocery
+                    </span>
+
+                </div>
+
+
+                <div class="product-info">
+
+                    <strong>
+                        Arroz Verde Valle 1 kg
+                    </strong>
+
+                    <span>
+                        Por pieza
+                    </span>
+
+                    <b>
+                        $32.00
+                    </b>
+
+                </div>
+
+
+                <div class="quantity-control">
+
+                    <button
+                        type="button"
+                        class="quantity-minus"
+                        data-product-id="demo-arroz"
+                    >
+                        −
+                    </button>
+
+                    <span
+                        class="quantity-value"
+                        data-product-id="demo-arroz"
+                    >
+                        0
+                    </span>
+
+                    <button
+                        type="button"
+                        class="quantity-plus"
+                        data-product-id="demo-arroz"
+                    >
+                        +
+                    </button>
+
+                </div>
+
+            </article>
+
+
+            <!-- PRODUCTO DEMO -->
+
+            <article
+                class="product-item"
+                data-product-id="demo-chuleta"
+                data-category="carnes"
+            >
+
+                <div class="product-icon">
+
+                    <span class="material-symbols-outlined">
+                        set_meal
+                    </span>
+
+                </div>
+
+
+                <div class="product-info">
+
+                    <strong>
+                        Chuleta de cerdo
+                    </strong>
+
+                    <span>
+                        Por kilogramo
+                    </span>
+
+                    <b>
+                        $135.00 / kg
+                    </b>
+
+                </div>
+
+
+                <div class="quantity-control">
+
+                    <button
+                        type="button"
+                        class="quantity-minus"
+                        data-product-id="demo-chuleta"
+                    >
+                        −
+                    </button>
+
+                    <span
+                        class="quantity-value"
+                        data-product-id="demo-chuleta"
+                    >
+                        0
+                    </span>
+
+                    <button
+                        type="button"
+                        class="quantity-plus"
+                        data-product-id="demo-chuleta"
+                    >
+                        +
+                    </button>
+
+                </div>
+
+            </article>
+
+        </div>
+
+
+        <div
+            id="emptyProducts"
+            class="empty-products"
+            style="display:none;"
+        >
+
+            <span class="material-symbols-outlined">
+                search_off
+            </span>
+
+            <strong>
+                No encontramos productos
+            </strong>
+
+            <p>
+                Prueba con otro nombre o categoría.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =============================================
+         UBICACIÓN
+    ============================================== -->
+
+    <section class="delivery-location">
+
+        <div class="delivery-icon">
+
+            <span class="material-symbols-outlined">
+                location_on
+            </span>
+
+        </div>
+
+
+        <div>
+
+            <span>
+                ENTREGAR EN
+            </span>
+
+            <strong id="currentLocation">
+                Detectando ubicación...
+            </strong>
+
+        </div>
+
+
+        <span class="material-symbols-outlined arrow">
+            chevron_right
+        </span>
+
+    </section>
+
+</main>
 
 
     <!-- =================================================
