@@ -8,283 +8,827 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>MOTI | Inicio</title>
+    <meta name="theme-color"
+          content="#16a34a">
 
-    <!-- Fuente -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet">
+    <title>MOTI GO | Inicio</title>
+
+    <!-- Fuentes -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
 
     <!-- Material Symbols -->
-    <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+    <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
 
-    <!-- Estilos -->
-    <link rel="stylesheet"
-          href="../css/variables.css">
+    <!-- Estilos generales -->
+    <link
+        rel="stylesheet"
+        href="../css/variables.css">
 
-    <link rel="stylesheet"
-          href="../css/main.css">
+    <link
+        rel="stylesheet"
+        href="../css/main.css">
 
-    <link rel="stylesheet"
-          href="../css/pasajero.css">
+    <!-- Estilos MOTI GO -->
+    <link
+        rel="stylesheet"
+        href="../css/pasajero.css">
 
 </head>
 
+
 <body>
 
-    <div class="dashboard">
+<!-- =====================================================
+     APLICACIÓN
+===================================================== -->
 
-        <!-- Encabezado -->
+<div class="go-app">
 
-        <header class="header">
 
-            <h2 id="userName">
-             Hola...
-            </h2>
+    <!-- =================================================
+         HEADER
+    ================================================== -->
 
-            <p>
-                Bienvenido a MOTI
-            </p>
+    <header class="go-header">
 
-        </header>
+        <button
+            type="button"
+            id="btnMenu"
+            class="header-button"
+            aria-label="Abrir menú">
 
-        <!-- Ubicación -->
-
-<section class="location-card">
-
-    <span class="material-symbols-outlined">
-
-        location_on
-
-    </span>
-
-    <div>
-
-        <strong>
-
-            Mi ubicación
-
-        </strong>
-
-        <p id="currentLocation">
-
-            Detectando ubicación...
-
-        </p>
-
-    </div>
-
-</section>
-
-        <!-- Ver ubicación -->
-
-<a
-href="seleccionar-destino.html"
-class="map-link-card">
-
-    <span class="material-symbols-outlined">
-
-        map
-
-    </span>
-
-    <div>
-
-        <strong>
-
-            Elegir destino en el mapa
-
-        </strong>
-
-        <p>
-
-            Selecciona exactamente a dónde deseas ir
-
-        </p>
-
-    </div>
-
-</a>
-        
-        <!-- Tipo de viaje -->
-
-        <section class="trip-selector">
-
-            <button class="trip-option active"
-                    id="btnLocal">
-
-                LOCAL
-
-            </button>
-
-            <button class="trip-option"
-                    id="btnEspecial">
-
-                ESPECIAL
-
-            </button>
-
-        </section>
-
-        <!-- Destino Especial -->
-
-<section id="specialFields"
-         class="destination"
-         style="display:none;">
-
-    <label>
-
-        Buscar destino especial
-
-    </label>
-
-    <input
-
-        type="text"
-
-        id="buscarDestinoEspecial"
-
-        placeholder="Escribe un destino...">
-
-    <div
-
-        id="listaDestinos"
-
-        class="lista-destinos">
-
-    </div>
-
-</section>
-
-        <!-- Destino -->
-
-<section class="destination">
-
-    <label>
-
-        Destino
-
-    </label>
-
-    <input
-        type="text"
-        id="destino"
-        placeholder="¿A dónde vas?">
-
-</section>
-
-        <!-- Observaciones -->
-
-        <section class="destination">
-
-            <label>
-
-                Observaciones
-
-            </label>
-
-<textarea
-    id="observaciones"
-    placeholder="Ejemplo: Estoy frente a urgencias"></textarea>
-
-        </section>
-
-        <!-- Tarifa -->
-
-        <section class="fare-card">
-
-            <span>
-
-                Tarifa estimada
-
+            <span class="material-symbols-outlined">
+                menu
             </span>
 
-            <strong id="fareAmount">
+        </button>
 
-                $10
 
+        <div class="brand">
+
+            <span class="material-symbols-outlined">
+                two_wheeler
+            </span>
+
+            <strong>
+                MOTI GO
             </strong>
 
-        </section>
+        </div>
 
-        <!-- Botón -->
 
-        <a href="#"
-   id="btnSolicitar"
-   class="btn-primary">
+        <a
+            href="perfil-pasajero.html"
+            class="header-button"
+            aria-label="Mi perfil">
 
-    Solicitar Mototaxi
+            <span class="material-symbols-outlined">
+                account_circle
+            </span>
 
-</a>
+        </a>
 
+    </header>
+
+
+
+    <!-- =================================================
+         MENÚ LATERAL
+    ================================================== -->
+
+    <div
+        id="menuOverlay"
+        class="menu-overlay">
     </div>
 
-    <!-- Menú inferior -->
 
-    <nav class="bottom-nav">
+    <aside
+        id="sideMenu"
+        class="side-menu">
 
-        <a href="#">
+
+        <div class="side-menu-header">
+
+            <div>
+
+                <span class="material-symbols-outlined">
+                    two_wheeler
+                </span>
+
+                <strong>
+                    MOTI GO
+                </strong>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="btnCloseMenu"
+                class="header-button">
+
+                <span class="material-symbols-outlined">
+                    close
+                </span>
+
+            </button>
+
+        </div>
+
+
+        <nav class="side-navigation">
+
+
+            <a
+                href="dashboard-pasajero.html"
+                class="side-link active">
+
+                <span class="material-symbols-outlined">
+                    home
+                </span>
+
+                <span>
+                    Inicio
+                </span>
+
+            </a>
+
+
+            <a
+                href="pedidos-pasajero.html"
+                class="side-link">
+
+                <span class="material-symbols-outlined">
+                    receipt_long
+                </span>
+
+                <span>
+                    Mis pedidos
+                </span>
+
+            </a>
+
+
+            <a
+                href="carrito.html"
+                class="side-link">
+
+                <span class="material-symbols-outlined">
+                    shopping_cart
+                </span>
+
+                <span>
+                    Mi carrito
+                </span>
+
+            </a>
+
+
+            <a
+                href="direcciones-pasajero.html"
+                class="side-link">
+
+                <span class="material-symbols-outlined">
+                    location_on
+                </span>
+
+                <span>
+                    Mis direcciones
+                </span>
+
+            </a>
+
+
+            <a
+                href="pagos-pasajero.html"
+                class="side-link">
+
+                <span class="material-symbols-outlined">
+                    payments
+                </span>
+
+                <span>
+                    Pagos
+                </span>
+
+            </a>
+
+
+            <a
+                href="perfil-pasajero.html"
+                class="side-link">
+
+                <span class="material-symbols-outlined">
+                    person
+                </span>
+
+                <span>
+                    Mi perfil
+                </span>
+
+            </a>
+
+
+        </nav>
+
+
+        <div class="side-menu-footer">
+
+            <button
+                type="button"
+                id="btnLogout"
+                class="side-link logout-link">
+
+                <span class="material-symbols-outlined">
+                    logout
+                </span>
+
+                <span>
+                    Cerrar sesión
+                </span>
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- =================================================
+         CONTENIDO PRINCIPAL
+    ================================================== -->
+
+    <main class="go-main">
+
+
+        <!-- =============================================
+             SALUDO
+        ============================================== -->
+
+        <section class="welcome-section">
+
+            <p class="welcome-small">
+                Bienvenido a MOTI GO
+            </p>
+
+            <h1 id="userName">
+                Hola...
+            </h1>
+
+            <p class="welcome-description">
+                ¿Qué necesitas hoy?
+            </p>
+
+        </section>
+
+
+
+        <!-- =============================================
+             BUSCADOR
+        ============================================== -->
+
+        <section class="search-section">
+
+            <div class="search-box">
+
+                <span class="material-symbols-outlined">
+                    search
+                </span>
+
+                <input
+                    type="search"
+                    id="buscarProducto"
+                    placeholder="Buscar productos..."
+                    autocomplete="off">
+
+                <button
+                    type="button"
+                    id="btnClearSearch"
+                    class="search-clear"
+                    style="display:none;">
+
+                    <span class="material-symbols-outlined">
+                        close
+                    </span>
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =============================================
+             RESULTADOS DE BÚSQUEDA
+        ============================================== -->
+
+        <section
+            id="searchResults"
+            class="search-results"
+            style="display:none;">
+
+        </section>
+
+
+
+        <!-- =============================================
+             CATEGORÍAS
+        ============================================== -->
+
+        <section class="catalog-section">
+
+            <div class="section-heading">
+
+                <h2>
+                    Categorías
+                </h2>
+
+                <button
+                    type="button"
+                    id="btnVerCategorias">
+
+                    Ver todas
+
+                </button>
+
+            </div>
+
+
+            <div
+                id="categoriesContainer"
+                class="categories-list">
+
+
+                <button
+                    type="button"
+                    class="category-item"
+                    data-category="abarrotes">
+
+                    <span class="material-symbols-outlined">
+                        grocery
+                    </span>
+
+                    <span>
+                        Abarrotes
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="category-item"
+                    data-category="carnes">
+
+                    <span class="material-symbols-outlined">
+                        set_meal
+                    </span>
+
+                    <span>
+                        Carnes
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="category-item"
+                    data-category="lacteos">
+
+                    <span class="material-symbols-outlined">
+                        egg
+                    </span>
+
+                    <span>
+                        Lácteos
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="category-item"
+                    data-category="bebidas">
+
+                    <span class="material-symbols-outlined">
+                        local_drink
+                    </span>
+
+                    <span>
+                        Bebidas
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="category-item"
+                    data-category="limpieza">
+
+                    <span class="material-symbols-outlined">
+                        cleaning_services
+                    </span>
+
+                    <span>
+                        Limpieza
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="category-item"
+                    data-category="higiene">
+
+                    <span class="material-symbols-outlined">
+                        soap
+                    </span>
+
+                    <span>
+                        Higiene
+                    </span>
+
+                </button>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =============================================
+             PRODUCTOS DESTACADOS
+        ============================================== -->
+
+        <section class="catalog-section">
+
+
+            <div class="section-heading">
+
+                <h2>
+                    Más pedidos
+                </h2>
+
+                <button
+                    type="button"
+                    id="btnVerProductos">
+
+                    Ver todos
+
+                </button>
+
+            </div>
+
+
+            <div
+                id="productsContainer"
+                class="products-list">
+
+
+                <!-- Producto -->
+
+                <article
+                    class="product-item"
+                    data-product-id="demo-leche">
+
+                    <div class="product-icon">
+
+                        <span class="material-symbols-outlined">
+                            local_drink
+                        </span>
+
+                    </div>
+
+
+                    <div class="product-info">
+
+                        <strong>
+                            Leche Lala 1 L
+                        </strong>
+
+                        <span>
+                            Lácteos · pieza
+                        </span>
+
+                    </div>
+
+
+                    <div class="product-action">
+
+                        <strong>
+                            $28
+                        </strong>
+
+                        <button
+                            type="button"
+                            class="add-product"
+                            data-product-id="demo-leche">
+
+                            <span class="material-symbols-outlined">
+                                add
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+
+                <!-- Producto -->
+
+                <article
+                    class="product-item"
+                    data-product-id="demo-huevo">
+
+                    <div class="product-icon">
+
+                        <span class="material-symbols-outlined">
+                            egg
+                        </span>
+
+                    </div>
+
+
+                    <div class="product-info">
+
+                        <strong>
+                            Huevo 18 piezas
+                        </strong>
+
+                        <span>
+                            Básicos · paquete
+                        </span>
+
+                    </div>
+
+
+                    <div class="product-action">
+
+                        <strong>
+                            $55
+                        </strong>
+
+                        <button
+                            type="button"
+                            class="add-product"
+                            data-product-id="demo-huevo">
+
+                            <span class="material-symbols-outlined">
+                                add
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+
+                <!-- Producto -->
+
+                <article
+                    class="product-item"
+                    data-product-id="demo-arroz">
+
+                    <div class="product-icon">
+
+                        <span class="material-symbols-outlined">
+                            grocery
+                        </span>
+
+                    </div>
+
+
+                    <div class="product-info">
+
+                        <strong>
+                            Arroz Verde Valle 1 kg
+                        </strong>
+
+                        <span>
+                            Abarrotes · kilo
+                        </span>
+
+                    </div>
+
+
+                    <div class="product-action">
+
+                        <strong>
+                            $32
+                        </strong>
+
+                        <button
+                            type="button"
+                            class="add-product"
+                            data-product-id="demo-arroz">
+
+                            <span class="material-symbols-outlined">
+                                add
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+
+                <!-- Producto -->
+
+                <article
+                    class="product-item"
+                    data-product-id="demo-chuleta">
+
+                    <div class="product-icon">
+
+                        <span class="material-symbols-outlined">
+                            set_meal
+                        </span>
+
+                    </div>
+
+
+                    <div class="product-info">
+
+                        <strong>
+                            Chuleta de cerdo
+                        </strong>
+
+                        <span>
+                            Carnes · kg
+                        </span>
+
+                    </div>
+
+
+                    <div class="product-action">
+
+                        <strong>
+                            $135/kg
+                        </strong>
+
+                        <button
+                            type="button"
+                            class="add-product"
+                            data-product-id="demo-chuleta">
+
+                            <span class="material-symbols-outlined">
+                                add
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </article>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =============================================
+             ESTADO DEL PEDIDO ACTUAL
+        ============================================== -->
+
+        <section
+            id="activeOrder"
+            class="active-order"
+            style="display:none;">
+
+            <div class="active-order-icon">
+
+                <span class="material-symbols-outlined">
+                    local_shipping
+                </span>
+
+            </div>
+
+            <div>
+
+                <strong>
+                    Pedido en curso
+                </strong>
+
+                <p id="activeOrderStatus">
+                    Preparando tu pedido...
+                </p>
+
+            </div>
 
             <span class="material-symbols-outlined">
-
-                home
-
+                chevron_right
             </span>
 
-            Inicio
+        </section>
 
-        </a>
 
-        <a href="#">
+    </main>
+
+
+
+    <!-- =================================================
+         CARRITO FLOTANTE
+    ================================================== -->
+
+    <button
+        type="button"
+        id="cartBar"
+        class="cart-bar">
+
+        <div class="cart-left">
 
             <span class="material-symbols-outlined">
-
-                receipt_long
-
+                shopping_cart
             </span>
 
-            Mis Viajes
+            <div>
 
-        </a>
+                <strong>
+                    Mi carrito
+                </strong>
 
-        <a href="perfil-pasajero.html">
+                <span id="cartItems">
+                    0 productos
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="cart-right">
+
+            <strong id="cartTotal">
+                $0
+            </strong>
 
             <span class="material-symbols-outlined">
-
-                person
-
+                chevron_right
             </span>
 
-            Perfil
+        </div>
 
-        </a>
+    </button>
 
-    </nav>
 
-    <script type="module"
-        src="../js/dashboard-pasajero.js"></script>
 
-<script type="module"
-        src="../js/solicitar-viaje.js">
-</script>
+</div>
 
-    <script type="module"
-        src="../js/firebase-test.js">
-    </script>
 
-<script type="module"
-        src="../js/auth-guard.js">
-</script>
 
-<script type="module"
-        src="../js/user-data.js">
-</script>
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
 
 <script
-type="module"
-src="../js/gps.js">
+    type="module"
+    src="../js/auth-guard.js">
 </script>
-    
+
+
+<script
+    type="module"
+    src="../js/user-data.js">
+</script>
+
+
+<script
+    type="module"
+    src="../js/dashboard-pasajero.js">
+</script>
+
+
+<script
+    type="module"
+    src="../js/logout.js">
+</script>
+
+
+<script
+    type="module"
+    src="../js/gps.js">
+</script>
+
+
 </body>
 
 </html>
