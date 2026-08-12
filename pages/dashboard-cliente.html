@@ -5,46 +5,50 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <meta name="theme-color"
-          content="#16a34a">
+    <meta
+        name="theme-color"
+        content="#16a34a"
+    >
 
-    <title>MOTI GO | Inicio</title>
+    <title>MOTI GO | Canasta Básica</title>
 
-    <!-- Fuentes -->
+    <!-- Google Fonts -->
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+        rel="stylesheet"
+    >
 
     <!-- Material Symbols -->
     <link
         rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+    >
 
-    <!-- Estilos generales -->
+    <!-- CSS -->
     <link
         rel="stylesheet"
-        href="../css/variables.css">
+        href="../css/variables.css"
+    >
 
     <link
         rel="stylesheet"
-        href="../css/main.css">
+        href="../css/main.css"
+    >
 
-    <!-- Estilos MOTI GO -->
     <link
         rel="stylesheet"
-        href="../css/pasajero.css">
+        href="../css/pasajero.css"
+    >
 
 </head>
 
 
 <body>
-
-<!-- =====================================================
-     APLICACIÓN
-===================================================== -->
 
 <div class="go-app">
 
@@ -59,7 +63,8 @@
             type="button"
             id="btnMenu"
             class="header-button"
-            aria-label="Abrir menú">
+            aria-label="Abrir menú"
+        >
 
             <span class="material-symbols-outlined">
                 menu
@@ -74,9 +79,17 @@
                 two_wheeler
             </span>
 
-            <strong>
-                MOTI GO
-            </strong>
+            <div>
+
+                <strong>
+                    MOTI GO
+                </strong>
+
+                <span>
+                    Canasta básica
+                </span>
+
+            </div>
 
         </div>
 
@@ -84,7 +97,8 @@
         <a
             href="perfil-pasajero.html"
             class="header-button"
-            aria-label="Mi perfil">
+            aria-label="Mi perfil"
+        >
 
             <span class="material-symbols-outlined">
                 account_circle
@@ -102,18 +116,18 @@
 
     <div
         id="menuOverlay"
-        class="menu-overlay">
-    </div>
+        class="menu-overlay"
+    ></div>
 
 
     <aside
         id="sideMenu"
-        class="side-menu">
-
+        class="side-menu"
+    >
 
         <div class="side-menu-header">
 
-            <div>
+            <div class="side-brand">
 
                 <span class="material-symbols-outlined">
                     two_wheeler
@@ -129,7 +143,8 @@
             <button
                 type="button"
                 id="btnCloseMenu"
-                class="header-button">
+                class="header-button"
+            >
 
                 <span class="material-symbols-outlined">
                     close
@@ -140,94 +155,111 @@
         </div>
 
 
+
         <nav class="side-navigation">
 
 
             <a
                 href="dashboard-pasajero.html"
-                class="side-link active">
+                class="side-link active"
+            >
 
                 <span class="material-symbols-outlined">
-                    home
+                    shopping_basket
                 </span>
 
-                <span>
-                    Inicio
-                </span>
+                <div>
+
+                    <strong>
+                        Canasta básica
+                    </strong>
+
+                    <small>
+                        Haz tu mandado
+                    </small>
+
+                </div>
 
             </a>
 
 
+
+            <a
+                href="marketplace.html"
+                class="side-link"
+            >
+
+                <span class="material-symbols-outlined">
+                    storefront
+                </span>
+
+                <div>
+
+                    <strong>
+                        Marketplace
+                    </strong>
+
+                    <small>
+                        Compra y vende
+                    </small>
+
+                </div>
+
+            </a>
+
+
+
             <a
                 href="pedidos-pasajero.html"
-                class="side-link">
+                class="side-link"
+            >
 
                 <span class="material-symbols-outlined">
                     receipt_long
                 </span>
 
-                <span>
-                    Mis pedidos
-                </span>
+                <div>
+
+                    <strong>
+                        Mis pedidos
+                    </strong>
+
+                    <small>
+                        Consulta tus mandados
+                    </small>
+
+                </div>
 
             </a>
 
 
+
             <a
                 href="carrito.html"
-                class="side-link">
+                class="side-link"
+            >
 
                 <span class="material-symbols-outlined">
                     shopping_cart
                 </span>
 
-                <span>
-                    Mi carrito
-                </span>
+                <div>
 
-            </a>
+                    <strong>
+                        Mi carrito
+                    </strong>
 
+                    <small>
+                        Canasta básica
+                    </small>
 
-            <a
-                href="direcciones-pasajero.html"
-                class="side-link">
+                </div>
 
-                <span class="material-symbols-outlined">
-                    location_on
-                </span>
-
-                <span>
-                    Mis direcciones
-                </span>
-
-            </a>
-
-
-            <a
-                href="pagos-pasajero.html"
-                class="side-link">
-
-                <span class="material-symbols-outlined">
-                    payments
-                </span>
-
-                <span>
-                    Pagos
-                </span>
-
-            </a>
-
-
-            <a
-                href="perfil-pasajero.html"
-                class="side-link">
-
-                <span class="material-symbols-outlined">
-                    person
-                </span>
-
-                <span>
-                    Mi perfil
+                <span
+                    id="menuCartBadge"
+                    class="menu-badge"
+                >
+                    0
                 </span>
 
             </a>
@@ -236,20 +268,110 @@
         </nav>
 
 
+
+        <div class="menu-divider"></div>
+
+
+
+        <!-- VENDER -->
+
+        <div class="sell-box">
+
+            <div class="sell-icon">
+
+                <span class="material-symbols-outlined">
+                    storefront
+                </span>
+
+            </div>
+
+            <div>
+
+                <strong>
+                    ¿Quieres vender?
+                </strong>
+
+                <p>
+                    Publica tus productos en MOTI GO
+                </p>
+
+                <a href="vender.html">
+                    Vender en MOTI GO
+                </a>
+
+            </div>
+
+        </div>
+
+
+
+        <nav class="side-navigation secondary">
+
+
+            <a
+                href="direcciones-pasajero.html"
+                class="side-link"
+            >
+
+                <span class="material-symbols-outlined">
+                    location_on
+                </span>
+
+                <div>
+
+                    <strong>
+                        Mis direcciones
+                    </strong>
+
+                </div>
+
+            </a>
+
+
+
+            <a
+                href="perfil-pasajero.html"
+                class="side-link"
+            >
+
+                <span class="material-symbols-outlined">
+                    person
+                </span>
+
+                <div>
+
+                    <strong>
+                        Mi perfil
+                    </strong>
+
+                </div>
+
+            </a>
+
+
+        </nav>
+
+
+
         <div class="side-menu-footer">
 
             <button
                 type="button"
                 id="btnLogout"
-                class="side-link logout-link">
+                class="side-link logout-link"
+            >
 
                 <span class="material-symbols-outlined">
                     logout
                 </span>
 
-                <span>
-                    Cerrar sesión
-                </span>
+                <div>
+
+                    <strong>
+                        Cerrar sesión
+                    </strong>
+
+                </div>
 
             </button>
 
@@ -260,28 +382,28 @@
 
 
     <!-- =================================================
-         CONTENIDO PRINCIPAL
+         CONTENIDO
     ================================================== -->
 
     <main class="go-main">
 
 
         <!-- =============================================
-             SALUDO
+             BIENVENIDA
         ============================================== -->
 
         <section class="welcome-section">
 
-            <p class="welcome-small">
-                Bienvenido a MOTI GO
-            </p>
+            <span class="section-kicker">
+                CANASTA BÁSICA
+            </span>
 
             <h1 id="userName">
                 Hola...
             </h1>
 
-            <p class="welcome-description">
-                ¿Qué necesitas hoy?
+            <p>
+                Arma tu mandado y nosotros te lo llevamos.
             </p>
 
         </section>
@@ -300,17 +422,22 @@
                     search
                 </span>
 
+
                 <input
                     type="search"
                     id="buscarProducto"
                     placeholder="Buscar productos..."
-                    autocomplete="off">
+                    autocomplete="off"
+                >
+
 
                 <button
                     type="button"
                     id="btnClearSearch"
                     class="search-clear"
-                    style="display:none;">
+                    style="display:none;"
+                    aria-label="Limpiar búsqueda"
+                >
 
                     <span class="material-symbols-outlined">
                         close
@@ -331,9 +458,8 @@
         <section
             id="searchResults"
             class="search-results"
-            style="display:none;">
-
-        </section>
+            style="display:none;"
+        ></section>
 
 
 
@@ -345,16 +471,24 @@
 
             <div class="section-heading">
 
-                <h2>
-                    Categorías
-                </h2>
+                <div>
+
+                    <span class="section-label">
+                        EXPLORA
+                    </span>
+
+                    <h2>
+                        Categorías
+                    </h2>
+
+                </div>
+
 
                 <button
                     type="button"
-                    id="btnVerCategorias">
-
+                    id="btnVerCategorias"
+                >
                     Ver todas
-
                 </button>
 
             </div>
@@ -362,16 +496,44 @@
 
             <div
                 id="categoriesContainer"
-                class="categories-list">
+                class="categories-list"
+            >
+
+
+                <button
+                    type="button"
+                    class="category-item active"
+                    data-category="todos"
+                >
+
+                    <span class="category-icon">
+
+                        <span class="material-symbols-outlined">
+                            apps
+                        </span>
+
+                    </span>
+
+                    <span>
+                        Todo
+                    </span>
+
+                </button>
+
 
 
                 <button
                     type="button"
                     class="category-item"
-                    data-category="abarrotes">
+                    data-category="abarrotes"
+                >
 
-                    <span class="material-symbols-outlined">
-                        grocery
+                    <span class="category-icon">
+
+                        <span class="material-symbols-outlined">
+                            grocery
+                        </span>
+
                     </span>
 
                     <span>
@@ -381,13 +543,19 @@
                 </button>
 
 
+
                 <button
                     type="button"
                     class="category-item"
-                    data-category="carnes">
+                    data-category="carnes"
+                >
 
-                    <span class="material-symbols-outlined">
-                        set_meal
+                    <span class="category-icon">
+
+                        <span class="material-symbols-outlined">
+                            set_meal
+                        </span>
+
                     </span>
 
                     <span>
@@ -397,13 +565,19 @@
                 </button>
 
 
+
                 <button
                     type="button"
                     class="category-item"
-                    data-category="lacteos">
+                    data-category="lacteos"
+                >
 
-                    <span class="material-symbols-outlined">
-                        egg
+                    <span class="category-icon">
+
+                        <span class="material-symbols-outlined">
+                            egg
+                        </span>
+
                     </span>
 
                     <span>
@@ -413,13 +587,19 @@
                 </button>
 
 
+
                 <button
                     type="button"
                     class="category-item"
-                    data-category="bebidas">
+                    data-category="bebidas"
+                >
 
-                    <span class="material-symbols-outlined">
-                        local_drink
+                    <span class="category-icon">
+
+                        <span class="material-symbols-outlined">
+                            local_drink
+                        </span>
+
                     </span>
 
                     <span>
@@ -429,13 +609,19 @@
                 </button>
 
 
+
                 <button
                     type="button"
                     class="category-item"
-                    data-category="limpieza">
+                    data-category="limpieza"
+                >
 
-                    <span class="material-symbols-outlined">
-                        cleaning_services
+                    <span class="category-icon">
+
+                        <span class="material-symbols-outlined">
+                            cleaning_services
+                        </span>
+
                     </span>
 
                     <span>
@@ -445,13 +631,19 @@
                 </button>
 
 
+
                 <button
                     type="button"
                     class="category-item"
-                    data-category="higiene">
+                    data-category="higiene"
+                >
 
-                    <span class="material-symbols-outlined">
-                        soap
+                    <span class="category-icon">
+
+                        <span class="material-symbols-outlined">
+                            soap
+                        </span>
+
                     </span>
 
                     <span>
@@ -468,39 +660,54 @@
 
 
         <!-- =============================================
-             PRODUCTOS DESTACADOS
+             PRODUCTOS
         ============================================== -->
 
-        <section class="catalog-section">
+        <section class="catalog-section products-section">
 
 
             <div class="section-heading">
 
-                <h2>
-                    Más pedidos
-                </h2>
+                <div>
 
-                <button
-                    type="button"
-                    id="btnVerProductos">
+                    <span
+                        id="productsLabel"
+                        class="section-label"
+                    >
+                        DISPONIBLES
+                    </span>
 
-                    Ver todos
+                    <h2 id="productsTitle">
+                        Productos
+                    </h2>
 
-                </button>
+                </div>
+
+
+                <span
+                    id="productsCount"
+                    class="products-count"
+                >
+                    0 productos
+                </span>
 
             </div>
 
 
+
             <div
                 id="productsContainer"
-                class="products-list">
+                class="products-list"
+            >
 
 
-                <!-- Producto -->
+                <!-- PRODUCTO DEMO -->
 
                 <article
                     class="product-item"
-                    data-product-id="demo-leche">
+                    data-product-id="demo-leche"
+                    data-category="lacteos"
+                >
 
                     <div class="product-icon">
 
@@ -518,27 +725,39 @@
                         </strong>
 
                         <span>
-                            Lácteos · pieza
+                            Por pieza
                         </span>
+
+                        <b>
+                            $28.00
+                        </b>
 
                     </div>
 
 
-                    <div class="product-action">
-
-                        <strong>
-                            $28
-                        </strong>
+                    <div class="quantity-control">
 
                         <button
                             type="button"
-                            class="add-product"
-                            data-product-id="demo-leche">
+                            class="quantity-minus"
+                            data-product-id="demo-leche"
+                        >
+                            −
+                        </button>
 
-                            <span class="material-symbols-outlined">
-                                add
-                            </span>
+                        <span
+                            class="quantity-value"
+                            data-product-id="demo-leche"
+                        >
+                            0
+                        </span>
 
+                        <button
+                            type="button"
+                            class="quantity-plus"
+                            data-product-id="demo-leche"
+                        >
+                            +
                         </button>
 
                     </div>
@@ -547,11 +766,13 @@
 
 
 
-                <!-- Producto -->
+                <!-- PRODUCTO DEMO -->
 
                 <article
                     class="product-item"
-                    data-product-id="demo-huevo">
+                    data-product-id="demo-huevo"
+                    data-category="abarrotes"
+                >
 
                     <div class="product-icon">
 
@@ -569,27 +790,39 @@
                         </strong>
 
                         <span>
-                            Básicos · paquete
+                            Por paquete
                         </span>
+
+                        <b>
+                            $55.00
+                        </b>
 
                     </div>
 
 
-                    <div class="product-action">
-
-                        <strong>
-                            $55
-                        </strong>
+                    <div class="quantity-control">
 
                         <button
                             type="button"
-                            class="add-product"
-                            data-product-id="demo-huevo">
+                            class="quantity-minus"
+                            data-product-id="demo-huevo"
+                        >
+                            −
+                        </button>
 
-                            <span class="material-symbols-outlined">
-                                add
-                            </span>
+                        <span
+                            class="quantity-value"
+                            data-product-id="demo-huevo"
+                        >
+                            0
+                        </span>
 
+                        <button
+                            type="button"
+                            class="quantity-plus"
+                            data-product-id="demo-huevo"
+                        >
+                            +
                         </button>
 
                     </div>
@@ -598,11 +831,13 @@
 
 
 
-                <!-- Producto -->
+                <!-- PRODUCTO DEMO -->
 
                 <article
                     class="product-item"
-                    data-product-id="demo-arroz">
+                    data-product-id="demo-arroz"
+                    data-category="abarrotes"
+                >
 
                     <div class="product-icon">
 
@@ -620,27 +855,39 @@
                         </strong>
 
                         <span>
-                            Abarrotes · kilo
+                            Por pieza
                         </span>
+
+                        <b>
+                            $32.00
+                        </b>
 
                     </div>
 
 
-                    <div class="product-action">
-
-                        <strong>
-                            $32
-                        </strong>
+                    <div class="quantity-control">
 
                         <button
                             type="button"
-                            class="add-product"
-                            data-product-id="demo-arroz">
+                            class="quantity-minus"
+                            data-product-id="demo-arroz"
+                        >
+                            −
+                        </button>
 
-                            <span class="material-symbols-outlined">
-                                add
-                            </span>
+                        <span
+                            class="quantity-value"
+                            data-product-id="demo-arroz"
+                        >
+                            0
+                        </span>
 
+                        <button
+                            type="button"
+                            class="quantity-plus"
+                            data-product-id="demo-arroz"
+                        >
+                            +
                         </button>
 
                     </div>
@@ -649,11 +896,13 @@
 
 
 
-                <!-- Producto -->
+                <!-- PRODUCTO DEMO -->
 
                 <article
                     class="product-item"
-                    data-product-id="demo-chuleta">
+                    data-product-id="demo-chuleta"
+                    data-category="carnes"
+                >
 
                     <div class="product-icon">
 
@@ -671,27 +920,39 @@
                         </strong>
 
                         <span>
-                            Carnes · kg
+                            Por kilogramo
                         </span>
+
+                        <b>
+                            $135.00 / kg
+                        </b>
 
                     </div>
 
 
-                    <div class="product-action">
-
-                        <strong>
-                            $135/kg
-                        </strong>
+                    <div class="quantity-control">
 
                         <button
                             type="button"
-                            class="add-product"
-                            data-product-id="demo-chuleta">
+                            class="quantity-minus"
+                            data-product-id="demo-chuleta"
+                        >
+                            −
+                        </button>
 
-                            <span class="material-symbols-outlined">
-                                add
-                            </span>
+                        <span
+                            class="quantity-value"
+                            data-product-id="demo-chuleta"
+                        >
+                            0
+                        </span>
 
+                        <button
+                            type="button"
+                            class="quantity-plus"
+                            data-product-id="demo-chuleta"
+                        >
+                            +
                         </button>
 
                     </div>
@@ -701,40 +962,63 @@
 
             </div>
 
+
+            <!-- Sin resultados -->
+
+            <div
+                id="emptyProducts"
+                class="empty-products"
+                style="display:none;"
+            >
+
+                <span class="material-symbols-outlined">
+                    search_off
+                </span>
+
+                <strong>
+                    No encontramos productos
+                </strong>
+
+                <p>
+                    Prueba con otro nombre o categoría.
+                </p>
+
+            </div>
+
+
         </section>
 
 
 
         <!-- =============================================
-             ESTADO DEL PEDIDO ACTUAL
+             UBICACIÓN DE ENTREGA
         ============================================== -->
 
-        <section
-            id="activeOrder"
-            class="active-order"
-            style="display:none;">
+        <section class="delivery-location">
 
-            <div class="active-order-icon">
+            <div class="delivery-icon">
 
                 <span class="material-symbols-outlined">
-                    local_shipping
+                    location_on
                 </span>
 
             </div>
 
+
             <div>
 
-                <strong>
-                    Pedido en curso
-                </strong>
+                <span>
+                    ENTREGAR EN
+                </span>
 
-                <p id="activeOrderStatus">
-                    Preparando tu pedido...
-                </p>
+                <strong id="currentLocation">
+                    Detectando ubicación...
+                </strong>
 
             </div>
 
-            <span class="material-symbols-outlined">
+
+            <span class="material-symbols-outlined arrow">
                 chevron_right
             </span>
 
@@ -752,18 +1036,24 @@
     <button
         type="button"
         id="cartBar"
-        class="cart-bar">
+        class="cart-bar"
+    >
 
         <div class="cart-left">
 
-            <span class="material-symbols-outlined">
-                shopping_cart
+            <span class="cart-icon">
+
+                <span class="material-symbols-outlined">
+                    shopping_cart
+                </span>
+
             </span>
+
 
             <div>
 
                 <strong>
-                    Mi carrito
+                    Mi mandado
                 </strong>
 
                 <span id="cartItems">
@@ -778,7 +1068,7 @@
         <div class="cart-right">
 
             <strong id="cartTotal">
-                $0
+                $0.00
             </strong>
 
             <span class="material-symbols-outlined">
@@ -790,43 +1080,38 @@
     </button>
 
 
-
 </div>
 
 
 
 <!-- =====================================================
-     JAVASCRIPT
+     JAVASCRIPT EXISTENTE
 ===================================================== -->
 
 <script
     type="module"
-    src="../js/auth-guard.js">
-</script>
-
-
-<script
-    type="module"
-    src="../js/user-data.js">
-</script>
-
+    src="../js/auth-guard.js"
+></script>
 
 <script
     type="module"
-    src="../js/dashboard-pasajero.js">
-</script>
-
-
-<script
-    type="module"
-    src="../js/logout.js">
-</script>
-
+    src="../js/user-data.js"
+></script>
 
 <script
     type="module"
-    src="../js/gps.js">
-</script>
+    src="../js/dashboard-pasajero.js"
+></script>
+
+<script
+    type="module"
+    src="../js/logout.js"
+></script>
+
+<script
+    type="module"
+    src="../js/gps.js"
+></script>
 
 
 </body>
