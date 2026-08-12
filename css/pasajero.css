@@ -1,6 +1,6 @@
 /* =========================================================
    MOTI GO
-   DASHBOARD CANASTA BÁSICA
+   DASHBOARD CLIENTE - CANASTA BÁSICA
 ========================================================= */
 
 
@@ -37,7 +37,7 @@ body {
 
 
 /* =========================================================
-   HEADER
+   HEADER SUPERIOR
 ========================================================= */
 
 .go-header {
@@ -61,11 +61,13 @@ body {
 }
 
 
-/* Botones */
+/* Botones del header */
 
 .header-button {
     width: 42px;
     height: 42px;
+
+    padding: 0;
 
     border: none;
     border-radius: 50%;
@@ -92,7 +94,7 @@ body {
 }
 
 
-/* Marca */
+/* Marca MOTI GO */
 
 .brand {
     display: flex;
@@ -103,6 +105,7 @@ body {
 
 .brand > .material-symbols-outlined {
     color: #16a34a;
+
     font-size: 28px;
 }
 
@@ -127,6 +130,7 @@ body {
     font-weight: 500;
 
     text-transform: uppercase;
+
     letter-spacing: .6px;
 }
 
@@ -137,11 +141,13 @@ body {
 
 .menu-overlay {
     position: fixed;
+
     inset: 0;
 
     background: rgba(0, 0, 0, .38);
 
     opacity: 0;
+
     visibility: hidden;
 
     transition: .25s ease;
@@ -151,6 +157,7 @@ body {
 
 .menu-overlay.active {
     opacity: 1;
+
     visibility: visible;
 }
 
@@ -163,6 +170,7 @@ body {
     bottom: 0;
 
     width: 300px;
+
     max-width: 86vw;
 
     background: #ffffff;
@@ -174,9 +182,12 @@ body {
     z-index: 600;
 
     display: flex;
+
     flex-direction: column;
 
     box-shadow: 8px 0 30px rgba(0, 0, 0, .12);
+
+    overflow-y: auto;
 }
 
 .side-menu.active {
@@ -184,7 +195,9 @@ body {
 }
 
 
-/* Cabecera menú */
+/* =========================================================
+   CABECERA DEL MENÚ
+========================================================= */
 
 .side-menu-header {
     min-height: 72px;
@@ -192,14 +205,18 @@ body {
     padding: 0 17px;
 
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 
     border-bottom: 1px solid #e5e7eb;
 }
 
+
 .side-brand {
     display: flex;
+
     align-items: center;
 
     gap: 9px;
@@ -211,16 +228,63 @@ body {
 
 .side-brand .material-symbols-outlined {
     color: #16a34a;
+
     font-size: 28px;
 }
 
 
-/* Navegación */
+/* =========================================================
+   BIENVENIDA DENTRO DEL MENÚ
+========================================================= */
+
+.side-welcome {
+    padding: 18px;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.side-welcome-label {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #16a34a;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    letter-spacing: .9px;
+}
+
+.side-welcome h2 {
+    margin: 0;
+
+    color: #111827;
+
+    font-size: 21px;
+
+    font-weight: 700;
+}
+
+.side-welcome p {
+    margin: 4px 0 0;
+
+    color: #6b7280;
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   NAVEGACIÓN DEL MENÚ
+========================================================= */
 
 .side-navigation {
     padding: 14px 11px;
 
     display: flex;
+
     flex-direction: column;
 
     gap: 4px;
@@ -235,16 +299,19 @@ body {
     position: relative;
 
     width: 100%;
+
     min-height: 52px;
 
     padding: 7px 13px;
 
     display: flex;
+
     align-items: center;
 
     gap: 13px;
 
     border: none;
+
     border-radius: 12px;
 
     background: transparent;
@@ -280,6 +347,7 @@ body {
     min-width: 0;
 
     display: flex;
+
     flex-direction: column;
 
     gap: 2px;
@@ -287,6 +355,7 @@ body {
 
 .side-link strong {
     font-size: 13px;
+
     font-weight: 600;
 }
 
@@ -301,7 +370,7 @@ body {
 }
 
 
-/* Badge */
+/* Badge del carrito */
 
 .menu-badge {
     position: absolute;
@@ -318,15 +387,20 @@ body {
     color: white;
 
     font-size: 10px;
+
     font-weight: 700;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 }
 
 
-/* Separador */
+/* =========================================================
+   SEPARADOR
+========================================================= */
 
 .menu-divider {
     height: 1px;
@@ -338,7 +412,7 @@ body {
 
 
 /* =========================================================
-   VENDER
+   VENDER EN MOTI GO
 ========================================================= */
 
 .sell-box {
@@ -347,6 +421,7 @@ body {
     padding: 13px;
 
     display: flex;
+
     align-items: flex-start;
 
     gap: 11px;
@@ -371,7 +446,9 @@ body {
     color: #16a34a;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 }
 
@@ -405,6 +482,7 @@ body {
     color: #16a34a;
 
     font-size: 10px;
+
     font-weight: 700;
 
     text-decoration: none;
@@ -412,7 +490,7 @@ body {
 
 
 /* =========================================================
-   PIE MENÚ
+   PIE DEL MENÚ
 ========================================================= */
 
 .side-menu-footer {
@@ -433,7 +511,7 @@ body {
 
 
 /* =========================================================
-   CONTENIDO
+   CONTENIDO PRINCIPAL
 ========================================================= */
 
 .go-main {
@@ -443,51 +521,9 @@ body {
 
     margin: 0 auto;
 
-    padding: 27px 18px 40px;
+    padding: 14px 18px 40px;
 
     box-sizing: border-box;
-}
-
-
-/* =========================================================
-   BIENVENIDA
-========================================================= */
-
-.welcome-section {
-    margin-bottom: 22px;
-}
-
-.section-kicker,
-.section-label {
-    display: block;
-
-    color: #16a34a;
-
-    font-size: 9px;
-
-    font-weight: 700;
-
-    letter-spacing: 1px;
-}
-
-.welcome-section h1 {
-    margin: 4px 0 5px;
-
-    color: #111827;
-
-    font-size: 27px;
-
-    line-height: 1.2;
-
-    font-weight: 700;
-}
-
-.welcome-section p:not(.section-label) {
-    margin: 0;
-
-    color: #6b7280;
-
-    font-size: 13px;
 }
 
 
@@ -496,16 +532,31 @@ body {
 ========================================================= */
 
 .search-section {
-    margin-bottom: 27px;
+    position: sticky;
+
+    top: 66px;
+
+    z-index: 90;
+
+    margin: 0 -18px 22px;
+
+    padding: 10px 18px;
+
+    background: #f7f8fa;
+
+    border-bottom: 1px solid rgba(229, 231, 235, .75);
 }
+
 
 .search-box {
     width: 100%;
-    height: 52px;
+
+    height: 50px;
 
     padding: 0 13px;
 
     display: flex;
+
     align-items: center;
 
     gap: 9px;
@@ -514,7 +565,7 @@ body {
 
     border: 1px solid #e3e6e9;
 
-    border-radius: 15px;
+    border-radius: 14px;
 
     box-shadow: 0 3px 12px rgba(0, 0, 0, .035);
 
@@ -543,6 +594,7 @@ body {
     padding: 0;
 
     border: none;
+
     outline: none;
 
     background: transparent;
@@ -558,11 +610,13 @@ body {
     color: #9ca3af;
 }
 
+
 .search-clear {
     width: 31px;
     height: 31px;
 
     border: none;
+
     border-radius: 50%;
 
     background: #f3f4f6;
@@ -570,7 +624,9 @@ body {
     color: #6b7280;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     cursor: pointer;
@@ -582,7 +638,7 @@ body {
 
 
 /* =========================================================
-   RESULTADOS
+   RESULTADOS DE BÚSQUEDA
 ========================================================= */
 
 .search-results {
@@ -590,7 +646,7 @@ body {
 
     margin-bottom: 25px;
 
-    background: white;
+    background: #ffffff;
 
     border: 1px solid #e5e7eb;
 
@@ -610,11 +666,18 @@ body {
     margin-bottom: 28px;
 }
 
+.categories-section {
+    margin-top: 4px;
+}
+
+
 .section-heading {
     margin-bottom: 12px;
 
     display: flex;
+
     align-items: flex-end;
+
     justify-content: space-between;
 
     gap: 15px;
@@ -652,6 +715,18 @@ body {
     cursor: pointer;
 
     white-space: nowrap;
+}
+
+.section-label {
+    display: block;
+
+    color: #16a34a;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
 }
 
 .products-count {
@@ -706,7 +781,9 @@ body {
     font-weight: 600;
 
     display: flex;
+
     flex-direction: column;
+
     align-items: center;
 
     gap: 6px;
@@ -728,6 +805,7 @@ body {
     color: #15803d;
 }
 
+
 .category-icon {
     width: 35px;
     height: 35px;
@@ -737,7 +815,9 @@ body {
     background: #f3f4f6;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 }
 
@@ -778,6 +858,7 @@ body {
     padding: 12px;
 
     display: flex;
+
     align-items: center;
 
     gap: 11px;
@@ -790,7 +871,7 @@ body {
 }
 
 
-/* Icono */
+/* Icono producto */
 
 .product-icon {
     width: 50px;
@@ -805,7 +886,9 @@ body {
     color: #16a34a;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 }
 
@@ -814,7 +897,7 @@ body {
 }
 
 
-/* Información */
+/* Información producto */
 
 .product-info {
     min-width: 0;
@@ -822,6 +905,7 @@ body {
     flex: 1;
 
     display: flex;
+
     flex-direction: column;
 
     gap: 2px;
@@ -855,7 +939,7 @@ body {
 
 
 /* =========================================================
-   CONTROL DE CANTIDAD
+   CANTIDAD
 ========================================================= */
 
 .quantity-control {
@@ -866,6 +950,7 @@ body {
     padding: 3px;
 
     display: flex;
+
     align-items: center;
 
     gap: 2px;
@@ -893,10 +978,13 @@ body {
     font-family: inherit;
 
     font-size: 18px;
+
     font-weight: 600;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     cursor: pointer;
@@ -927,7 +1015,9 @@ body {
     padding: 45px 20px;
 
     display: flex;
+
     flex-direction: column;
+
     align-items: center;
 
     text-align: center;
@@ -970,6 +1060,7 @@ body {
     padding: 13px;
 
     display: flex;
+
     align-items: center;
 
     gap: 11px;
@@ -994,7 +1085,9 @@ body {
     color: #16a34a;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 }
 
@@ -1008,6 +1101,7 @@ body {
     flex: 1;
 
     display: flex;
+
     flex-direction: column;
 
     gap: 3px;
@@ -1045,13 +1139,14 @@ body {
 
 
 /* =========================================================
-   CARRITO FLOTANTE
+   CARRITO INFERIOR
 ========================================================= */
 
 .cart-bar {
     position: fixed;
 
     left: 50%;
+
     bottom: 15px;
 
     transform: translateX(-50%);
@@ -1065,6 +1160,7 @@ body {
     padding: 10px 14px;
 
     border: none;
+
     border-radius: 17px;
 
     background: #111827;
@@ -1075,7 +1171,9 @@ body {
         0 10px 30px rgba(0, 0, 0, .20);
 
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 
     cursor: pointer;
@@ -1094,6 +1192,7 @@ body {
 
 .cart-left {
     display: flex;
+
     align-items: center;
 
     gap: 10px;
@@ -1108,7 +1207,9 @@ body {
     background: #16a34a;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 }
 
@@ -1119,6 +1220,7 @@ body {
 
 .cart-left > div {
     display: flex;
+
     flex-direction: column;
 
     align-items: flex-start;
@@ -1139,6 +1241,7 @@ body {
 
 .cart-right {
     display: flex;
+
     align-items: center;
 
     gap: 3px;
@@ -1156,13 +1259,14 @@ body {
 
 
 /* =========================================================
-   DESKTOP
+   TABLET / ESCRITORIO
 ========================================================= */
 
 @media (min-width: 768px) {
 
     .go-main {
         padding-left: 28px;
+
         padding-right: 28px;
     }
 
@@ -1190,11 +1294,23 @@ body {
 
     .go-header {
         padding-left: 12px;
+
         padding-right: 12px;
     }
 
     .go-main {
         padding-left: 13px;
+
+        padding-right: 13px;
+    }
+
+    .search-section {
+        margin-left: -13px;
+
+        margin-right: -13px;
+
+        padding-left: 13px;
+
         padding-right: 13px;
     }
 
