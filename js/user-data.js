@@ -17,43 +17,74 @@ onAuthStateChanged(
     auth,
     async (user) => {
 
-        if(!user) return;
+        if (!user) return;
 
-        try{
+        try {
 
             const docRef =
-            doc(
-                db,
-                "usuarios",
-                user.uid
-            );
-
-            const docSnap =
-            await getDoc(docRef);
-
-            if(docSnap.exists()){
-
-                const datos =
-                docSnap.data();
-
-                const userName =
-                document.getElementById(
-                    "userName"
+                doc(
+                    db,
+                    "usuarios",
+                    user.uid
                 );
 
-                if(userName){
+
+            const docSnap =
+                await getDoc(docRef);
+
+
+            if (docSnap.exists()) {
+
+                const datos =
+                    docSnap.data();
+
+
+                // =====================================
+                // NOMBRE EN EL MENÚ LATERAL
+                // =====================================
+
+                const sideUserName =
+                    document.getElementById(
+                        "sideUserName"
+                    );
+
+
+                if (sideUserName) {
+
+                    sideUserName.textContent =
+                        `Hola ${datos.nombre} 👋`;
+
+                }
+
+
+                // =====================================
+                // COMPATIBILIDAD
+                // =====================================
+                // Si alguna otra página todavía utiliza
+                // #userName, seguirá funcionando.
+
+                const userName =
+                    document.getElementById(
+                        "userName"
+                    );
+
+
+                if (userName) {
 
                     userName.textContent =
-                    `Hola ${datos.nombre} 👋`;
+                        `Hola ${datos.nombre} 👋`;
 
                 }
 
             }
 
         }
-        catch(error){
+        catch (error) {
 
-            console.error(error);
+            console.error(
+                "Error obteniendo datos del usuario:",
+                error
+            );
 
         }
 
