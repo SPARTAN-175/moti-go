@@ -59,18 +59,17 @@
 
     <header class="go-header">
 
-        <button
-            type="button"
-            id="btnMenu"
-            class="header-button"
-            aria-label="Abrir menú"
-        >
+<button
+    id="menuButton"
+    class="header-button"
+    type="button"
+    aria-label="Abrir menú">
 
-            <span class="material-symbols-outlined">
-                menu
-            </span>
+    <span class="material-symbols-outlined">
+        menu
+    </span>
 
-        </button>
+</button>
 
 
         <div class="brand">
@@ -140,17 +139,17 @@
             </div>
 
 
-            <button
-                type="button"
-                id="btnCloseMenu"
-                class="header-button"
-            >
+<button
+    id="closeMenuButton"
+    class="header-button"
+    type="button"
+    aria-label="Cerrar menú">
 
-                <span class="material-symbols-outlined">
-                    close
-                </span>
+    <span class="material-symbols-outlined">
+        close
+    </span>
 
-            </button>
+</button>
 
         </div>
 
@@ -395,7 +394,10 @@
 
     </aside>
 
-
+<div
+    id="menuOverlay"
+    class="menu-overlay">
+</div>
 
     <!-- =================================================
          CONTENIDO
@@ -1078,6 +1080,10 @@
     src="../js/gps.js"
 ></script>
 
+<script
+    type="module"
+    src="../js/menu.js">
+</script>
 
 </body>
 
