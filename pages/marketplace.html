@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 
@@ -22,7 +21,7 @@
         rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
 
-    <!-- Estilos generales -->
+    <!-- Estilos -->
     <link
         rel="stylesheet"
         href="../css/variables.css">
@@ -31,7 +30,6 @@
         rel="stylesheet"
         href="../css/main.css">
 
-    <!-- Estilos Marketplace -->
     <link
         rel="stylesheet"
         href="../css/marketplace.css">
@@ -41,29 +39,181 @@
 
 <body>
 
-    <div class="marketplace-app">
+
+<div class="marketplace-app">
 
 
-        <!-- =================================================
-             HEADER
-        ================================================== -->
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
 
-        <header class="marketplace-header">
+    <header class="marketplace-header">
 
-            <button
-                type="button"
-                id="btnBack"
-                class="header-icon-button"
-                aria-label="Regresar">
+
+        <!-- MENÚ -->
+
+        <button
+            id="marketMenuButton"
+            class="header-icon-button"
+            type="button"
+            aria-label="Abrir menú">
+
+            <span class="material-symbols-outlined">
+                menu
+            </span>
+
+        </button>
+
+
+        <!-- MARCA -->
+
+        <div class="marketplace-brand">
+
+            <span class="material-symbols-outlined">
+                storefront
+            </span>
+
+            <div>
+
+                <strong>
+                    Marketplace
+                </strong>
+
+                <small>
+                    Compra y vende en MOTI GO
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <!-- CARRITO -->
+
+        <button
+            id="btnMarketplaceCart"
+            class="header-icon-button cart-button"
+            type="button"
+            aria-label="Carrito">
+
+            <span class="material-symbols-outlined">
+                shopping_cart
+            </span>
+
+            <span
+                id="cartBadge"
+                class="cart-badge">
+
+                0
+
+            </span>
+
+        </button>
+
+    </header>
+
+
+
+    <!-- =====================================================
+         MENÚ LATERAL
+    ====================================================== -->
+
+    <div
+        id="marketMenuOverlay"
+        class="market-menu-overlay">
+    </div>
+
+
+    <aside
+        id="marketSideMenu"
+        class="market-side-menu">
+
+
+        <!-- CABECERA -->
+
+        <div class="market-menu-header">
+
+            <div class="market-menu-brand">
 
                 <span class="material-symbols-outlined">
-                    arrow_back
+                    storefront
+                </span>
+
+                <strong>
+                    MOTI GO
+                </strong>
+
+            </div>
+
+
+            <button
+                id="marketCloseMenu"
+                class="header-icon-button"
+                type="button"
+                aria-label="Cerrar menú">
+
+                <span class="material-symbols-outlined">
+                    close
                 </span>
 
             </button>
 
+        </div>
 
-            <div class="marketplace-brand">
+
+
+        <!-- BIENVENIDA -->
+
+        <div class="market-menu-welcome">
+
+            <span>
+                ESTÁS EN
+            </span>
+
+            <h2>
+                Marketplace
+            </h2>
+
+            <p>
+                Compra, vende y descubre productos locales.
+            </p>
+
+        </div>
+
+
+
+        <!-- NAVEGACIÓN -->
+
+        <nav class="market-menu-navigation">
+
+
+            <a
+                href="dashboard-pasajero.html"
+                class="market-menu-link">
+
+                <span class="material-symbols-outlined">
+                    home
+                </span>
+
+                <div>
+
+                    <strong>
+                        Inicio MOTI GO
+                    </strong>
+
+                    <small>
+                        Regresar al inicio
+                    </small>
+
+                </div>
+
+            </a>
+
+
+
+            <a
+                href="marketplace.html"
+                class="market-menu-link active">
 
                 <span class="material-symbols-outlined">
                     storefront
@@ -76,864 +226,22 @@
                     </strong>
 
                     <small>
-                        Compra y vende en MOTI GO
+                        Explorar productos
                     </small>
 
                 </div>
 
-            </div>
+            </a>
 
 
-            <!-- Carrito Marketplace -->
 
-            <button
-                type="button"
-                id="btnMarketplaceCart"
-                class="header-icon-button cart-button"
-                aria-label="Carrito Marketplace">
+            <a
+                href="carrito-marketplace.html"
+                class="market-menu-link">
 
                 <span class="material-symbols-outlined">
                     shopping_cart
                 </span>
-
-                <span
-                    id="cartBadge"
-                    class="cart-badge">
-
-                    0
-
-                </span>
-
-            </button>
-
-        </header>
-
-
-
-        <!-- =================================================
-             CONTENIDO
-        ================================================== -->
-
-        <main class="marketplace-main">
-
-
-            <!-- =================================================
-                 BUSCADOR
-            ================================================== -->
-
-            <section class="marketplace-search">
-
-                <div class="marketplace-search-box">
-
-                    <span class="material-symbols-outlined">
-                        search
-                    </span>
-
-                    <input
-                        type="search"
-                        id="marketplaceSearch"
-                        placeholder="Buscar productos..."
-                        autocomplete="off">
-
-                    <button
-                        type="button"
-                        id="clearSearch"
-                        class="clear-search"
-                        aria-label="Limpiar búsqueda"
-                        style="display:none;">
-
-                        <span class="material-symbols-outlined">
-                            close
-                        </span>
-
-                    </button>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- =================================================
-                 CATEGORÍAS
-            ================================================== -->
-
-            <section class="marketplace-categories">
-
-                <div class="marketplace-section-heading">
-
-                    <div>
-
-                        <span class="marketplace-label">
-                            EXPLORA
-                        </span>
-
-                        <h2>
-                            Categorías
-                        </h2>
-
-                    </div>
-
-                    <button
-                        type="button"
-                        id="btnAllCategories">
-
-                        Ver todas
-
-                    </button>
-
-                </div>
-
-
-                <div
-                    id="marketplaceCategories"
-                    class="categories-scroll">
-
-
-                    <button
-                        class="market-category active"
-                        data-category="todos"
-                        type="button">
-
-                        <span class="category-circle">
-
-                            <span class="material-symbols-outlined">
-                                apps
-                            </span>
-
-                        </span>
-
-                        <span>
-                            Todo
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="market-category"
-                        data-category="hogar"
-                        type="button">
-
-                        <span class="category-circle">
-
-                            <span class="material-symbols-outlined">
-                                chair
-                            </span>
-
-                        </span>
-
-                        <span>
-                            Hogar
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="market-category"
-                        data-category="electronica"
-                        type="button">
-
-                        <span class="category-circle">
-
-                            <span class="material-symbols-outlined">
-                                devices
-                            </span>
-
-                        </span>
-
-                        <span>
-                            Tecnología
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="market-category"
-                        data-category="ropa"
-                        type="button">
-
-                        <span class="category-circle">
-
-                            <span class="material-symbols-outlined">
-                                checkroom
-                            </span>
-
-                        </span>
-
-                        <span>
-                            Ropa
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="market-category"
-                        data-category="calzado"
-                        type="button">
-
-                        <span class="category-circle">
-
-                            <span class="material-symbols-outlined">
-                                steps
-                            </span>
-
-                        </span>
-
-                        <span>
-                            Calzado
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="market-category"
-                        data-category="vehiculos"
-                        type="button">
-
-                        <span class="category-circle">
-
-                            <span class="material-symbols-outlined">
-                                directions_car
-                            </span>
-
-                        </span>
-
-                        <span>
-                            Vehículos
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="market-category"
-                        data-category="otros"
-                        type="button">
-
-                        <span class="category-circle">
-
-                            <span class="material-symbols-outlined">
-                                category
-                            </span>
-
-                        </span>
-
-                        <span>
-                            Otros
-                        </span>
-
-                    </button>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- =================================================
-                 PRODUCTOS DESTACADOS
-            ================================================== -->
-
-            <section class="marketplace-products">
-
-
-                <div class="marketplace-section-heading">
-
-                    <div>
-
-                        <span class="marketplace-label">
-                            MARKETPLACE
-                        </span>
-
-                        <h2>
-                            Productos destacados
-                        </h2>
-
-                    </div>
-
-                    <span
-                        id="productsCount"
-                        class="products-count">
-
-                        0 productos
-
-                    </span>
-
-                </div>
-
-
-
-                <!-- GRID -->
-
-                <div
-                    id="marketplaceProducts"
-                    class="marketplace-grid">
-
-
-                    <!-- =================================================
-                         PRODUCTO 1
-                    ================================================== -->
-
-                    <article
-                        class="market-product"
-                        data-product-id="demo-001"
-                        data-category="electronica">
-
-
-                        <button
-                            type="button"
-                            class="favorite-button"
-                            aria-label="Agregar a favoritos">
-
-                            <span class="material-symbols-outlined">
-                                favorite
-                            </span>
-
-                        </button>
-
-
-                        <button
-                            type="button"
-                            class="product-open"
-                            data-product-id="demo-001">
-
-
-                            <div class="product-image">
-
-                                <span class="material-symbols-outlined">
-                                    headphones
-                                </span>
-
-                                <span class="product-condition">
-                                    Nuevo
-                                </span>
-
-                            </div>
-
-
-                            <div class="product-content">
-
-                                <h3>
-                                    Audífonos inalámbricos
-                                </h3>
-
-                                <strong class="product-price">
-                                    $450
-                                </strong>
-
-
-                                <div class="product-rating">
-
-                                    <span class="stars">
-                                        ★★★★★
-                                    </span>
-
-                                    <span>
-                                        4.8
-                                    </span>
-
-                                </div>
-
-
-                                <p class="seller-name">
-                                    Carlos Store
-                                </p>
-
-                            </div>
-
-                        </button>
-
-                    </article>
-
-
-
-                    <!-- =================================================
-                         PRODUCTO 2
-                    ================================================== -->
-
-                    <article
-                        class="market-product"
-                        data-product-id="demo-002"
-                        data-category="hogar">
-
-
-                        <button
-                            type="button"
-                            class="favorite-button"
-                            aria-label="Agregar a favoritos">
-
-                            <span class="material-symbols-outlined">
-                                favorite
-                            </span>
-
-                        </button>
-
-
-                        <button
-                            type="button"
-                            class="product-open"
-                            data-product-id="demo-002">
-
-
-                            <div class="product-image">
-
-                                <span class="material-symbols-outlined">
-                                    blender
-                                </span>
-
-                                <span class="product-condition">
-                                    Nuevo
-                                </span>
-
-                            </div>
-
-
-                            <div class="product-content">
-
-                                <h3>
-                                    Licuadora de cocina
-                                </h3>
-
-                                <strong class="product-price">
-                                    $890
-                                </strong>
-
-
-                                <div class="product-rating">
-
-                                    <span class="stars">
-                                        ★★★★☆
-                                    </span>
-
-                                    <span>
-                                        4.5
-                                    </span>
-
-                                </div>
-
-
-                                <p class="seller-name">
-                                    Hogar Ostuacán
-                                </p>
-
-                            </div>
-
-                        </button>
-
-                    </article>
-
-
-
-                    <!-- =================================================
-                         PRODUCTO 3
-                    ================================================== -->
-
-                    <article
-                        class="market-product"
-                        data-product-id="demo-003"
-                        data-category="ropa">
-
-
-                        <button
-                            type="button"
-                            class="favorite-button"
-                            aria-label="Agregar a favoritos">
-
-                            <span class="material-symbols-outlined">
-                                favorite
-                            </span>
-
-                        </button>
-
-
-                        <button
-                            type="button"
-                            class="product-open"
-                            data-product-id="demo-003">
-
-
-                            <div class="product-image">
-
-                                <span class="material-symbols-outlined">
-                                    checkroom
-                                </span>
-
-                                <span class="product-condition">
-                                    Nuevo
-                                </span>
-
-                            </div>
-
-
-                            <div class="product-content">
-
-                                <h3>
-                                    Camisa casual para hombre
-                                </h3>
-
-                                <strong class="product-price">
-                                    $320
-                                </strong>
-
-
-                                <div class="product-rating">
-
-                                    <span class="stars">
-                                        ★★★★★
-                                    </span>
-
-                                    <span>
-                                        4.9
-                                    </span>
-
-                                </div>
-
-
-                                <p class="seller-name">
-                                    Moda Local
-                                </p>
-
-                            </div>
-
-                        </button>
-
-                    </article>
-
-
-
-                    <!-- =================================================
-                         PRODUCTO 4
-                    ================================================== -->
-
-                    <article
-                        class="market-product"
-                        data-product-id="demo-004"
-                        data-category="calzado">
-
-
-                        <button
-                            type="button"
-                            class="favorite-button"
-                            aria-label="Agregar a favoritos">
-
-                            <span class="material-symbols-outlined">
-                                favorite
-                            </span>
-
-                        </button>
-
-
-                        <button
-                            type="button"
-                            class="product-open"
-                            data-product-id="demo-004">
-
-
-                            <div class="product-image">
-
-                                <span class="material-symbols-outlined">
-                                    steps
-                                </span>
-
-                                <span class="product-condition">
-                                    Nuevo
-                                </span>
-
-                            </div>
-
-
-                            <div class="product-content">
-
-                                <h3>
-                                    Tenis deportivos
-                                </h3>
-
-                                <strong class="product-price">
-                                    $650
-                                </strong>
-
-
-                                <div class="product-rating">
-
-                                    <span class="stars">
-                                        ★★★★★
-                                    </span>
-
-                                    <span>
-                                        4.8
-                                    </span>
-
-                                </div>
-
-
-                                <p class="seller-name">
-                                    Calzado Express
-                                </p>
-
-                            </div>
-
-                        </button>
-
-                    </article>
-
-
-
-                    <!-- =================================================
-                         PRODUCTO 5
-                    ================================================== -->
-
-                    <article
-                        class="market-product"
-                        data-product-id="demo-005"
-                        data-category="vehiculos">
-
-
-                        <button
-                            type="button"
-                            class="favorite-button"
-                            aria-label="Agregar a favoritos">
-
-                            <span class="material-symbols-outlined">
-                                favorite
-                            </span>
-
-                        </button>
-
-
-                        <button
-                            type="button"
-                            class="product-open"
-                            data-product-id="demo-005">
-
-
-                            <div class="product-image">
-
-                                <span class="material-symbols-outlined">
-                                    two_wheeler
-                                </span>
-
-                                <span class="product-condition">
-                                    Usado
-                                </span>
-
-                            </div>
-
-
-                            <div class="product-content">
-
-                                <h3>
-                                    Motocicleta Italika
-                                </h3>
-
-                                <strong class="product-price">
-                                    $18,500
-                                </strong>
-
-
-                                <div class="product-rating">
-
-                                    <span class="stars">
-                                        ★★★★☆
-                                    </span>
-
-                                    <span>
-                                        4.6
-                                    </span>
-
-                                </div>
-
-
-                                <p class="seller-name">
-                                    Venta Particular
-                                </p>
-
-                            </div>
-
-                        </button>
-
-                    </article>
-
-
-
-                    <!-- =================================================
-                         PRODUCTO 6
-                    ================================================== -->
-
-                    <article
-                        class="market-product"
-                        data-product-id="demo-006"
-                        data-category="otros">
-
-
-                        <button
-                            type="button"
-                            class="favorite-button"
-                            aria-label="Agregar a favoritos">
-
-                            <span class="material-symbols-outlined">
-                                favorite
-                            </span>
-
-                        </button>
-
-
-                        <button
-                            type="button"
-                            class="product-open"
-                            data-product-id="demo-006">
-
-
-                            <div class="product-image">
-
-                                <span class="material-symbols-outlined">
-                                    backpack
-                                </span>
-
-                                <span class="product-condition">
-                                    Nuevo
-                                </span>
-
-                            </div>
-
-
-                            <div class="product-content">
-
-                                <h3>
-                                    Mochila escolar
-                                </h3>
-
-                                <strong class="product-price">
-                                    $320
-                                </strong>
-
-
-                                <div class="product-rating">
-
-                                    <span class="stars">
-                                        ★★★★★
-                                    </span>
-
-                                    <span>
-                                        5.0
-                                    </span>
-
-                                </div>
-
-
-                                <p class="seller-name">
-                                    Tienda Local
-                                </p>
-
-                            </div>
-
-                        </button>
-
-                    </article>
-
-                </div>
-
-
-
-                <!-- Sin resultados -->
-
-                <div
-                    id="emptyMarketplace"
-                    class="empty-marketplace"
-                    style="display:none;">
-
-                    <span class="material-symbols-outlined">
-                        search_off
-                    </span>
-
-                    <strong>
-                        No encontramos productos
-                    </strong>
-
-                    <p>
-                        Prueba con otra búsqueda o categoría.
-                    </p>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- =================================================
-                 INVITACIÓN PARA VENDEDORES
-            ================================================== -->
-
-            <section class="seller-banner">
-
-                <div class="seller-banner-icon">
-
-                    <span class="material-symbols-outlined">
-                        store
-                    </span>
-
-                </div>
-
-
-                <div class="seller-banner-content">
-
-                    <span>
-                        ¿TIENES ALGO QUE VENDER?
-                    </span>
-
-                    <h3>
-                        Publica tus productos en MOTI GO
-                    </h3>
-
-                    <p>
-                        Llega a clientes de tu localidad
-                        y recibe tus pedidos fácilmente.
-                    </p>
-
-                    <a
-                        href="vender-en-moti.html"
-                        class="seller-banner-button">
-
-                        Comenzar a vender
-
-                        <span class="material-symbols-outlined">
-                            arrow_forward
-                        </span>
-
-                    </a>
-
-                </div>
-
-            </section>
-
-
-        </main>
-
-
-
-        <!-- =================================================
-             CARRITO FLOTANTE MARKETPLACE
-        ================================================== -->
-
-        <button
-            type="button"
-            id="marketplaceCartBar"
-            class="marketplace-cart-bar"
-            style="display:none;">
-
-            <div class="marketplace-cart-left">
-
-                <div class="marketplace-cart-icon">
-
-                    <span class="material-symbols-outlined">
-                        shopping_cart
-                    </span>
-
-                </div>
 
                 <div>
 
@@ -941,42 +249,972 @@
                         Mi carrito
                     </strong>
 
-                    <span id="cartItems">
-                        0 productos
-                    </span>
+                    <small>
+                        Productos seleccionados
+                    </small>
 
                 </div>
 
-            </div>
+                <span
+                    id="menuCartBadge"
+                    class="menu-cart-badge">
+
+                    0
+
+                </span>
+
+            </a>
 
 
-            <div class="marketplace-cart-total">
 
-                <strong id="cartTotal">
-                    $0
-                </strong>
+            <a
+                href="pedidos-marketplace.html"
+                class="market-menu-link">
 
                 <span class="material-symbols-outlined">
-                    chevron_right
+                    package_2
+                </span>
+
+                <div>
+
+                    <strong>
+                        Mis pedidos
+                    </strong>
+
+                    <small>
+                        Consulta tus compras
+                    </small>
+
+                </div>
+
+            </a>
+
+
+
+            <a
+                href="favoritos-marketplace.html"
+                class="market-menu-link">
+
+                <span class="material-symbols-outlined">
+                    favorite
+                </span>
+
+                <div>
+
+                    <strong>
+                        Favoritos
+                    </strong>
+
+                    <small>
+                        Productos guardados
+                    </small>
+
+                </div>
+
+            </a>
+
+
+        </nav>
+
+
+
+        <div class="market-menu-divider">
+        </div>
+
+
+
+        <!-- VENDER -->
+
+        <a
+            href="vender-en-moti.html"
+            class="market-sell-box">
+
+            <div class="market-sell-icon">
+
+                <span class="material-symbols-outlined">
+                    store
                 </span>
 
             </div>
 
-        </button>
+            <div>
+
+                <strong>
+                    Vender en MOTI GO
+                </strong>
+
+                <p>
+                    Publica tus productos y llega a clientes locales.
+                </p>
+
+                <span>
+                    Comenzar a vender
+                </span>
+
+            </div>
+
+        </a>
 
 
-    </div>
+
+        <!-- CONFIGURACIÓN -->
+
+        <nav class="market-menu-navigation secondary">
+
+
+            <a
+                href="configuracion.html"
+                class="market-menu-link">
+
+                <span class="material-symbols-outlined">
+                    settings
+                </span>
+
+                <div>
+
+                    <strong>
+                        Configuración
+                    </strong>
+
+                </div>
+
+            </a>
+
+
+        </nav>
 
 
 
-    <!-- =================================================
-         JAVASCRIPT
-    ================================================== -->
+        <!-- PIE -->
 
-    <script
-        type="module"
-        src="../js/marketplace.js">
-    </script>
+        <div class="market-menu-footer">
+
+            <a
+                href="#"
+                id="btnLogoutMarketplace"
+                class="market-menu-link logout-link">
+
+                <span class="material-symbols-outlined">
+                    logout
+                </span>
+
+                <div>
+
+                    <strong>
+                        Cerrar sesión
+                    </strong>
+
+                </div>
+
+            </a>
+
+        </div>
+
+
+    </aside>
+
+
+
+    <!-- =====================================================
+         CONTENIDO PRINCIPAL
+    ====================================================== -->
+
+    <main class="marketplace-main">
+
+
+        <!-- =================================================
+             BUSCADOR FIJO
+        ================================================== -->
+
+        <section class="marketplace-search">
+
+            <div class="marketplace-search-box">
+
+                <span class="material-symbols-outlined">
+                    search
+                </span>
+
+
+                <input
+                    type="search"
+                    id="marketplaceSearch"
+                    placeholder="Buscar productos..."
+                    autocomplete="off">
+
+
+                <button
+                    type="button"
+                    id="clearSearch"
+                    class="clear-search"
+                    aria-label="Limpiar búsqueda"
+                    style="display:none;">
+
+                    <span class="material-symbols-outlined">
+                        close
+                    </span>
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             CATEGORÍAS
+        ================================================== -->
+
+        <section class="marketplace-categories">
+
+
+            <div class="marketplace-section-heading">
+
+                <div>
+
+                    <span class="marketplace-label">
+                        EXPLORA
+                    </span>
+
+                    <h2>
+                        Categorías
+                    </h2>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="btnAllCategories">
+
+                    Ver todas
+
+                </button>
+
+            </div>
+
+
+
+            <div
+                id="marketplaceCategories"
+                class="categories-scroll">
+
+
+                <button
+                    class="market-category active"
+                    data-category="todos"
+                    type="button">
+
+                    <span class="category-circle">
+
+                        <span class="material-symbols-outlined">
+                            apps
+                        </span>
+
+                    </span>
+
+                    <span>
+                        Todo
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="market-category"
+                    data-category="hogar"
+                    type="button">
+
+                    <span class="category-circle">
+
+                        <span class="material-symbols-outlined">
+                            chair
+                        </span>
+
+                    </span>
+
+                    <span>
+                        Hogar
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="market-category"
+                    data-category="electronica"
+                    type="button">
+
+                    <span class="category-circle">
+
+                        <span class="material-symbols-outlined">
+                            devices
+                        </span>
+
+                    </span>
+
+                    <span>
+                        Tecnología
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="market-category"
+                    data-category="ropa"
+                    type="button">
+
+                    <span class="category-circle">
+
+                        <span class="material-symbols-outlined">
+                            checkroom
+                        </span>
+
+                    </span>
+
+                    <span>
+                        Ropa
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="market-category"
+                    data-category="calzado"
+                    type="button">
+
+                    <span class="category-circle">
+
+                        <span class="material-symbols-outlined">
+                            steps
+                        </span>
+
+                    </span>
+
+                    <span>
+                        Calzado
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="market-category"
+                    data-category="vehiculos"
+                    type="button">
+
+                    <span class="category-circle">
+
+                        <span class="material-symbols-outlined">
+                            directions_car
+                        </span>
+
+                    </span>
+
+                    <span>
+                        Vehículos
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="market-category"
+                    data-category="otros"
+                    type="button">
+
+                    <span class="category-circle">
+
+                        <span class="material-symbols-outlined">
+                            category
+                        </span>
+
+                    </span>
+
+                    <span>
+                        Otros
+                    </span>
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             PRODUCTOS
+        ================================================== -->
+
+        <section class="marketplace-products">
+
+
+            <div class="marketplace-section-heading">
+
+                <div>
+
+                    <span class="marketplace-label">
+                        MARKETPLACE
+                    </span>
+
+                    <h2>
+                        Productos destacados
+                    </h2>
+
+                </div>
+
+
+                <span
+                    id="productsCount"
+                    class="products-count">
+
+                    0 productos
+
+                </span>
+
+            </div>
+
+
+
+            <div
+                id="marketplaceProducts"
+                class="marketplace-grid">
+
+
+                <!-- PRODUCTO 1 -->
+
+                <article
+                    class="market-product"
+                    data-product-id="demo-001"
+                    data-category="electronica">
+
+                    <button
+                        type="button"
+                        class="favorite-button"
+                        aria-label="Agregar a favoritos">
+
+                        <span class="material-symbols-outlined">
+                            favorite
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="product-open"
+                        data-product-id="demo-001">
+
+                        <div class="product-image">
+
+                            <span class="material-symbols-outlined">
+                                headphones
+                            </span>
+
+                            <span class="product-condition">
+                                Nuevo
+                            </span>
+
+                        </div>
+
+
+                        <div class="product-content">
+
+                            <h3>
+                                Audífonos inalámbricos
+                            </h3>
+
+                            <strong class="product-price">
+                                $450
+                            </strong>
+
+
+                            <div class="product-rating">
+
+                                <span class="stars">
+                                    ★★★★★
+                                </span>
+
+                                <span>
+                                    4.8
+                                </span>
+
+                            </div>
+
+
+                            <p class="seller-name">
+                                Carlos Store
+                            </p>
+
+                        </div>
+
+                    </button>
+
+                </article>
+
+
+
+                <!-- PRODUCTO 2 -->
+
+                <article
+                    class="market-product"
+                    data-product-id="demo-002"
+                    data-category="hogar">
+
+                    <button
+                        type="button"
+                        class="favorite-button"
+                        aria-label="Agregar a favoritos">
+
+                        <span class="material-symbols-outlined">
+                            favorite
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="product-open"
+                        data-product-id="demo-002">
+
+                        <div class="product-image">
+
+                            <span class="material-symbols-outlined">
+                                blender
+                            </span>
+
+                            <span class="product-condition">
+                                Nuevo
+                            </span>
+
+                        </div>
+
+
+                        <div class="product-content">
+
+                            <h3>
+                                Licuadora de cocina
+                            </h3>
+
+                            <strong class="product-price">
+                                $890
+                            </strong>
+
+
+                            <div class="product-rating">
+
+                                <span class="stars">
+                                    ★★★★☆
+                                </span>
+
+                                <span>
+                                    4.5
+                                </span>
+
+                            </div>
+
+
+                            <p class="seller-name">
+                                Hogar Ostuacán
+                            </p>
+
+                        </div>
+
+                    </button>
+
+                </article>
+
+
+
+                <!-- PRODUCTO 3 -->
+
+                <article
+                    class="market-product"
+                    data-product-id="demo-003"
+                    data-category="ropa">
+
+                    <button
+                        type="button"
+                        class="favorite-button"
+                        aria-label="Agregar a favoritos">
+
+                        <span class="material-symbols-outlined">
+                            favorite
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="product-open"
+                        data-product-id="demo-003">
+
+                        <div class="product-image">
+
+                            <span class="material-symbols-outlined">
+                                checkroom
+                            </span>
+
+                            <span class="product-condition">
+                                Nuevo
+                            </span>
+
+                        </div>
+
+
+                        <div class="product-content">
+
+                            <h3>
+                                Camisa casual para hombre
+                            </h3>
+
+                            <strong class="product-price">
+                                $320
+                            </strong>
+
+
+                            <div class="product-rating">
+
+                                <span class="stars">
+                                    ★★★★★
+                                </span>
+
+                                <span>
+                                    4.9
+                                </span>
+
+                            </div>
+
+
+                            <p class="seller-name">
+                                Moda Local
+                            </p>
+
+                        </div>
+
+                    </button>
+
+                </article>
+
+
+
+                <!-- PRODUCTO 4 -->
+
+                <article
+                    class="market-product"
+                    data-product-id="demo-004"
+                    data-category="calzado">
+
+                    <button
+                        type="button"
+                        class="favorite-button"
+                        aria-label="Agregar a favoritos">
+
+                        <span class="material-symbols-outlined">
+                            favorite
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="product-open"
+                        data-product-id="demo-004">
+
+                        <div class="product-image">
+
+                            <span class="material-symbols-outlined">
+                                steps
+                            </span>
+
+                            <span class="product-condition">
+                                Nuevo
+                            </span>
+
+                        </div>
+
+
+                        <div class="product-content">
+
+                            <h3>
+                                Tenis deportivos
+                            </h3>
+
+                            <strong class="product-price">
+                                $650
+                            </strong>
+
+
+                            <div class="product-rating">
+
+                                <span class="stars">
+                                    ★★★★★
+                                </span>
+
+                                <span>
+                                    4.8
+                                </span>
+
+                            </div>
+
+
+                            <p class="seller-name">
+                                Calzado Express
+                            </p>
+
+                        </div>
+
+                    </button>
+
+                </article>
+
+
+
+                <!-- PRODUCTO 5 -->
+
+                <article
+                    class="market-product"
+                    data-product-id="demo-005"
+                    data-category="vehiculos">
+
+                    <button
+                        type="button"
+                        class="favorite-button"
+                        aria-label="Agregar a favoritos">
+
+                        <span class="material-symbols-outlined">
+                            favorite
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="product-open"
+                        data-product-id="demo-005">
+
+                        <div class="product-image">
+
+                            <span class="material-symbols-outlined">
+                                two_wheeler
+                            </span>
+
+                            <span class="product-condition">
+                                Usado
+                            </span>
+
+                        </div>
+
+
+                        <div class="product-content">
+
+                            <h3>
+                                Motocicleta Italika
+                            </h3>
+
+                            <strong class="product-price">
+                                $18,500
+                            </strong>
+
+
+                            <div class="product-rating">
+
+                                <span class="stars">
+                                    ★★★★☆
+                                </span>
+
+                                <span>
+                                    4.6
+                                </span>
+
+                            </div>
+
+
+                            <p class="seller-name">
+                                Venta Particular
+                            </p>
+
+                        </div>
+
+                    </button>
+
+                </article>
+
+
+
+                <!-- PRODUCTO 6 -->
+
+                <article
+                    class="market-product"
+                    data-product-id="demo-006"
+                    data-category="otros">
+
+                    <button
+                        type="button"
+                        class="favorite-button"
+                        aria-label="Agregar a favoritos">
+
+                        <span class="material-symbols-outlined">
+                            favorite
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="product-open"
+                        data-product-id="demo-006">
+
+                        <div class="product-image">
+
+                            <span class="material-symbols-outlined">
+                                backpack
+                            </span>
+
+                            <span class="product-condition">
+                                Nuevo
+                            </span>
+
+                        </div>
+
+
+                        <div class="product-content">
+
+                            <h3>
+                                Mochila escolar
+                            </h3>
+
+                            <strong class="product-price">
+                                $320
+                            </strong>
+
+
+                            <div class="product-rating">
+
+                                <span class="stars">
+                                    ★★★★★
+                                </span>
+
+                                <span>
+                                    5.0
+                                </span>
+
+                            </div>
+
+
+                            <p class="seller-name">
+                                Tienda Local
+                            </p>
+
+                        </div>
+
+                    </button>
+
+                </article>
+
+
+            </div>
+
+
+
+            <!-- SIN RESULTADOS -->
+
+            <div
+                id="emptyMarketplace"
+                class="empty-marketplace"
+                style="display:none;">
+
+                <span class="material-symbols-outlined">
+                    search_off
+                </span>
+
+                <strong>
+                    No encontramos productos
+                </strong>
+
+                <p>
+                    Prueba con otra búsqueda o categoría.
+                </p>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- =====================================================
+         CARRITO FLOTANTE
+    ====================================================== -->
+
+    <button
+        type="button"
+        id="marketplaceCartBar"
+        class="marketplace-cart-bar"
+        style="display:none;">
+
+        <div class="marketplace-cart-left">
+
+            <div class="marketplace-cart-icon">
+
+                <span class="material-symbols-outlined">
+                    shopping_cart
+                </span>
+
+            </div>
+
+            <div>
+
+                <strong>
+                    Mi carrito
+                </strong>
+
+                <span id="cartItems">
+                    0 productos
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="marketplace-cart-total">
+
+            <strong id="cartTotal">
+                $0
+            </strong>
+
+            <span class="material-symbols-outlined">
+                chevron_right
+            </span>
+
+        </div>
+
+    </button>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     JAVASCRIPT
+====================================================== -->
+
+<script
+    type="module"
+    src="../js/marketplace.js">
+</script>
 
 
 </body>
