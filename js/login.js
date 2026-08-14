@@ -190,6 +190,27 @@ async function iniciarSesion() {
         }
 
 
+// ============================
+// NEGOCIO
+// ============================
+
+if (
+    usuario.tipo === "negocio"
+) {
+
+    console.log(
+        "Redirigiendo a dashboard negocio"
+    );
+
+
+    window.location.href =
+        "dashboard-negocio.html";
+
+
+    return;
+}
+
+
         // ============================
         // TIPO DESCONOCIDO
         // ============================
