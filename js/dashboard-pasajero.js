@@ -60,10 +60,10 @@ const cartTotal =
     document.getElementById("cartTotal");
 
 const searchInput =
-    document.getElementById("searchInput");
+    document.getElementById("buscarProducto");
 
 const searchClear =
-    document.querySelector(".search-clear");
+    document.getElementById("btnClearSearch");
 
 const locationText =
     document.getElementById("currentLocation");
@@ -1140,7 +1140,13 @@ function configurarCategorias() {
 function configurarBuscador() {
 
     if (!searchInput) {
+
+        console.warn(
+            "⚠️ No se encontró el campo de búsqueda."
+        );
+
         return;
+
     }
 
 
@@ -1149,7 +1155,25 @@ function configurarBuscador() {
         () => {
 
             textoBusqueda =
-                searchInput.value;
+                searchInput.value.trim();
+
+
+            // Mostrar / ocultar botón limpiar
+
+            if (searchClear) {
+
+                searchClear.style.display =
+                    textoBusqueda.length > 0
+                        ? "flex"
+                        : "none";
+
+            }
+
+
+            console.log(
+                "🔎 Buscando:",
+                textoBusqueda
+            );
 
 
             renderizarProductos();
@@ -1164,11 +1188,19 @@ function configurarBuscador() {
             "click",
             () => {
 
-                searchInput.value = "";
+                searchInput.value =
+                    "";
 
-                textoBusqueda = "";
+                textoBusqueda =
+                    "";
+
+
+                searchClear.style.display =
+                    "none";
+
 
                 renderizarProductos();
+
 
                 searchInput.focus();
 
@@ -1178,7 +1210,6 @@ function configurarBuscador() {
     }
 
 }
-
 
 // =====================================================
 // CATEGORÍA POR DEFECTO
