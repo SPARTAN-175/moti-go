@@ -1,1 +1,1008 @@
+/* =========================================================
+   MOTI GO - MARKETPLACE
+========================================================= */
 
+.marketplace-app {
+    width: 100%;
+    min-height: 100vh;
+
+    background: #f7f8fa;
+
+    padding-bottom: 40px;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.marketplace-header {
+    position: sticky;
+
+    top: 0;
+
+    z-index: 100;
+
+    width: 100%;
+    height: 66px;
+
+    padding: 0 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: #ffffff;
+
+    border-bottom: 1px solid #e8eaed;
+}
+
+
+.header-icon-button {
+    position: relative;
+
+    width: 42px;
+    height: 42px;
+
+    padding: 0;
+
+    border: none;
+    border-radius: 50%;
+
+    background: transparent;
+
+    color: #374151;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+}
+
+.header-icon-button:hover {
+    background: #f3f4f6;
+}
+
+.header-icon-button .material-symbols-outlined {
+    font-size: 24px;
+}
+
+
+/* =========================================================
+   MARCA
+========================================================= */
+
+.marketplace-brand {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    min-width: 0;
+}
+
+.marketplace-brand > .material-symbols-outlined {
+    color: #16a34a;
+
+    font-size: 28px;
+}
+
+.marketplace-brand div {
+    display: flex;
+
+    flex-direction: column;
+
+    line-height: 1.15;
+}
+
+.marketplace-brand strong {
+    color: #111827;
+
+    font-size: 16px;
+
+    font-weight: 700;
+}
+
+.marketplace-brand small {
+    margin-top: 2px;
+
+    color: #9ca3af;
+
+    font-size: 8px;
+
+    font-weight: 500;
+
+    letter-spacing: .3px;
+}
+
+
+/* =========================================================
+   CARRITO HEADER
+========================================================= */
+
+.cart-button {
+    position: relative;
+}
+
+.cart-badge {
+    position: absolute;
+
+    top: 3px;
+    right: 1px;
+
+    min-width: 17px;
+    height: 17px;
+
+    padding: 0 4px;
+
+    border-radius: 20px;
+
+    background: #16a34a;
+
+    color: #ffffff;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* =========================================================
+   CONTENIDO
+========================================================= */
+
+.marketplace-main {
+    width: 100%;
+
+    max-width: 1000px;
+
+    margin: 0 auto;
+
+    padding: 16px 15px 100px;
+}
+
+
+/* =========================================================
+   BUSCADOR
+========================================================= */
+
+.marketplace-search {
+    width: 100%;
+
+    margin-bottom: 22px;
+}
+
+.marketplace-search-box {
+    width: 100%;
+    height: 50px;
+
+    padding: 0 13px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    background: #ffffff;
+
+    border: 1px solid #e1e4e8;
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 3px 12px rgba(0, 0, 0, .035);
+}
+
+.marketplace-search-box:focus-within {
+    border-color: #16a34a;
+
+    box-shadow:
+        0 0 0 3px rgba(22, 163, 74, .08);
+}
+
+.marketplace-search-box > .material-symbols-outlined {
+    color: #9ca3af;
+
+    font-size: 23px;
+}
+
+.marketplace-search-box input {
+    flex: 1;
+
+    width: 100%;
+    height: 100%;
+
+    padding: 0;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    color: #111827;
+
+    font-family: inherit;
+
+    font-size: 13px;
+}
+
+.marketplace-search-box input::placeholder {
+    color: #9ca3af;
+}
+
+.clear-search {
+    width: 30px;
+    height: 30px;
+
+    padding: 0;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #f3f4f6;
+
+    color: #6b7280;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+}
+
+.clear-search .material-symbols-outlined {
+    font-size: 18px;
+}
+
+
+/* =========================================================
+   ENCABEZADOS DE SECCIÓN
+========================================================= */
+
+.marketplace-section-heading {
+    margin-bottom: 12px;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    justify-content: space-between;
+
+    gap: 12px;
+}
+
+.marketplace-section-heading h2 {
+    margin: 3px 0 0;
+
+    color: #111827;
+
+    font-size: 17px;
+
+    font-weight: 700;
+}
+
+.marketplace-label {
+    color: #16a34a;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+}
+
+.marketplace-section-heading button {
+    padding: 0;
+
+    border: none;
+
+    background: transparent;
+
+    color: #16a34a;
+
+    font-family: inherit;
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.products-count {
+    color: #9ca3af;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   CATEGORÍAS
+========================================================= */
+
+.marketplace-categories {
+    margin-bottom: 28px;
+}
+
+.categories-scroll {
+    display: flex;
+
+    gap: 9px;
+
+    overflow-x: auto;
+
+    padding-bottom: 4px;
+
+    scrollbar-width: none;
+}
+
+.categories-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.market-category {
+    flex: 0 0 auto;
+
+    min-width: 72px;
+
+    padding: 7px 8px 8px;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 13px;
+
+    background: #ffffff;
+
+    color: #4b5563;
+
+    font-family: inherit;
+
+    font-size: 9px;
+
+    font-weight: 600;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 5px;
+
+    cursor: pointer;
+
+    transition: .2s ease;
+}
+
+.market-category:hover {
+    border-color: #bbf7d0;
+}
+
+.market-category.active {
+    background: #f0fdf4;
+
+    border-color: #86efac;
+
+    color: #15803d;
+}
+
+.category-circle {
+    width: 34px;
+    height: 34px;
+
+    border-radius: 10px;
+
+    background: #f3f4f6;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.market-category.active .category-circle {
+    background: #dcfce7;
+}
+
+.category-circle .material-symbols-outlined {
+    font-size: 19px;
+}
+
+
+/* =========================================================
+   GRID DE PRODUCTOS
+========================================================= */
+
+.marketplace-products {
+    width: 100%;
+}
+
+.marketplace-grid {
+    width: 100%;
+
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 11px;
+}
+
+
+/* =========================================================
+   PRODUCTO
+========================================================= */
+
+.market-product {
+    position: relative;
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 15px;
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+
+.market-product:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 7px 20px rgba(0, 0, 0, .07);
+}
+
+
+/* =========================================================
+   BOTÓN FAVORITO
+========================================================= */
+
+.favorite-button {
+    position: absolute;
+
+    top: 8px;
+    right: 8px;
+
+    z-index: 5;
+
+    width: 31px;
+    height: 31px;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, .94);
+
+    color: #6b7280;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 2px 7px rgba(0, 0, 0, .08);
+}
+
+.favorite-button:hover {
+    color: #dc2626;
+}
+
+.favorite-button.active {
+    color: #dc2626;
+}
+
+.favorite-button .material-symbols-outlined {
+    font-size: 18px;
+}
+
+
+/* =========================================================
+   BOTÓN DEL PRODUCTO
+========================================================= */
+
+.product-open {
+    width: 100%;
+
+    padding: 0;
+
+    border: none;
+
+    background: transparent;
+
+    color: inherit;
+
+    font-family: inherit;
+
+    text-align: left;
+
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   IMAGEN DEL PRODUCTO
+========================================================= */
+
+.product-image {
+    position: relative;
+
+    width: 100%;
+
+    aspect-ratio: 1 / 1;
+
+    background:
+        linear-gradient(
+            145deg,
+            #f1f5f9,
+            #e9eef2
+        );
+
+    color: #9ca3af;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.product-image > .material-symbols-outlined {
+    font-size: 52px;
+
+    color: #9ca3af;
+}
+
+
+/* Cuando posteriormente haya imagen real */
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    display: block;
+}
+
+
+/* =========================================================
+   ESTADO DEL PRODUCTO
+========================================================= */
+
+.product-condition {
+    position: absolute;
+
+    left: 8px;
+    bottom: 8px;
+
+    padding: 4px 7px;
+
+    border-radius: 6px;
+
+    background: rgba(17, 24, 39, .78);
+
+    color: #ffffff;
+
+    font-size: 8px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   INFORMACIÓN DEL PRODUCTO
+========================================================= */
+
+.product-content {
+    padding: 10px 10px 12px;
+}
+
+.product-content h3 {
+    height: 32px;
+
+    margin: 0 0 5px;
+
+    overflow: hidden;
+
+    color: #111827;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    line-height: 1.45;
+
+    display: -webkit-box;
+
+    -webkit-line-clamp: 2;
+
+    -webkit-box-orient: vertical;
+}
+
+.product-price {
+    display: block;
+
+    color: #111827;
+
+    font-size: 17px;
+
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   CALIFICACIÓN
+========================================================= */
+
+.product-rating {
+    margin-top: 4px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 4px;
+
+    color: #6b7280;
+
+    font-size: 9px;
+}
+
+.stars {
+    color: #f59e0b;
+
+    font-size: 10px;
+
+    letter-spacing: -1px;
+}
+
+
+/* =========================================================
+   VENDEDOR
+========================================================= */
+
+.seller-name {
+    margin: 6px 0 0;
+
+    overflow: hidden;
+
+    color: #9ca3af;
+
+    font-size: 8px;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   SIN RESULTADOS
+========================================================= */
+
+.empty-marketplace {
+    padding: 55px 20px;
+
+    text-align: center;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 15px;
+}
+
+.empty-marketplace > .material-symbols-outlined {
+    color: #9ca3af;
+
+    font-size: 38px;
+}
+
+.empty-marketplace strong {
+    display: block;
+
+    margin-top: 8px;
+
+    color: #374151;
+
+    font-size: 13px;
+}
+
+.empty-marketplace p {
+    margin: 5px 0 0;
+
+    color: #9ca3af;
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   BANNER VENDEDORES
+========================================================= */
+
+.seller-banner {
+    margin-top: 30px;
+
+    padding: 17px;
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 12px;
+
+    background: #111827;
+
+    border-radius: 17px;
+
+    color: #ffffff;
+}
+
+.seller-banner-icon {
+    width: 41px;
+    height: 41px;
+
+    flex: 0 0 41px;
+
+    border-radius: 11px;
+
+    background: #16a34a;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.seller-banner-icon .material-symbols-outlined {
+    font-size: 22px;
+}
+
+.seller-banner-content {
+    min-width: 0;
+}
+
+.seller-banner-content > span {
+    color: #86efac;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+    letter-spacing: .8px;
+}
+
+.seller-banner-content h3 {
+    margin: 4px 0;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    line-height: 1.35;
+}
+
+.seller-banner-content p {
+    margin: 0 0 10px;
+
+    color: #d1d5db;
+
+    font-size: 9px;
+
+    line-height: 1.5;
+}
+
+.seller-banner-button {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 3px;
+
+    color: #ffffff;
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    text-decoration: none;
+}
+
+.seller-banner-button .material-symbols-outlined {
+    font-size: 16px;
+}
+
+
+/* =========================================================
+   CARRITO FLOTANTE
+========================================================= */
+
+.marketplace-cart-bar {
+    position: fixed;
+
+    left: 50%;
+    bottom: 15px;
+
+    transform: translateX(-50%);
+
+    width: calc(100% - 28px);
+
+    max-width: 700px;
+
+    min-height: 64px;
+
+    padding: 10px 14px;
+
+    border: none;
+
+    border-radius: 17px;
+
+    background: #111827;
+
+    color: #ffffff;
+
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, .2);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    font-family: inherit;
+
+    cursor: pointer;
+
+    z-index: 200;
+}
+
+.marketplace-cart-left {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+}
+
+.marketplace-cart-icon {
+    width: 40px;
+    height: 40px;
+
+    border-radius: 11px;
+
+    background: #16a34a;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.marketplace-cart-icon .material-symbols-outlined {
+    font-size: 21px;
+}
+
+.marketplace-cart-left > div:last-child {
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 2px;
+}
+
+.marketplace-cart-left strong {
+    font-size: 12px;
+}
+
+.marketplace-cart-left span {
+    color: #d1d5db;
+
+    font-size: 9px;
+}
+
+.marketplace-cart-total {
+    display: flex;
+
+    align-items: center;
+
+    gap: 3px;
+}
+
+.marketplace-cart-total strong {
+    font-size: 15px;
+}
+
+.marketplace-cart-total .material-symbols-outlined {
+    color: #d1d5db;
+
+    font-size: 21px;
+}
+
+
+/* =========================================================
+   TABLETS
+========================================================= */
+
+@media (min-width: 700px) {
+
+    .marketplace-main {
+        padding-left: 25px;
+        padding-right: 25px;
+    }
+
+    .marketplace-grid {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+
+        gap: 14px;
+    }
+
+}
+
+
+/* =========================================================
+   ESCRITORIO
+========================================================= */
+
+@media (min-width: 1050px) {
+
+    .marketplace-grid {
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+    }
+
+}
+
+
+/* =========================================================
+   TELÉFONOS MUY PEQUEÑOS
+========================================================= */
+
+@media (max-width: 350px) {
+
+    .marketplace-main {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .marketplace-grid {
+        gap: 8px;
+    }
+
+    .product-content {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .product-content h3 {
+        font-size: 10px;
+    }
+
+    .product-price {
+        font-size: 15px;
+    }
+
+    .marketplace-brand small {
+        display: none;
+    }
+
+}
