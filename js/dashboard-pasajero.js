@@ -180,7 +180,7 @@ function guardarCarrito() {
 
 
 // =====================================================
-// CARGAR PRODUCTOS DESDE FIREBASE
+// CARGAR CATÁLOGO DESDE FIREBASE
 // =====================================================
 
 async function cargarCatalogo() {
@@ -189,6 +189,7 @@ async function cargarCatalogo() {
         return;
     }
 
+
     try {
 
         console.log(
@@ -196,9 +197,9 @@ async function cargarCatalogo() {
         );
 
 
-        // -----------------------------------------
-        // PRODUCTOS
-        // -----------------------------------------
+        // =================================================
+        // PRODUCTOS MAESTROS
+        // =================================================
 
         const productosSnapshot =
             await getDocs(
@@ -211,12 +212,14 @@ async function cargarCatalogo() {
 
         productos = [];
 
+
         productosSnapshot.forEach(
             (docSnap) => {
 
                 productos.push({
 
-                    id: docSnap.id,
+                    id:
+                        docSnap.id,
 
                     ...docSnap.data()
 
@@ -226,27 +229,29 @@ async function cargarCatalogo() {
         );
 
 
-        // -----------------------------------------
-        // INVENTARIO
-        // -----------------------------------------
+        // =================================================
+        // INVENTARIOS DE LAS TIENDAS
+        // =================================================
 
         const inventarioSnapshot =
             await getDocs(
                 collection(
                     db,
-                    "inventario_tiendas"
+                    "inventarios"
                 )
             );
 
 
         inventarios = [];
 
+
         inventarioSnapshot.forEach(
             (docSnap) => {
 
                 inventarios.push({
 
-                    id: docSnap.id,
+                    id:
+                        docSnap.id,
 
                     ...docSnap.data()
 
@@ -257,19 +262,20 @@ async function cargarCatalogo() {
 
 
         console.log(
-            "Productos encontrados:",
+            "📦 Productos encontrados:",
             productos.length
         );
 
+
         console.log(
-            "Inventarios encontrados:",
+            "🏪 Inventarios encontrados:",
             inventarios.length
         );
 
 
-        // -----------------------------------------
+        // =================================================
         // MOSTRAR
-        // -----------------------------------------
+        // =================================================
 
         renderizarProductos();
 
@@ -285,7 +291,8 @@ async function cargarCatalogo() {
 
         if (productsContainer) {
 
-            productsContainer.innerHTML = "";
+            productsContainer.innerHTML =
+                "";
 
         }
 
@@ -300,7 +307,9 @@ async function cargarCatalogo() {
     }
 
 }
-
+// =====================================================
+// OBTENER INVENTARIO DISPONIBLE
+// =====================================================
 
 // =====================================================
 // OBTENER INVENTARIO DISPONIBLE
@@ -311,11 +320,43 @@ function obtenerInventarioProducto(
 ) {
 
     return inventarios.filter(
-        inventario =>
+        inventario => {
 
-            inventario.productoId === productoId &&
+            if (
+                inventario.productoId !==
+                productoId
+            ) {
 
-            inventario.disponible === true
+                return false;
+
+            }
+
+
+            /*
+                El inventario importado desde el
+                panel del negocio utiliza:
+
+                disponible: true
+                existencia: número
+            */
+
+
+            const disponible =
+                inventario.disponible === true;
+
+
+            const existencia =
+                Number(
+                    inventario.existencia || 0
+                );
+
+
+            return (
+                disponible &&
+                existencia > 0
+            );
+
+        }
     );
 
 }
@@ -381,28 +422,17 @@ function renderizarProductos() {
     }
 
 
-    productsContainer.innerHTML = "";
+    productsContainer.innerHTML =
+        "";
 
 
-    let productosDisponibles = [];
+    // =================================================
+    // PRODUCTOS CON INVENTARIO DISPONIBLE
+    // =================================================
 
-
-    // -----------------------------------------
-    // FILTRAR PRODUCTOS CON INVENTARIO
-    // -----------------------------------------
-
-    productosDisponibles =
+    let productosDisponibles =
         productos.filter(
             producto => {
-
-                if (
-                    producto.activo !== true
-                ) {
-
-                    return false;
-
-                }
-
 
                 const inventario =
                     obtenerMejorInventario(
@@ -410,35 +440,53 @@ function renderizarProductos() {
                     );
 
 
-                return inventario !== null;
+                return (
+                    inventario !== null
+                );
 
             }
         );
 
 
-    // -----------------------------------------
-    // FILTRO CATEGORÍA
-    // -----------------------------------------
+    // =================================================
+    // FILTRO POR CATEGORÍA
+    // =================================================
 
     if (
         categoriaActual !==
-        "todos"
+        "todos" &&
+        categoriaActual !==
+        "todas"
     ) {
 
         productosDisponibles =
             productosDisponibles.filter(
-                producto =>
+                producto => {
 
-                    producto.categoriaId ===
-                    categoriaActual
+                    const categoria =
+                        producto.categoria ||
+                        producto.categoriaId ||
+                        "otros";
+
+
+                    return (
+                        normalizarTexto(
+                            categoria
+                        ) ===
+                        normalizarTexto(
+                            categoriaActual
+                        )
+                    );
+
+                }
             );
 
     }
 
 
-    // -----------------------------------------
-    // FILTRO BÚSQUEDA
-    // -----------------------------------------
+    // =================================================
+    // FILTRO POR BÚSQUEDA
+    // =================================================
 
     if (
         textoBusqueda
@@ -458,21 +506,39 @@ function renderizarProductos() {
 
                     const nombre =
                         normalizarTexto(
-                            producto.nombre || ""
+                            producto.nombre ||
+                            ""
                         );
 
 
                     const nombreNormalizado =
                         normalizarTexto(
-                            producto.nombreNormalizado || ""
+                            producto.nombreNormalizado ||
+                            ""
+                        );
+
+
+                    const codigo =
+                        normalizarTexto(
+                            producto.codigo ||
+                            producto.codigoTienda ||
+                            ""
                         );
 
 
                     return (
 
-                        nombre.includes(texto) ||
+                        nombre.includes(
+                            texto
+                        ) ||
 
-                        nombreNormalizado.includes(texto)
+                        nombreNormalizado.includes(
+                            texto
+                        ) ||
+
+                        codigo.includes(
+                            texto
+                        )
 
                     );
 
@@ -482,9 +548,9 @@ function renderizarProductos() {
     }
 
 
-    // -----------------------------------------
-    // CONTADORES
-    // -----------------------------------------
+    // =================================================
+    // CONTADOR
+    // =================================================
 
     if (productsCount) {
 
@@ -498,15 +564,17 @@ function renderizarProductos() {
     }
 
 
-    // -----------------------------------------
+    // =================================================
     // TÍTULO
-    // -----------------------------------------
+    // =================================================
 
     if (productsTitle) {
 
         if (
             categoriaActual ===
-            "todos"
+            "todos" ||
+            categoriaActual ===
+            "todas"
         ) {
 
             productsTitle.textContent =
@@ -525,12 +593,13 @@ function renderizarProductos() {
     }
 
 
-    // -----------------------------------------
+    // =================================================
     // SIN RESULTADOS
-    // -----------------------------------------
+    // =================================================
 
     if (
-        productosDisponibles.length === 0
+        productosDisponibles.length ===
+        0
     ) {
 
         if (emptyProducts) {
@@ -539,6 +608,12 @@ function renderizarProductos() {
                 "flex";
 
         }
+
+
+        console.log(
+            "📭 No hay productos disponibles con los filtros actuales."
+        );
+
 
         return;
 
@@ -553,9 +628,9 @@ function renderizarProductos() {
     }
 
 
-    // -----------------------------------------
+    // =================================================
     // CREAR PRODUCTOS
-    // -----------------------------------------
+    // =================================================
 
     productosDisponibles.forEach(
         producto => {
@@ -564,6 +639,11 @@ function renderizarProductos() {
                 obtenerMejorInventario(
                     producto.id
                 );
+
+
+            if (!inventario) {
+                return;
+            }
 
 
             const elemento =
@@ -583,9 +663,13 @@ function renderizarProductos() {
 
     actualizarCantidadesVisibles();
 
+
+    console.log(
+        "🛒 Productos mostrados:",
+        productosDisponibles.length
+    );
+
 }
-
-
 // =====================================================
 // CREAR ELEMENTO DE PRODUCTO
 // =====================================================
@@ -1108,32 +1192,59 @@ function obtenerIconoProducto(
 ) {
 
     const categoria =
-        producto.categoriaId;
+        normalizarTexto(
+            producto.categoria ||
+            producto.categoriaId ||
+            "otros"
+        );
 
 
     const iconos = {
 
-        abarrotes: "grocery",
+        abarrotes:
+            "grocery",
 
-        carnes: "set_meal",
+        carnes:
+            "set_meal",
 
-        lacteos: "egg",
+        lacteos:
+            "egg",
 
-        bebidas: "local_drink",
+        "lacteos y huevos":
+            "egg",
 
-        frutas_verduras: "nutrition",
+        bebidas:
+            "local_drink",
 
-        limpieza: "cleaning_services",
+        frutas_verduras:
+            "nutrition",
 
-        higiene: "soap"
+        "frutas y verduras":
+            "nutrition",
+
+        limpieza:
+            "cleaning_services",
+
+        higiene:
+            "soap",
+
+        "higiene personal":
+            "soap",
+
+        botanas:
+            "fastfood",
+
+        mariscos:
+            "set_meal",
+
+        varios:
+            "category"
 
     };
 
 
     return (
-        iconos[
-            categoria
-        ] ||
+        iconos[categoria] ||
         "shopping_bag"
     );
 
@@ -1176,34 +1287,67 @@ function obtenerNombreCategoria(
 
     const nombres = {
 
-        abarrotes: "Abarrotes",
+        todos:
+            "Productos",
 
-        carnes: "Carnes",
+        todas:
+            "Productos",
 
-        lacteos: "Lácteos",
+        abarrotes:
+            "Abarrotes",
 
-        bebidas: "Bebidas",
+        carnes:
+            "Carnes",
+
+        lacteos:
+            "Lácteos",
+
+        "lacteos y huevos":
+            "Lácteos y huevos",
+
+        bebidas:
+            "Bebidas",
 
         frutas_verduras:
             "Frutas y verduras",
 
-        limpieza: "Limpieza",
+        "frutas y verduras":
+            "Frutas y verduras",
 
-        higiene: "Higiene"
+        limpieza:
+            "Limpieza",
+
+        higiene:
+            "Higiene",
+
+        "higiene personal":
+            "Higiene personal",
+
+        botanas:
+            "Botanas",
+
+        mariscos:
+            "Mariscos",
+
+        varios:
+            "Varios",
+
+        otros:
+            "Otros"
 
     };
 
 
     return (
         nombres[
-            categoriaId
+            normalizarTexto(
+                categoriaId
+            )
         ] ||
         "Productos"
     );
 
 }
-
-
 // =====================================================
 // NORMALIZAR TEXTO
 // =====================================================
