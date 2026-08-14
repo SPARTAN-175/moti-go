@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>MOTI GO | Mi negocio</title>
+
+    <!-- =========================
+         FUENTES
+    ========================== -->
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+    >
+
+
+    <!-- =========================
+         ESTILOS
+    ========================== -->
+
+    <link
+        rel="stylesheet"
+        href="../css/variables.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/dashboard-negocio.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<div class="business-app">
+
+
+    <!-- =====================================================
+         OVERLAY DEL MENÚ
+    ====================================================== -->
+
+    <div
+        class="sidebar-overlay"
+        id="sidebarOverlay"
+    ></div>
+
+
+    <!-- =====================================================
+         MENÚ LATERAL
+    ====================================================== -->
+
+    <aside
+        class="business-sidebar"
+        id="businessSidebar"
+    >
+
+        <!-- CABECERA DEL MENÚ -->
+
+        <div class="sidebar-header">
+
+            <div class="sidebar-brand">
+
+                <div class="brand-icon">
+
+                    <span class="material-symbols-outlined">
+                        store
+                    </span>
+
+                </div>
+
+
+                <div class="brand-info">
+
+                    <strong>
+                        MOTI GO
+                    </strong>
+
+                    <span>
+                        Panel de negocio
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="sidebar-close"
+                id="sidebarClose"
+                aria-label="Cerrar menú"
+            >
+
+                <span class="material-symbols-outlined">
+                    close
+                </span>
+
+            </button>
+
+        </div>
+
+
+        <!-- INFORMACIÓN DEL NEGOCIO -->
+
+        <div class="sidebar-business">
+
+            <div class="business-avatar">
+
+                <span class="material-symbols-outlined">
+                    storefront
+                </span>
+
+            </div>
+
+
+            <div class="business-info">
+
+                <strong id="businessName">
+                    Mi negocio
+                </strong>
+
+                <span id="businessType">
+                    Negocio afiliado
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- NAVEGACIÓN -->
+
+        <nav class="business-nav">
+
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">
+                    PRINCIPAL
+                </span>
+
+
+                <button
+                    type="button"
+                    class="nav-item active"
+                    data-view="inicio"
+                >
+
+                    <span class="material-symbols-outlined">
+                        dashboard
+                    </span>
+
+                    <span>
+                        Inicio
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="nav-item"
+                    data-view="productos"
+                >
+
+                    <span class="material-symbols-outlined">
+                        inventory_2
+                    </span>
+
+                    <span>
+                        Mis productos
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="nav-item"
+                    data-view="importar"
+                >
+
+                    <span class="material-symbols-outlined">
+                        upload_file
+                    </span>
+
+                    <span>
+                        Importar catálogo
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="nav-item"
+                    data-view="agregar"
+                >
+
+                    <span class="material-symbols-outlined">
+                        add_box
+                    </span>
+
+                    <span>
+                        Agregar producto
+                    </span>
+
+                </button>
+
+            </div>
+
+
+            <div class="nav-section">
+
+                <span class="nav-section-title">
+                    NEGOCIO
+                </span>
+
+
+                <button
+                    type="button"
+                    class="nav-item"
+                    data-view="negocio"
+                >
+
+                    <span class="material-symbols-outlined">
+                        storefront
+                    </span>
+
+                    <span>
+                        Mi negocio
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="nav-item"
+                    data-view="configuracion"
+                >
+
+                    <span class="material-symbols-outlined">
+                        settings
+                    </span>
+
+                    <span>
+                        Configuración
+                    </span>
+
+                </button>
+
+            </div>
+
+        </nav>
+
+
+        <!-- CERRAR SESIÓN -->
+
+        <div class="sidebar-footer">
+
+            <button
+                type="button"
+                class="logout-item"
+                id="logoutButton"
+            >
+
+                <span class="material-symbols-outlined">
+                    logout
+                </span>
+
+                <span>
+                    Cerrar sesión
+                </span>
+
+            </button>
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- =====================================================
+         CONTENIDO PRINCIPAL
+    ====================================================== -->
+
+    <div class="business-content">
+
+
+        <!-- =================================================
+             HEADER SUPERIOR
+        ================================================== -->
+
+        <header class="business-header">
+
+            <div class="header-left">
+
+                <button
+                    type="button"
+                    class="menu-button"
+                    id="menuButton"
+                    aria-label="Abrir menú"
+                >
+
+                    <span class="material-symbols-outlined">
+                        menu
+                    </span>
+
+                </button>
+
+
+                <div class="header-page">
+
+                    <strong id="pageTitle">
+                        Inicio
+                    </strong>
+
+                    <span id="pageSubtitle">
+                        Resumen de tu negocio
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="header-actions">
+
+                <button
+                    type="button"
+                    class="header-icon-button"
+                    id="notificationsButton"
+                    aria-label="Notificaciones"
+                >
+
+                    <span class="material-symbols-outlined">
+                        notifications
+                    </span>
+
+                    <span
+                        class="notification-dot"
+                        id="notificationDot"
+                    ></span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="header-profile"
+                    id="profileButton"
+                >
+
+                    <span class="material-symbols-outlined">
+                        account_circle
+                    </span>
+
+                </button>
+
+            </div>
+
+        </header>
+
+
+
+        <!-- =================================================
+             ÁREA DE VISTAS
+        ================================================== -->
+
+        <main class="business-main">
+
+
+            <!-- =================================================
+                 VISTA: INICIO
+            ================================================== -->
+
+            <section
+                class="business-view active"
+                id="viewInicio"
+                data-view-content="inicio"
+            >
+
+                <div class="view-intro">
+
+                    <span class="eyebrow">
+                        MI NEGOCIO
+                    </span>
+
+                    <h1 id="welcomeTitle">
+                        Hola 👋
+                    </h1>
+
+                    <p>
+                        Aquí puedes administrar tu catálogo
+                        y mantener tus productos actualizados.
+                    </p>
+
+                </div>
+
+
+                <!-- RESUMEN -->
+
+                <div class="business-summary">
+
+                    <div class="summary-line">
+
+                        <div class="summary-main">
+
+                            <span class="material-symbols-outlined">
+                                inventory_2
+                            </span>
+
+                            <div>
+
+                                <span>
+                                    Productos
+                                </span>
+
+                                <strong id="totalProducts">
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="summary-action"
+                            data-go-view="productos"
+                        >
+
+                            Ver productos
+
+                            <span class="material-symbols-outlined">
+                                arrow_forward
+                            </span>
+
+                        </button>
+
+                    </div>
+
+
+                    <div class="summary-divider"></div>
+
+
+                    <div class="summary-line">
+
+                        <div class="summary-main">
+
+                            <span class="material-symbols-outlined">
+                                check_circle
+                            </span>
+
+                            <div>
+
+                                <span>
+                                    Disponibles
+                                </span>
+
+                                <strong id="availableProducts">
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="summary-divider"></div>
+
+
+                    <div class="summary-line">
+
+                        <div class="summary-main">
+
+                            <span class="material-symbols-outlined">
+                                warning
+                            </span>
+
+                            <div>
+
+                                <span>
+                                    Necesitan revisión
+                                </span>
+
+                                <strong id="reviewProducts">
+                                    0
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="summary-action"
+                            data-go-view="productos"
+                        >
+
+                            Revisar
+
+                            <span class="material-symbols-outlined">
+                                arrow_forward
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ACCIONES RÁPIDAS -->
+
+                <div class="view-section">
+
+                    <div class="section-heading">
+
+                        <div>
+
+                            <span class="eyebrow">
+                                ACCIONES
+                            </span>
+
+                            <h2>
+                                Administrar catálogo
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="quick-actions">
+
+                        <button
+                            type="button"
+                            class="quick-action"
+                            data-go-view="importar"
+                        >
+
+                            <span class="material-symbols-outlined">
+                                upload_file
+                            </span>
+
+                            <div>
+
+                                <strong>
+                                    Importar catálogo
+                                </strong>
+
+                                <span>
+                                    Excel o CSV
+                                </span>
+
+                            </div>
+
+                            <span class="material-symbols-outlined arrow">
+                                arrow_forward
+                            </span>
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="quick-action"
+                            data-go-view="agregar"
+                        >
+
+                            <span class="material-symbols-outlined">
+                                add_circle
+                            </span>
+
+                            <div>
+
+                                <strong>
+                                    Agregar producto
+                                </strong>
+
+                                <span>
+                                    Crear uno manualmente
+                                </span>
+
+                            </div>
+
+                            <span class="material-symbols-outlined arrow">
+                                arrow_forward
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 VISTA: PRODUCTOS
+            ================================================== -->
+
+            <section
+                class="business-view"
+                id="viewProductos"
+                data-view-content="productos"
+            >
+
+                <div class="view-intro compact">
+
+                    <span class="eyebrow">
+                        CATÁLOGO
+                    </span>
+
+                    <h1>
+                        Mis productos
+                    </h1>
+
+                    <p>
+                        Consulta y administra los productos
+                        de tu negocio.
+                    </p>
+
+                </div>
+
+
+                <!-- BUSCADOR -->
+
+                <div class="products-search">
+
+                    <span class="material-symbols-outlined">
+                        search
+                    </span>
+
+                    <input
+                        type="search"
+                        id="businessProductSearch"
+                        placeholder="Buscar producto..."
+                        autocomplete="off"
+                    >
+
+                    <button
+                        type="button"
+                        id="clearProductSearch"
+                        aria-label="Limpiar búsqueda"
+                    >
+
+                        <span class="material-symbols-outlined">
+                            close
+                        </span>
+
+                    </button>
+
+                </div>
+
+
+                <!-- FILTROS -->
+
+                <div class="product-filters">
+
+                    <button
+                        type="button"
+                        class="product-filter active"
+                        data-filter="todos"
+                    >
+                        Todos
+                    </button>
+
+                    <button
+                        type="button"
+                        class="product-filter"
+                        data-filter="disponibles"
+                    >
+                        Disponibles
+                    </button>
+
+                    <button
+                        type="button"
+                        class="product-filter"
+                        data-filter="agotados"
+                    >
+                        Agotados
+                    </button>
+
+                    <button
+                        type="button"
+                        class="product-filter"
+                        data-filter="revision"
+                    >
+                        Revisión
+                    </button>
+
+                </div>
+
+
+                <!-- CONTADOR -->
+
+                <div class="products-toolbar">
+
+                    <span id="businessProductsCount">
+                        0 productos
+                    </span>
+
+                    <button
+                        type="button"
+                        class="toolbar-action"
+                        data-go-view="agregar"
+                    >
+
+                        <span class="material-symbols-outlined">
+                            add
+                        </span>
+
+                        Agregar
+
+                    </button>
+
+                </div>
+
+
+                <!-- LISTA -->
+
+                <div
+                    class="business-products-list"
+                    id="businessProductsList"
+                >
+                </div>
+
+
+                <!-- SIN PRODUCTOS -->
+
+                <div
+                    class="business-empty"
+                    id="businessProductsEmpty"
+                    style="display:none;"
+                >
+
+                    <span class="material-symbols-outlined">
+                        inventory_2
+                    </span>
+
+                    <strong>
+                        No encontramos productos
+                    </strong>
+
+                    <p>
+                        Puedes importar tu catálogo
+                        o agregar un producto manualmente.
+                    </p>
+
+                    <button
+                        type="button"
+                        data-go-view="agregar"
+                    >
+
+                        Agregar producto
+
+                    </button>
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 VISTA: IMPORTAR
+            ================================================== -->
+
+            <section
+                class="business-view"
+                id="viewImportar"
+                data-view-content="importar"
+            >
+
+                <div class="view-intro compact">
+
+                    <span class="eyebrow">
+                        CATÁLOGO
+                    </span>
+
+                    <h1>
+                        Importar catálogo
+                    </h1>
+
+                    <p>
+                        Carga tus productos desde Excel
+                        o CSV.
+                    </p>
+
+                </div>
+
+
+                <!-- INFORMACIÓN DE TIENDA -->
+
+                <div class="import-business-info">
+
+                    <span class="material-symbols-outlined">
+                        store
+                    </span>
+
+                    <div>
+
+                        <span>
+                            Importando catálogo para
+                        </span>
+
+                        <strong id="importBusinessName">
+                            Mi negocio
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ZONA DE ARCHIVO -->
+
+                <label
+                    for="businessCatalogFile"
+                    class="business-upload-zone"
+                    id="businessUploadZone"
+                >
+
+                    <div class="upload-symbol">
+
+                        <span class="material-symbols-outlined">
+                            cloud_upload
+                        </span>
+
+                    </div>
+
+
+                    <strong>
+                        Selecciona tu archivo
+                    </strong>
+
+
+                    <span>
+                        Excel (.xlsx) o CSV (.csv)
+                    </span>
+
+
+                    <b>
+                        Buscar archivo
+                    </b>
+
+
+                    <input
+                        type="file"
+                        id="businessCatalogFile"
+                        accept=".xlsx,.csv"
+                        hidden
+                    >
+
+                </label>
+
+
+                <!-- ARCHIVO -->
+
+                <div
+                    class="business-selected-file"
+                    id="businessSelectedFile"
+                    style="display:none;"
+                >
+
+                    <span class="material-symbols-outlined">
+                        description
+                    </span>
+
+                    <div>
+
+                        <strong
+                            id="businessSelectedFileName"
+                        >
+                            archivo.xlsx
+                        </strong>
+
+                        <span
+                            id="businessSelectedFileSize"
+                        >
+                            0 KB
+                        </span>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="businessRemoveFile"
+                        aria-label="Eliminar archivo"
+                    >
+
+                        <span class="material-symbols-outlined">
+                            close
+                        </span>
+
+                    </button>
+
+                </div>
+
+
+                <!-- INFORMACIÓN -->
+
+                <div class="business-info-box">
+
+                    <span class="material-symbols-outlined">
+                        info
+                    </span>
+
+                    <p>
+                        MOTI analizará el archivo,
+                        identificará los productos y
+                        preparará una vista previa antes
+                        de guardar los cambios.
+                    </p>
+
+                </div>
+
+
+                <!-- BOTÓN -->
+
+                <button
+                    type="button"
+                    class="business-primary-button"
+                    id="businessProcessCatalog"
+                    disabled
+                >
+
+                    <span class="material-symbols-outlined">
+                        upload
+                    </span>
+
+                    Procesar catálogo
+
+                </button>
+
+
+                <!-- RESULTADOS -->
+
+                <div
+                    class="business-import-results"
+                    id="businessImportResults"
+                    style="display:none;"
+                >
+
+                    <div class="import-results-header">
+
+                        <div>
+
+                            <span class="eyebrow">
+                                REVISIÓN
+                            </span>
+
+                            <h2>
+                                Revisa tu catálogo
+                            </h2>
+
+                        </div>
+
+                        <span id="businessImportTotal">
+                            0 productos
+                        </span>
+
+                    </div>
+
+
+                    <div class="import-stats">
+
+                        <div>
+
+                            <strong
+                                id="businessRecognizedCount"
+                            >
+                                0
+                            </strong>
+
+                            <span>
+                                Reconocidos
+                            </span>
+
+                        </div>
+
+
+                        <div>
+
+                            <strong
+                                id="businessNewCount"
+                            >
+                                0
+                            </strong>
+
+                            <span>
+                                Nuevos
+                            </span>
+
+                        </div>
+
+
+                        <div>
+
+                            <strong
+                                id="businessReviewCount"
+                            >
+                                0
+                            </strong>
+
+                            <span>
+                                Revisar
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="business-import-preview"
+                        id="businessImportPreview"
+                    >
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="business-primary-button"
+                        id="businessConfirmImport"
+                        disabled
+                    >
+
+                        <span class="material-symbols-outlined">
+                            cloud_done
+                        </span>
+
+                        Importar catálogo
+
+                    </button>
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 VISTA: AGREGAR PRODUCTO
+            ================================================== -->
+
+            <section
+                class="business-view"
+                id="viewAgregar"
+                data-view-content="agregar"
+            >
+
+                <div class="view-intro compact">
+
+                    <span class="eyebrow">
+                        CATÁLOGO
+                    </span>
+
+                    <h1>
+                        Agregar producto
+                    </h1>
+
+                    <p>
+                        Registra un producto manualmente.
+                    </p>
+
+                </div>
+
+
+                <form
+                    class="product-form"
+                    id="businessProductForm"
+                >
+
+
+                    <div class="form-field">
+
+                        <label for="productName">
+                            Nombre del producto
+                        </label>
+
+                        <input
+                            type="text"
+                            id="productName"
+                            placeholder="Ej. Arroz Verde Valle 1 kg"
+                            autocomplete="off"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-row">
+
+
+                        <div class="form-field">
+
+                            <label for="productCategory">
+                                Categoría
+                            </label>
+
+                            <select
+                                id="productCategory"
+                                required
+                            >
+
+                                <option value="">
+                                    Selecciona
+                                </option>
+
+                                <option value="abarrotes">
+                                    Abarrotes
+                                </option>
+
+                                <option value="bebidas">
+                                    Bebidas
+                                </option>
+
+                                <option value="lacteos">
+                                    Lácteos
+                                </option>
+
+                                <option value="carnes">
+                                    Carnes
+                                </option>
+
+                                <option value="frutas_verduras">
+                                    Frutas y verduras
+                                </option>
+
+                                <option value="limpieza">
+                                    Limpieza
+                                </option>
+
+                                <option value="higiene">
+                                    Higiene
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-field">
+
+                            <label for="productSaleType">
+                                Tipo de venta
+                            </label>
+
+                            <select
+                                id="productSaleType"
+                                required
+                            >
+
+                                <option value="unidad">
+                                    Por unidad
+                                </option>
+
+                                <option value="peso">
+                                    Por peso
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="form-row">
+
+
+                        <div class="form-field">
+
+                            <label for="productPrice">
+                                Precio de venta
+                            </label>
+
+                            <div class="input-prefix">
+
+                                <span>
+                                    $
+                                </span>
+
+                                <input
+                                    type="number"
+                                    id="productPrice"
+                                    min="0"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    required
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-field">
+
+                            <label for="productUnit">
+                                Unidad
+                            </label>
+
+                            <select
+                                id="productUnit"
+                                required
+                            >
+
+                                <option value="pieza">
+                                    Pieza
+                                </option>
+
+                                <option value="kg">
+                                    Kilogramo
+                                </option>
+
+                                <option value="g">
+                                    Gramo
+                                </option>
+
+                                <option value="litro">
+                                    Litro
+                                </option>
+
+                                <option value="ml">
+                                    Mililitro
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="form-field">
+
+                        <label for="productDescription">
+                            Descripción
+                        </label>
+
+                        <textarea
+                            id="productDescription"
+                            rows="4"
+                            placeholder="Descripción opcional..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <div class="form-field">
+
+                        <label>
+                            Fotografía
+                        </label>
+
+
+                        <label
+                            for="productImage"
+                            class="image-upload"
+                        >
+
+                            <span class="material-symbols-outlined">
+                                add_photo_alternate
+                            </span>
+
+                            <span>
+                                Agregar fotografía
+                            </span>
+
+                            <input
+                                type="file"
+                                id="productImage"
+                                accept="image/*"
+                                hidden
+                            >
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="form-switch-row">
+
+                        <div>
+
+                            <strong>
+                                Producto disponible
+                            </strong>
+
+                            <span>
+                                Los clientes podrán verlo
+                                y solicitarlo.
+                            </span>
+
+                        </div>
+
+
+                        <label class="switch">
+
+                            <input
+                                type="checkbox"
+                                id="productAvailable"
+                                checked
+                            >
+
+                            <span></span>
+
+                        </label>
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="business-primary-button"
+                    >
+
+                        <span class="material-symbols-outlined">
+                            save
+                        </span>
+
+                        Guardar producto
+
+                    </button>
+
+
+                </form>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 VISTA: MI NEGOCIO
+            ================================================== -->
+
+            <section
+                class="business-view"
+                id="viewNegocio"
+                data-view-content="negocio"
+            >
+
+                <div class="view-intro compact">
+
+                    <span class="eyebrow">
+                        NEGOCIO
+                    </span>
+
+                    <h1>
+                        Mi negocio
+                    </h1>
+
+                    <p>
+                        Consulta la información de tu negocio
+                        afiliado a MOTI GO.
+                    </p>
+
+                </div>
+
+
+                <div class="business-profile">
+
+
+                    <div class="profile-main">
+
+                        <div class="profile-store-icon">
+
+                            <span class="material-symbols-outlined">
+                                storefront
+                            </span>
+
+                        </div>
+
+
+                        <div>
+
+                            <strong id="profileBusinessName">
+                                Mi negocio
+                            </strong>
+
+                            <span id="profileBusinessType">
+                                Negocio afiliado
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="profile-line">
+
+                        <span>
+                            Dirección
+                        </span>
+
+                        <strong id="profileAddress">
+                            No registrada
+                        </strong>
+
+                    </div>
+
+
+                    <div class="profile-line">
+
+                        <span>
+                            Estado
+                        </span>
+
+                        <strong class="status-active">
+                            Activo
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 VISTA: CONFIGURACIÓN
+            ================================================== -->
+
+            <section
+                class="business-view"
+                id="viewConfiguracion"
+                data-view-content="configuracion"
+            >
+
+                <div class="view-intro compact">
+
+                    <span class="eyebrow">
+                        CUENTA
+                    </span>
+
+                    <h1>
+                        Configuración
+                    </h1>
+
+                    <p>
+                        Administra las opciones de tu cuenta.
+                    </p>
+
+                </div>
+
+
+                <div class="settings-list">
+
+
+                    <button
+                        type="button"
+                        class="settings-item"
+                    >
+
+                        <div>
+
+                            <strong>
+                                Seguridad
+                            </strong>
+
+                            <span>
+                                Cambiar contraseña
+                            </span>
+
+                        </div>
+
+
+                        <span class="material-symbols-outlined">
+                            chevron_right
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="settings-item"
+                    >
+
+                        <div>
+
+                            <strong>
+                                Notificaciones
+                            </strong>
+
+                            <span>
+                                Configurar avisos
+                            </span>
+
+                        </div>
+
+
+                        <span class="material-symbols-outlined">
+                            chevron_right
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="settings-item"
+                    >
+
+                        <div>
+
+                            <strong>
+                                Ayuda
+                            </strong>
+
+                            <span>
+                                Centro de ayuda MOTI GO
+                            </span>
+
+                        </div>
+
+
+                        <span class="material-symbols-outlined">
+                            chevron_right
+                        </span>
+
+                    </button>
+
+
+                </div>
+
+
+            </section>
+
+
+        </main>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     JAVASCRIPT
+====================================================== -->
+
+<script
+    type="module"
+    src="../js/dashboard-negocio.js"
+></script>
+
+
+</body>
+
+</html>
