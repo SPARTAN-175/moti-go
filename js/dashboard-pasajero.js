@@ -273,6 +273,36 @@ async function cargarCatalogo() {
         );
 
 
+        console.log(
+    "🔎 EJEMPLO PRODUCTO:",
+    productos[0]
+);
+
+console.log(
+    "🔎 EJEMPLO INVENTARIO:",
+    inventarios[0]
+);
+
+console.log(
+    "🔎 PRODUCTO ID:",
+    productos[0]?.id
+);
+
+console.log(
+    "🔎 INVENTARIO PRODUCTO ID:",
+    inventarios[0]?.productoId
+);
+
+console.log(
+    "🔎 EXISTENCIA:",
+    inventarios[0]?.existencia
+);
+
+console.log(
+    "🔎 DISPONIBLE:",
+    inventarios[0]?.disponible
+);
+
         // =================================================
         // MOSTRAR
         // =================================================
@@ -311,48 +341,38 @@ async function cargarCatalogo() {
 // OBTENER INVENTARIO DISPONIBLE
 // =====================================================
 
-// =====================================================
-// OBTENER INVENTARIO DISPONIBLE
-// =====================================================
-
 function obtenerInventarioProducto(
     productoId
 ) {
 
-    return inventarios.filter(
-        inventario => {
+    const resultados =
+        inventarios.filter(
+            inventario => {
 
-            if (
-                inventario.productoId !==
-                productoId
-            ) {
-
-                return false;
+                return (
+                    inventario.productoId ===
+                    productoId
+                );
 
             }
+        );
 
 
-            /*
-                El inventario importado desde el
-                panel del negocio utiliza:
-
-                disponible: true
-                existencia: número
-            */
-
+    return resultados.filter(
+        inventario => {
 
             const disponible =
-                inventario.disponible === true;
+                inventario.disponible;
 
 
             const existencia =
                 Number(
-                    inventario.existencia || 0
+                    inventario.existencia ?? 0
                 );
 
 
             return (
-                disponible &&
+                disponible !== false &&
                 existencia > 0
             );
 
