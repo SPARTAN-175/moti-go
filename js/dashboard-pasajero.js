@@ -25,7 +25,7 @@ let userLng = null;
 let productos = [];
 let inventarios = [];
 
-let categoriaActual = "todas";
+let categoriaActual = "todos";
 let textoBusqueda = "";
 
 let carrito = {};
@@ -422,7 +422,7 @@ function renderizarProductos() {
 
     if (
         categoriaActual !==
-        "todas"
+        "todos"
     ) {
 
         productosDisponibles =
@@ -506,7 +506,7 @@ function renderizarProductos() {
 
         if (
             categoriaActual ===
-            "todas"
+            "todos"
         ) {
 
             productsTitle.textContent =
