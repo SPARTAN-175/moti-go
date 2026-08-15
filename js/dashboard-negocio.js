@@ -3956,6 +3956,101 @@ function abrirProductoParaEditar(
         </div>
 
 
+        <!-- IMAGEN DEL PRODUCTO -->
+
+<div
+    style="
+        margin-bottom:20px;
+        text-align:center;
+    "
+>
+
+    <div
+        id="previewImagenProducto"
+        style="
+            width:130px;
+            height:130px;
+            margin:0 auto 10px;
+            border-radius:16px;
+            border:1px solid #e5e7eb;
+            background:#f9fafb;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            overflow:hidden;
+        "
+    >
+
+        ${
+            producto.imagenUrl
+                ? `
+                    <img
+                        src="${escapeHtml(
+                            producto.imagenUrl
+                        )}"
+                        alt="${escapeHtml(
+                            producto.nombre || "Producto"
+                        )}"
+                        style="
+                            width:100%;
+                            height:100%;
+                            object-fit:contain;
+                        "
+                    >
+                `
+                : `
+                    <span
+                        class="material-symbols-outlined"
+                        style="
+                            font-size:42px;
+                            color:#9ca3af;
+                        "
+                    >
+                        image
+                    </span>
+                `
+        }
+
+    </div>
+
+
+    <label
+        for="editarImagenProducto"
+        style="
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:7px;
+            padding:9px 14px;
+            border-radius:10px;
+            background:#f3f4f6;
+            color:#374151;
+            font-size:11px;
+            font-weight:600;
+            cursor:pointer;
+        "
+    >
+
+        <span class="material-symbols-outlined">
+            photo_camera
+        </span>
+
+        Cambiar imagen
+
+    </label>
+
+
+    <input
+        id="editarImagenProducto"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        style="
+            display:none;
+        "
+    />
+
+</div>
+
         <!-- NOMBRE -->
 
         <label
@@ -4268,6 +4363,141 @@ function abrirProductoParaEditar(
     document.body.appendChild(
         modal
     );
+
+
+    // =====================================================
+// VISTA PREVIA DE IMAGEN
+// =====================================================
+
+const inputImagen =
+    document.getElementById(
+        "editarImagenProducto"
+    );
+
+
+const previewImagen =
+    document.getElementById(
+        "previewImagenProducto"
+    );
+
+
+if (
+    inputImagen &&
+    previewImagen
+) {
+
+    inputImagen.addEventListener(
+        "change",
+        event => {
+
+            const archivo =
+                event.target.files[0];
+
+
+            if (!archivo) {
+
+                return;
+
+            }
+
+
+            // =============================================
+            // VALIDAR TIPO
+            // =============================================
+
+            if (
+                ![
+                    "image/jpeg",
+                    "image/png",
+                    "image/webp"
+                ].includes(
+                    archivo.type
+                )
+            ) {
+
+                alert(
+                    "Solo puedes seleccionar imágenes JPG, PNG o WebP."
+                );
+
+
+                inputImagen.value =
+                    "";
+
+
+                return;
+
+            }
+
+
+            // =============================================
+            // VALIDAR TAMAÑO
+            // =============================================
+
+            const maximoMB =
+                2;
+
+
+            const maximoBytes =
+                maximoMB *
+                1024 *
+                1024;
+
+
+            if (
+                archivo.size >
+                maximoBytes
+            ) {
+
+                alert(
+                    "La imagen no puede superar los 2 MB."
+                );
+
+
+                inputImagen.value =
+                    "";
+
+
+                return;
+
+            }
+
+
+            // =============================================
+            // CREAR PREVIEW
+            // =============================================
+
+            const reader =
+                new FileReader();
+
+
+            reader.onload =
+                () => {
+
+                    previewImagen.innerHTML = `
+
+                        <img
+                            src="${reader.result}"
+                            alt="Vista previa"
+                            style="
+                                width:100%;
+                                height:100%;
+                                object-fit:contain;
+                            "
+                        >
+
+                    `;
+
+                };
+
+
+            reader.readAsDataURL(
+                archivo
+            );
+
+        }
+    );
+
+}
 
 
     // =====================================================
