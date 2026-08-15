@@ -690,12 +690,11 @@ async function cargarProductos() {
                 "⚠️ No hay tiendaId para cargar productos."
             );
 
-            productos =
-                [];
+productos = [];
 
-            mostrarProductos(
-                productos
-            );
+productosFiltrados = [];
+
+renderizarProductos();
 
             return;
 
@@ -749,12 +748,11 @@ async function cargarProductos() {
             inventarios.length === 0
         ) {
 
-            productos =
-                [];
+productos = [];
 
-            mostrarProductos(
-                productos
-            );
+productosFiltrados = [];
+
+renderizarProductos();
 
             console.log(
                 "📭 La tienda no tiene productos."
@@ -1037,25 +1035,25 @@ async function cargarProductos() {
         // 5. GUARDAR RESULTADO
         // =================================================
 
-        productos =
-            productosCombinados;
+       productos =
+    productosCombinados;
 
 
-        console.log(
-            "🛒 Productos cargados:",
-            productos.length
-        );
+productosFiltrados =
+    [...productos];
 
 
-        // =================================================
-        // 6. MOSTRAR PRODUCTOS
-        // =================================================
-
-        mostrarProductos(
-            productos
-        );
+console.log(
+    "🛒 Productos cargados:",
+    productos.length
+);
 
 
+// =================================================
+// 6. MOSTRAR PRODUCTOS
+// =================================================
+
+renderizarProductos();
     }
     catch (error) {
 
@@ -1065,13 +1063,11 @@ async function cargarProductos() {
         );
 
 
-        productos =
-            [];
+productos = [];
 
+productosFiltrados = [];
 
-        mostrarProductos(
-            productos
-        );
+renderizarProductos();
 
     }
 
