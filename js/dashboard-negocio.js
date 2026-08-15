@@ -24,7 +24,8 @@ import {
     where,
     setDoc,
     addDoc,
-    serverTimestamp
+    serverTimestamp,
+    documentId
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 import {
     ref,
@@ -671,35 +672,39 @@ function actualizarDatosVisualesTienda() {
 
 
 // =========================================================
-// CARGAR PRODUCTOS DE LA TIENDA
+// CARGAR PRODUCTOS DE LA TIENDA — OPTIMIZADO
 // =========================================================
 
 async function cargarProductos() {
 
+    console.log(
+        "📦 Cargando productos de la tienda..."
+    );
+
+
     try {
 
-        console.log(
-            "📦 Cargando productos de la tienda..."
-        );
+        if (!tiendaId) {
+
+            console.warn(
+                "⚠️ No hay tiendaId para cargar productos."
+            );
+
+            productosNegocio =
+                [];
+
+            mostrarProductos(
+                productosNegocio
+            );
+
+            return;
+
+        }
 
 
-        /*
-            Estructura prevista:
-
-            inventarios
-            ├── tiendaId
-            ├── productoId
-            ├── precio
-            ├── disponible
-            └── ...
-
-            productos
-            ├── nombre
-            ├── categoria
-            ├── imagenUrl
-            └── ...
-        */
-
+        // =================================================
+        // 1. OBTENER INVENTARIOS DE LA TIENDA
+        // =================================================
 
         const inventariosQuery =
             query(
@@ -721,149 +726,334 @@ async function cargarProductos() {
             );
 
 
+        const inventarios =
+            inventariosSnap.docs.map(
+                docSnap => ({
+
+                    id:
+                        docSnap.id,
+
+                    ...docSnap.data()
+
+                })
+            );
+
+
         console.log(
             "📦 Inventarios encontrados:",
-            inventariosSnap.size
+            inventarios.length
         );
 
 
-        const lista =
-            [];
-
-
-        for (
-            const inventarioDoc
-            of inventariosSnap.docs
+        if (
+            inventarios.length === 0
         ) {
 
-            const inventario =
-                inventarioDoc.data();
+            productosNegocio =
+                [];
 
+            mostrarProductos(
+                productosNegocio
+            );
 
-            const productoId =
-                inventario.productoId;
+            console.log(
+                "📭 La tienda no tiene productos."
+            );
 
-
-            if (!productoId) {
-
-                console.warn(
-                    "⚠️ Inventario sin productoId:",
-                    inventarioDoc.id
-                );
-
-                continue;
-
-            }
-
-
-            const productoRef =
-                doc(
-                    db,
-                    "productos",
-                    productoId
-                );
-
-
-            const productoSnap =
-                await getDoc(
-                    productoRef
-                );
-
-
-            if (!productoSnap.exists()) {
-
-                console.warn(
-                    "⚠️ Producto no encontrado:",
-                    productoId
-                );
-
-                continue;
-
-            }
-
-
-            const producto =
-                productoSnap.data();
-
-
-            lista.push({
-
-                id:
-                    productoSnap.id,
-
-                inventarioId:
-                    inventarioDoc.id,
-
-                nombre:
-                    producto.nombre ||
-                    "Producto sin nombre",
-
-                nombreNormalizado:
-                    producto.nombreNormalizado ||
-                    normalizarTexto(
-                        producto.nombre ||
-                        ""
-                    ),
-
-                categoria:
-                    producto.categoria ||
-                    "otros",
-
-                descripcion:
-                    producto.descripcion ||
-                    "",
-
-                imagenUrl:
-                    producto.imagenUrl ||
-                    "",
-
-                codigo:
-                    inventario.codigoTienda ||
-                    producto.codigo ||
-                    "",
-
-                precio:
-                    Number(
-                        inventario.precio ??
-                        producto.precio ??
-                        0
-                    ),
-
-                existencia:
-                    Number(
-                        inventario.existencia ??
-                        0
-                    ),
-
-                disponible:
-                    inventario.disponible !== false,
-
-                necesitaRevision:
-                    producto.necesitaRevision === true
-
-            });
+            return;
 
         }
 
 
-        productos =
-            lista;
+        // =================================================
+        // 2. OBTENER PRODUCT IDS ÚNICOS
+        // =================================================
+
+        const productIds =
+            [
+                ...new Set(
+                    inventarios
+                        .map(
+                            inventario =>
+                                inventario.productoId
+                        )
+                        .filter(
+                            id =>
+                                !!id
+                        )
+                )
+            ];
 
 
-        productosFiltrados =
-            [...productos];
+        console.log(
+            "🔎 Productos únicos a consultar:",
+            productIds.length
+        );
+
+
+        // =================================================
+        // 3. CONSULTAR PRODUCTOS EN LOTES
+        // =================================================
+        //
+        // Firestore permite consultar múltiples IDs
+        // mediante documentId() + where("in").
+        //
+        // Usamos lotes de 30 para mantenernos dentro
+        // del límite de la consulta.
+        // =================================================
+
+        const TAMANO_LOTE =
+            30;
+
+
+        const productosPorId =
+            new Map();
+
+
+        for (
+            let i = 0;
+            i < productIds.length;
+            i += TAMANO_LOTE
+        ) {
+
+            const lote =
+                productIds.slice(
+                    i,
+                    i + TAMANO_LOTE
+                );
+
+
+            console.log(
+                `🔎 Consultando lote ${
+                    Math.floor(
+                        i / TAMANO_LOTE
+                    ) + 1
+                }...`,
+                lote.length,
+                "productos"
+            );
+
+
+            const productosQuery =
+                query(
+                    collection(
+                        db,
+                        "productos"
+                    ),
+                    where(
+                        documentId(),
+                        "in",
+                        lote
+                    )
+                );
+
+
+            const productosSnap =
+                await getDocs(
+                    productosQuery
+                );
+
+
+            productosSnap.docs.forEach(
+                docSnap => {
+
+                    productosPorId.set(
+                        docSnap.id,
+                        {
+
+                            id:
+                                docSnap.id,
+
+                            ...docSnap.data()
+
+                        }
+                    );
+
+                }
+            );
+
+        }
+
+
+        console.log(
+            "📚 Productos maestros encontrados:",
+            productosPorId.size
+        );
+
+
+        // =================================================
+        // 4. COMBINAR INVENTARIO + PRODUCTO
+        // =================================================
+
+        const productosCombinados =
+            [];
+
+
+        inventarios.forEach(
+            inventario => {
+
+                const producto =
+                    productosPorId.get(
+                        inventario.productoId
+                    );
+
+
+                // -----------------------------------------
+                // Si el producto maestro no existe
+                // -----------------------------------------
+
+                if (!producto) {
+
+                    console.warn(
+                        "⚠️ No se encontró producto maestro:",
+                        inventario.productoId
+                    );
+
+                    return;
+
+                }
+
+
+                // -----------------------------------------
+                // Crear objeto completo
+                // -----------------------------------------
+
+                productosCombinados.push({
+
+                    // =====================================
+                    // IDENTIFICADORES
+                    // =====================================
+
+                    id:
+                        producto.id,
+
+                    productoId:
+                        producto.id,
+
+                    inventarioId:
+                        inventario.id,
+
+
+                    // =====================================
+                    // PRODUCTO MAESTRO
+                    // =====================================
+
+                    nombre:
+                        producto.nombre ||
+                        "",
+
+                    nombreNormalizado:
+                        producto.nombreNormalizado ||
+                        normalizarTexto(
+                            producto.nombre ||
+                            ""
+                        ),
+
+                    codigoBarras:
+                        producto.codigoBarras ||
+                        inventario.codigoBarras ||
+                        "",
+
+                    categoria:
+                        producto.categoria ||
+                        "otros",
+
+                    departamentoOriginal:
+                        producto.departamentoOriginal ||
+                        "",
+
+                    descripcion:
+                        producto.descripcion ||
+                        "",
+
+                    imagenUrl:
+                        producto.imagenUrl ||
+                        "",
+
+
+                    // =====================================
+                    // INVENTARIO
+                    // =====================================
+
+                    codigoTienda:
+                        inventario.codigoTienda ||
+                        "",
+
+                    precio:
+                        Number(
+                            inventario.precio ||
+                            0
+                        ),
+
+                    costo:
+                        Number(
+                            inventario.costo ||
+                            0
+                        ),
+
+                    existencia:
+                        Number(
+                            inventario.existencia ||
+                            0
+                        ),
+
+                    inventarioMinimo:
+                        Number(
+                            inventario.inventarioMinimo ||
+                            0
+                        ),
+
+                    inventarioMaximo:
+                        Number(
+                            inventario.inventarioMaximo ||
+                            0
+                        ),
+
+                    tipoVenta:
+                        inventario.tipoVenta ||
+                        producto.tipoVenta ||
+                        "unidad",
+
+                    disponible:
+                        inventario.disponible ===
+                        true,
+
+
+                    // =====================================
+                    // REVISIÓN
+                    // =====================================
+
+                    necesitaRevision:
+                        producto.necesitaRevision ===
+                        true
+
+                });
+
+            }
+        );
+
+
+        // =================================================
+        // 5. GUARDAR RESULTADO
+        // =================================================
+
+        productosNegocio =
+            productosCombinados;
 
 
         console.log(
             "🛒 Productos cargados:",
-            productos.length
+            productosNegocio.length
         );
 
 
-        renderizarProductos();
+        // =================================================
+        // 6. MOSTRAR PRODUCTOS
+        // =================================================
 
-
-        actualizarEstadisticas();
+        mostrarProductos(
+            productosNegocio
+        );
 
 
     }
@@ -874,8 +1064,13 @@ async function cargarProductos() {
             error
         );
 
-        mostrarErrorProductos(
-            error
+
+        productosNegocio =
+            [];
+
+
+        mostrarProductos(
+            productosNegocio
         );
 
     }
