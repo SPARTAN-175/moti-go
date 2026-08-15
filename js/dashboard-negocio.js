@@ -1054,6 +1054,9 @@ console.log(
 // =================================================
 
 renderizarProductos();
+
+actualizarEstadisticas();
+        
     }
     catch (error) {
 
