@@ -24,12 +24,13 @@ import {
     where,
     setDoc,
     addDoc,
-    ref,
-    uploadBytes,
-    getDownloadURL,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
+import {
+    ref,
+    uploadBytes,
+    getDownloadURL
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
 
 // =========================================================
 // ESTADO GLOBAL
