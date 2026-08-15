@@ -4,7 +4,11 @@
 // CATÁLOGO + IMPORTACIÓN
 // =========================================================
 
-import { auth, db } from "./firebase-config.js";
+import {
+    auth,
+    db,
+    storage
+} from "./firebase-config.js";
 
 import {
     onAuthStateChanged,
@@ -20,6 +24,9 @@ import {
     where,
     setDoc,
     addDoc,
+    ref,
+    uploadBytes,
+    getDownloadURL
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
@@ -4702,6 +4709,18 @@ if (!productoId) {
             )
             .checked;
 
+    const inputImagen =
+    document.getElementById(
+        "editarImagenProducto"
+    );
+
+const archivoImagen =
+    inputImagen &&
+    inputImagen.files &&
+    inputImagen.files[0]
+        ? inputImagen.files[0]
+        : null;
+
 
     // =====================================================
     // VALIDACIONES
@@ -4781,6 +4800,56 @@ if (!productoId) {
             "Guardando...";
 
 
+
+
+
+// =====================================================
+// SUBIR IMAGEN SI EL USUARIO SELECCIONÓ UNA
+// =====================================================
+
+let imagenUrl =
+    producto.imagenUrl || "";
+
+
+if (archivoImagen) {
+
+    console.log(
+        "📸 Subiendo imagen:",
+        archivoImagen.name
+    );
+
+
+    const rutaImagen =
+        `productos/${productoId}/imagen`;
+
+
+    const referenciaImagen =
+        ref(
+            storage,
+            rutaImagen
+        );
+
+
+    await uploadBytes(
+        referenciaImagen,
+        archivoImagen
+    );
+
+
+    imagenUrl =
+        await getDownloadURL(
+            referenciaImagen
+        );
+
+
+    console.log(
+        "✅ Imagen subida:",
+        imagenUrl
+    );
+
+}
+
+        
         // =================================================
         // ACTUALIZAR PRODUCTO MAESTRO
         // =================================================
@@ -4803,6 +4872,7 @@ if (!productoId) {
                     ),
 
                 categoria,
+                imagenUrl,
 
                 necesitaRevision:
                     precio <= 0,
