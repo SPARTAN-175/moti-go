@@ -3800,37 +3800,868 @@ function abrirProductoParaEditar(
     producto
 ) {
 
-    /*
-        Por ahora no abrimos otra página.
-
-        Más adelante podemos convertir esto
-        en una vista interna:
-
-        #viewEditarProducto
-
-        para modificar:
-
-        - nombre
-        - precio
-        - categoría
-        - existencia
-        - fotografía
-        - disponibilidad
-    */
-
-
     console.log(
-        "✏️ Preparado para editar:",
+        "✏️ Editando producto:",
         producto
     );
 
 
-    alert(
-        `Producto seleccionado:\n\n${producto.nombre}\n${formatearPrecio(producto.precio)}`
+    // =====================================================
+    // CREAR MODAL
+    // =====================================================
+
+    const modalExistente =
+        document.getElementById(
+            "modalEditarProducto"
+        );
+
+
+    if (modalExistente) {
+
+        modalExistente.remove();
+
+    }
+
+
+    const modal =
+        document.createElement(
+            "div"
+        );
+
+
+    modal.id =
+        "modalEditarProducto";
+
+
+    modal.style.position =
+        "fixed";
+
+    modal.style.inset =
+        "0";
+
+    modal.style.background =
+        "rgba(0,0,0,0.45)";
+
+    modal.style.display =
+        "flex";
+
+    modal.style.alignItems =
+        "center";
+
+    modal.style.justifyContent =
+        "center";
+
+    modal.style.zIndex =
+        "9999";
+
+    modal.style.padding =
+        "20px";
+
+
+    // =====================================================
+    // CONTENEDOR
+    // =====================================================
+
+    const contenido =
+        document.createElement(
+            "div"
+        );
+
+
+    contenido.style.width =
+        "100%";
+
+    contenido.style.maxWidth =
+        "430px";
+
+    contenido.style.maxHeight =
+        "90vh";
+
+    contenido.style.overflowY =
+        "auto";
+
+    contenido.style.background =
+        "#ffffff";
+
+    contenido.style.borderRadius =
+        "18px";
+
+    contenido.style.padding =
+        "22px";
+
+    contenido.style.boxShadow =
+        "0 20px 50px rgba(0,0,0,0.20)";
+
+
+    // =====================================================
+    // TÍTULO
+    // =====================================================
+
+    contenido.innerHTML = `
+
+        <div
+            style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                margin-bottom:18px;
+            "
+        >
+
+            <div>
+
+                <div
+                    style="
+                        font-size:18px;
+                        font-weight:700;
+                        color:#111827;
+                    "
+                >
+                    Editar producto
+                </div>
+
+                <div
+                    style="
+                        margin-top:4px;
+                        font-size:10px;
+                        color:#9ca3af;
+                    "
+                >
+                    GTIN:
+                    ${escapeHtml(
+                        producto.codigoBarras ||
+                        "Sin GTIN"
+                    )}
+                </div>
+
+            </div>
+
+
+            <button
+                id="btnCerrarEditarProducto"
+                type="button"
+                style="
+                    border:0;
+                    background:#f3f4f6;
+                    width:34px;
+                    height:34px;
+                    border-radius:50%;
+                    cursor:pointer;
+                    font-size:18px;
+                "
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- NOMBRE -->
+
+        <label
+            style="
+                display:block;
+                margin-bottom:6px;
+                font-size:11px;
+                font-weight:600;
+                color:#374151;
+            "
+        >
+            Nombre
+        </label>
+
+        <input
+            id="editarNombreProducto"
+            type="text"
+            value="${escapeHtml(
+                producto.nombre || ""
+            )}"
+            style="
+                width:100%;
+                box-sizing:border-box;
+                padding:12px;
+                border:1px solid #d1d5db;
+                border-radius:10px;
+                margin-bottom:15px;
+                font-size:13px;
+            "
+        />
+
+
+        <!-- CATEGORÍA -->
+
+        <label
+            style="
+                display:block;
+                margin-bottom:6px;
+                font-size:11px;
+                font-weight:600;
+                color:#374151;
+            "
+        >
+            Categoría
+        </label>
+
+        <select
+            id="editarCategoriaProducto"
+            style="
+                width:100%;
+                box-sizing:border-box;
+                padding:12px;
+                border:1px solid #d1d5db;
+                border-radius:10px;
+                margin-bottom:15px;
+                font-size:13px;
+                background:#fff;
+            "
+        >
+
+            <option value="abarrotes">
+                Abarrotes
+            </option>
+
+            <option value="bebidas">
+                Bebidas
+            </option>
+
+            <option value="limpieza">
+                Limpieza
+            </option>
+
+            <option value="higiene">
+                Higiene
+            </option>
+
+            <option value="botanas">
+                Botanas
+            </option>
+
+            <option value="lacteos">
+                Lácteos
+            </option>
+
+            <option value="carnes">
+                Carnes
+            </option>
+
+            <option value="frutas">
+                Frutas y verduras
+            </option>
+
+            <option value="panaderia">
+                Panadería
+            </option>
+
+            <option value="congelados">
+                Congelados
+            </option>
+
+            <option value="farmacia">
+                Farmacia
+            </option>
+
+            <option value="otros">
+                Otros
+            </option>
+
+        </select>
+
+
+        <!-- PRECIO -->
+
+        <label
+            style="
+                display:block;
+                margin-bottom:6px;
+                font-size:11px;
+                font-weight:600;
+                color:#374151;
+            "
+        >
+            Precio de venta
+        </label>
+
+        <input
+            id="editarPrecioProducto"
+            type="number"
+            min="0"
+            step="0.01"
+            value="${Number(
+                producto.precio || 0
+            )}"
+            style="
+                width:100%;
+                box-sizing:border-box;
+                padding:12px;
+                border:1px solid #d1d5db;
+                border-radius:10px;
+                margin-bottom:15px;
+                font-size:13px;
+            "
+        />
+
+
+        <!-- EXISTENCIA -->
+
+        <label
+            style="
+                display:block;
+                margin-bottom:6px;
+                font-size:11px;
+                font-weight:600;
+                color:#374151;
+            "
+        >
+            Existencia
+        </label>
+
+        <input
+            id="editarExistenciaProducto"
+            type="number"
+            min="0"
+            step="1"
+            value="${Number(
+                producto.existencia || 0
+            )}"
+            style="
+                width:100%;
+                box-sizing:border-box;
+                padding:12px;
+                border:1px solid #d1d5db;
+                border-radius:10px;
+                margin-bottom:15px;
+                font-size:13px;
+            "
+        />
+
+
+        <!-- TIPO DE VENTA -->
+
+        <label
+            style="
+                display:block;
+                margin-bottom:6px;
+                font-size:11px;
+                font-weight:600;
+                color:#374151;
+            "
+        >
+            Tipo de venta
+        </label>
+
+        <select
+            id="editarTipoVentaProducto"
+            style="
+                width:100%;
+                box-sizing:border-box;
+                padding:12px;
+                border:1px solid #d1d5db;
+                border-radius:10px;
+                margin-bottom:15px;
+                font-size:13px;
+                background:#fff;
+            "
+        >
+
+            <option value="unidad">
+                Por unidad
+            </option>
+
+            <option value="peso">
+                Por peso
+            </option>
+
+            <option value="litro">
+                Por litro
+            </option>
+
+            <option value="pieza">
+                Por pieza
+            </option>
+
+        </select>
+
+
+        <!-- DISPONIBILIDAD -->
+
+        <label
+            style="
+                display:flex;
+                align-items:center;
+                gap:9px;
+                margin-bottom:20px;
+                font-size:12px;
+                color:#374151;
+                cursor:pointer;
+            "
+        >
+
+            <input
+                id="editarDisponibleProducto"
+                type="checkbox"
+                ${
+                    producto.disponible
+                        ? "checked"
+                        : ""
+                }
+            />
+
+            Producto disponible para clientes
+
+        </label>
+
+
+        <!-- BOTONES -->
+
+        <div
+            style="
+                display:flex;
+                gap:10px;
+            "
+        >
+
+            <button
+                id="btnCancelarEditarProducto"
+                type="button"
+                style="
+                    flex:1;
+                    padding:12px;
+                    border:0;
+                    border-radius:10px;
+                    background:#f3f4f6;
+                    color:#374151;
+                    font-weight:600;
+                    cursor:pointer;
+                "
+            >
+                Cancelar
+            </button>
+
+
+            <button
+                id="btnGuardarEditarProducto"
+                type="button"
+                style="
+                    flex:1;
+                    padding:12px;
+                    border:0;
+                    border-radius:10px;
+                    background:#111827;
+                    color:#fff;
+                    font-weight:600;
+                    cursor:pointer;
+                "
+            >
+                Guardar cambios
+            </button>
+
+        </div>
+
+    `;
+
+
+    modal.appendChild(
+        contenido
     );
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    // =====================================================
+    // ESTABLECER CATEGORÍA
+    // =====================================================
+
+    const categoria =
+        document.getElementById(
+            "editarCategoriaProducto"
+        );
+
+
+    if (categoria) {
+
+        categoria.value =
+            producto.categoria ||
+            "otros";
+
+    }
+
+
+    // =====================================================
+    // ESTABLECER TIPO DE VENTA
+    // =====================================================
+
+    const tipoVenta =
+        document.getElementById(
+            "editarTipoVentaProducto"
+        );
+
+
+    if (tipoVenta) {
+
+        tipoVenta.value =
+            producto.tipoVenta ||
+            "unidad";
+
+    }
+
+
+    // =====================================================
+    // CERRAR MODAL
+    // =====================================================
+
+    const cerrar =
+        () => {
+
+            modal.remove();
+
+        };
+
+
+    document
+        .getElementById(
+            "btnCerrarEditarProducto"
+        )
+        .addEventListener(
+            "click",
+            cerrar
+        );
+
+
+    document
+        .getElementById(
+            "btnCancelarEditarProducto"
+        )
+        .addEventListener(
+            "click",
+            cerrar
+        );
+
+
+    modal.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target ===
+                modal
+            ) {
+
+                cerrar();
+
+            }
+
+        }
+    );
+
+
+    // =====================================================
+    // GUARDAR
+    // =====================================================
+
+    document
+        .getElementById(
+            "btnGuardarEditarProducto"
+        )
+        .addEventListener(
+            "click",
+            async () => {
+
+                await guardarEdicionProducto(
+                    producto,
+                    cerrar
+                );
+
+            }
+        );
 
 }
 
+
+
+// =========================================================
+// GUARDAR EDICIÓN DE PRODUCTO
+// =========================================================
+
+async function guardarEdicionProducto(
+    producto,
+    cerrarModal
+) {
+
+    const btnGuardar =
+        document.getElementById(
+            "btnGuardarEditarProducto"
+        );
+
+
+    // =====================================================
+    // OBTENER VALORES
+    // =====================================================
+
+    const nombre =
+        document
+            .getElementById(
+                "editarNombreProducto"
+            )
+            .value
+            .trim();
+
+
+    const categoria =
+        document
+            .getElementById(
+                "editarCategoriaProducto"
+            )
+            .value;
+
+
+    const precio =
+        Number(
+            document
+                .getElementById(
+                    "editarPrecioProducto"
+                )
+                .value
+        );
+
+
+    const existencia =
+        Number(
+            document
+                .getElementById(
+                    "editarExistenciaProducto"
+                )
+                .value
+        );
+
+
+    const tipoVenta =
+        document
+            .getElementById(
+                "editarTipoVentaProducto"
+            )
+            .value;
+
+
+    const disponible =
+        document
+            .getElementById(
+                "editarDisponibleProducto"
+            )
+            .checked;
+
+
+    // =====================================================
+    // VALIDACIONES
+    // =====================================================
+
+    if (!nombre) {
+
+        alert(
+            "El nombre del producto es obligatorio."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !Number.isFinite(
+            precio
+        ) ||
+        precio < 0
+    ) {
+
+        alert(
+            "Ingresa un precio válido."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !Number.isFinite(
+            existencia
+        ) ||
+        existencia < 0
+    ) {
+
+        alert(
+            "Ingresa una existencia válida."
+        );
+
+        return;
+
+    }
+
+
+    if (!tiendaId) {
+
+        alert(
+            "No se encontró la tienda asociada."
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        btnGuardar.disabled =
+            true;
+
+
+        btnGuardar.textContent =
+            "Guardando...";
+
+
+        // =================================================
+        // ACTUALIZAR PRODUCTO MAESTRO
+        // =================================================
+
+        await setDoc(
+
+            doc(
+                db,
+                "productos",
+                producto.productoId
+            ),
+
+            {
+
+                nombre,
+
+                nombreNormalizado:
+                    normalizarTexto(
+                        nombre
+                    ),
+
+                categoria,
+
+                necesitaRevision:
+                    precio <= 0,
+
+                actualizadoEn:
+                    serverTimestamp()
+
+            },
+
+            {
+                merge: true
+            }
+
+        );
+
+
+        // =================================================
+        // ACTUALIZAR INVENTARIO DE ESTA TIENDA
+        // =================================================
+
+        const inventarioId =
+            producto.inventarioId ||
+            `${tiendaId}_${producto.productoId}`;
+
+
+        await setDoc(
+
+            doc(
+                db,
+                "inventarios",
+                inventarioId
+            ),
+
+            {
+
+                tiendaId,
+
+                productoId:
+                    producto.productoId,
+
+                precio,
+
+                existencia,
+
+                tipoVenta,
+
+                disponible:
+                    disponible &&
+                    existencia > 0,
+
+                actualizadoEn:
+                    serverTimestamp()
+
+            },
+
+            {
+                merge: true
+            }
+
+        );
+
+
+        console.log(
+            "✅ Producto actualizado:",
+            producto.productoId
+        );
+
+
+        // =================================================
+        // CERRAR
+        // =================================================
+
+        cerrarModal();
+
+
+        // =================================================
+        // RECARGAR CATÁLOGO
+        // =================================================
+
+        await cargarProductos();
+
+
+        // =================================================
+        // MENSAJE
+        // =================================================
+
+        console.log(
+            "✅ Catálogo actualizado correctamente."
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "❌ Error actualizando producto:",
+            error
+        );
+
+
+        alert(
+            "No se pudo actualizar el producto. Revisa la consola."
+        );
+
+    }
+    finally {
+
+        if (btnGuardar) {
+
+            btnGuardar.disabled =
+                false;
+
+            btnGuardar.textContent =
+                "Guardar cambios";
+
+        }
+
+    }
+
+}
 
 // =========================================================
 // PERFIL
