@@ -1833,16 +1833,12 @@ async function analizarFilas(
     filas
 ) {
 
-    console.log(
-        "🔍 Analizando productos..."
-    );
+    const resultado = [];
 
 
-    /*
-        Cargamos productos maestros existentes
-        para poder detectar coincidencias.
-    */
-
+    // =====================================================
+    // 1. CARGAR PRODUCTOS MAESTROS EXISTENTES
+    // =====================================================
 
     const productosSnap =
         await getDocs(
@@ -1867,19 +1863,248 @@ async function analizarFilas(
 
 
     console.log(
-        "📚 Productos maestros:",
+        "📚 Productos maestros encontrados:",
         existentes.length
     );
 
 
-    const resultado =
-        [];
+    // =====================================================
+    // 2. CARGAR INVENTARIOS DE ESTA TIENDA
+    // =====================================================
 
+    let inventariosTienda = [];
+
+
+    if (tiendaId) {
+
+        const inventariosQuery =
+            query(
+                collection(
+                    db,
+                    "inventarios"
+                ),
+                where(
+                    "tiendaId",
+                    "==",
+                    tiendaId
+                )
+            );
+
+
+        const inventariosSnap =
+            await getDocs(
+                inventariosQuery
+            );
+
+
+        inventariosTienda =
+            inventariosSnap.docs.map(
+                docSnap => ({
+
+                    id:
+                        docSnap.id,
+
+                    ...docSnap.data()
+
+                })
+            );
+
+
+        console.log(
+            "🏪 Inventarios de esta tienda:",
+            inventariosTienda.length
+        );
+
+    }
+
+
+    // =====================================================
+    // 3. CREAR ÍNDICES PARA BÚSQUEDA RÁPIDA
+    // =====================================================
+
+    const productosPorGTIN =
+        new Map();
+
+
+    const productosPorNombre =
+        new Map();
+
+
+    const inventariosPorCodigo =
+        new Map();
+
+
+    // -----------------------------------------------------
+    // PRODUCTOS POR GTIN
+    // -----------------------------------------------------
+
+    existentes.forEach(
+        producto => {
+
+            const gtin =
+                normalizarGTIN(
+                    producto.codigoBarras
+                );
+
+
+            if (
+                gtin &&
+                !productosPorGTIN.has(
+                    gtin
+                )
+            ) {
+
+                productosPorGTIN.set(
+                    gtin,
+                    producto
+                );
+
+            }
+
+
+            // ---------------------------------------------
+            // RESPALDO POR NOMBRE
+            // ---------------------------------------------
+
+            const nombreNormalizado =
+                producto.nombreNormalizado ||
+                normalizarTexto(
+                    producto.nombre ||
+                    ""
+                );
+
+
+            if (
+                nombreNormalizado &&
+                !productosPorNombre.has(
+                    nombreNormalizado
+                )
+            ) {
+
+                productosPorNombre.set(
+                    nombreNormalizado,
+                    producto
+                );
+
+            }
+
+        }
+    );
+
+
+    // -----------------------------------------------------
+    // INVENTARIOS POR CÓDIGO DE TIENDA
+    // -----------------------------------------------------
+
+    inventariosTienda.forEach(
+        inventario => {
+
+            const codigo =
+                normalizarGTIN(
+                    inventario.codigoTienda
+                );
+
+
+            if (
+                codigo &&
+                !inventariosPorCodigo.has(
+                    codigo
+                )
+            ) {
+
+                inventariosPorCodigo.set(
+                    codigo,
+                    inventario
+                );
+
+            }
+
+        }
+    );
+
+
+    // =====================================================
+    // 4. DETECTAR GTIN DUPLICADOS DENTRO DEL EXCEL
+    // =====================================================
+
+    const gtinsArchivo =
+        new Map();
+
+
+    filas.forEach(
+        fila => {
+
+            const codigo =
+                obtenerValor(
+                    fila,
+                    [
+                        "Código",
+                        "Codigo",
+                        "codigo",
+                        "GTIN",
+                        "gtin",
+                        "EAN",
+                        "EAN13",
+                        "EAN-13",
+                        "Código de barras",
+                        "Codigo de barras",
+                        "CodigoBarras",
+                        "codigoBarras"
+                    ]
+                );
+
+
+            const gtin =
+                normalizarGTIN(
+                    codigo
+                );
+
+
+            if (!gtin) {
+                return;
+            }
+
+
+            if (
+                gtinsArchivo.has(
+                    gtin
+                )
+            ) {
+
+                gtinsArchivo
+                    .get(
+                        gtin
+                    )
+                    .push(
+                        fila
+                    );
+
+            }
+            else {
+
+                gtinsArchivo.set(
+                    gtin,
+                    [fila]
+                );
+
+            }
+
+        }
+    );
+
+
+    // =====================================================
+    // 5. ANALIZAR CADA FILA
+    // =====================================================
 
     for (
         const fila
         of filas
     ) {
+
+        // -------------------------------------------------
+        // NOMBRE
+        // -------------------------------------------------
 
         const nombre =
             obtenerValor(
@@ -1890,56 +2115,14 @@ async function analizarFilas(
                     "Nombre",
                     "nombre",
                     "Descripción",
-                    "descripcion"
+                    "Descripcion"
                 ]
             );
 
 
-        if (!nombre) {
-
-            continue;
-
-        }
-
-
-        const precio =
-            convertirNumero(
-                obtenerValor(
-                    fila,
-                    [
-                        "P. Venta",
-                        "P.Venta",
-                        "Precio",
-                        "precio"
-                    ]
-                )
-            );
-
-
-        const costo =
-            convertirNumero(
-                obtenerValor(
-                    fila,
-                    [
-                        "P. Costo",
-                        "P.Costo",
-                        "Costo"
-                    ]
-                )
-            );
-
-
-        const mayoreo =
-            convertirNumero(
-                obtenerValor(
-                    fila,
-                    [
-                        "P. Mayoreo",
-                        "P.Mayoreo"
-                    ]
-                )
-            );
-
+        // -------------------------------------------------
+        // DEPARTAMENTO
+        // -------------------------------------------------
 
         const departamento =
             obtenerValor(
@@ -1948,10 +2131,70 @@ async function analizarFilas(
                     "Departamento",
                     "departamento",
                     "Categoría",
+                    "Categoria",
                     "categoria"
                 ]
             );
 
+
+        // -------------------------------------------------
+        // PRECIO DE VENTA
+        // -------------------------------------------------
+
+        const precio =
+            convertirNumero(
+                obtenerValor(
+                    fila,
+                    [
+                        "P. Venta",
+                        "P.Venta",
+                        "Precio Venta",
+                        "Precio",
+                        "precio"
+                    ]
+                )
+            );
+
+
+        // -------------------------------------------------
+        // COSTO
+        // -------------------------------------------------
+
+        const costo =
+            convertirNumero(
+                obtenerValor(
+                    fila,
+                    [
+                        "P. Costo",
+                        "P.Costo",
+                        "Costo",
+                        "costo"
+                    ]
+                )
+            );
+
+
+        // -------------------------------------------------
+        // MAYOREO
+        // -------------------------------------------------
+
+        const mayoreo =
+            convertirNumero(
+                obtenerValor(
+                    fila,
+                    [
+                        "P. Mayoreo",
+                        "P.Mayoreo",
+                        "Mayoreo",
+                        "precioMayoreo"
+                    ]
+                )
+            );
+
+
+        // -------------------------------------------------
+        // EXISTENCIA
+        // -------------------------------------------------
 
         const existencia =
             convertirNumero(
@@ -1967,6 +2210,10 @@ async function analizarFilas(
             );
 
 
+        // -------------------------------------------------
+        // INVENTARIO MÍNIMO
+        // -------------------------------------------------
+
         const minimo =
             convertirNumero(
                 obtenerValor(
@@ -1974,11 +2221,17 @@ async function analizarFilas(
                     [
                         "Inv. Mínimo",
                         "Inv.Minimo",
-                        "Minimo"
+                        "Inv. Mínimo",
+                        "Minimo",
+                        "Mínimo"
                     ]
                 )
             );
 
+
+        // -------------------------------------------------
+        // INVENTARIO MÁXIMO
+        // -------------------------------------------------
 
         const maximo =
             convertirNumero(
@@ -1987,11 +2240,17 @@ async function analizarFilas(
                     [
                         "Inv. Máximo",
                         "Inv.Maximo",
-                        "Maximo"
+                        "Inv. Máximo",
+                        "Maximo",
+                        "Máximo"
                     ]
                 )
             );
 
+
+        // -------------------------------------------------
+        // TIPO DE VENTA
+        // -------------------------------------------------
 
         const tipoVenta =
             obtenerValor(
@@ -2004,6 +2263,10 @@ async function analizarFilas(
             );
 
 
+        // -------------------------------------------------
+        // CÓDIGO / GTIN
+        // -------------------------------------------------
+
         const codigo =
             obtenerValor(
                 fila,
@@ -2011,10 +2274,28 @@ async function analizarFilas(
                     "Código",
                     "Codigo",
                     "codigo",
-                    "Clave"
+                    "GTIN",
+                    "gtin",
+                    "EAN",
+                    "EAN13",
+                    "EAN-13",
+                    "Código de barras",
+                    "Codigo de barras",
+                    "CodigoBarras",
+                    "codigoBarras"
                 ]
             );
 
+
+        const gtin =
+            normalizarGTIN(
+                codigo
+            );
+
+
+        // -------------------------------------------------
+        // NOMBRE NORMALIZADO
+        // -------------------------------------------------
 
         const nombreNormalizado =
             normalizarTexto(
@@ -2022,28 +2303,176 @@ async function analizarFilas(
             );
 
 
-        const productoExistente =
-            existentes.find(
-                producto => {
+        // =================================================
+        // BUSCAR PRODUCTO EXISTENTE
+        // =================================================
 
-                    const existenteNormalizado =
-
-                        producto.nombreNormalizado ||
-
-                        normalizarTexto(
-                            producto.nombre ||
-                            ""
-                        );
+        let productoExistente =
+            null;
 
 
-                    return (
-                        existenteNormalizado ===
-                        nombreNormalizado
+        let metodoCoincidencia =
+            "ninguno";
+
+
+        // -------------------------------------------------
+        // PRIORIDAD 1: GTIN
+        // -------------------------------------------------
+
+        if (gtin) {
+
+            productoExistente =
+                productosPorGTIN.get(
+                    gtin
+                );
+
+
+            if (
+                productoExistente
+            ) {
+
+                metodoCoincidencia =
+                    "gtin";
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // PRIORIDAD 2:
+        // INVENTARIO DE ESTA TIENDA
+        // -------------------------------------------------
+
+        if (
+            !productoExistente &&
+            gtin
+        ) {
+
+            const inventarioExistente =
+                inventariosPorCodigo.get(
+                    gtin
+                );
+
+
+            if (
+                inventarioExistente &&
+                inventarioExistente.productoId
+            ) {
+
+                productoExistente =
+                    existentes.find(
+                        producto =>
+                            producto.id ===
+                            inventarioExistente.productoId
                     );
 
-                }
-            );
 
+                if (
+                    productoExistente
+                ) {
+
+                    metodoCoincidencia =
+                        "codigo_tienda";
+
+                }
+
+            }
+
+        }
+
+
+        // -------------------------------------------------
+        // PRIORIDAD 3:
+        // NOMBRE COMO RESPALDO
+        // -------------------------------------------------
+
+        if (
+            !productoExistente &&
+            nombreNormalizado
+        ) {
+
+            productoExistente =
+                productosPorNombre.get(
+                    nombreNormalizado
+                );
+
+
+            if (
+                productoExistente
+            ) {
+
+                metodoCoincidencia =
+                    "nombre";
+
+            }
+
+        }
+
+
+        // =================================================
+        // DUPLICADO DENTRO DEL MISMO EXCEL
+        // =================================================
+
+        let duplicadoArchivo =
+            false;
+
+
+        if (gtin) {
+
+            const coincidencias =
+                gtinsArchivo.get(
+                    gtin
+                );
+
+
+            if (
+                coincidencias &&
+                coincidencias.length > 1
+            ) {
+
+                duplicadoArchivo =
+                    true;
+
+            }
+
+        }
+
+
+        // =================================================
+        // DETERMINAR ESTADO
+        // =================================================
+
+        let estado;
+
+
+        if (
+            duplicadoArchivo
+        ) {
+
+            estado =
+                "duplicado";
+
+        }
+        else if (
+            productoExistente
+        ) {
+
+            estado =
+                "existente";
+
+        }
+        else {
+
+            estado =
+                "nuevo";
+
+        }
+
+
+        // =================================================
+        // GUARDAR RESULTADO
+        // =================================================
 
         resultado.push({
 
@@ -2054,6 +2483,9 @@ async function analizarFilas(
 
             codigoTienda:
                 codigo,
+
+            codigoBarras:
+                gtin,
 
             precio,
 
@@ -2087,14 +2519,35 @@ async function analizarFilas(
                     ? productoExistente.id
                     : null,
 
-            estado:
-                productoExistente
-                    ? "existente"
-                    : "nuevo"
+            metodoCoincidencia,
+
+            estado
 
         });
 
     }
+
+
+    // =====================================================
+    // RESUMEN EN CONSOLA
+    // =====================================================
+
+    console.log(
+        "🔎 Productos maestros indexados por GTIN:",
+        productosPorGTIN.size
+    );
+
+
+    console.log(
+        "🔎 Productos indexados por nombre:",
+        productosPorNombre.size
+    );
+
+
+    console.log(
+        "🏪 Inventarios de la tienda:",
+        inventariosTienda.length
+    );
 
 
     return resultado;
@@ -2116,6 +2569,10 @@ function mostrarResultadoImportacion(
         );
 
 
+    // =====================================================
+    // CONTADORES
+    // =====================================================
+
     const total =
         resultado.length;
 
@@ -2136,6 +2593,14 @@ function mostrarResultadoImportacion(
         ).length;
 
 
+    const duplicados =
+        resultado.filter(
+            item =>
+                item.estado ===
+                "duplicado"
+        ).length;
+
+
     const revision =
         resultado.filter(
             item =>
@@ -2143,6 +2608,10 @@ function mostrarResultadoImportacion(
                 item.precio <= 0
         ).length;
 
+
+    // =====================================================
+    // MOSTRAR PANEL DE RESULTADOS
+    // =====================================================
 
     if (results) {
 
@@ -2203,10 +2672,15 @@ function mostrarResultadoImportacion(
     if (reviewElement) {
 
         reviewElement.textContent =
-            revision;
+            revision +
+            duplicados;
 
     }
 
+
+    // =====================================================
+    // VISTA PREVIA
+    // =====================================================
 
     const preview =
         document.getElementById(
@@ -2214,7 +2688,11 @@ function mostrarResultadoImportacion(
         );
 
 
-    if (!preview) return;
+    if (!preview) {
+
+        return;
+
+    }
 
 
     preview.innerHTML =
@@ -2222,7 +2700,10 @@ function mostrarResultadoImportacion(
 
 
     resultado
-        .slice(0, 20)
+        .slice(
+            0,
+            20
+        )
         .forEach(
             producto => {
 
@@ -2240,6 +2721,50 @@ function mostrarResultadoImportacion(
                     "1px solid #f0f1f3";
 
 
+                // -----------------------------------------
+                // TEXTO DEL ESTADO
+                // -----------------------------------------
+
+                let estadoTexto =
+                    "Nuevo";
+
+
+                if (
+                    producto.estado ===
+                    "existente"
+                ) {
+
+                    estadoTexto =
+                        `Existente · ${producto.metodoCoincidencia}`;
+
+                }
+
+
+                if (
+                    producto.estado ===
+                    "duplicado"
+                ) {
+
+                    estadoTexto =
+                        "⚠️ GTIN DUPLICADO";
+
+                }
+
+
+                if (
+                    !producto.codigoBarras
+                ) {
+
+                    estadoTexto +=
+                        " · Sin GTIN";
+
+                }
+
+
+                // -----------------------------------------
+                // ELEMENTO
+                // -----------------------------------------
+
                 item.innerHTML = `
 
                     <strong>
@@ -2256,6 +2781,16 @@ function mostrarResultadoImportacion(
                         "
                     >
 
+                        ${
+                            producto.codigoBarras
+                                ? `GTIN: ${escapeHtml(
+                                    producto.codigoBarras
+                                )}`
+                                : "Sin GTIN"
+                        }
+
+                        ·
+
                         ${formatearPrecio(
                             producto.precio
                         )}
@@ -2270,12 +2805,7 @@ function mostrarResultadoImportacion(
 
                         ·
 
-                        ${
-                            producto.estado ===
-                            "nuevo"
-                                ? "Nuevo"
-                                : "Existente"
-                        }
+                        ${estadoTexto}
 
                     </div>
 
@@ -2290,7 +2820,14 @@ function mostrarResultadoImportacion(
         );
 
 
-    if (resultado.length > 20) {
+    // =====================================================
+    // MENSAJE SI HAY MÁS DE 20
+    // =====================================================
+
+    if (
+        resultado.length >
+        20
+    ) {
 
         const more =
             document.createElement(
@@ -2325,6 +2862,10 @@ function mostrarResultadoImportacion(
     }
 
 
+    // =====================================================
+    // BOTÓN DE IMPORTAR
+    // =====================================================
+
     const confirmButton =
         document.getElementById(
             "businessConfirmImport"
@@ -2333,25 +2874,192 @@ function mostrarResultadoImportacion(
 
     if (confirmButton) {
 
+        // -------------------------------------------------
+        // NO PERMITIR IMPORTAR SI HAY GTIN DUPLICADOS
+        // -------------------------------------------------
+
         confirmButton.disabled =
-            resultado.length === 0;
+            resultado.length === 0 ||
+            duplicados > 0;
 
     }
 
 
+    // =====================================================
+    // MENSAJE VISUAL SI HAY DUPLICADOS
+    // =====================================================
+
+    if (
+        duplicados > 0
+    ) {
+
+        const mensaje =
+            document.createElement(
+                "div"
+            );
+
+
+        mensaje.style.marginTop =
+            "14px";
+
+
+        mensaje.style.padding =
+            "12px";
+
+
+        mensaje.style.borderRadius =
+            "10px";
+
+
+        mensaje.style.background =
+            "#fff3f3";
+
+
+        mensaje.style.color =
+            "#b42318";
+
+
+        mensaje.style.fontSize =
+            "11px";
+
+
+        mensaje.style.lineHeight =
+            "1.5";
+
+
+        mensaje.innerHTML = `
+
+            <strong>
+                ⚠️ No se puede importar todavía
+            </strong>
+
+            <br>
+
+            Se encontraron
+            <strong>
+                ${duplicados}
+            </strong>
+            filas con GTIN duplicados
+            dentro del archivo.
+
+            <br><br>
+
+            Corrige esos códigos en el Excel
+            antes de continuar.
+
+        `;
+
+
+        preview.appendChild(
+            mensaje
+        );
+
+    }
+
+
+    // =====================================================
+    // MENSAJE SI HAY PRODUCTOS SIN GTIN
+    // =====================================================
+
+    const sinGTIN =
+        resultado.filter(
+            item =>
+                !item.codigoBarras
+        ).length;
+
+
+    if (
+        sinGTIN > 0
+    ) {
+
+        const mensajeGTIN =
+            document.createElement(
+                "div"
+            );
+
+
+        mensajeGTIN.style.marginTop =
+            "10px";
+
+
+        mensajeGTIN.style.padding =
+            "10px";
+
+
+        mensajeGTIN.style.borderRadius =
+            "10px";
+
+
+        mensajeGTIN.style.background =
+            "#fff8e8";
+
+
+        mensajeGTIN.style.color =
+            "#8a5a00";
+
+
+        mensajeGTIN.style.fontSize =
+            "10px";
+
+
+        mensajeGTIN.innerHTML = `
+
+            ⚠️
+            <strong>
+                ${sinGTIN}
+            </strong>
+            productos no tienen GTIN.
+
+            <br>
+
+            MOTI utilizará el nombre como
+            respaldo para identificarlos.
+
+        `;
+
+
+        preview.appendChild(
+            mensajeGTIN
+        );
+
+    }
+
+
+    // =====================================================
+    // SCROLL
+    // =====================================================
+
     results.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
+
+        behavior:
+            "smooth",
+
+        block:
+            "start"
+
     });
 
 
+    // =====================================================
+    // CONSOLA
+    // =====================================================
+
     console.log(
-        "📊 Resultado:",
+        "📊 Resultado del análisis:",
         {
+
             total,
+
             existentes,
+
             nuevos,
+
+            duplicados,
+
+            sinGTIN,
+
             revision
+
         }
     );
 
@@ -2378,21 +3086,66 @@ if (confirmImport) {
 }
 
 
+// =========================================================
+// IMPORTAR PRODUCTOS
+// =========================================================
+
 async function importarProductos() {
 
     if (
-        !productosParaImportar.length
+        !productosParaImportar ||
+        productosParaImportar.length === 0
     ) {
+
+        alert(
+            "No hay productos para importar."
+        );
 
         return;
 
     }
 
 
+    // =====================================================
+    // VERIFICAR TIENDA
+    // =====================================================
+
     if (!tiendaId) {
 
         alert(
-            "No hay una tienda asociada."
+            "No hay una tienda asociada a esta cuenta."
+        );
+
+        return;
+
+    }
+
+
+    // =====================================================
+    // NO PERMITIR DUPLICADOS DEL ARCHIVO
+    // =====================================================
+
+    const duplicados =
+        productosParaImportar.filter(
+            producto =>
+                producto.estado ===
+                "duplicado"
+        );
+
+
+    if (
+        duplicados.length > 0
+    ) {
+
+        alert(
+
+            "No se puede importar el catálogo.\n\n" +
+
+            `Se encontraron ${duplicados.length} ` +
+            "filas con GTIN duplicados dentro del archivo.\n\n" +
+
+            "Corrige el archivo y vuelve a intentarlo."
+
         );
 
         return;
@@ -2401,6 +3154,10 @@ async function importarProductos() {
 
 
     try {
+
+        // =================================================
+        // DESHABILITAR BOTÓN
+        // =================================================
 
         confirmImport.disabled =
             true;
@@ -2417,23 +3174,39 @@ async function importarProductos() {
         `;
 
 
-        let nuevos = 0;
+        let nuevos =
+            0;
 
-        let actualizados = 0;
 
+        let actualizados =
+            0;
+
+
+        let inventariosActualizados =
+            0;
+
+
+        // =================================================
+        // PROCESAR CADA PRODUCTO
+        // =================================================
 
         for (
             const item
             of productosParaImportar
         ) {
 
+
+            // =============================================
+            // PRODUCTO EXISTENTE
+            // =============================================
+
             let productoId =
                 item.productoExistenteId;
 
 
-            // -----------------------------------------
-            // PRODUCTO MAESTRO
-            // -----------------------------------------
+            // =============================================
+            // SI NO EXISTE → CREAR PRODUCTO MAESTRO
+            // =============================================
 
             if (!productoId) {
 
@@ -2444,6 +3217,10 @@ async function importarProductos() {
                             "productos"
                         ),
                         {
+
+                            codigoBarras:
+                                item.codigoBarras ||
+                                "",
 
                             nombre:
                                 item.nombre,
@@ -2486,16 +3263,63 @@ async function importarProductos() {
                 nuevos++;
 
             }
+
+
+            // =============================================
+            // SI YA EXISTE → ACTUALIZAR PRODUCTO
+            // =============================================
+
             else {
+
+                await setDoc(
+
+                    doc(
+                        db,
+                        "productos",
+                        productoId
+                    ),
+
+                    {
+
+                        codigoBarras:
+                            item.codigoBarras ||
+                            "",
+
+                        nombre:
+                            item.nombre,
+
+                        nombreNormalizado:
+                            item.nombreNormalizado,
+
+                        categoria:
+                            item.categoria,
+
+                        departamentoOriginal:
+                            item.departamentoOriginal,
+
+                        tipoVenta:
+                            item.tipoVenta,
+
+                        actualizadoEn:
+                            serverTimestamp()
+
+                    },
+
+                    {
+                        merge: true
+                    }
+
+                );
+
 
                 actualizados++;
 
             }
 
 
-            // -----------------------------------------
+            // =============================================
             // INVENTARIO DE LA TIENDA
-            // -----------------------------------------
+            // =============================================
 
             const inventarioId =
                 `${tiendaId}_${productoId}`;
@@ -2515,8 +3339,20 @@ async function importarProductos() {
 
                     productoId,
 
+                    // -------------------------------------
+                    // CÓDIGOS
+                    // -------------------------------------
+
                     codigoTienda:
                         item.codigoTienda,
+
+                    codigoBarras:
+                        item.codigoBarras ||
+                        "",
+
+                    // -------------------------------------
+                    // PRECIOS
+                    // -------------------------------------
 
                     precio:
                         item.precio,
@@ -2527,6 +3363,10 @@ async function importarProductos() {
                     precioMayoreo:
                         item.mayoreo,
 
+                    // -------------------------------------
+                    // EXISTENCIAS
+                    // -------------------------------------
+
                     existencia:
                         item.existencia,
 
@@ -2536,11 +3376,23 @@ async function importarProductos() {
                     inventarioMaximo:
                         item.inventarioMaximo,
 
+                    // -------------------------------------
+                    // TIPO DE VENTA
+                    // -------------------------------------
+
                     tipoVenta:
                         item.tipoVenta,
 
+                    // -------------------------------------
+                    // DISPONIBILIDAD
+                    // -------------------------------------
+
                     disponible:
                         item.existencia > 0,
+
+                    // -------------------------------------
+                    // FECHA
+                    // -------------------------------------
 
                     actualizadoEn:
                         serverTimestamp()
@@ -2553,45 +3405,80 @@ async function importarProductos() {
 
             );
 
+
+            inventariosActualizados++;
+
         }
 
 
+        // =================================================
+        // RESULTADO
+        // =================================================
+
         console.log(
-            "✅ Importación terminada:",
+            "✅ IMPORTACIÓN COMPLETADA",
             {
+
                 nuevos,
-                actualizados
+
+                actualizados,
+
+                inventariosActualizados
+
             }
         );
 
 
         alert(
-            `Catálogo importado correctamente.\n\nNuevos: ${nuevos}\nActualizados: ${actualizados}`
+
+            "Catálogo importado correctamente.\n\n" +
+
+            `Productos nuevos: ${nuevos}\n` +
+
+            `Productos actualizados: ${actualizados}\n` +
+
+            `Inventarios actualizados: ${inventariosActualizados}`
+
         );
 
+
+        // =================================================
+        // LIMPIAR IMPORTACIÓN
+        // =================================================
 
         limpiarArchivo();
 
 
+        // =================================================
+        // RECARGAR PRODUCTOS
+        // =================================================
+
         await cargarProductos();
 
+
+        // =================================================
+        // VOLVER A PRODUCTOS
+        // =================================================
 
         cambiarVista(
             "productos"
         );
 
-
     }
     catch (error) {
 
         console.error(
-            "❌ Error importando catálogo:",
+            "❌ ERROR IMPORTANDO CATÁLOGO:",
             error
         );
 
 
         alert(
-            "Ocurrió un error al guardar el catálogo. Revisa la consola."
+
+            "Ocurrió un error al guardar el catálogo.\n\n" +
+
+            "Revisa la consola para conocer el detalle."
+
         );
 
     }
@@ -2604,7 +3491,7 @@ async function importarProductos() {
         confirmImport.innerHTML = `
 
             <span class="material-symbols-outlined">
-                cloud_done
+                cloud_upload
             </span>
 
             Importar catálogo
@@ -2614,7 +3501,6 @@ async function importarProductos() {
     }
 
 }
-
 
 // =========================================================
 // AGREGAR PRODUCTO MANUAL
@@ -3062,6 +3948,53 @@ function normalizarTexto(
             /\s+/g,
             " "
         );
+
+}
+
+// =========================================================
+// NORMALIZAR GTIN / CÓDIGO DE BARRAS
+// =========================================================
+
+function normalizarGTIN(
+    valor
+) {
+
+    if (
+        valor === null ||
+        valor === undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    let texto =
+        String(
+            valor
+        ).trim();
+
+
+    // Excel puede convertir algunos códigos
+    // en números terminados en .0
+
+    texto =
+        texto.replace(
+            /\.0$/,
+            ""
+        );
+
+
+    // Conservamos solamente números
+
+    texto =
+        texto.replace(
+            /\D/g,
+            ""
+        );
+
+
+    return texto;
 
 }
 
