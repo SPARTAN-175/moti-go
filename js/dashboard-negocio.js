@@ -3271,50 +3271,58 @@ async function importarProductos() {
 
             else {
 
-                await setDoc(
+    await setDoc(
 
-                    doc(
-                        db,
-                        "productos",
-                        productoId
-                    ),
+        doc(
+            db,
+            "productos",
+            productoId
+        ),
 
-                    {
+        {
 
-                        codigoBarras:
-                            item.codigoBarras ||
-                            "",
+            codigoBarras:
+                item.codigoBarras ||
+                "",
 
-                        nombre:
-                            item.nombre,
+            nombre:
+                item.nombre,
 
-                        nombreNormalizado:
-                            item.nombreNormalizado,
+            nombreNormalizado:
+                item.nombreNormalizado,
 
-                        categoria:
-                            item.categoria,
+            categoria:
+                item.categoria,
 
-                        departamentoOriginal:
-                            item.departamentoOriginal,
+            departamentoOriginal:
+                item.departamentoOriginal,
 
-                        tipoVenta:
-                            item.tipoVenta,
+            tipoVenta:
+                item.tipoVenta,
 
-                        actualizadoEn:
-                            serverTimestamp()
+            // =============================================
+            // REVISIÓN
+            // =============================================
 
-                    },
+            necesitaRevision:
+                !item.nombre ||
+                item.precio <= 0,
 
-                    {
-                        merge: true
-                    }
+            actualizadoEn:
+                serverTimestamp()
 
-                );
+        },
+
+        {
+            merge: true
+        }
+
+    );
 
 
-                actualizados++;
+    actualizados++;
 
-            }
+}
 
 
             // =============================================
