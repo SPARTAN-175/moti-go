@@ -4531,11 +4531,6 @@ if (!productoId) {
     }
 
 
-    const productoId =
-    producto.productoId ||
-    producto.id;
-
-
 if (!productoId) {
 
     alert(
