@@ -690,11 +690,11 @@ async function cargarProductos() {
                 "⚠️ No hay tiendaId para cargar productos."
             );
 
-            productosNegocio =
+            productos =
                 [];
 
             mostrarProductos(
-                productosNegocio
+                productos
             );
 
             return;
@@ -749,11 +749,11 @@ async function cargarProductos() {
             inventarios.length === 0
         ) {
 
-            productosNegocio =
+            productos =
                 [];
 
             mostrarProductos(
-                productosNegocio
+                productos
             );
 
             console.log(
@@ -1037,13 +1037,13 @@ async function cargarProductos() {
         // 5. GUARDAR RESULTADO
         // =================================================
 
-        productosNegocio =
+        productos =
             productosCombinados;
 
 
         console.log(
             "🛒 Productos cargados:",
-            productosNegocio.length
+            productos.length
         );
 
 
@@ -1052,7 +1052,7 @@ async function cargarProductos() {
         // =================================================
 
         mostrarProductos(
-            productosNegocio
+            productos
         );
 
 
@@ -1065,12 +1065,12 @@ async function cargarProductos() {
         );
 
 
-        productosNegocio =
+        productos =
             [];
 
 
         mostrarProductos(
-            productosNegocio
+            productos
         );
 
     }
