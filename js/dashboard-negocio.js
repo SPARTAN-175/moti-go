@@ -4390,6 +4390,26 @@ async function guardarEdicionProducto(
     cerrarModal
 ) {
 
+    const productoId =
+    producto.productoId ||
+    producto.id;
+
+const inventarioId =
+    producto.inventarioId ||
+    `${tiendaId}_${productoId}`;
+
+
+if (!productoId) {
+
+    alert(
+        "No se pudo identificar el producto."
+    );
+
+    return;
+
+}
+
+    
     const btnGuardar =
         document.getElementById(
             "btnGuardarEditarProducto"
@@ -4511,6 +4531,21 @@ async function guardarEdicionProducto(
     }
 
 
+    const productoId =
+    producto.productoId ||
+    producto.id;
+
+
+if (!productoId) {
+
+    alert(
+        "No se pudo identificar el producto."
+    );
+
+    return;
+
+}
+
     try {
 
         btnGuardar.disabled =
@@ -4530,7 +4565,7 @@ async function guardarEdicionProducto(
             doc(
                 db,
                 "productos",
-                producto.productoId
+                productoId
             ),
 
             {
@@ -4564,8 +4599,8 @@ async function guardarEdicionProducto(
         // =================================================
 
         const inventarioId =
-            producto.inventarioId ||
-            `${tiendaId}_${producto.productoId}`;
+    producto.inventarioId ||
+    `${tiendaId}_${productoId}`;
 
 
         await setDoc(
@@ -4581,7 +4616,7 @@ async function guardarEdicionProducto(
                 tiendaId,
 
                 productoId:
-                    producto.productoId,
+                productoId,
 
                 precio,
 
