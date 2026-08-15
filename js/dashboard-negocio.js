@@ -26,7 +26,7 @@ import {
     addDoc,
     ref,
     uploadBytes,
-    getDownloadURL
+    getDownloadURL,
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
