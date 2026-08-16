@@ -3,8 +3,12 @@ import { auth, db } from "./firebase-config.js";
 import {
     doc,
     updateDoc,
+    getDoc,
     collection,
-    getDocs
+    getDocs,
+    query,
+    where,
+    documentId
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
@@ -24,6 +28,10 @@ let userLng = null;
 
 let productos = [];
 let inventarios = [];
+
+let tiendasDisponibles = [];
+let tiendaSeleccionada = null;
+let tiendaSeleccionadaId = null;
 
 let categoriaActual = "todos";
 let textoBusqueda = "";
@@ -67,6 +75,12 @@ const searchClear =
 
 const locationText =
     document.getElementById("currentLocation");
+
+const storeSelector =
+    document.getElementById("storeSelector");
+
+const storeSelectorSection =
+    document.getElementById("storeSelectorSection");
 
 
 // =====================================================
@@ -180,7 +194,391 @@ function guardarCarrito() {
 
 
 // =====================================================
-// CARGAR CATÁLOGO DESDE FIREBASE
+// CARGAR CONTEXTO DEL CLIENTE Y TIENDAS DISPONIBLES
+// =====================================================
+
+async function cargarContextoTiendas() {
+
+    const user = auth.currentUser;
+
+    if (!user) {
+        throw new Error("No hay usuario autenticado.");
+    }
+
+    console.log("📍 Cargando zona del cliente...");
+
+    const usuarioSnap =
+        await getDoc(
+            doc(
+                db,
+                "usuarios",
+                user.uid
+            )
+        );
+
+    if (!usuarioSnap.exists()) {
+        throw new Error("No existe el perfil del cliente.");
+    }
+
+    const usuario = usuarioSnap.data();
+
+    const municipioCliente =
+        normalizarTexto(usuario.municipio || "");
+
+    const localidadCliente =
+        normalizarTexto(usuario.localidad || "");
+
+    if (!municipioCliente && !localidadCliente) {
+        throw new Error("El cliente no tiene municipio o localidad registrados.");
+    }
+
+    console.log("📍 Zona cliente:", {
+        municipio: usuario.municipio,
+        localidad: usuario.localidad,
+        latitud: usuario.latitud,
+        longitud: usuario.longitud
+    });
+
+    // Una sola consulta: tiendas del municipio del cliente.
+    // La localidad se valida en memoria cuando el documento la tiene.
+    const tiendasQuery =
+        query(
+            collection(db, "tiendas"),
+            where(
+                "municipio",
+                "==",
+                usuario.municipio
+            )
+        );
+
+    const tiendasSnapshot =
+        await getDocs(tiendasQuery);
+
+    tiendasDisponibles = [];
+
+    tiendasSnapshot.forEach((docSnap) => {
+
+        const tienda = {
+            id: docSnap.id,
+            ...docSnap.data()
+        };
+
+        if (tienda.activa === false) {
+            return;
+        }
+
+        const localidadTienda =
+            normalizarTexto(tienda.localidad || "");
+
+        const municipioTienda =
+            normalizarTexto(tienda.municipio || "");
+
+        // Si la tienda ya tiene localidad, debe coincidir.
+        // Si todavía no tiene localidad, se permite mientras
+        // pertenezca al mismo municipio para no romper tiendas existentes.
+        const mismaLocalidad =
+            !localidadTienda ||
+            !localidadCliente ||
+            localidadTienda === localidadCliente;
+
+        const mismoMunicipio =
+            !municipioTienda ||
+            municipioTienda === municipioCliente;
+
+        if (mismaLocalidad && mismoMunicipio) {
+            tiendasDisponibles.push(tienda);
+        }
+
+    });
+
+    tiendasDisponibles.sort((a, b) =>
+        String(a.nombre || "").localeCompare(
+            String(b.nombre || ""),
+            "es"
+        )
+    );
+
+    console.log(
+        "🏪 Tiendas disponibles en la zona:",
+        tiendasDisponibles.length,
+        tiendasDisponibles
+    );
+
+    if (!tiendasDisponibles.length) {
+        throw new Error(
+            "No hay tiendas disponibles en tu localidad por el momento."
+        );
+    }
+
+    const tiendaGuardada =
+        sessionStorage.getItem("motiTiendaSeleccionadaId");
+
+    const tiendaEncontrada =
+        tiendasDisponibles.find(
+            tienda => tienda.id === tiendaGuardada
+        );
+
+    tiendaSeleccionada =
+        tiendaEncontrada ||
+        tiendasDisponibles[0];
+
+    tiendaSeleccionadaId =
+        tiendaSeleccionada.id;
+
+    sessionStorage.setItem(
+        "motiTiendaSeleccionadaId",
+        tiendaSeleccionadaId
+    );
+
+    renderizarSelectorTiendas();
+
+}
+
+
+// =====================================================
+// SELECTOR DE TIENDAS
+// =====================================================
+
+function renderizarSelectorTiendas() {
+
+    if (!storeSelector) {
+        return;
+    }
+
+    storeSelector.innerHTML = "";
+
+    tiendasDisponibles.forEach((tienda) => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = tienda.id;
+
+        option.textContent =
+            tienda.nombre || "Tienda";
+
+        if (tienda.id === tiendaSeleccionadaId) {
+            option.selected = true;
+        }
+
+        storeSelector.appendChild(option);
+
+    });
+
+    storeSelector.disabled = false;
+
+    if (storeSelectorSection) {
+        storeSelectorSection.style.display =
+            tiendasDisponibles.length > 0
+                ? "block"
+                : "none";
+    }
+
+}
+
+
+async function seleccionarTienda(tiendaId) {
+
+    const tienda =
+        tiendasDisponibles.find(
+            item => item.id === tiendaId
+        );
+
+    if (!tienda) {
+        return;
+    }
+
+    tiendaSeleccionada = tienda;
+    tiendaSeleccionadaId = tienda.id;
+
+    sessionStorage.setItem(
+        "motiTiendaSeleccionadaId",
+        tiendaSeleccionadaId
+    );
+
+    categoriaActual = "todos";
+
+    document
+        .querySelectorAll(".category-item")
+        .forEach((item) => {
+            item.classList.toggle(
+                "active",
+                item.dataset.category === "todos"
+            );
+        });
+
+    console.log(
+        "🏪 Tienda seleccionada:",
+        tiendaSeleccionada
+    );
+
+    await cargarCatalogoDeTienda();
+
+}
+
+
+if (storeSelector) {
+
+    storeSelector.addEventListener(
+        "change",
+        async (event) => {
+
+            try {
+
+                storeSelector.disabled = true;
+
+                await seleccionarTienda(
+                    event.target.value
+                );
+
+            }
+            catch (error) {
+
+                console.error(
+                    "❌ Error cambiando de tienda:",
+                    error
+                );
+
+                alert(
+                    "No pudimos cargar esta tienda. Intenta nuevamente."
+                );
+
+            }
+            finally {
+
+                storeSelector.disabled = false;
+
+            }
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// CARGAR CATÁLOGO DE LA TIENDA SELECCIONADA
+// =====================================================
+
+async function cargarCatalogoDeTienda() {
+
+    if (!productsContainer) {
+        return;
+    }
+
+    if (!tiendaSeleccionadaId) {
+        return;
+    }
+
+    console.log(
+        "🛒 Cargando catálogo de:",
+        tiendaSeleccionada?.nombre
+    );
+
+    // Una sola lectura de inventarios: solamente esta tienda.
+    const inventariosQuery =
+        query(
+            collection(db, "inventarios"),
+            where(
+                "tiendaId",
+                "==",
+                tiendaSeleccionadaId
+            )
+        );
+
+    const inventarioSnapshot =
+        await getDocs(inventariosQuery);
+
+    inventarios = [];
+
+    inventarioSnapshot.forEach((docSnap) => {
+
+        const inventario = {
+            id: docSnap.id,
+            ...docSnap.data()
+        };
+
+        const existencia =
+            Number(inventario.existencia ?? 0);
+
+        if (
+            inventario.disponible !== false &&
+            existencia > 0
+        ) {
+            inventarios.push(inventario);
+        }
+
+    });
+
+    console.log(
+        "🏪 Inventarios disponibles de la tienda:",
+        inventarios.length
+    );
+
+    // Solamente necesitamos los productos que existen en esta tienda.
+    const productoIds = [
+        ...new Set(
+            inventarios
+                .map(item => item.productoId)
+                .filter(Boolean)
+        )
+    ];
+
+    productos = [];
+
+    // Firestore limita las consultas IN a grupos pequeños.
+    const loteTamano = 30;
+
+    for (
+        let inicio = 0;
+        inicio < productoIds.length;
+        inicio += loteTamano
+    ) {
+
+        const lote =
+            productoIds.slice(
+                inicio,
+                inicio + loteTamano
+            );
+
+        const productosQuery =
+            query(
+                collection(db, "productos"),
+                where(
+                    documentId(),
+                    "in",
+                    lote
+                )
+            );
+
+        const productosSnapshot =
+            await getDocs(productosQuery);
+
+        productosSnapshot.forEach((docSnap) => {
+
+            productos.push({
+                id: docSnap.id,
+                ...docSnap.data()
+            });
+
+        });
+
+    }
+
+    console.log(
+        "📦 Productos de la tienda cargados:",
+        productos.length
+    );
+
+    renderizarProductos();
+
+    actualizarCarrito();
+
+}
+
+
+// =====================================================
+// CARGAR CATÁLOGO
 // =====================================================
 
 async function cargarCatalogo() {
@@ -189,126 +587,15 @@ async function cargarCatalogo() {
         return;
     }
 
-
     try {
 
         console.log(
             "🛒 Cargando catálogo MOTI GO..."
         );
 
+        await cargarContextoTiendas();
 
-        // =================================================
-        // PRODUCTOS MAESTROS
-        // =================================================
-
-        const productosSnapshot =
-            await getDocs(
-                collection(
-                    db,
-                    "productos"
-                )
-            );
-
-
-        productos = [];
-
-
-        productosSnapshot.forEach(
-            (docSnap) => {
-
-                productos.push({
-
-                    id:
-                        docSnap.id,
-
-                    ...docSnap.data()
-
-                });
-
-            }
-        );
-
-
-        // =================================================
-        // INVENTARIOS DE LAS TIENDAS
-        // =================================================
-
-        const inventarioSnapshot =
-            await getDocs(
-                collection(
-                    db,
-                    "inventarios"
-                )
-            );
-
-
-        inventarios = [];
-
-
-        inventarioSnapshot.forEach(
-            (docSnap) => {
-
-                inventarios.push({
-
-                    id:
-                        docSnap.id,
-
-                    ...docSnap.data()
-
-                });
-
-            }
-        );
-
-
-        console.log(
-            "📦 Productos encontrados:",
-            productos.length
-        );
-
-
-        console.log(
-            "🏪 Inventarios encontrados:",
-            inventarios.length
-        );
-
-
-        console.log(
-    "🔎 EJEMPLO PRODUCTO:",
-    productos[0]
-);
-
-console.log(
-    "🔎 EJEMPLO INVENTARIO:",
-    inventarios[0]
-);
-
-console.log(
-    "🔎 PRODUCTO ID:",
-    productos[0]?.id
-);
-
-console.log(
-    "🔎 INVENTARIO PRODUCTO ID:",
-    inventarios[0]?.productoId
-);
-
-console.log(
-    "🔎 EXISTENCIA:",
-    inventarios[0]?.existencia
-);
-
-console.log(
-    "🔎 DISPONIBLE:",
-    inventarios[0]?.disponible
-);
-
-        // =================================================
-        // MOSTRAR
-        // =================================================
-
-        renderizarProductos();
-
+        await cargarCatalogoDeTienda();
 
     }
     catch (error) {
@@ -318,25 +605,26 @@ console.log(
             error
         );
 
-
         if (productsContainer) {
-
-            productsContainer.innerHTML =
-                "";
-
+            productsContainer.innerHTML = "";
         }
 
-
         if (emptyProducts) {
+            emptyProducts.style.display = "flex";
+        }
 
-            emptyProducts.style.display =
-                "flex";
+        if (storeSelector) {
+            storeSelector.disabled = true;
+        }
 
+        if (storeSelectorSection) {
+            storeSelectorSection.style.display = "none";
         }
 
     }
 
 }
+
 // =====================================================
 // OBTENER INVENTARIO DISPONIBLE
 // =====================================================
