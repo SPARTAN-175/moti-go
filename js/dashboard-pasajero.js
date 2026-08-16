@@ -240,57 +240,149 @@ async function cargarContextoTiendas() {
         longitud: usuario.longitud
     });
 
-    // Una sola consulta: tiendas del municipio del cliente.
-    // La localidad se valida en memoria cuando el documento la tiene.
-    const tiendasQuery =
-        query(
-            collection(db, "tiendas"),
-            where(
-                "municipio",
-                "==",
-                usuario.municipio
+    // Una sola consulta principal: tiendas del municipio del cliente.
+    // Firestore compara los textos literalmente, por lo que primero
+    // usamos el valor guardado en el perfil y, si no hay resultados,
+    // probamos variantes compatibles con los datos actuales.
+    let tiendasSnapshot =
+        await getDocs(
+            query(
+                collection(db, "tiendas"),
+                where(
+                    "municipio",
+                    "==",
+                    usuario.municipio
+                )
             )
         );
 
-    const tiendasSnapshot =
-        await getDocs(tiendasQuery);
-
     tiendasDisponibles = [];
 
-    tiendasSnapshot.forEach((docSnap) => {
+    if (!tiendasSnapshot.empty) {
 
-        const tienda = {
-            id: docSnap.id,
-            ...docSnap.data()
-        };
+        tiendasSnapshot.forEach((docSnap) => {
 
-        if (tienda.activa === false) {
-            return;
+            tiendasDisponibles.push({
+                id: docSnap.id,
+                ...docSnap.data()
+            });
+
+        });
+
+    }
+    else {
+
+        // Compatibilidad temporal con municipios que tienen
+        // diferencias de acentos en los documentos existentes.
+        const municipioNormalizado =
+            normalizarTexto(
+                usuario.municipio || ""
+            );
+
+        const municipiosCompatibles = [
+            usuario.municipio,
+            municipioNormalizado
+        ];
+
+        // Caso actual conocido:
+        // Ostuacan <-> Ostuacán
+        if (
+            municipioNormalizado ===
+            "ostuacan"
+        ) {
+
+            municipiosCompatibles.push(
+                "Ostuacán"
+            );
+
         }
 
-        const localidadTienda =
-            normalizarTexto(tienda.localidad || "");
+        const municipiosUnicos =
+            [
+                ...new Set(
+                    municipiosCompatibles.filter(Boolean)
+                )
+            ];
 
-        const municipioTienda =
-            normalizarTexto(tienda.municipio || "");
+        for (
+            const municipio of municipiosUnicos
+        ) {
 
-        // Si la tienda ya tiene localidad, debe coincidir.
-        // Si todavía no tiene localidad, se permite mientras
-        // pertenezca al mismo municipio para no romper tiendas existentes.
-        const mismaLocalidad =
-            !localidadTienda ||
-            !localidadCliente ||
-            localidadTienda === localidadCliente;
+            const snapshot =
+                await getDocs(
+                    query(
+                        collection(db, "tiendas"),
+                        where(
+                            "municipio",
+                            "==",
+                            municipio
+                        )
+                    )
+                );
 
-        const mismoMunicipio =
-            !municipioTienda ||
-            municipioTienda === municipioCliente;
+            snapshot.forEach((docSnap) => {
 
-        if (mismaLocalidad && mismoMunicipio) {
-            tiendasDisponibles.push(tienda);
+                if (
+                    !tiendasDisponibles.some(
+                        tienda =>
+                            tienda.id ===
+                            docSnap.id
+                    )
+                ) {
+
+                    tiendasDisponibles.push({
+                        id: docSnap.id,
+                        ...docSnap.data()
+                    });
+
+                }
+
+            });
+
         }
 
-    });
+    }
+
+    // Filtrar tiendas activas y validar localidad.
+    tiendasDisponibles =
+        tiendasDisponibles.filter(
+            tienda => {
+
+                if (
+                    tienda.activa === false
+                ) {
+                    return false;
+                }
+
+                const localidadTienda =
+                    normalizarTexto(
+                        tienda.localidad || ""
+                    );
+
+                const municipioTienda =
+                    normalizarTexto(
+                        tienda.municipio || ""
+                    );
+
+                const mismaLocalidad =
+                    !localidadTienda ||
+                    !localidadCliente ||
+                    localidadTienda ===
+                        localidadCliente;
+
+                const mismoMunicipio =
+                    !municipioTienda ||
+                    !municipioCliente ||
+                    municipioTienda ===
+                        municipioCliente;
+
+                return (
+                    mismaLocalidad &&
+                    mismoMunicipio
+                );
+
+            }
+        );
 
     tiendasDisponibles.sort((a, b) =>
         String(a.nombre || "").localeCompare(
@@ -305,10 +397,47 @@ async function cargarContextoTiendas() {
         tiendasDisponibles
     );
 
+    // La ausencia de tiendas locales no es un error técnico.
+    // Más adelante aquí se conectará la opción para buscar
+    // tiendas de otra zona.
     if (!tiendasDisponibles.length) {
-        throw new Error(
-            "No hay tiendas disponibles en tu localidad por el momento."
+
+        console.warn(
+            "⚠️ No hay tiendas disponibles en la localidad del cliente."
         );
+
+        tiendaSeleccionada = null;
+        tiendaSeleccionadaId = null;
+
+        if (storeSelector) {
+
+            storeSelector.innerHTML = "";
+            storeSelector.disabled = true;
+
+        }
+
+        if (storeSelectorSection) {
+
+            storeSelectorSection.style.display =
+                "none";
+
+        }
+
+        if (productsContainer) {
+
+            productsContainer.innerHTML =
+                "";
+
+        }
+
+        if (emptyProducts) {
+
+            emptyProducts.style.display =
+                "flex";
+        }
+
+        return;
+
     }
 
     const tiendaGuardada =
@@ -626,6 +755,7 @@ async function cargarCatalogo() {
 
 }
 
+
 // =====================================================
 // OBTENER INVENTARIO DISPONIBLE
 // =====================================================
@@ -742,6 +872,1032 @@ function renderizarProductos() {
     let productosDisponibles =
         productos.filter(
             producto => {
+
+            return (
+                producto.disponible !== false
+            );
+
+        }
+    );
+
+
+    // =================================================
+    // FILTRAR POR CATEGORÍA
+    // =================================================
+
+    if (
+        categoriaActual &&
+        categoriaActual !== "todos"
+    ) {
+
+        productosDisponibles =
+            productosDisponibles.filter(
+                producto => {
+
+                    const categoria =
+                        normalizarTexto(
+                            producto.categoria ||
+                            ""
+                        );
+
+
+                    return (
+                        categoria ===
+                        normalizarTexto(
+                            categoriaActual
+                        )
+                    );
+
+                }
+            );
+
+    }
+
+
+    // =================================================
+    // FILTRAR POR BÚSQUEDA
+    // =================================================
+
+    if (textoBusqueda) {
+
+        const busqueda =
+            normalizarTexto(
+                textoBusqueda
+            );
+
+
+        productosDisponibles =
+            productosDisponibles.filter(
+                producto => {
+
+                    const nombre =
+                        normalizarTexto(
+                            producto.nombre ||
+                            ""
+                        );
+
+
+                    const marca =
+                        normalizarTexto(
+                            producto.marca ||
+                            ""
+                        );
+
+
+                    const codigo =
+                        normalizarTexto(
+                            producto.codigoBarras ||
+                            producto.codigo ||
+                            ""
+                        );
+
+
+                    return (
+                        nombre.includes(
+                            busqueda
+                        ) ||
+                        marca.includes(
+                            busqueda
+                        ) ||
+                        codigo.includes(
+                            busqueda
+                        )
+                    );
+
+                }
+            );
+
+    }
+
+
+    // =================================================
+    // MOSTRAR RESULTADOS
+    // =================================================
+
+    productosDisponibles.forEach(
+        producto => {
+
+            const elemento =
+                crearProductoElemento(
+                    producto
+                );
+
+
+            if (elemento) {
+
+                productsContainer.appendChild(
+                    elemento
+                );
+
+            }
+
+        }
+    );
+
+
+    if (productsCount) {
+
+        productsCount.textContent =
+            `${productosDisponibles.length} producto${
+                productosDisponibles.length === 1
+                    ? ""
+                    : "s"
+            }`;
+
+    }
+
+
+    if (productsLabel) {
+
+        productsLabel.textContent =
+            `${productosDisponibles.length} producto${
+                productosDisponibles.length === 1
+                    ? ""
+                    : "s"
+            }`;
+
+    }
+
+
+    if (productsTitle) {
+
+        productsTitle.textContent =
+            tiendaSeleccionada?.nombre ||
+            "Productos";
+
+    }
+
+
+    // =================================================
+    // CATÁLOGO VACÍO
+    // =================================================
+
+    if (
+        productosDisponibles.length === 0
+    ) {
+
+        if (emptyProducts) {
+
+            emptyProducts.style.display =
+                "flex";
+
+
+            const mensaje =
+                emptyProducts.querySelector(
+                    ".empty-text"
+                );
+
+
+            if (mensaje) {
+
+                mensaje.textContent =
+                    textoBusqueda
+                        ? "No encontramos productos con esa búsqueda."
+                        : "No hay productos disponibles.";
+
+            }
+
+        }
+
+    }
+    else {
+
+        if (emptyProducts) {
+
+            emptyProducts.style.display =
+                "none";
+
+        }
+
+    }
+
+}
+
+
+// =====================================================
+// CREAR ELEMENTO DEL PRODUCTO
+// =====================================================
+
+function crearProductoElemento(
+    producto
+) {
+
+    const item =
+        document.createElement(
+            "div"
+        );
+
+
+    item.className =
+        "product-item";
+
+
+    const inventario =
+        obtenerMejorInventario(
+            producto.id
+        );
+
+
+    if (!inventario) {
+
+        return null;
+
+    }
+
+
+    const precio =
+        Number(
+            inventario.precio ??
+            producto.precio ??
+            0
+        );
+
+
+    const existencia =
+        Number(
+            inventario.existencia ??
+            0
+        );
+
+
+    const cantidadCarrito =
+        Number(
+            carrito[producto.id] ||
+            0
+        );
+
+
+    const imagen =
+        producto.imagenUrl ||
+        producto.imagen ||
+        producto.imageUrl ||
+        "";
+
+
+    const nombre =
+        producto.nombre ||
+        "Producto";
+
+
+    const marca =
+        producto.marca ||
+        "";
+
+
+    const unidad =
+        obtenerTextoUnidad(
+            producto,
+            inventario
+        );
+
+
+    item.innerHTML = `
+
+        <div class="product-image">
+
+            ${
+                imagen
+                    ? `
+                        <img
+                            src="${escapeHtml(
+                                imagen
+                            )}"
+                            alt="${escapeHtml(
+                                nombre
+                            )}"
+                            loading="lazy"
+                        >
+                    `
+                    : `
+                        <div class="product-image-placeholder">
+                            ${obtenerIconoProducto(
+                                producto
+                            )}
+                        </div>
+                    `
+            }
+
+        </div>
+
+
+        <div class="product-info">
+
+            <div class="product-name">
+                ${escapeHtml(
+                    nombre
+                )}
+            </div>
+
+
+            ${
+                marca
+                    ? `
+                        <div class="product-brand">
+                            ${escapeHtml(
+                                marca
+                            )}
+                        </div>
+                    `
+                    : ""
+            }
+
+
+            <div class="product-price">
+
+                $${precio.toFixed(2)}
+
+                ${
+                    unidad
+                        ? `
+                            <span class="product-unit">
+                                ${escapeHtml(
+                                    unidad
+                                )}
+                            </span>
+                        `
+                        : ""
+                }
+
+            </div>
+
+
+            ${
+                existencia > 0
+                    ? `
+                        <div class="product-stock">
+                            ${existencia} disponibles
+                        </div>
+                    `
+                    : `
+                        <div class="product-stock unavailable">
+                            Agotado
+                        </div>
+                    `
+            }
+
+
+            <div class="product-actions">
+
+                ${
+                    cantidadCarrito > 0
+                        ? `
+
+                            <button
+                                type="button"
+                                class="quantity-minus"
+                                data-product-id="${producto.id}"
+                            >
+                                −
+                            </button>
+
+
+                            <span
+                                class="quantity-value"
+                                data-product-id="${producto.id}"
+                            >
+                                ${cantidadCarrito}
+                            </span>
+
+
+                            <button
+                                type="button"
+                                class="quantity-plus"
+                                data-product-id="${producto.id}"
+                            >
+                                +
+                            </button>
+
+                        `
+                        : `
+
+                            <button
+                                type="button"
+                                class="add-product"
+                                data-product-id="${producto.id}"
+                                ${
+                                    existencia <= 0
+                                        ? "disabled"
+                                        : ""
+                                }
+                            >
+                                Agregar
+                            </button>
+
+                        `
+                }
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    // =================================================
+    // BOTÓN AGREGAR
+    // =================================================
+
+    const botonAgregar =
+        item.querySelector(
+            ".add-product"
+        );
+
+
+    if (botonAgregar) {
+
+        botonAgregar.addEventListener(
+            "click",
+            () => {
+
+                agregarAlCarrito(
+                    producto.id
+                );
+
+            }
+        );
+
+    }
+
+
+    // =================================================
+    // BOTÓN MENOS
+    // =================================================
+
+    const botonMenos =
+        item.querySelector(
+            ".quantity-minus"
+        );
+
+
+    if (botonMenos) {
+
+        botonMenos.addEventListener(
+            "click",
+            () => {
+
+                cambiarCantidadCarrito(
+                    producto.id,
+                    -1
+                );
+
+            }
+        );
+
+    }
+
+
+    // =================================================
+    // BOTÓN MÁS
+    // =================================================
+
+    const botonMas =
+        item.querySelector(
+            ".quantity-plus"
+        );
+
+
+    if (botonMas) {
+
+        botonMas.addEventListener(
+            "click",
+            () => {
+
+                cambiarCantidadCarrito(
+                    producto.id,
+                    1
+                );
+
+            }
+        );
+
+    }
+
+
+    return item;
+
+}
+
+
+// =====================================================
+// ICONO DE PRODUCTO
+// =====================================================
+
+function obtenerIconoProducto(
+    producto
+) {
+
+    const categoria =
+        normalizarTexto(
+            producto.categoria ||
+            ""
+        );
+
+
+    const iconos = {
+
+        abarrotes:
+            "🛒",
+
+        bebidas:
+            "🥤",
+
+        lacteos:
+            "🥛",
+
+        carnes:
+            "🥩",
+
+        frutas:
+            "🍎",
+
+        verduras:
+            "🥬",
+
+        limpieza:
+            "🧹",
+
+        higiene:
+            "🧴",
+
+        botanas:
+            "🍿",
+
+        dulces:
+            "🍬",
+
+        panaderia:
+            "🥖",
+
+        congelados:
+            "🧊",
+
+        mascotas:
+            "🐶",
+
+        farmacia:
+            "💊"
+
+    };
+
+
+    return (
+        iconos[categoria] ||
+        "📦"
+    );
+
+}
+
+
+// =====================================================
+// TEXTO DE UNIDAD
+// =====================================================
+
+function obtenerTextoUnidad(
+    producto,
+    inventario
+) {
+
+    if (
+        inventario &&
+        inventario.unidad
+    ) {
+
+        return inventario.unidad;
+
+    }
+
+
+    if (
+        producto &&
+        producto.unidad
+    ) {
+
+        return producto.unidad;
+
+    }
+
+
+    return "";
+
+}
+
+
+// =====================================================
+// AGREGAR AL CARRITO
+// =====================================================
+
+function agregarAlCarrito(
+    productoId
+) {
+
+    const inventario =
+        obtenerMejorInventario(
+            productoId
+        );
+
+
+    if (!inventario) {
+
+        alert(
+            "Este producto no está disponible."
+        );
+
+        return;
+
+    }
+
+
+    const existencia =
+        Number(
+            inventario.existencia ??
+            0
+        );
+
+
+    const cantidadActual =
+        Number(
+            carrito[productoId] ||
+            0
+        );
+
+
+    if (
+        cantidadActual >=
+        existencia
+    ) {
+
+        alert(
+            "No hay más unidades disponibles."
+        );
+
+        return;
+
+    }
+
+
+    carrito[productoId] =
+        cantidadActual + 1;
+
+
+    guardarCarrito();
+
+    actualizarCarrito();
+
+    renderizarProductos();
+
+}
+
+
+// =====================================================
+// CAMBIAR CANTIDAD DEL CARRITO
+// =====================================================
+
+function cambiarCantidadCarrito(
+    productoId,
+    cambio
+) {
+
+    const cantidadActual =
+        Number(
+            carrito[productoId] ||
+            0
+        );
+
+
+    const nuevaCantidad =
+        cantidadActual +
+        cambio;
+
+
+    const inventario =
+        obtenerMejorInventario(
+            productoId
+        );
+
+
+    if (
+        cambio > 0 &&
+        inventario &&
+        nuevaCantidad >
+            Number(
+                inventario.existencia ?? 0
+            )
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        nuevaCantidad <= 0
+    ) {
+
+        delete carrito[
+            productoId
+        ];
+
+    }
+    else {
+
+        carrito[
+            productoId
+        ] = nuevaCantidad;
+
+    }
+
+
+    guardarCarrito();
+
+    actualizarCarrito();
+
+    renderizarProductos();
+
+}
+
+
+// =====================================================
+// ACTUALIZAR CARRITO
+// =====================================================
+
+function actualizarCarrito() {
+
+    if (!cartBar) {
+        return;
+    }
+
+
+    const productosCarrito =
+        Object.entries(
+            carrito
+        );
+
+
+    let total =
+        0;
+
+
+    let cantidadTotal =
+        0;
+
+
+    if (cartItems) {
+
+        cartItems.innerHTML =
+            "";
+
+    }
+
+
+    productosCarrito.forEach(
+        ([productoId, cantidad]) => {
+
+            const producto =
+                productos.find(
+                    item =>
+                        item.id ===
+                        productoId
+                );
+
+
+            if (!producto) {
+                return;
+            }
+
+
+            const inventario =
+                obtenerMejorInventario(
+                    productoId
+                );
+
+
+            if (!inventario) {
+                return;
+            }
+
+
+            const precio =
+                Number(
+                    inventario.precio ??
+                    producto.precio ??
+                    0
+                );
+
+
+            const cantidadNumero =
+                Number(
+                    cantidad || 0
+                );
+
+
+            const subtotal =
+                precio *
+                cantidadNumero;
+
+
+            total +=
+                subtotal;
+
+
+            cantidadTotal +=
+                cantidadNumero;
+
+
+            if (cartItems) {
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                item.className =
+                    "cart-item";
+
+
+                item.innerHTML = `
+
+                    <div class="cart-item-info">
+
+                        <div class="cart-item-name">
+                            ${escapeHtml(
+                                producto.nombre ||
+                                "Producto"
+                            )}
+                        </div>
+
+
+                        <div class="cart-item-price">
+                            $${precio.toFixed(2)}
+                        </div>
+
+                    </div>
+
+
+                    <div class="cart-item-actions">
+
+                        <button
+                            type="button"
+                            class="quantity-minus"
+                            data-product-id="${productoId}"
+                        >
+                            −
+                        </button>
+
+
+                        <span>
+                            ${cantidadNumero}
+                        </span>
+
+
+                        <button
+                            type="button"
+                            class="quantity-plus"
+                            data-product-id="${productoId}"
+                        >
+                            +
+                        </button>
+
+                    </div>
+
+                `;
+
+
+                const botonMenos =
+                    item.querySelector(
+                        ".quantity-minus"
+                    );
+
+
+                const botonMas =
+                    item.querySelector(
+                        ".quantity-plus"
+                    );
+
+
+                if (botonMenos) {
+
+                    botonMenos.addEventListener(
+                        "click",
+                        (event) => {
+
+                            event.stopPropagation();
+
+                            cambiarCantidadCarrito(
+                                productoId,
+                                -1
+                            );
+
+                        }
+                    );
+
+                }
+
+
+                if (botonMas) {
+
+                    botonMas.addEventListener(
+                        "click",
+                        (event) => {
+
+                            event.stopPropagation();
+
+                            cambiarCantidadCarrito(
+                                productoId,
+                                1
+                            );
+
+                        }
+                    );
+
+                }
+
+
+                cartItems.appendChild(
+                    item
+                );
+
+            }
+
+        }
+    );
+
+
+    if (cartTotal) {
+
+        cartTotal.textContent =
+            `$${total.toFixed(2)}`;
+
+    }
+
+
+    if (cartBar) {
+
+        cartBar.style.display =
+            cantidadTotal > 0
+                ? "flex"
+                : "none";
+
+    }
+
+}
+
+
+// =====================================================
+// ESCAPAR HTML
+// =====================================================
+
+function escapeHtml(
+    texto
+) {
+
+    return String(
+        texto ?? ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+// =====================================================
+// NORMALIZAR TEXTO
+// =====================================================
+
+function normalizarTexto(
+    texto
+) {
+
+    return String(
+        texto || ""
+    )
+        .normalize("NFD")
+        .replace(
+            /[\u0300-\u036f]/g,
+            ""
+        )
+        .toLowerCase()
+        .trim();
+
+}
 
                 const inventario =
                     obtenerMejorInventario(
@@ -979,6 +2135,8 @@ function renderizarProductos() {
     );
 
 }
+
+
 // =====================================================
 // CREAR ELEMENTO DE PRODUCTO
 // =====================================================
@@ -1189,6 +2347,235 @@ function crearProductoElemento(
 
 
 // =====================================================
+// OBTENER ICONO DEL PRODUCTO
+// =====================================================
+
+function obtenerIconoProducto(
+    producto
+) {
+
+    const categoria =
+        normalizarTexto(
+            producto.categoria ||
+            producto.categoriaId ||
+            ""
+        );
+
+
+    const iconos = {
+
+        abarrotes:
+            "shopping_cart",
+
+        bebidas:
+            "local_drink",
+
+        lacteos:
+            "local_drink",
+
+        carnes:
+            "restaurant",
+
+        frutas:
+            "nutrition",
+
+        verduras:
+            "eco",
+
+        limpieza:
+            "cleaning_services",
+
+        higiene:
+            "soap",
+
+        botanas:
+            "fastfood",
+
+        dulces:
+            "cake",
+
+        panaderia:
+            "bakery_dining",
+
+        congelados:
+            "ac_unit",
+
+        mascotas:
+            "pets",
+
+        farmacia:
+            "medication"
+
+    };
+
+
+    return (
+        iconos[categoria] ||
+        "inventory_2"
+    );
+
+}
+
+
+// =====================================================
+// OBTENER TEXTO DE UNIDAD
+// =====================================================
+
+function obtenerTextoUnidad(
+    producto
+) {
+
+    if (
+        producto.unidad
+    ) {
+
+        return producto.unidad;
+
+    }
+
+
+    if (
+        producto.presentacion
+    ) {
+
+        return producto.presentacion;
+
+    }
+
+
+    if (
+        producto.contenido
+    ) {
+
+        return producto.contenido;
+
+    }
+
+
+    return "";
+
+}
+
+
+// =====================================================
+// FORMATEAR PRECIO
+// =====================================================
+
+function formatearPrecio(
+    precio
+) {
+
+    return Number(
+        precio || 0
+    ).toLocaleString(
+        "es-MX",
+        {
+            style: "currency",
+            currency: "MXN"
+        }
+    );
+
+}
+
+
+// =====================================================
+// OBTENER NOMBRE DE CATEGORÍA
+// =====================================================
+
+function obtenerNombreCategoria(
+    categoria
+) {
+
+    const nombres = {
+
+        abarrotes:
+            "Abarrotes",
+
+        bebidas:
+            "Bebidas",
+
+        lacteos:
+            "Lácteos",
+
+        carnes:
+            "Carnes",
+
+        frutas:
+            "Frutas",
+
+        verduras:
+            "Verduras",
+
+        limpieza:
+            "Limpieza",
+
+        higiene:
+            "Higiene",
+
+        botanas:
+            "Botanas",
+
+        dulces:
+            "Dulces",
+
+        panaderia:
+            "Panadería",
+
+        congelados:
+            "Congelados",
+
+        mascotas:
+            "Mascotas",
+
+        farmacia:
+            "Farmacia"
+
+    };
+
+
+    return (
+        nombres[categoria] ||
+        "Productos"
+    );
+
+}
+
+
+// =====================================================
+// ESCAPAR HTML
+// =====================================================
+
+function escaparHTML(
+    texto
+) {
+
+    return String(
+        texto ?? ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+// =====================================================
 // CAMBIAR CANTIDAD
 // =====================================================
 
@@ -1206,6 +2593,26 @@ function cambiarCantidad(
     const nuevaCantidad =
         cantidadActual +
         cambio;
+
+
+    const inventario =
+        obtenerMejorInventario(
+            productoId
+        );
+
+
+    if (
+        cambio > 0 &&
+        inventario &&
+        nuevaCantidad >
+            Number(
+                inventario.existencia ?? 0
+            )
+    ) {
+
+        return;
+
+    }
 
 
     if (
@@ -1500,6 +2907,7 @@ function configurarBuscador() {
 
 }
 
+
 // =====================================================
 // CATEGORÍA POR DEFECTO
 // =====================================================
@@ -1598,8 +3006,7 @@ function obtenerIconoProducto(
 function obtenerTextoUnidad(
     producto
 ) {
-
-    if (
+        if (
         producto.tipoVenta ===
         "peso"
     ) {
@@ -1688,6 +3095,8 @@ function obtenerNombreCategoria(
     );
 
 }
+
+
 // =====================================================
 // NORMALIZAR TEXTO
 // =====================================================
