@@ -2294,8 +2294,13 @@ function configurarCategoriaInicial() {
 
 
 // =====================================================
-// BUSCADOR
+// CONFIGURAR BUSCADOR
 // =====================================================
+
+let busquedaGlobalTimer = null;
+
+let busquedaGlobalSolicitud = 0;
+
 
 function configurarBuscador() {
 
@@ -2310,17 +2315,28 @@ function configurarBuscador() {
     }
 
 
+    // =================================================
+    // FORZAR ESCRITURA NORMAL
+    // =================================================
+
+    searchInput.style.direction =
+        "ltr";
+
+    searchInput.style.textAlign =
+        "left";
+
+
+    // =================================================
+    // ESCRIBIR
+    // =================================================
+
     searchInput.addEventListener(
         "input",
         () => {
 
             textoBusqueda =
-                searchInput.value.trim();
+                searchInput.value;
 
-
-            // =================================================
-            // BOTÓN LIMPIAR
-            // =================================================
 
             if (searchClear) {
 
@@ -2332,55 +2348,104 @@ function configurarBuscador() {
             }
 
 
+            // Cancelar búsqueda global anterior
+
+            if (
+                busquedaGlobalTimer
+            ) {
+
+                clearTimeout(
+                    busquedaGlobalTimer
+                );
+
+            }
+
+
+            busquedaGlobalSolicitud++;
+
+
             // =================================================
-            // OCULTAR RESULTADOS GLOBALES ANTERIORES
+            // CAMPO VACÍO
             // =================================================
 
-            ocultarResultadosBusquedaGlobal();
+            if (
+                !textoBusqueda.trim()
+            ) {
+
+                ocultarResultadosBusquedaGlobal();
+
+
+                renderizarProductos();
+
+
+                return;
+
+            }
 
 
             // =================================================
-            // BÚSQUEDA NORMAL
+            // PRIMERO: BUSCAR EN LA TIENDA ACTUAL
             // =================================================
-
-            console.log(
-                "🔎 Buscando en tienda:",
-                textoBusqueda
-            );
-
 
             renderizarProductos();
 
 
+            const resultadosLocales =
+                obtenerProductosBusquedaLocal();
+
+
             // =================================================
-            // MOSTRAR OPCIÓN DE BÚSQUEDA GLOBAL
+            // SI ENCONTRÓ EN LA TIENDA
             // =================================================
 
             if (
-                textoBusqueda.length > 0
+                resultadosLocales.length > 0
             ) {
 
-                const resultadosLocales =
-                    obtenerProductosBusquedaLocal();
+                ocultarResultadosBusquedaGlobal();
 
-
-                if (
-                    resultadosLocales.length ===
-                    0
-                ) {
-
-                    mostrarOpcionBusquedaGlobal();
-
-                }
+                return;
 
             }
+
+
+            // =================================================
+            // NO ENCONTRÓ
+            //
+            // ESPERAMOS UN POQUITO PARA NO CONSULTAR
+            // FIREBASE POR CADA LETRA.
+            // =================================================
+
+            const solicitudActual =
+                busquedaGlobalSolicitud;
+
+
+            busquedaGlobalTimer =
+                setTimeout(
+                    async () => {
+
+                        if (
+                            solicitudActual !==
+                            busquedaGlobalSolicitud
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        await buscarAutomaticamenteEnOtrasTiendas();
+
+                    },
+                    400
+                );
 
         }
     );
 
 
     // =================================================
-    // LIMPIAR BUSCADOR
+    // LIMPIAR
     // =================================================
 
     if (searchClear) {
@@ -2400,6 +2465,20 @@ function configurarBuscador() {
                     "none";
 
 
+                busquedaGlobalSolicitud++;
+
+
+                if (
+                    busquedaGlobalTimer
+                ) {
+
+                    clearTimeout(
+                        busquedaGlobalTimer
+                    );
+
+                }
+
+
                 ocultarResultadosBusquedaGlobal();
 
 
@@ -2415,6 +2494,965 @@ function configurarBuscador() {
 
 }
 
+// =====================================================
+// OBTENER RESULTADOS LOCALES
+// =====================================================
+
+function obtenerProductosBusquedaLocal() {
+
+    if (
+        !textoBusqueda ||
+        !textoBusqueda.trim()
+    ) {
+
+        return productos;
+
+    }
+
+
+    const texto =
+        normalizarTexto(
+            textoBusqueda
+        );
+
+
+    return productos.filter(
+        producto => {
+
+            const nombre =
+                normalizarTexto(
+                    producto.nombre ||
+                    ""
+                );
+
+
+            const nombreNormalizado =
+                normalizarTexto(
+                    producto.nombreNormalizado ||
+                    ""
+                );
+
+
+            const codigo =
+                normalizarTexto(
+                    producto.codigo ||
+                    producto.codigoTienda ||
+                    ""
+                );
+
+
+            return (
+
+                nombre.includes(
+                    texto
+                ) ||
+
+                nombreNormalizado.includes(
+                    texto
+                ) ||
+
+                codigo.includes(
+                    texto
+                )
+
+            );
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// OCULTAR RESULTADOS GLOBALES
+// =====================================================
+
+function ocultarResultadosBusquedaGlobal() {
+
+    if (!emptyProducts) {
+
+        return;
+
+    }
+
+
+    emptyProducts.innerHTML =
+        "";
+
+
+    emptyProducts.style.display =
+        "none";
+
+}
+
+
+// =====================================================
+// BUSCAR AUTOMÁTICAMENTE EN OTRAS TIENDAS
+// =====================================================
+
+async function buscarAutomaticamenteEnOtrasTiendas() {
+
+    if (
+        !textoBusqueda ||
+        !textoBusqueda.trim()
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !tiendasDisponibles ||
+        !tiendasDisponibles.length
+    ) {
+
+        return;
+
+    }
+
+
+    const textoBuscado =
+        textoBusqueda.trim();
+
+
+    const textoNormalizado =
+        normalizarTexto(
+            textoBuscado
+        );
+
+
+    const solicitudActual =
+        busquedaGlobalSolicitud;
+
+
+    // =================================================
+    // TIENDAS DIFERENTES A LA ACTUAL
+    // =================================================
+
+    const otrasTiendas =
+        tiendasDisponibles.filter(
+            tienda =>
+                tienda.id !==
+                tiendaSeleccionadaId
+        );
+
+
+    if (
+        otrasTiendas.length ===
+        0
+    ) {
+
+        mostrarResultadosBusquedaGlobal(
+            [],
+            textoBuscado
+        );
+
+
+        return;
+
+    }
+
+
+    try {
+
+        // =================================================
+        // MOSTRAR ESTADO DE BÚSQUEDA
+        // =================================================
+
+        mostrarEstadoBusquedaGlobal(
+            textoBuscado
+        );
+
+
+        // =================================================
+        // CONSULTAR INVENTARIOS DE LAS OTRAS TIENDAS
+        // =================================================
+
+        const tiendaIds =
+            otrasTiendas.map(
+                tienda =>
+                    tienda.id
+            );
+
+
+        const inventariosGlobales =
+            [];
+
+
+        const loteTiendas =
+            30;
+
+
+        for (
+            let inicio = 0;
+            inicio < tiendaIds.length;
+            inicio += loteTiendas
+        ) {
+
+            const lote =
+                tiendaIds.slice(
+                    inicio,
+                    inicio +
+                    loteTiendas
+                );
+
+
+            const inventariosQuery =
+                query(
+                    collection(
+                        db,
+                        "inventarios"
+                    ),
+                    where(
+                        "tiendaId",
+                        "in",
+                        lote
+                    )
+                );
+
+
+            const inventariosSnapshot =
+                await getDocs(
+                    inventariosQuery
+                );
+
+
+            inventariosSnapshot.forEach(
+                docSnap => {
+
+                    const inventario = {
+
+                        id:
+                            docSnap.id,
+
+                        ...docSnap.data()
+
+                    };
+
+
+                    const existencia =
+                        Number(
+                            inventario.existencia ??
+                            0
+                        );
+
+
+                    if (
+                        inventario.disponible !== false &&
+                        existencia > 0
+                    ) {
+
+                        inventariosGlobales.push(
+                            inventario
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        // =================================================
+        // SI EL USUARIO CAMBIÓ LA BÚSQUEDA MIENTRAS
+        // FIREBASE RESPONDÍA, IGNORAMOS ESTE RESULTADO.
+        // =================================================
+
+        if (
+            solicitudActual !==
+            busquedaGlobalSolicitud
+        ) {
+
+            return;
+
+        }
+
+
+        // =================================================
+        // IDS DE PRODUCTOS
+        // =================================================
+
+        const productoIds =
+            [
+                ...new Set(
+                    inventariosGlobales
+                        .map(
+                            inventario =>
+                                inventario.productoId
+                        )
+                        .filter(Boolean)
+                )
+            ];
+
+
+        if (
+            productoIds.length ===
+            0
+        ) {
+
+            mostrarResultadosBusquedaGlobal(
+                [],
+                textoBuscado
+            );
+
+
+            return;
+
+        }
+
+
+        // =================================================
+        // PRODUCTOS MAESTROS
+        // =================================================
+
+        const productosGlobales =
+            [];
+
+
+        const loteProductos =
+            30;
+
+
+        for (
+            let inicio = 0;
+            inicio < productoIds.length;
+            inicio += loteProductos
+        ) {
+
+            const lote =
+                productoIds.slice(
+                    inicio,
+                    inicio +
+                    loteProductos
+                );
+
+
+            const productosQuery =
+                query(
+                    collection(
+                        db,
+                        "productos"
+                    ),
+                    where(
+                        documentId(),
+                        "in",
+                        lote
+                    )
+                );
+
+
+            const productosSnapshot =
+                await getDocs(
+                    productosQuery
+                );
+
+
+            productosSnapshot.forEach(
+                docSnap => {
+
+                    productosGlobales.push({
+
+                        id:
+                            docSnap.id,
+
+                        ...docSnap.data()
+
+                    });
+
+                }
+            );
+
+        }
+
+
+        // =================================================
+        // COMPARAR PRODUCTOS
+        // =================================================
+
+        const resultados =
+            [];
+
+
+        inventariosGlobales.forEach(
+            inventario => {
+
+                const producto =
+                    productosGlobales.find(
+                        item =>
+                            item.id ===
+                            inventario.productoId
+                    );
+
+
+                if (!producto) {
+
+                    return;
+
+                }
+
+
+                const nombre =
+                    normalizarTexto(
+                        producto.nombre ||
+                        ""
+                    );
+
+
+                const nombreNormalizado =
+                    normalizarTexto(
+                        producto.nombreNormalizado ||
+                        ""
+                    );
+
+
+                const codigo =
+                    normalizarTexto(
+                        producto.codigo ||
+                        inventario.codigoTienda ||
+                        ""
+                    );
+
+
+                const coincide =
+                    nombre.includes(
+                        textoNormalizado
+                    ) ||
+
+                    nombreNormalizado.includes(
+                        textoNormalizado
+                    ) ||
+
+                    codigo.includes(
+                        textoNormalizado
+                    );
+
+
+                if (!coincide) {
+
+                    return;
+
+                }
+
+
+                const tienda =
+                    tiendasDisponibles.find(
+                        item =>
+                            item.id ===
+                            inventario.tiendaId
+                    );
+
+
+                if (!tienda) {
+
+                    return;
+
+                }
+
+
+                resultados.push({
+
+                    producto:
+                        producto,
+
+                    inventario:
+                        inventario,
+
+                    tienda:
+                        tienda
+
+                });
+
+            }
+        );
+
+
+        // =================================================
+        // EVITAR RESULTADOS DUPLICADOS
+        // =================================================
+
+        const resultadosUnicos =
+            [];
+
+
+        const claves =
+            new Set();
+
+
+        resultados.forEach(
+            resultado => {
+
+                const clave =
+                    `${resultado.tienda.id}_${resultado.producto.id}`;
+
+
+                if (
+                    claves.has(
+                        clave
+                    )
+                ) {
+
+                    return;
+
+                }
+
+
+                claves.add(
+                    clave
+                );
+
+
+                resultadosUnicos.push(
+                    resultado
+                );
+
+            }
+        );
+
+
+        mostrarResultadosBusquedaGlobal(
+            resultadosUnicos,
+            textoBuscado
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "❌ Error buscando en otras tiendas:",
+            error
+        );
+
+
+        mostrarErrorBusquedaGlobal();
+
+    }
+
+}
+// =====================================================
+// ESTADO DE BÚSQUEDA GLOBAL
+// =====================================================
+
+function mostrarEstadoBusquedaGlobal(
+    texto
+) {
+
+    if (!emptyProducts) {
+
+        return;
+
+    }
+
+
+    emptyProducts.innerHTML = `
+
+        <div
+            style="
+                width:100%;
+                text-align:center;
+                padding:20px 12px;
+            "
+        >
+
+            <div
+                style="
+                    font-size:14px;
+                    margin-bottom:8px;
+                "
+            >
+                Buscando
+            </div>
+
+
+            <strong>
+                ${escaparHTML(
+                    texto
+                )}
+            </strong>
+
+        </div>
+
+    `;
+
+
+    emptyProducts.style.display =
+        "flex";
+
+}
+
+
+// =====================================================
+// MOSTRAR RESULTADOS GLOBALES
+// =====================================================
+
+function mostrarResultadosBusquedaGlobal(
+    resultados,
+    texto
+) {
+
+    if (!emptyProducts) {
+
+        return;
+
+    }
+
+
+    if (
+        resultados.length ===
+        0
+    ) {
+
+        emptyProducts.innerHTML = `
+
+            <div
+                style="
+                    width:100%;
+                    padding:20px 12px;
+                    text-align:center;
+                "
+            >
+
+                <div
+                    style="
+                        font-size:14px;
+                        margin-bottom:8px;
+                    "
+                >
+                    No encontramos
+                </div>
+
+
+                <strong>
+                    "${escaparHTML(
+                        texto
+                    )}"
+                </strong>
+
+
+                <div
+                    style="
+                        font-size:13px;
+                        margin-top:8px;
+                    "
+                >
+                    No está disponible en
+                    otras tiendas de tu zona.
+                </div>
+
+            </div>
+
+        `;
+
+
+        emptyProducts.style.display =
+            "flex";
+
+
+        return;
+
+    }
+
+
+    emptyProducts.innerHTML = `
+
+        <div
+            style="
+                width:100%;
+                text-align:left;
+            "
+        >
+
+            <div
+                style="
+                    text-align:center;
+                    margin-bottom:14px;
+                "
+            >
+
+                <strong>
+                    "${escaparHTML(
+                        texto
+                    )}"
+                </strong>
+
+
+                <div
+                    style="
+                        font-size:13px;
+                        margin-top:5px;
+                    "
+                >
+                    Disponible en otras tiendas
+                    de tu zona
+                </div>
+
+            </div>
+
+
+            <div
+                id="motiGlobalResultsList"
+            ></div>
+
+        </div>
+
+    `;
+
+
+    const lista =
+        document.getElementById(
+            "motiGlobalResultsList"
+        );
+
+
+    resultados.forEach(
+        resultado => {
+
+            const producto =
+                resultado.producto;
+
+
+            const inventario =
+                resultado.inventario;
+
+
+            const tienda =
+                resultado.tienda;
+
+
+            const precio =
+                Number(
+                    inventario.precio ??
+                    producto.precio ??
+                    0
+                );
+
+
+            const cantidad =
+                obtenerCantidadGlobal(
+                    producto.id,
+                    tienda.id
+                );
+
+
+            const item =
+                document.createElement(
+                    "article"
+                );
+
+
+            item.style.display =
+                "flex";
+
+
+            item.style.alignItems =
+                "center";
+
+
+            item.style.gap =
+                "10px";
+
+
+            item.style.padding =
+                "12px 0";
+
+
+            item.style.borderBottom =
+                "1px solid #eeeeee";
+
+
+            item.innerHTML = `
+
+                <div
+                    style="
+                        flex:1;
+                        min-width:0;
+                    "
+                >
+
+                    <strong
+                        style="
+                            display:block;
+                            font-size:14px;
+                        "
+                    >
+                        ${escaparHTML(
+                            producto.nombre ||
+                            "Producto"
+                        )}
+                    </strong>
+
+
+                    <span
+                        style="
+                            display:block;
+                            font-size:12px;
+                            margin-top:3px;
+                        "
+                    >
+                        🏪 ${escaparHTML(
+                            tienda.nombre ||
+                            "Tienda"
+                        )}
+                    </span>
+
+
+                    <b
+                        style="
+                            display:block;
+                            margin-top:4px;
+                        "
+                    >
+                        ${formatearPrecio(
+                            precio
+                        )}
+                    </b>
+
+                </div>
+
+
+                <div
+                    class="quantity-control"
+                    style="
+                        flex-shrink:0;
+                    "
+                >
+
+                    <button
+                        type="button"
+                        class="global-quantity-minus"
+                        aria-label="Disminuir cantidad"
+                    >
+                        −
+                    </button>
+
+
+                    <span
+                        class="global-quantity-value"
+                    >
+                        ${cantidad}
+                    </span>
+
+
+                    <button
+                        type="button"
+                        class="global-quantity-plus"
+                        aria-label="Aumentar cantidad"
+                    >
+                        +
+                    </button>
+
+                </div>
+
+            `;
+
+
+            // =================================================
+            // MENOS
+            // =================================================
+
+            const btnMinus =
+                item.querySelector(
+                    ".global-quantity-minus"
+                );
+
+
+            btnMinus.addEventListener(
+                "click",
+                event => {
+
+                    event.stopPropagation();
+
+
+                    cambiarCantidadGlobal(
+                        producto.id,
+                        tienda.id,
+                        -1
+                    );
+
+                }
+            );
+
+
+            // =================================================
+            // MÁS
+            // =================================================
+
+            const btnPlus =
+                item.querySelector(
+                    ".global-quantity-plus"
+                );
+
+
+            btnPlus.addEventListener(
+                "click",
+                event => {
+
+                    event.stopPropagation();
+
+
+                    cambiarCantidadGlobal(
+                        producto.id,
+                        tienda.id,
+                        1
+                    );
+
+                }
+            );
+
+
+            if (lista) {
+
+                lista.appendChild(
+                    item
+                );
+
+            }
+
+        }
+    );
+
+
+    emptyProducts.style.display =
+        "flex";
+
+}
+
+
+// =====================================================
+// ERROR
+// =====================================================
+
+function mostrarErrorBusquedaGlobal() {
+
+    if (!emptyProducts) {
+
+        return;
+
+    }
+
+
+    emptyProducts.innerHTML = `
+
+        <div
+            style="
+                text-align:center;
+                padding:20px;
+            "
+        >
+
+            No pudimos consultar
+            otras tiendas en este momento.
+
+        </div>
+
+    `;
+
+
+    emptyProducts.style.display =
+        "flex";
+
+}
 
 // =====================================================
 // OBTENER RESULTADOS DE LA TIENDA ACTUAL
