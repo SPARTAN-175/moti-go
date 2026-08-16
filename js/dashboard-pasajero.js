@@ -82,6 +82,82 @@ const searchClear =
 const locationText =
     document.getElementById("currentLocation");
 
+// =====================================================
+// SELECTOR DE TIENDA
+// =====================================================
+
+const storeSelectorSection =
+    document.createElement("div");
+
+storeSelectorSection.id =
+    "motiStoreSelectorSection";
+
+storeSelectorSection.style.display =
+    "none";
+
+
+const storeSelectorLabel =
+    document.createElement("div");
+
+storeSelectorLabel.textContent =
+    "Comprar en";
+
+
+storeSelectorLabel.style.fontWeight =
+    "600";
+
+storeSelectorLabel.style.marginBottom =
+    "6px";
+
+
+const storeSelector =
+    document.createElement("select");
+
+storeSelector.id =
+    "motiStoreSelector";
+
+
+storeSelector.style.width =
+    "100%";
+
+storeSelector.style.padding =
+    "12px";
+
+storeSelector.style.borderRadius =
+    "10px";
+
+storeSelector.style.border =
+    "1px solid #ddd";
+
+storeSelector.style.background =
+    "#fff";
+
+storeSelector.style.fontSize =
+    "15px";
+
+
+storeSelectorSection.appendChild(
+    storeSelectorLabel
+);
+
+storeSelectorSection.appendChild(
+    storeSelector
+);
+
+
+// =====================================================
+// INSERTAR SELECTOR ANTES DEL CATÁLOGO
+// =====================================================
+
+if (productsContainer) {
+
+    productsContainer.parentNode.insertBefore(
+        storeSelectorSection,
+        productsContainer
+    );
+
+}
+
 
 // =====================================================
 // SELECTOR DE VIAJE
