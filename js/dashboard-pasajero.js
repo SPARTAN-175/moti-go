@@ -3455,12 +3455,13 @@ function mostrarResultadosBusquedaGlobal(
                     </button>
 
 
-                    <span
-                        class="global-quantity-value"
-                    >
-                        ${cantidad}
-                    </span>
-
+ <span
+    class="global-quantity-value"
+    data-product-id="${producto.id}"
+    data-tienda-id="${tienda.id}"
+>
+    ${cantidad}
+</span>
 
                     <button
                         type="button"
