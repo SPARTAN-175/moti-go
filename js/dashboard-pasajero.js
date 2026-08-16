@@ -1930,57 +1930,6 @@ function configurarBuscador() {
 
 }
 
-// =====================================================
-// TEXTO DE UNIDAD
-// =====================================================
-
-function obtenerTextoUnidad(
-    producto
-) {
-
-    if (
-        producto.tipoVenta ===
-        "peso"
-    ) {
-
-        return `Por ${
-            producto.unidad ||
-            "kg"
-        }`;
-
-    }
-
-
-    if (
-        producto.unidad
-    ) {
-
-        return producto.unidad;
-
-    }
-
-
-    if (
-        producto.presentacion
-    ) {
-
-        return producto.presentacion;
-
-    }
-
-
-    if (
-        producto.contenido
-    ) {
-
-        return producto.contenido;
-
-    }
-
-
-    return "Por pieza";
-
-}
 
 
 // =====================================================
