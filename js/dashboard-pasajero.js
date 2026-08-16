@@ -1,10 +1,6 @@
 import { auth, db } from "./firebase-config.js";
 
 import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-
-import {
     doc,
     updateDoc,
     collection,
@@ -14,6 +10,10 @@ import {
     where,
     documentId
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
 // =====================================================
@@ -37,6 +37,12 @@ let categoriaActual = "todos";
 let textoBusqueda = "";
 
 let carrito = {};
+
+let tiendasDisponibles = [];
+
+let tiendaSeleccionada = null;
+
+let tiendaSeleccionadaId = null;
 
 
 // =====================================================
