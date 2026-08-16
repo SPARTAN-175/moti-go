@@ -1352,3 +1352,65 @@ body {
 body.menu-open {
     overflow: hidden;
 }
+
+/* =========================================================
+   TIENDA SELECCIONADA - RAPIDOSTUACAN
+========================================================= */
+
+.store-selector-section {
+    margin-top: 12px;
+    padding: 12px 13px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 15px;
+}
+
+.store-selector-icon {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    border-radius: 11px;
+    background: #eff6ff;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.store-selector-icon .material-symbols-outlined {
+    font-size: 21px;
+}
+
+.store-selector-info {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.store-selector-info > span {
+    color: #9ca3af;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: .8px;
+}
+
+#storeSelector {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #374151;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0;
+}
+
+#storeSelector:disabled {
+    opacity: .6;
+}
