@@ -561,7 +561,7 @@ async function cargarTiendasDeLaZona(
 
 
 // =====================================================
-// CARGAR CATÁLOGO DE LAS TIENDAS DE LA ZONA
+// CARGAR CATÁLOGO
 // =====================================================
 
 async function cargarCatalogo() {
@@ -578,33 +578,23 @@ async function cargarCatalogo() {
         );
 
 
-        const usuario =
-            await cargarContextoCliente();
+        // =================================================
+        // 1. OBTENER TIENDAS DE LA ZONA
+        // =================================================
+
+        await cargarContextoTiendas();
 
 
         // =================================================
-        // TIENDAS
+        // 2. SI NO HAY TIENDAS
         // =================================================
-
-        const tiendas =
-            await cargarTiendasDeLaZona(
-                usuario
-            );
-
-
-        console.log(
-            "🏪 Tiendas disponibles en la zona:",
-            tiendas.length,
-            tiendas
-        );
-
 
         if (
-            tiendas.length === 0
+            !tiendasDisponibles.length
         ) {
 
             console.warn(
-                "⚠️ No hay tiendas disponibles en la localidad del cliente."
+                "⚠️ No hay tiendas disponibles en la zona."
             );
 
 
@@ -637,228 +627,17 @@ async function cargarCatalogo() {
             }
 
 
-            if (productsLabel) {
-
-                productsLabel.textContent =
-                    "0 productos";
-
-            }
-
-
-            if (productsTitle) {
-
-                productsTitle.textContent =
-                    "Productos";
-
-            }
-
-
             return;
 
         }
 
 
         // =================================================
-        // INVENTARIOS
-        // =================================================
-        //
-        // IMPORTANTE:
-        //
-        // Ya NO descargamos todos los inventarios.
-        //
-        // Solamente consultamos los inventarios de las
-        // tiendas que pertenecen a la zona del cliente.
-        //
+        // 3. CARGAR CATÁLOGO DE LA TIENDA SELECCIONADA
         // =================================================
 
-        inventarios = [];
+        await cargarCatalogoDeTienda();
 
-
-        const tiendaIds =
-            tiendas.map(
-                tienda =>
-                    tienda.id
-            );
-
-
-        const loteTiendas =
-            30;
-
-
-        for (
-            let inicio = 0;
-            inicio < tiendaIds.length;
-            inicio += loteTiendas
-        ) {
-
-            const lote =
-                tiendaIds.slice(
-                    inicio,
-                    inicio +
-                    loteTiendas
-                );
-
-
-            const inventarioQuery =
-                query(
-                    collection(
-                        db,
-                        "inventarios"
-                    ),
-                    where(
-                        "tiendaId",
-                        "in",
-                        lote
-                    )
-                );
-
-
-            const inventarioSnapshot =
-                await getDocs(
-                    inventarioQuery
-                );
-
-
-            inventarioSnapshot.forEach(
-                docSnap => {
-
-                    const inventario = {
-
-                        id:
-                            docSnap.id,
-
-                        ...docSnap.data()
-
-                    };
-
-
-                    const existencia =
-                        Number(
-                            inventario.existencia ??
-                            0
-                        );
-
-
-                    if (
-                        inventario.disponible !== false &&
-                        existencia > 0
-                    ) {
-
-                        inventarios.push(
-                            inventario
-                        );
-
-                    }
-
-                }
-            );
-
-        }
-
-
-        console.log(
-            "🏪 Inventarios disponibles:",
-            inventarios.length
-        );
-
-
-        // =================================================
-        // PRODUCTOS
-        // =================================================
-        //
-        // Solo consultamos los productos que realmente
-        // aparecen en los inventarios disponibles.
-        //
-        // =================================================
-
-        const productoIds = [
-            ...new Set(
-                inventarios
-                    .map(
-                        inventario =>
-                            inventario.productoId
-                    )
-                    .filter(Boolean)
-            )
-        ];
-
-
-        productos = [];
-
-
-        const loteProductos =
-            30;
-
-
-        for (
-            let inicio = 0;
-            inicio < productoIds.length;
-            inicio += loteProductos
-        ) {
-
-            const lote =
-                productoIds.slice(
-                    inicio,
-                    inicio +
-                    loteProductos
-                );
-
-
-            const productosQuery =
-                query(
-                    collection(
-                        db,
-                        "productos"
-                    ),
-                    where(
-                        documentId(),
-                        "in",
-                        lote
-                    )
-                );
-
-
-            const productosSnapshot =
-                await getDocs(
-                    productosQuery
-                );
-
-
-            productosSnapshot.forEach(
-                docSnap => {
-
-                    productos.push({
-
-                        id:
-                            docSnap.id,
-
-                        ...docSnap.data()
-
-                    });
-
-                }
-            );
-
-        }
-
-
-        console.log(
-            "📦 Productos encontrados:",
-            productos.length
-        );
-
-
-        console.log(
-            "🏪 Inventarios encontrados:",
-            inventarios.length
-        );
-
-
-        // =================================================
-        // MOSTRAR
-        // =================================================
-
-        renderizarProductos();
 
     }
     catch (error) {
@@ -867,6 +646,11 @@ async function cargarCatalogo() {
             "❌ Error cargando catálogo:",
             error
         );
+
+
+        productos = [];
+
+        inventarios = [];
 
 
         if (productsContainer) {
@@ -887,7 +671,6 @@ async function cargarCatalogo() {
     }
 
 }
-
 
 // =====================================================
 // OBTENER INVENTARIO DISPONIBLE
