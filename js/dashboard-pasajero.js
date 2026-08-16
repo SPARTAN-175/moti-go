@@ -1,12 +1,15 @@
 import { auth, db } from "./firebase-config.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import {
     doc,
     updateDoc,
-    getDoc,
     collection,
     getDocs,
+    getDoc,
     query,
     where,
     documentId
@@ -29,10 +32,6 @@ let userLng = null;
 
 let productos = [];
 let inventarios = [];
-
-let tiendasDisponibles = [];
-let tiendaSeleccionada = null;
-let tiendaSeleccionadaId = null;
 
 let categoriaActual = "todos";
 let textoBusqueda = "";
@@ -76,12 +75,6 @@ const searchClear =
 
 const locationText =
     document.getElementById("currentLocation");
-
-const storeSelector =
-    document.getElementById("storeSelector");
-
-const storeSelectorSection =
-    document.getElementById("storeSelectorSection");
 
 
 // =====================================================
@@ -195,18 +188,29 @@ function guardarCarrito() {
 
 
 // =====================================================
-// CARGAR CONTEXTO DEL CLIENTE Y TIENDAS DISPONIBLES
+// CARGAR CONTEXTO DEL CLIENTE
 // =====================================================
 
-async function cargarContextoTiendas() {
+async function cargarContextoCliente() {
 
-    const user = auth.currentUser;
+    const user =
+        auth.currentUser;
+
 
     if (!user) {
-        throw new Error("No hay usuario autenticado.");
+
+        throw new Error(
+            "No hay usuario autenticado."
+        );
+
     }
 
-    console.log("📍 Cargando zona del cliente...");
+
+    console.log(
+        "👤 Usuario pasajero autenticado:",
+        user.uid
+    );
+
 
     const usuarioSnap =
         await getDoc(
@@ -217,498 +221,265 @@ async function cargarContextoTiendas() {
             )
         );
 
+
     if (!usuarioSnap.exists()) {
-        throw new Error("No existe el perfil del cliente.");
-    }
 
-    const usuario = usuarioSnap.data();
-
-    const municipioCliente =
-        normalizarTexto(usuario.municipio || "");
-
-    const localidadCliente =
-        normalizarTexto(usuario.localidad || "");
-
-    if (!municipioCliente && !localidadCliente) {
-        throw new Error("El cliente no tiene municipio o localidad registrados.");
-    }
-
-    console.log("📍 Zona cliente:", {
-        municipio: usuario.municipio,
-        localidad: usuario.localidad,
-        latitud: usuario.latitud,
-        longitud: usuario.longitud
-    });
-
-    // Una sola consulta principal: tiendas del municipio del cliente.
-    // Firestore compara los textos literalmente, por lo que primero
-    // usamos el valor guardado en el perfil y, si no hay resultados,
-    // probamos variantes compatibles con los datos actuales.
-    let tiendasSnapshot =
-        await getDocs(
-            query(
-                collection(db, "tiendas"),
-                where(
-                    "municipio",
-                    "==",
-                    usuario.municipio
-                )
-            )
+        throw new Error(
+            "No existe el perfil del cliente."
         );
 
-    tiendasDisponibles = [];
-
-    if (!tiendasSnapshot.empty) {
-
-        tiendasSnapshot.forEach((docSnap) => {
-
-            tiendasDisponibles.push({
-                id: docSnap.id,
-                ...docSnap.data()
-            });
-
-        });
-
-    }
-    else {
-
-        // Compatibilidad temporal con municipios que tienen
-        // diferencias de acentos en los documentos existentes.
-        const municipioNormalizado =
-            normalizarTexto(
-                usuario.municipio || ""
-            );
-
-        const municipiosCompatibles = [
-            usuario.municipio,
-            municipioNormalizado
-        ];
-
-        // Caso actual conocido:
-        // Ostuacan <-> Ostuacán
-        if (
-            municipioNormalizado ===
-            "ostuacan"
-        ) {
-
-            municipiosCompatibles.push(
-                "Ostuacán"
-            );
-
-        }
-
-        const municipiosUnicos =
-            [
-                ...new Set(
-                    municipiosCompatibles.filter(Boolean)
-                )
-            ];
-
-        for (
-            const municipio of municipiosUnicos
-        ) {
-
-            const snapshot =
-                await getDocs(
-                    query(
-                        collection(db, "tiendas"),
-                        where(
-                            "municipio",
-                            "==",
-                            municipio
-                        )
-                    )
-                );
-
-            snapshot.forEach((docSnap) => {
-
-                if (
-                    !tiendasDisponibles.some(
-                        tienda =>
-                            tienda.id ===
-                            docSnap.id
-                    )
-                ) {
-
-                    tiendasDisponibles.push({
-                        id: docSnap.id,
-                        ...docSnap.data()
-                    });
-
-                }
-
-            });
-
-        }
-
     }
 
-    // Filtrar tiendas activas y validar localidad.
-    tiendasDisponibles =
-        tiendasDisponibles.filter(
-            tienda => {
 
-                if (
-                    tienda.activa === false
-                ) {
-                    return false;
-                }
+    const usuario =
+        usuarioSnap.data();
 
-                const localidadTienda =
-                    normalizarTexto(
-                        tienda.localidad || ""
-                    );
-
-                const municipioTienda =
-                    normalizarTexto(
-                        tienda.municipio || ""
-                    );
-
-                const mismaLocalidad =
-                    !localidadTienda ||
-                    !localidadCliente ||
-                    localidadTienda ===
-                        localidadCliente;
-
-                const mismoMunicipio =
-                    !municipioTienda ||
-                    !municipioCliente ||
-                    municipioTienda ===
-                        municipioCliente;
-
-                return (
-                    mismaLocalidad &&
-                    mismoMunicipio
-                );
-
-            }
-        );
-
-    tiendasDisponibles.sort((a, b) =>
-        String(a.nombre || "").localeCompare(
-            String(b.nombre || ""),
-            "es"
-        )
-    );
 
     console.log(
-        "🏪 Tiendas disponibles en la zona:",
-        tiendasDisponibles.length,
-        tiendasDisponibles
+        "👤 Perfil cliente:",
+        usuario
     );
 
-    // La ausencia de tiendas locales no es un error técnico.
-    // Más adelante aquí se conectará la opción para buscar
-    // tiendas de otra zona.
-    if (!tiendasDisponibles.length) {
 
-        console.warn(
-            "⚠️ No hay tiendas disponibles en la localidad del cliente."
-        );
-
-        tiendaSeleccionada = null;
-        tiendaSeleccionadaId = null;
-
-        if (storeSelector) {
-
-            storeSelector.innerHTML = "";
-            storeSelector.disabled = true;
-
-        }
-
-        if (storeSelectorSection) {
-
-            storeSelectorSection.style.display =
-                "none";
-
-        }
-
-        if (productsContainer) {
-
-            productsContainer.innerHTML =
-                "";
-
-        }
-
-        if (emptyProducts) {
-
-            emptyProducts.style.display =
-                "flex";
-        }
-
-        return;
-
-    }
-
-    const tiendaGuardada =
-        sessionStorage.getItem("motiTiendaSeleccionadaId");
-
-    const tiendaEncontrada =
-        tiendasDisponibles.find(
-            tienda => tienda.id === tiendaGuardada
-        );
-
-    tiendaSeleccionada =
-        tiendaEncontrada ||
-        tiendasDisponibles[0];
-
-    tiendaSeleccionadaId =
-        tiendaSeleccionada.id;
-
-    sessionStorage.setItem(
-        "motiTiendaSeleccionadaId",
-        tiendaSeleccionadaId
-    );
-
-    renderizarSelectorTiendas();
+    return usuario;
 
 }
 
 
 // =====================================================
-// SELECTOR DE TIENDAS
+// OBTENER TIENDAS DE LA ZONA DEL CLIENTE
+// =====================================================
+//
+// PRIORIDAD:
+//
+// 1. localidadId
+// 2. compatibilidad temporal con municipio/localidad
+//
+// NO utilizamos las coordenadas del catálogo de
+// localidades para determinar la posición física.
+//
+// Las coordenadas reales del cliente continúan viniendo
+// del GPS.
+//
 // =====================================================
 
-function renderizarSelectorTiendas() {
+async function cargarTiendasDeLaZona(
+    usuario
+) {
 
-    if (!storeSelector) {
-        return;
-    }
-
-    storeSelector.innerHTML = "";
-
-    tiendasDisponibles.forEach((tienda) => {
-
-        const option =
-            document.createElement("option");
-
-        option.value = tienda.id;
-
-        option.textContent =
-            tienda.nombre || "Tienda";
-
-        if (tienda.id === tiendaSeleccionadaId) {
-            option.selected = true;
-        }
-
-        storeSelector.appendChild(option);
-
-    });
-
-    storeSelector.disabled = false;
-
-    if (storeSelectorSection) {
-        storeSelectorSection.style.display =
-            tiendasDisponibles.length > 0
-                ? "block"
-                : "none";
-    }
-
-}
+    let tiendasEncontradas = [];
 
 
-async function seleccionarTienda(tiendaId) {
+    // =================================================
+    // OPCIÓN PRINCIPAL: localidadId
+    // =================================================
 
-    const tienda =
-        tiendasDisponibles.find(
-            item => item.id === tiendaId
-        );
-
-    if (!tienda) {
-        return;
-    }
-
-    tiendaSeleccionada = tienda;
-    tiendaSeleccionadaId = tienda.id;
-
-    sessionStorage.setItem(
-        "motiTiendaSeleccionadaId",
-        tiendaSeleccionadaId
-    );
-
-    categoriaActual = "todos";
-
-    document
-        .querySelectorAll(".category-item")
-        .forEach((item) => {
-            item.classList.toggle(
-                "active",
-                item.dataset.category === "todos"
-            );
-        });
-
-    console.log(
-        "🏪 Tienda seleccionada:",
-        tiendaSeleccionada
-    );
-
-    await cargarCatalogoDeTienda();
-
-}
-
-
-if (storeSelector) {
-
-    storeSelector.addEventListener(
-        "change",
-        async (event) => {
-
-            try {
-
-                storeSelector.disabled = true;
-
-                await seleccionarTienda(
-                    event.target.value
-                );
-
-            }
-            catch (error) {
-
-                console.error(
-                    "❌ Error cambiando de tienda:",
-                    error
-                );
-
-                alert(
-                    "No pudimos cargar esta tienda. Intenta nuevamente."
-                );
-
-            }
-            finally {
-
-                storeSelector.disabled = false;
-
-            }
-
-        }
-    );
-
-}
-
-
-// =====================================================
-// CARGAR CATÁLOGO DE LA TIENDA SELECCIONADA
-// =====================================================
-
-async function cargarCatalogoDeTienda() {
-
-    if (!productsContainer) {
-        return;
-    }
-
-    if (!tiendaSeleccionadaId) {
-        return;
-    }
-
-    console.log(
-        "🛒 Cargando catálogo de:",
-        tiendaSeleccionada?.nombre
-    );
-
-    // Una sola lectura de inventarios: solamente esta tienda.
-    const inventariosQuery =
-        query(
-            collection(db, "inventarios"),
-            where(
-                "tiendaId",
-                "==",
-                tiendaSeleccionadaId
-            )
-        );
-
-    const inventarioSnapshot =
-        await getDocs(inventariosQuery);
-
-    inventarios = [];
-
-    inventarioSnapshot.forEach((docSnap) => {
-
-        const inventario = {
-            id: docSnap.id,
-            ...docSnap.data()
-        };
-
-        const existencia =
-            Number(inventario.existencia ?? 0);
-
-        if (
-            inventario.disponible !== false &&
-            existencia > 0
-        ) {
-            inventarios.push(inventario);
-        }
-
-    });
-
-    console.log(
-        "🏪 Inventarios disponibles de la tienda:",
-        inventarios.length
-    );
-
-    // Solamente necesitamos los productos que existen en esta tienda.
-    const productoIds = [
-        ...new Set(
-            inventarios
-                .map(item => item.productoId)
-                .filter(Boolean)
-        )
-    ];
-
-    productos = [];
-
-    // Firestore limita las consultas IN a grupos pequeños.
-    const loteTamano = 30;
-
-    for (
-        let inicio = 0;
-        inicio < productoIds.length;
-        inicio += loteTamano
+    if (
+        usuario.localidadId
     ) {
 
-        const lote =
-            productoIds.slice(
-                inicio,
-                inicio + loteTamano
-            );
+        console.log(
+            "📍 Buscando tiendas por localidadId:",
+            usuario.localidadId
+        );
 
-        const productosQuery =
+
+        const tiendasQuery =
             query(
-                collection(db, "productos"),
+                collection(
+                    db,
+                    "tiendas"
+                ),
                 where(
-                    documentId(),
-                    "in",
-                    lote
+                    "localidadId",
+                    "==",
+                    usuario.localidadId
                 )
             );
 
-        const productosSnapshot =
-            await getDocs(productosQuery);
 
-        productosSnapshot.forEach((docSnap) => {
+        const tiendasSnapshot =
+            await getDocs(
+                tiendasQuery
+            );
 
-            productos.push({
-                id: docSnap.id,
-                ...docSnap.data()
-            });
 
-        });
+        tiendasSnapshot.forEach(
+            docSnap => {
+
+                const tienda = {
+
+                    id:
+                        docSnap.id,
+
+                    ...docSnap.data()
+
+                };
+
+
+                if (
+                    tienda.activa !== false
+                ) {
+
+                    tiendasEncontradas.push(
+                        tienda
+                    );
+
+                }
+
+            }
+        );
+
+
+        console.log(
+            "🏪 Tiendas encontradas por localidadId:",
+            tiendasEncontradas.length
+        );
+
+
+        return tiendasEncontradas;
 
     }
 
-    console.log(
-        "📦 Productos de la tienda cargados:",
-        productos.length
+
+    // =================================================
+    // COMPATIBILIDAD TEMPORAL
+    // =================================================
+    //
+    // Los registros antiguos todavía pueden no tener
+    // localidadId.
+    //
+    // En ese caso utilizamos municipio/localidad.
+    //
+    // Esta parte desaparecerá cuando todos los usuarios
+    // y tiendas nuevos utilicen localidadId.
+    //
+    // =================================================
+
+    console.warn(
+        "⚠️ El usuario todavía no tiene localidadId. Usando compatibilidad por municipio/localidad."
     );
 
-    renderizarProductos();
 
-    actualizarCarrito();
+    const municipioUsuario =
+        normalizarTexto(
+            usuario.municipio ||
+            ""
+        );
+
+
+    const localidadUsuario =
+        normalizarTexto(
+            usuario.localidad ||
+            ""
+        );
+
+
+    if (
+        !municipioUsuario
+    ) {
+
+        return [];
+
+    }
+
+
+    const tiendasQuery =
+        query(
+            collection(
+                db,
+                "tiendas"
+            ),
+            where(
+                "municipio",
+                "==",
+                usuario.municipio
+            )
+        );
+
+
+    const tiendasSnapshot =
+        await getDocs(
+            tiendasQuery
+        );
+
+
+    tiendasSnapshot.forEach(
+        docSnap => {
+
+            const tienda = {
+
+                id:
+                    docSnap.id,
+
+                ...docSnap.data()
+
+            };
+
+
+            if (
+                tienda.activa === false
+            ) {
+
+                return;
+
+            }
+
+
+            const municipioTienda =
+                normalizarTexto(
+                    tienda.municipio ||
+                    ""
+                );
+
+
+            const localidadTienda =
+                normalizarTexto(
+                    tienda.localidad ||
+                    ""
+                );
+
+
+            const mismoMunicipio =
+                municipioTienda ===
+                municipioUsuario;
+
+
+            const mismaLocalidad =
+                !localidadUsuario ||
+                !localidadTienda ||
+                localidadTienda ===
+                localidadUsuario;
+
+
+            if (
+                mismoMunicipio &&
+                mismaLocalidad
+            ) {
+
+                tiendasEncontradas.push(
+                    tienda
+                );
+
+            }
+
+        }
+    );
+
+
+    console.log(
+        "🏪 Tiendas encontradas por compatibilidad:",
+        tiendasEncontradas.length
+    );
+
+
+    return tiendasEncontradas;
 
 }
 
 
 // =====================================================
-// CARGAR CATÁLOGO
+// CARGAR CATÁLOGO DE LAS TIENDAS DE LA ZONA
 // =====================================================
 
 async function cargarCatalogo() {
@@ -717,15 +488,295 @@ async function cargarCatalogo() {
         return;
     }
 
+
     try {
 
         console.log(
             "🛒 Cargando catálogo MOTI GO..."
         );
 
-        await cargarContextoTiendas();
 
-        await cargarCatalogoDeTienda();
+        const usuario =
+            await cargarContextoCliente();
+
+
+        // =================================================
+        // TIENDAS
+        // =================================================
+
+        const tiendas =
+            await cargarTiendasDeLaZona(
+                usuario
+            );
+
+
+        console.log(
+            "🏪 Tiendas disponibles en la zona:",
+            tiendas.length,
+            tiendas
+        );
+
+
+        if (
+            tiendas.length === 0
+        ) {
+
+            console.warn(
+                "⚠️ No hay tiendas disponibles en la localidad del cliente."
+            );
+
+
+            productos = [];
+
+            inventarios = [];
+
+
+            if (productsContainer) {
+
+                productsContainer.innerHTML =
+                    "";
+
+            }
+
+
+            if (emptyProducts) {
+
+                emptyProducts.style.display =
+                    "flex";
+
+            }
+
+
+            if (productsCount) {
+
+                productsCount.textContent =
+                    "0 productos";
+
+            }
+
+
+            if (productsLabel) {
+
+                productsLabel.textContent =
+                    "0 productos";
+
+            }
+
+
+            if (productsTitle) {
+
+                productsTitle.textContent =
+                    "Productos";
+
+            }
+
+
+            return;
+
+        }
+
+
+        // =================================================
+        // INVENTARIOS
+        // =================================================
+        //
+        // IMPORTANTE:
+        //
+        // Ya NO descargamos todos los inventarios.
+        //
+        // Solamente consultamos los inventarios de las
+        // tiendas que pertenecen a la zona del cliente.
+        //
+        // =================================================
+
+        inventarios = [];
+
+
+        const tiendaIds =
+            tiendas.map(
+                tienda =>
+                    tienda.id
+            );
+
+
+        const loteTiendas =
+            30;
+
+
+        for (
+            let inicio = 0;
+            inicio < tiendaIds.length;
+            inicio += loteTiendas
+        ) {
+
+            const lote =
+                tiendaIds.slice(
+                    inicio,
+                    inicio +
+                    loteTiendas
+                );
+
+
+            const inventarioQuery =
+                query(
+                    collection(
+                        db,
+                        "inventarios"
+                    ),
+                    where(
+                        "tiendaId",
+                        "in",
+                        lote
+                    )
+                );
+
+
+            const inventarioSnapshot =
+                await getDocs(
+                    inventarioQuery
+                );
+
+
+            inventarioSnapshot.forEach(
+                docSnap => {
+
+                    const inventario = {
+
+                        id:
+                            docSnap.id,
+
+                        ...docSnap.data()
+
+                    };
+
+
+                    const existencia =
+                        Number(
+                            inventario.existencia ??
+                            0
+                        );
+
+
+                    if (
+                        inventario.disponible !== false &&
+                        existencia > 0
+                    ) {
+
+                        inventarios.push(
+                            inventario
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        console.log(
+            "🏪 Inventarios disponibles:",
+            inventarios.length
+        );
+
+
+        // =================================================
+        // PRODUCTOS
+        // =================================================
+        //
+        // Solo consultamos los productos que realmente
+        // aparecen en los inventarios disponibles.
+        //
+        // =================================================
+
+        const productoIds = [
+            ...new Set(
+                inventarios
+                    .map(
+                        inventario =>
+                            inventario.productoId
+                    )
+                    .filter(Boolean)
+            )
+        ];
+
+
+        productos = [];
+
+
+        const loteProductos =
+            30;
+
+
+        for (
+            let inicio = 0;
+            inicio < productoIds.length;
+            inicio += loteProductos
+        ) {
+
+            const lote =
+                productoIds.slice(
+                    inicio,
+                    inicio +
+                    loteProductos
+                );
+
+
+            const productosQuery =
+                query(
+                    collection(
+                        db,
+                        "productos"
+                    ),
+                    where(
+                        documentId(),
+                        "in",
+                        lote
+                    )
+                );
+
+
+            const productosSnapshot =
+                await getDocs(
+                    productosQuery
+                );
+
+
+            productosSnapshot.forEach(
+                docSnap => {
+
+                    productos.push({
+
+                        id:
+                            docSnap.id,
+
+                        ...docSnap.data()
+
+                    });
+
+                }
+            );
+
+        }
+
+
+        console.log(
+            "📦 Productos encontrados:",
+            productos.length
+        );
+
+
+        console.log(
+            "🏪 Inventarios encontrados:",
+            inventarios.length
+        );
+
+
+        // =================================================
+        // MOSTRAR
+        // =================================================
+
+        renderizarProductos();
 
     }
     catch (error) {
@@ -735,20 +786,20 @@ async function cargarCatalogo() {
             error
         );
 
+
         if (productsContainer) {
-            productsContainer.innerHTML = "";
+
+            productsContainer.innerHTML =
+                "";
+
         }
+
 
         if (emptyProducts) {
-            emptyProducts.style.display = "flex";
-        }
 
-        if (storeSelector) {
-            storeSelector.disabled = true;
-        }
+            emptyProducts.style.display =
+                "flex";
 
-        if (storeSelectorSection) {
-            storeSelectorSection.style.display = "none";
         }
 
     }
@@ -826,10 +877,14 @@ function obtenerMejorInventario(
         (mejor, actual) => {
 
             const precioMejor =
-                Number(mejor.precio);
+                Number(
+                    mejor.precio
+                );
 
             const precioActual =
-                Number(actual.precio);
+                Number(
+                    actual.precio
+                );
 
 
             if (
@@ -872,1032 +927,6 @@ function renderizarProductos() {
     let productosDisponibles =
         productos.filter(
             producto => {
-
-            return (
-                producto.disponible !== false
-            );
-
-        }
-    );
-
-
-    // =================================================
-    // FILTRAR POR CATEGORÍA
-    // =================================================
-
-    if (
-        categoriaActual &&
-        categoriaActual !== "todos"
-    ) {
-
-        productosDisponibles =
-            productosDisponibles.filter(
-                producto => {
-
-                    const categoria =
-                        normalizarTexto(
-                            producto.categoria ||
-                            ""
-                        );
-
-
-                    return (
-                        categoria ===
-                        normalizarTexto(
-                            categoriaActual
-                        )
-                    );
-
-                }
-            );
-
-    }
-
-
-    // =================================================
-    // FILTRAR POR BÚSQUEDA
-    // =================================================
-
-    if (textoBusqueda) {
-
-        const busqueda =
-            normalizarTexto(
-                textoBusqueda
-            );
-
-
-        productosDisponibles =
-            productosDisponibles.filter(
-                producto => {
-
-                    const nombre =
-                        normalizarTexto(
-                            producto.nombre ||
-                            ""
-                        );
-
-
-                    const marca =
-                        normalizarTexto(
-                            producto.marca ||
-                            ""
-                        );
-
-
-                    const codigo =
-                        normalizarTexto(
-                            producto.codigoBarras ||
-                            producto.codigo ||
-                            ""
-                        );
-
-
-                    return (
-                        nombre.includes(
-                            busqueda
-                        ) ||
-                        marca.includes(
-                            busqueda
-                        ) ||
-                        codigo.includes(
-                            busqueda
-                        )
-                    );
-
-                }
-            );
-
-    }
-
-
-    // =================================================
-    // MOSTRAR RESULTADOS
-    // =================================================
-
-    productosDisponibles.forEach(
-        producto => {
-
-            const elemento =
-                crearProductoElemento(
-                    producto
-                );
-
-
-            if (elemento) {
-
-                productsContainer.appendChild(
-                    elemento
-                );
-
-            }
-
-        }
-    );
-
-
-    if (productsCount) {
-
-        productsCount.textContent =
-            `${productosDisponibles.length} producto${
-                productosDisponibles.length === 1
-                    ? ""
-                    : "s"
-            }`;
-
-    }
-
-
-    if (productsLabel) {
-
-        productsLabel.textContent =
-            `${productosDisponibles.length} producto${
-                productosDisponibles.length === 1
-                    ? ""
-                    : "s"
-            }`;
-
-    }
-
-
-    if (productsTitle) {
-
-        productsTitle.textContent =
-            tiendaSeleccionada?.nombre ||
-            "Productos";
-
-    }
-
-
-    // =================================================
-    // CATÁLOGO VACÍO
-    // =================================================
-
-    if (
-        productosDisponibles.length === 0
-    ) {
-
-        if (emptyProducts) {
-
-            emptyProducts.style.display =
-                "flex";
-
-
-            const mensaje =
-                emptyProducts.querySelector(
-                    ".empty-text"
-                );
-
-
-            if (mensaje) {
-
-                mensaje.textContent =
-                    textoBusqueda
-                        ? "No encontramos productos con esa búsqueda."
-                        : "No hay productos disponibles.";
-
-            }
-
-        }
-
-    }
-    else {
-
-        if (emptyProducts) {
-
-            emptyProducts.style.display =
-                "none";
-
-        }
-
-    }
-
-}
-
-
-// =====================================================
-// CREAR ELEMENTO DEL PRODUCTO
-// =====================================================
-
-function crearProductoElemento(
-    producto
-) {
-
-    const item =
-        document.createElement(
-            "div"
-        );
-
-
-    item.className =
-        "product-item";
-
-
-    const inventario =
-        obtenerMejorInventario(
-            producto.id
-        );
-
-
-    if (!inventario) {
-
-        return null;
-
-    }
-
-
-    const precio =
-        Number(
-            inventario.precio ??
-            producto.precio ??
-            0
-        );
-
-
-    const existencia =
-        Number(
-            inventario.existencia ??
-            0
-        );
-
-
-    const cantidadCarrito =
-        Number(
-            carrito[producto.id] ||
-            0
-        );
-
-
-    const imagen =
-        producto.imagenUrl ||
-        producto.imagen ||
-        producto.imageUrl ||
-        "";
-
-
-    const nombre =
-        producto.nombre ||
-        "Producto";
-
-
-    const marca =
-        producto.marca ||
-        "";
-
-
-    const unidad =
-        obtenerTextoUnidad(
-            producto,
-            inventario
-        );
-
-
-    item.innerHTML = `
-
-        <div class="product-image">
-
-            ${
-                imagen
-                    ? `
-                        <img
-                            src="${escapeHtml(
-                                imagen
-                            )}"
-                            alt="${escapeHtml(
-                                nombre
-                            )}"
-                            loading="lazy"
-                        >
-                    `
-                    : `
-                        <div class="product-image-placeholder">
-                            ${obtenerIconoProducto(
-                                producto
-                            )}
-                        </div>
-                    `
-            }
-
-        </div>
-
-
-        <div class="product-info">
-
-            <div class="product-name">
-                ${escapeHtml(
-                    nombre
-                )}
-            </div>
-
-
-            ${
-                marca
-                    ? `
-                        <div class="product-brand">
-                            ${escapeHtml(
-                                marca
-                            )}
-                        </div>
-                    `
-                    : ""
-            }
-
-
-            <div class="product-price">
-
-                $${precio.toFixed(2)}
-
-                ${
-                    unidad
-                        ? `
-                            <span class="product-unit">
-                                ${escapeHtml(
-                                    unidad
-                                )}
-                            </span>
-                        `
-                        : ""
-                }
-
-            </div>
-
-
-            ${
-                existencia > 0
-                    ? `
-                        <div class="product-stock">
-                            ${existencia} disponibles
-                        </div>
-                    `
-                    : `
-                        <div class="product-stock unavailable">
-                            Agotado
-                        </div>
-                    `
-            }
-
-
-            <div class="product-actions">
-
-                ${
-                    cantidadCarrito > 0
-                        ? `
-
-                            <button
-                                type="button"
-                                class="quantity-minus"
-                                data-product-id="${producto.id}"
-                            >
-                                −
-                            </button>
-
-
-                            <span
-                                class="quantity-value"
-                                data-product-id="${producto.id}"
-                            >
-                                ${cantidadCarrito}
-                            </span>
-
-
-                            <button
-                                type="button"
-                                class="quantity-plus"
-                                data-product-id="${producto.id}"
-                            >
-                                +
-                            </button>
-
-                        `
-                        : `
-
-                            <button
-                                type="button"
-                                class="add-product"
-                                data-product-id="${producto.id}"
-                                ${
-                                    existencia <= 0
-                                        ? "disabled"
-                                        : ""
-                                }
-                            >
-                                Agregar
-                            </button>
-
-                        `
-                }
-
-            </div>
-
-        </div>
-
-    `;
-
-
-    // =================================================
-    // BOTÓN AGREGAR
-    // =================================================
-
-    const botonAgregar =
-        item.querySelector(
-            ".add-product"
-        );
-
-
-    if (botonAgregar) {
-
-        botonAgregar.addEventListener(
-            "click",
-            () => {
-
-                agregarAlCarrito(
-                    producto.id
-                );
-
-            }
-        );
-
-    }
-
-
-    // =================================================
-    // BOTÓN MENOS
-    // =================================================
-
-    const botonMenos =
-        item.querySelector(
-            ".quantity-minus"
-        );
-
-
-    if (botonMenos) {
-
-        botonMenos.addEventListener(
-            "click",
-            () => {
-
-                cambiarCantidadCarrito(
-                    producto.id,
-                    -1
-                );
-
-            }
-        );
-
-    }
-
-
-    // =================================================
-    // BOTÓN MÁS
-    // =================================================
-
-    const botonMas =
-        item.querySelector(
-            ".quantity-plus"
-        );
-
-
-    if (botonMas) {
-
-        botonMas.addEventListener(
-            "click",
-            () => {
-
-                cambiarCantidadCarrito(
-                    producto.id,
-                    1
-                );
-
-            }
-        );
-
-    }
-
-
-    return item;
-
-}
-
-
-// =====================================================
-// ICONO DE PRODUCTO
-// =====================================================
-
-function obtenerIconoProducto(
-    producto
-) {
-
-    const categoria =
-        normalizarTexto(
-            producto.categoria ||
-            ""
-        );
-
-
-    const iconos = {
-
-        abarrotes:
-            "🛒",
-
-        bebidas:
-            "🥤",
-
-        lacteos:
-            "🥛",
-
-        carnes:
-            "🥩",
-
-        frutas:
-            "🍎",
-
-        verduras:
-            "🥬",
-
-        limpieza:
-            "🧹",
-
-        higiene:
-            "🧴",
-
-        botanas:
-            "🍿",
-
-        dulces:
-            "🍬",
-
-        panaderia:
-            "🥖",
-
-        congelados:
-            "🧊",
-
-        mascotas:
-            "🐶",
-
-        farmacia:
-            "💊"
-
-    };
-
-
-    return (
-        iconos[categoria] ||
-        "📦"
-    );
-
-}
-
-
-// =====================================================
-// TEXTO DE UNIDAD
-// =====================================================
-
-function obtenerTextoUnidad(
-    producto,
-    inventario
-) {
-
-    if (
-        inventario &&
-        inventario.unidad
-    ) {
-
-        return inventario.unidad;
-
-    }
-
-
-    if (
-        producto &&
-        producto.unidad
-    ) {
-
-        return producto.unidad;
-
-    }
-
-
-    return "";
-
-}
-
-
-// =====================================================
-// AGREGAR AL CARRITO
-// =====================================================
-
-function agregarAlCarrito(
-    productoId
-) {
-
-    const inventario =
-        obtenerMejorInventario(
-            productoId
-        );
-
-
-    if (!inventario) {
-
-        alert(
-            "Este producto no está disponible."
-        );
-
-        return;
-
-    }
-
-
-    const existencia =
-        Number(
-            inventario.existencia ??
-            0
-        );
-
-
-    const cantidadActual =
-        Number(
-            carrito[productoId] ||
-            0
-        );
-
-
-    if (
-        cantidadActual >=
-        existencia
-    ) {
-
-        alert(
-            "No hay más unidades disponibles."
-        );
-
-        return;
-
-    }
-
-
-    carrito[productoId] =
-        cantidadActual + 1;
-
-
-    guardarCarrito();
-
-    actualizarCarrito();
-
-    renderizarProductos();
-
-}
-
-
-// =====================================================
-// CAMBIAR CANTIDAD DEL CARRITO
-// =====================================================
-
-function cambiarCantidadCarrito(
-    productoId,
-    cambio
-) {
-
-    const cantidadActual =
-        Number(
-            carrito[productoId] ||
-            0
-        );
-
-
-    const nuevaCantidad =
-        cantidadActual +
-        cambio;
-
-
-    const inventario =
-        obtenerMejorInventario(
-            productoId
-        );
-
-
-    if (
-        cambio > 0 &&
-        inventario &&
-        nuevaCantidad >
-            Number(
-                inventario.existencia ?? 0
-            )
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        nuevaCantidad <= 0
-    ) {
-
-        delete carrito[
-            productoId
-        ];
-
-    }
-    else {
-
-        carrito[
-            productoId
-        ] = nuevaCantidad;
-
-    }
-
-
-    guardarCarrito();
-
-    actualizarCarrito();
-
-    renderizarProductos();
-
-}
-
-
-// =====================================================
-// ACTUALIZAR CARRITO
-// =====================================================
-
-function actualizarCarrito() {
-
-    if (!cartBar) {
-        return;
-    }
-
-
-    const productosCarrito =
-        Object.entries(
-            carrito
-        );
-
-
-    let total =
-        0;
-
-
-    let cantidadTotal =
-        0;
-
-
-    if (cartItems) {
-
-        cartItems.innerHTML =
-            "";
-
-    }
-
-
-    productosCarrito.forEach(
-        ([productoId, cantidad]) => {
-
-            const producto =
-                productos.find(
-                    item =>
-                        item.id ===
-                        productoId
-                );
-
-
-            if (!producto) {
-                return;
-            }
-
-
-            const inventario =
-                obtenerMejorInventario(
-                    productoId
-                );
-
-
-            if (!inventario) {
-                return;
-            }
-
-
-            const precio =
-                Number(
-                    inventario.precio ??
-                    producto.precio ??
-                    0
-                );
-
-
-            const cantidadNumero =
-                Number(
-                    cantidad || 0
-                );
-
-
-            const subtotal =
-                precio *
-                cantidadNumero;
-
-
-            total +=
-                subtotal;
-
-
-            cantidadTotal +=
-                cantidadNumero;
-
-
-            if (cartItems) {
-
-                const item =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                item.className =
-                    "cart-item";
-
-
-                item.innerHTML = `
-
-                    <div class="cart-item-info">
-
-                        <div class="cart-item-name">
-                            ${escapeHtml(
-                                producto.nombre ||
-                                "Producto"
-                            )}
-                        </div>
-
-
-                        <div class="cart-item-price">
-                            $${precio.toFixed(2)}
-                        </div>
-
-                    </div>
-
-
-                    <div class="cart-item-actions">
-
-                        <button
-                            type="button"
-                            class="quantity-minus"
-                            data-product-id="${productoId}"
-                        >
-                            −
-                        </button>
-
-
-                        <span>
-                            ${cantidadNumero}
-                        </span>
-
-
-                        <button
-                            type="button"
-                            class="quantity-plus"
-                            data-product-id="${productoId}"
-                        >
-                            +
-                        </button>
-
-                    </div>
-
-                `;
-
-
-                const botonMenos =
-                    item.querySelector(
-                        ".quantity-minus"
-                    );
-
-
-                const botonMas =
-                    item.querySelector(
-                        ".quantity-plus"
-                    );
-
-
-                if (botonMenos) {
-
-                    botonMenos.addEventListener(
-                        "click",
-                        (event) => {
-
-                            event.stopPropagation();
-
-                            cambiarCantidadCarrito(
-                                productoId,
-                                -1
-                            );
-
-                        }
-                    );
-
-                }
-
-
-                if (botonMas) {
-
-                    botonMas.addEventListener(
-                        "click",
-                        (event) => {
-
-                            event.stopPropagation();
-
-                            cambiarCantidadCarrito(
-                                productoId,
-                                1
-                            );
-
-                        }
-                    );
-
-                }
-
-
-                cartItems.appendChild(
-                    item
-                );
-
-            }
-
-        }
-    );
-
-
-    if (cartTotal) {
-
-        cartTotal.textContent =
-            `$${total.toFixed(2)}`;
-
-    }
-
-
-    if (cartBar) {
-
-        cartBar.style.display =
-            cantidadTotal > 0
-                ? "flex"
-                : "none";
-
-    }
-
-}
-
-
-// =====================================================
-// ESCAPAR HTML
-// =====================================================
-
-function escapeHtml(
-    texto
-) {
-
-    return String(
-        texto ?? ""
-    )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-}
-
-
-// =====================================================
-// NORMALIZAR TEXTO
-// =====================================================
-
-function normalizarTexto(
-    texto
-) {
-
-    return String(
-        texto || ""
-    )
-        .normalize("NFD")
-        .replace(
-            /[\u0300-\u036f]/g,
-            ""
-        )
-        .toLowerCase()
-        .trim();
-
-}
 
                 const inventario =
                     obtenerMejorInventario(
@@ -2136,7 +1165,6 @@ function normalizarTexto(
 
 }
 
-
 // =====================================================
 // CREAR ELEMENTO DE PRODUCTO
 // =====================================================
@@ -2161,12 +1189,14 @@ function crearProductoElemento(
 
 
     article.dataset.category =
-        producto.categoriaId;
+        producto.categoriaId ||
+        producto.categoria ||
+        "";
 
 
-    // -----------------------------------------
-    // ICONO
-    // -----------------------------------------
+    // =================================================
+    // INFORMACIÓN DEL PRODUCTO
+    // =================================================
 
     const icono =
         obtenerIconoProducto(
@@ -2174,33 +1204,30 @@ function crearProductoElemento(
         );
 
 
-    // -----------------------------------------
-    // UNIDAD
-    // -----------------------------------------
-
     const textoUnidad =
         obtenerTextoUnidad(
             producto
         );
 
 
-    // -----------------------------------------
-    // PRECIO
-    // -----------------------------------------
-
     const precio =
         Number(
-            inventario.precio
+            inventario.precio ??
+            producto.precio ??
+            0
         );
 
-
-    // -----------------------------------------
-    // CANTIDAD ACTUAL
-    // -----------------------------------------
 
     const cantidad =
         obtenerCantidad(
             producto.id
+        );
+
+
+    const existencia =
+        Number(
+            inventario.existencia ??
+            0
         );
 
 
@@ -2224,15 +1251,53 @@ function crearProductoElemento(
                 )}
             </strong>
 
-            <span>
-                ${textoUnidad}
-            </span>
+
+            ${
+                producto.marca
+                    ? `
+                        <span>
+                            ${escaparHTML(
+                                producto.marca
+                            )}
+                        </span>
+                    `
+                    : ""
+            }
+
+
+            ${
+                textoUnidad
+                    ? `
+                        <span>
+                            ${escaparHTML(
+                                textoUnidad
+                            )}
+                        </span>
+                    `
+                    : ""
+            }
+
 
             <b>
                 ${formatearPrecio(
                     precio
                 )}
             </b>
+
+
+            ${
+                existencia > 0
+                    ? `
+                        <small>
+                            ${existencia} disponibles
+                        </small>
+                    `
+                    : `
+                        <small>
+                            Agotado
+                        </small>
+                    `
+            }
 
         </div>
 
@@ -2271,9 +1336,9 @@ function crearProductoElemento(
     `;
 
 
-    // -----------------------------------------
+    // =================================================
     // BOTÓN MENOS
-    // -----------------------------------------
+    // =================================================
 
     const btnMinus =
         article.querySelector(
@@ -2281,24 +1346,29 @@ function crearProductoElemento(
         );
 
 
-    btnMinus.addEventListener(
-        "click",
-        (event) => {
+    if (btnMinus) {
 
-            event.stopPropagation();
+        btnMinus.addEventListener(
+            "click",
+            event => {
 
-            cambiarCantidad(
-                producto.id,
-                -1
-            );
-
-        }
-    );
+                event.stopPropagation();
 
 
-    // -----------------------------------------
+                cambiarCantidad(
+                    producto.id,
+                    -1
+                );
+
+            }
+        );
+
+    }
+
+
+    // =================================================
     // BOTÓN MÁS
-    // -----------------------------------------
+    // =================================================
 
     const btnPlus =
         article.querySelector(
@@ -2306,39 +1376,24 @@ function crearProductoElemento(
         );
 
 
-    btnPlus.addEventListener(
-        "click",
-        (event) => {
+    if (btnPlus) {
 
-            event.stopPropagation();
+        btnPlus.addEventListener(
+            "click",
+            event => {
 
-            cambiarCantidad(
-                producto.id,
-                1
-            );
-
-        }
-    );
+                event.stopPropagation();
 
 
-    // -----------------------------------------
-    // TOCAR PRODUCTO
-    // -----------------------------------------
+                cambiarCantidad(
+                    producto.id,
+                    1
+                );
 
-    article.addEventListener(
-        "click",
-        () => {
+            }
+        );
 
-            console.log(
-                "Producto seleccionado:",
-                producto
-            );
-
-            // Más adelante:
-            // abrirDetalleProducto(producto);
-
-        }
-    );
+    }
 
 
     return article;
@@ -2358,23 +1413,29 @@ function obtenerIconoProducto(
         normalizarTexto(
             producto.categoria ||
             producto.categoriaId ||
-            ""
+            "otros"
         );
 
 
     const iconos = {
 
         abarrotes:
-            "shopping_cart",
+            "grocery",
+
+        carnes:
+            "set_meal",
+
+        carniceria:
+            "set_meal",
+
+        lacteos:
+            "egg",
+
+        "lacteos y huevos":
+            "egg",
 
         bebidas:
             "local_drink",
-
-        lacteos:
-            "local_drink",
-
-        carnes:
-            "restaurant",
 
         frutas:
             "nutrition",
@@ -2382,17 +1443,26 @@ function obtenerIconoProducto(
         verduras:
             "eco",
 
+        frutas_verduras:
+            "nutrition",
+
+        "frutas y verduras":
+            "nutrition",
+
         limpieza:
             "cleaning_services",
 
         higiene:
             "soap",
 
+        "higiene personal":
+            "soap",
+
         botanas:
             "fastfood",
 
-        dulces:
-            "cake",
+        mariscos:
+            "set_meal",
 
         panaderia:
             "bakery_dining",
@@ -2404,14 +1474,17 @@ function obtenerIconoProducto(
             "pets",
 
         farmacia:
-            "medication"
+            "medication",
+
+        varios:
+            "category"
 
     };
 
 
     return (
         iconos[categoria] ||
-        "inventory_2"
+        "shopping_bag"
     );
 
 }
@@ -2458,124 +1531,6 @@ function obtenerTextoUnidad(
 
 
 // =====================================================
-// FORMATEAR PRECIO
-// =====================================================
-
-function formatearPrecio(
-    precio
-) {
-
-    return Number(
-        precio || 0
-    ).toLocaleString(
-        "es-MX",
-        {
-            style: "currency",
-            currency: "MXN"
-        }
-    );
-
-}
-
-
-// =====================================================
-// OBTENER NOMBRE DE CATEGORÍA
-// =====================================================
-
-function obtenerNombreCategoria(
-    categoria
-) {
-
-    const nombres = {
-
-        abarrotes:
-            "Abarrotes",
-
-        bebidas:
-            "Bebidas",
-
-        lacteos:
-            "Lácteos",
-
-        carnes:
-            "Carnes",
-
-        frutas:
-            "Frutas",
-
-        verduras:
-            "Verduras",
-
-        limpieza:
-            "Limpieza",
-
-        higiene:
-            "Higiene",
-
-        botanas:
-            "Botanas",
-
-        dulces:
-            "Dulces",
-
-        panaderia:
-            "Panadería",
-
-        congelados:
-            "Congelados",
-
-        mascotas:
-            "Mascotas",
-
-        farmacia:
-            "Farmacia"
-
-    };
-
-
-    return (
-        nombres[categoria] ||
-        "Productos"
-    );
-
-}
-
-
-// =====================================================
-// ESCAPAR HTML
-// =====================================================
-
-function escaparHTML(
-    texto
-) {
-
-    return String(
-        texto ?? ""
-    )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-}
-
-// =====================================================
 // CAMBIAR CANTIDAD
 // =====================================================
 
@@ -2601,19 +1556,34 @@ function cambiarCantidad(
         );
 
 
+    // =================================================
+    // NO PERMITIR MÁS PRODUCTOS QUE LA EXISTENCIA
+    // =================================================
+
     if (
         cambio > 0 &&
         inventario &&
         nuevaCantidad >
             Number(
-                inventario.existencia ?? 0
+                inventario.existencia ??
+                0
             )
     ) {
+
+        console.warn(
+            "⚠️ No hay suficiente existencia para:",
+            productoId
+        );
+
 
         return;
 
     }
 
+
+    // =================================================
+    // ELIMINAR DEL CARRITO
+    // =================================================
 
     if (
         nuevaCantidad <= 0
@@ -2628,12 +1598,22 @@ function cambiarCantidad(
 
         carrito[
             productoId
-        ] = nuevaCantidad;
+        ] =
+            nuevaCantidad;
 
     }
 
 
+    // =================================================
+    // GUARDAR LOCALMENTE
+    // =================================================
+
     guardarCarrito();
+
+
+    // =================================================
+    // ACTUALIZAR INTERFAZ
+    // =================================================
 
     actualizarCantidadesVisibles();
 
@@ -2665,13 +1645,13 @@ function obtenerCantidad(
 
 function actualizarCantidadesVisibles() {
 
-    const controles =
+    const elementos =
         document.querySelectorAll(
             ".quantity-value"
         );
 
 
-    controles.forEach(
+    elementos.forEach(
         elemento => {
 
             const productoId =
@@ -2695,9 +1675,12 @@ function actualizarCantidadesVisibles() {
 
 function actualizarCarrito() {
 
-    let totalProductos = 0;
+    let totalProductos =
+        0;
 
-    let total = 0;
+
+    let total =
+        0;
 
 
     Object.entries(
@@ -2731,21 +1714,33 @@ function actualizarCarrito() {
 
             const precio =
                 Number(
-                    inventario.precio
+                    inventario.precio ??
+                    producto.precio ??
+                    0
+                );
+
+
+            const cantidadNumero =
+                Number(
+                    cantidad || 0
                 );
 
 
             totalProductos +=
-                Number(cantidad);
+                cantidadNumero;
 
 
             total +=
                 precio *
-                Number(cantidad);
+                cantidadNumero;
 
         }
     );
 
+
+    // =================================================
+    // CANTIDAD DE PRODUCTOS
+    // =================================================
 
     if (cartItems) {
 
@@ -2759,6 +1754,10 @@ function actualizarCarrito() {
     }
 
 
+    // =================================================
+    // TOTAL
+    // =================================================
+
     if (cartTotal) {
 
         cartTotal.textContent =
@@ -2768,6 +1767,10 @@ function actualizarCarrito() {
 
     }
 
+
+    // =================================================
+    // MOSTRAR / OCULTAR BARRA
+    // =================================================
 
     if (cartBar) {
 
@@ -2782,7 +1785,7 @@ function actualizarCarrito() {
 
 
 // =====================================================
-// CATEGORÍAS
+// CONFIGURAR CATEGORÍAS
 // =====================================================
 
 function configurarCategorias() {
@@ -2801,10 +1804,13 @@ function configurarCategorias() {
                 () => {
 
                     botones.forEach(
-                        item =>
+                        item => {
+
                             item.classList.remove(
                                 "active"
-                            )
+                            );
+
+                        }
                     );
 
 
@@ -2815,7 +1821,7 @@ function configurarCategorias() {
 
                     categoriaActual =
                         boton.dataset.category ||
-                        "todas";
+                        "todos";
 
 
                     renderizarProductos();
@@ -2830,7 +1836,30 @@ function configurarCategorias() {
 
 
 // =====================================================
-// BUSCADOR
+// CONFIGURAR CATEGORÍA INICIAL
+// =====================================================
+
+function configurarCategoriaInicial() {
+
+    const categoriaActiva =
+        document.querySelector(
+            ".category-item.active"
+        );
+
+
+    if (categoriaActiva) {
+
+        categoriaActual =
+            categoriaActiva.dataset.category ||
+            "todos";
+
+    }
+
+}
+
+
+// =====================================================
+// CONFIGURAR BUSCADOR
 // =====================================================
 
 function configurarBuscador() {
@@ -2840,6 +1869,7 @@ function configurarBuscador() {
         console.warn(
             "⚠️ No se encontró el campo de búsqueda."
         );
+
 
         return;
 
@@ -2854,8 +1884,6 @@ function configurarBuscador() {
                 searchInput.value.trim();
 
 
-            // Mostrar / ocultar botón limpiar
-
             if (searchClear) {
 
                 searchClear.style.display =
@@ -2864,12 +1892,6 @@ function configurarBuscador() {
                         : "none";
 
             }
-
-
-            console.log(
-                "🔎 Buscando:",
-                textoBusqueda
-            );
 
 
             renderizarProductos();
@@ -2886,6 +1908,7 @@ function configurarBuscador() {
 
                 searchInput.value =
                     "";
+
 
                 textoBusqueda =
                     "";
@@ -2907,32 +1930,8 @@ function configurarBuscador() {
 
 }
 
-
 // =====================================================
-// CATEGORÍA POR DEFECTO
-// =====================================================
-
-function configurarCategoriaInicial() {
-
-    const categoriaActiva =
-        document.querySelector(
-            ".category-item.active"
-        );
-
-
-    if (categoriaActiva) {
-
-        categoriaActual =
-            categoriaActiva.dataset.category ||
-            "todas";
-
-    }
-
-}
-
-
-// =====================================================
-// ICONOS
+// ICONOS DE PRODUCTO
 // =====================================================
 
 function obtenerIconoProducto(
@@ -2955,6 +1954,9 @@ function obtenerIconoProducto(
         carnes:
             "set_meal",
 
+        carniceria:
+            "set_meal",
+
         lacteos:
             "egg",
 
@@ -2963,6 +1965,12 @@ function obtenerIconoProducto(
 
         bebidas:
             "local_drink",
+
+        frutas:
+            "nutrition",
+
+        verduras:
+            "eco",
 
         frutas_verduras:
             "nutrition",
@@ -2985,6 +1993,18 @@ function obtenerIconoProducto(
         mariscos:
             "set_meal",
 
+        panaderia:
+            "bakery_dining",
+
+        congelados:
+            "ac_unit",
+
+        mascotas:
+            "pets",
+
+        farmacia:
+            "medication",
+
         varios:
             "category"
 
@@ -3000,13 +2020,14 @@ function obtenerIconoProducto(
 
 
 // =====================================================
-// TEXTO UNIDAD
+// TEXTO DE UNIDAD
 // =====================================================
 
 function obtenerTextoUnidad(
     producto
 ) {
-        if (
+
+    if (
         producto.tipoVenta ===
         "peso"
     ) {
@@ -3019,13 +2040,40 @@ function obtenerTextoUnidad(
     }
 
 
+    if (
+        producto.unidad
+    ) {
+
+        return producto.unidad;
+
+    }
+
+
+    if (
+        producto.presentacion
+    ) {
+
+        return producto.presentacion;
+
+    }
+
+
+    if (
+        producto.contenido
+    ) {
+
+        return producto.contenido;
+
+    }
+
+
     return "Por pieza";
 
 }
 
 
 // =====================================================
-// NOMBRE CATEGORÍA
+// NOMBRE DE CATEGORÍA
 // =====================================================
 
 function obtenerNombreCategoria(
@@ -3046,6 +2094,9 @@ function obtenerNombreCategoria(
         carnes:
             "Carnes",
 
+        carniceria:
+            "Carnes",
+
         lacteos:
             "Lácteos",
 
@@ -3054,6 +2105,12 @@ function obtenerNombreCategoria(
 
         bebidas:
             "Bebidas",
+
+        frutas:
+            "Frutas",
+
+        verduras:
+            "Verduras",
 
         frutas_verduras:
             "Frutas y verduras",
@@ -3075,6 +2132,18 @@ function obtenerNombreCategoria(
 
         mariscos:
             "Mariscos",
+
+        panaderia:
+            "Panadería",
+
+        congelados:
+            "Congelados",
+
+        mascotas:
+            "Mascotas",
+
+        farmacia:
+            "Farmacia",
 
         varios:
             "Varios",
@@ -3105,7 +2174,9 @@ function normalizarTexto(
     texto
 ) {
 
-    return String(texto)
+    return String(
+        texto || ""
+    )
         .toLowerCase()
         .normalize("NFD")
         .replace(
@@ -3137,21 +2208,25 @@ function formatearPrecio(
             minimumFractionDigits: 2
         }
     ).format(
-        Number(precio) || 0
+        Number(
+            precio
+        ) || 0
     );
 
 }
 
 
 // =====================================================
-// EVITAR HTML INYECTADO
+// ESCAPAR HTML
 // =====================================================
 
 function escaparHTML(
     texto
 ) {
 
-    return String(texto)
+    return String(
+        texto ?? ""
+    )
         .replace(
             /&/g,
             "&amp;"
@@ -3252,7 +2327,7 @@ else {
 
 
 // =====================================================
-// ACTUALIZAR UBICACIÓN EN FIRESTORE
+// ACTUALIZAR UBICACIÓN REAL DEL CLIENTE
 // =====================================================
 
 async function actualizarUbicacion(
@@ -3273,9 +2348,11 @@ async function actualizarUbicacion(
 
             {
 
-                latitud: lat,
+                latitud:
+                    lat,
 
-                longitud: lng,
+                longitud:
+                    lng,
 
                 ultimaUbicacion:
                     new Date().toISOString()
@@ -3312,7 +2389,9 @@ const destinoGuardado =
     );
 
 
-if (destinoGuardado) {
+if (
+    destinoGuardado
+) {
 
     try {
 
@@ -3339,7 +2418,6 @@ if (destinoGuardado) {
 
 }
 
-
 // =====================================================
 // BOTÓN DEL CARRITO
 // =====================================================
@@ -3365,13 +2443,15 @@ if (cartBar) {
                     ↓
                 revisar pedido
                     ↓
-                consultar inventarios
+                validar existencia
                     ↓
-                determinar tiendas
+                determinar tienda(s)
                     ↓
-                calcular ruta
+                calcular tarifa
                     ↓
-                ticket
+                crear pedido
+                    ↓
+                asignar repartidor
             */
 
         }
@@ -3381,10 +2461,15 @@ if (cartBar) {
 
 
 // =====================================================
-// INICIO
+// INICIALIZACIÓN DEL CARRITO
 // =====================================================
 
 cargarCarrito();
+
+
+// =====================================================
+// CONFIGURAR INTERFAZ
+// =====================================================
 
 configurarCategorias();
 
@@ -3397,8 +2482,19 @@ actualizarCarrito();
 
 // =====================================================
 // FIREBASE AUTH
-// ESPERAR A QUE FIREBASE RESTAURE LA SESIÓN
 // =====================================================
+//
+// IMPORTANTE:
+//
+// No intentamos cargar el catálogo antes de que
+// Firebase haya restaurado la sesión.
+//
+// Esto evita el error:
+//
+// "No hay usuario autenticado."
+//
+// =====================================================
+
 
 onAuthStateChanged(
     auth,
@@ -3409,6 +2505,7 @@ onAuthStateChanged(
             console.warn(
                 "⚠️ No hay usuario autenticado."
             );
+
 
             return;
 
@@ -3438,6 +2535,10 @@ onAuthStateChanged(
     }
 );
 
+
+// =====================================================
+// INICIO
+// =====================================================
 
 console.log(
     "🛒 MOTI GO - CATÁLOGO INICIADO"
