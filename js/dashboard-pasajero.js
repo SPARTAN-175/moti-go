@@ -1,4 +1,5 @@
 import { auth, db } from "./firebase-config.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import {
     doc,
@@ -1984,7 +1985,49 @@ configurarBuscador();
 
 actualizarCarrito();
 
-cargarCatalogo();
+
+// =====================================================
+// FIREBASE AUTH
+// ESPERAR A QUE FIREBASE RESTAURE LA SESIÓN
+// =====================================================
+
+onAuthStateChanged(
+    auth,
+    async user => {
+
+        if (!user) {
+
+            console.warn(
+                "⚠️ No hay usuario autenticado."
+            );
+
+            return;
+
+        }
+
+
+        console.log(
+            "👤 Usuario pasajero autenticado:",
+            user.uid
+        );
+
+
+        try {
+
+            await cargarCatalogo();
+
+        }
+        catch (error) {
+
+            console.error(
+                "❌ Error iniciando catálogo:",
+                error
+            );
+
+        }
+
+    }
+);
 
 
 console.log(
