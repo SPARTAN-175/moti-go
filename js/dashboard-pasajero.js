@@ -561,6 +561,576 @@ async function cargarTiendasDeLaZona(
 
 
 // =====================================================
+// CARGAR CONTEXTO DE TIENDAS
+// =====================================================
+
+async function cargarContextoTiendas() {
+
+    console.log(
+        "📍 Cargando zona del cliente..."
+    );
+
+
+    const usuario =
+        await cargarContextoCliente();
+
+
+    // =================================================
+    // OBTENER TIENDAS DE LA ZONA
+    // =================================================
+
+    tiendasDisponibles =
+        await cargarTiendasDeLaZona(
+            usuario
+        );
+
+
+    console.log(
+        "🏪 Tiendas disponibles en la zona:",
+        tiendasDisponibles.length,
+        tiendasDisponibles
+    );
+
+
+    // =================================================
+    // NO HAY TIENDAS
+    // =================================================
+
+    if (
+        tiendasDisponibles.length ===
+        0
+    ) {
+
+        tiendaSeleccionada =
+            null;
+
+        tiendaSeleccionadaId =
+            null;
+
+
+        if (storeSelectorSection) {
+
+            storeSelectorSection.style.display =
+                "none";
+
+        }
+
+
+        return;
+
+    }
+
+
+    // =================================================
+    // RECUPERAR TIENDA ANTERIOR
+    // =================================================
+
+    const tiendaGuardada =
+        sessionStorage.getItem(
+            "motiTiendaSeleccionadaId"
+        );
+
+
+    let tiendaInicial =
+        null;
+
+
+    if (
+        tiendaGuardada
+    ) {
+
+        tiendaInicial =
+            tiendasDisponibles.find(
+                tienda =>
+                    tienda.id ===
+                    tiendaGuardada
+            );
+
+    }
+
+
+    // =================================================
+    // SI NO EXISTE, USAR LA PRIMERA
+    // =================================================
+
+    if (!tiendaInicial) {
+
+        tiendaInicial =
+            tiendasDisponibles[0];
+
+    }
+
+
+    tiendaSeleccionada =
+        tiendaInicial;
+
+
+    tiendaSeleccionadaId =
+        tiendaInicial.id;
+
+
+    sessionStorage.setItem(
+        "motiTiendaSeleccionadaId",
+        tiendaSeleccionadaId
+    );
+
+
+    console.log(
+        "🏪 Tienda seleccionada:",
+        tiendaSeleccionada
+    );
+
+
+    // =================================================
+    // CONSTRUIR SELECTOR
+    // =================================================
+
+    if (storeSelector) {
+
+        storeSelector.innerHTML =
+            "";
+
+
+        tiendasDisponibles.forEach(
+            tienda => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    tienda.id;
+
+
+                option.textContent =
+                    tienda.nombre ||
+                    "Tienda";
+
+
+                if (
+                    tienda.id ===
+                    tiendaSeleccionadaId
+                ) {
+
+                    option.selected =
+                        true;
+
+                }
+
+
+                storeSelector.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+        storeSelectorSection.style.display =
+            "block";
+
+    }
+
+
+    // =================================================
+    // EVENTO CAMBIO DE TIENDA
+    // =================================================
+
+    if (
+        !storeSelector.dataset.listener
+    ) {
+
+        storeSelector.addEventListener(
+            "change",
+            async event => {
+
+                const nuevaTiendaId =
+                    event.target.value;
+
+
+                try {
+
+                    storeSelector.disabled =
+                        true;
+
+
+                    await seleccionarTienda(
+                        nuevaTiendaId
+                    );
+
+                }
+                catch (error) {
+
+                    console.error(
+                        "❌ Error cambiando de tienda:",
+                        error
+                    );
+
+                }
+                finally {
+
+                    storeSelector.disabled =
+                        false;
+
+                }
+
+            }
+        );
+
+
+        storeSelector.dataset.listener =
+            "true";
+
+    }
+
+}
+
+// =====================================================
+// SELECCIONAR TIENDA
+// =====================================================
+
+async function seleccionarTienda(
+    tiendaId
+) {
+
+    const tienda =
+        tiendasDisponibles.find(
+            item =>
+                item.id ===
+                tiendaId
+        );
+
+
+    if (!tienda) {
+
+        console.warn(
+            "⚠️ No se encontró la tienda seleccionada:",
+            tiendaId
+        );
+
+
+        return;
+
+    }
+
+
+    // =================================================
+    // CAMBIAR TIENDA
+    // =================================================
+
+    tiendaSeleccionada =
+        tienda;
+
+
+    tiendaSeleccionadaId =
+        tienda.id;
+
+
+    sessionStorage.setItem(
+        "motiTiendaSeleccionadaId",
+        tiendaSeleccionadaId
+    );
+
+
+    console.log(
+        "🏪 Cambiando a tienda:",
+        tiendaSeleccionada
+    );
+
+
+    // =================================================
+    // LIMPIAR CATÁLOGO ANTERIOR
+    // =================================================
+
+    productos = [];
+
+    inventarios = [];
+
+
+    if (productsContainer) {
+
+        productsContainer.innerHTML =
+            "";
+
+    }
+
+
+    if (emptyProducts) {
+
+        emptyProducts.style.display =
+            "none";
+
+    }
+
+
+    if (productsCount) {
+
+        productsCount.textContent =
+            "Cargando...";
+
+    }
+
+
+    // =================================================
+    // CARGAR CATÁLOGO NUEVO
+    // =================================================
+
+    await cargarCatalogoDeTienda();
+
+}
+
+// =====================================================
+// CARGAR CATÁLOGO DE LA TIENDA SELECCIONADA
+// =====================================================
+
+async function cargarCatalogoDeTienda() {
+
+    if (
+        !tiendaSeleccionadaId
+    ) {
+
+        console.warn(
+            "⚠️ No hay tienda seleccionada."
+        );
+
+
+        return;
+
+    }
+
+
+    try {
+
+        console.log(
+            "🛒 Cargando catálogo de:",
+            tiendaSeleccionada
+                ?.nombre ||
+            tiendaSeleccionadaId
+        );
+
+
+        // =================================================
+        // LIMPIAR DATOS ANTERIORES
+        // =================================================
+
+        productos = [];
+
+        inventarios = [];
+
+
+        // =================================================
+        // INVENTARIOS DE ESTA TIENDA
+        // =================================================
+
+        const inventariosQuery =
+            query(
+                collection(
+                    db,
+                    "inventarios"
+                ),
+                where(
+                    "tiendaId",
+                    "==",
+                    tiendaSeleccionadaId
+                )
+            );
+
+
+        const inventariosSnapshot =
+            await getDocs(
+                inventariosQuery
+            );
+
+
+        inventariosSnapshot.forEach(
+            docSnap => {
+
+                const inventario = {
+
+                    id:
+                        docSnap.id,
+
+                    ...docSnap.data()
+
+                };
+
+
+                const existencia =
+                    Number(
+                        inventario.existencia ??
+                        0
+                    );
+
+
+                if (
+                    inventario.disponible !== false &&
+                    existencia > 0
+                ) {
+
+                    inventarios.push(
+                        inventario
+                    );
+
+                }
+
+            }
+        );
+
+
+        console.log(
+            "🏪 Inventarios disponibles de la tienda:",
+            inventarios.length
+        );
+
+
+        // =================================================
+        // IDS DE PRODUCTOS
+        // =================================================
+
+        const productoIds = [
+            ...new Set(
+                inventarios
+                    .map(
+                        inventario =>
+                            inventario.productoId
+                    )
+                    .filter(Boolean)
+            )
+        ];
+
+
+        if (
+            productoIds.length ===
+            0
+        ) {
+
+            console.warn(
+                "⚠️ La tienda no tiene productos disponibles."
+            );
+
+
+            renderizarProductos();
+
+
+            return;
+
+        }
+
+
+        // =================================================
+        // CONSULTAR PRODUCTOS POR LOTES
+        // =================================================
+
+        const loteProductos =
+            30;
+
+
+        for (
+            let inicio = 0;
+            inicio < productoIds.length;
+            inicio += loteProductos
+        ) {
+
+            const lote =
+                productoIds.slice(
+                    inicio,
+                    inicio +
+                    loteProductos
+                );
+
+
+            const productosQuery =
+                query(
+                    collection(
+                        db,
+                        "productos"
+                    ),
+                    where(
+                        documentId(),
+                        "in",
+                        lote
+                    )
+                );
+
+
+            const productosSnapshot =
+                await getDocs(
+                    productosQuery
+                );
+
+
+            productosSnapshot.forEach(
+                docSnap => {
+
+                    productos.push({
+
+                        id:
+                            docSnap.id,
+
+                        ...docSnap.data()
+
+                    });
+
+                }
+            );
+
+        }
+
+
+        console.log(
+            "📦 Productos de la tienda cargados:",
+            productos.length
+        );
+
+
+        // =================================================
+        // RENDERIZAR
+        // =================================================
+
+        renderizarProductos();
+
+
+        // =================================================
+        // ACTUALIZAR CARRITO
+        // =================================================
+
+        actualizarCarrito();
+
+    }
+    catch (error) {
+
+        console.error(
+            "❌ Error cargando catálogo de la tienda:",
+            error
+        );
+
+
+        productos = [];
+
+        inventarios = [];
+
+
+        if (productsContainer) {
+
+            productsContainer.innerHTML =
+                "";
+
+        }
+
+
+        if (emptyProducts) {
+
+            emptyProducts.style.display =
+                "flex";
+
+        }
+
+    }
+
+}
+// =====================================================
 // CARGAR CATÁLOGO
 // =====================================================
 
