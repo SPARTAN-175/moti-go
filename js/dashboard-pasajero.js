@@ -2085,27 +2085,48 @@ function cambiarCantidad(
     // GUARDAR
     // =================================================
 
-    else {
+   else {
 
-        carrito[
-            clave
-        ] = {
+    const producto =
+        productos.find(
+            item =>
+                item.id ===
+                productoId
+        );
 
-            productoId:
-                productoId,
 
-            tiendaId:
-                tiendaSeleccionadaId,
+    carrito[
+        clave
+    ] = {
 
-            cantidad:
-                nuevaCantidad,
+        productoId:
+            productoId,
 
-            precio:
-                precio
+        tiendaId:
+            tiendaSeleccionadaId,
 
-        };
+        cantidad:
+            nuevaCantidad,
 
-    }
+        precio:
+            precio,
+
+        nombre:
+            producto?.nombre ||
+            itemActual?.nombre ||
+            "Producto",
+
+        tiendaNombre:
+            tiendaSeleccionada?.nombre ||
+            itemActual?.tiendaNombre ||
+            "Tienda",
+
+        existencia:
+            existencia
+
+    };
+
+}
 
 
     guardarCarrito();
