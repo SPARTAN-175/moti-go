@@ -3446,10 +3446,11 @@ function mostrarResultadosBusquedaGlobal(
                     event.stopPropagation();
 
 
-                    cambiarCantidadGlobal(
-                        producto.id,
-                        tienda.id,
-                        -1
+                  cambiarCantidadDesdeTienda(
+                    producto.id,
+                    tienda.id,
+                        -1,
+                    inventario.precio
                     );
 
                 }
@@ -3473,12 +3474,12 @@ function mostrarResultadosBusquedaGlobal(
                     event.stopPropagation();
 
 
-                    cambiarCantidadGlobal(
-                        producto.id,
-                        tienda.id,
-                        1
+                    cambiarCantidadDesdeTienda(
+                    producto.id,
+                    tienda.id,
+                      1,
+                    inventario.precio
                     );
-
                 }
             );
 
@@ -3500,6 +3501,144 @@ function mostrarResultadosBusquedaGlobal(
 
 }
 
+
+// =====================================================
+// CAMBIAR CANTIDAD DESDE BÚSQUEDA GLOBAL
+// =====================================================
+
+function cambiarCantidadDesdeTienda(
+    productoId,
+    tiendaId,
+    cambio,
+    precio
+) {
+
+    const clave =
+        obtenerClaveCarrito(
+            productoId,
+            tiendaId
+        );
+
+
+    const itemActual =
+        carrito[
+            clave
+        ];
+
+
+    const cantidadActual =
+        itemActual
+            ? Number(
+                itemActual.cantidad ||
+                0
+            )
+            : 0;
+
+
+    const nuevaCantidad =
+        cantidadActual +
+        cambio;
+
+
+    // =================================================
+    // BUSCAR EXISTENCIA
+    // =================================================
+
+    const inventario =
+        inventarios.find(
+            item =>
+                item.productoId ===
+                productoId &&
+                item.tiendaId ===
+                tiendaId
+        );
+
+
+    // Si la búsqueda global no tiene ese inventario
+    // en memoria, utilizamos el precio recibido y
+    // permitimos agregarlo. La existencia será validada
+    // nuevamente antes de crear el pedido.
+
+    const existencia =
+        inventario
+            ? Number(
+                inventario.existencia ??
+                0
+            )
+            : null;
+
+
+    if (
+        existencia !== null &&
+        nuevaCantidad >
+        existencia
+    ) {
+
+        console.warn(
+            "⚠️ No hay suficiente existencia."
+        );
+
+        return;
+
+    }
+
+
+    // =================================================
+    // ELIMINAR
+    // =================================================
+
+    if (
+        nuevaCantidad <= 0
+    ) {
+
+        delete carrito[
+            clave
+        ];
+
+    }
+
+    // =================================================
+    // GUARDAR
+    // =================================================
+
+    else {
+
+        carrito[
+            clave
+        ] = {
+
+            productoId:
+                productoId,
+
+            tiendaId:
+                tiendaId,
+
+            cantidad:
+                nuevaCantidad,
+
+            precio:
+                Number(
+                    precio ||
+                    0
+                )
+
+        };
+
+    }
+
+
+    guardarCarrito();
+
+
+    actualizarCarrito();
+
+
+    actualizarPanelCarrito();
+
+
+    mostrarResultadosBusquedaGlobalActualizados();
+
+}
 
 // =====================================================
 // ERROR
