@@ -4850,12 +4850,14 @@ function actualizarPanelCarrito() {
                             event.stopPropagation();
 
 
-                            cambiarCantidadDesdeTienda(
-                                item.productoId,
-                                item.tiendaId,
-                                -1,
-                                item.precio
-                            );
+    cambiarCantidadDesdeTienda(
+    item.productoId,
+    item.tiendaId,
+    -1,
+    item.precio,
+    item.nombre,
+    item.existencia
+);
 
                         }
                     );
@@ -4878,12 +4880,14 @@ function actualizarPanelCarrito() {
                             event.stopPropagation();
 
 
-                            cambiarCantidadDesdeTienda(
-                                item.productoId,
-                                item.tiendaId,
-                                1,
-                                item.precio
-                            );
+    cambiarCantidadDesdeTienda(
+    item.productoId,
+    item.tiendaId,
+    1,
+    item.precio,
+    item.nombre,
+    item.existencia
+);
 
                         }
                     );
