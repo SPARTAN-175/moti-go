@@ -3690,6 +3690,20 @@ function cambiarCantidadDesdeTienda(
 
     actualizarPanelCarrito();
 
+// =================================================
+// SI SE AGREGÓ UN PRODUCTO DESDE BÚSQUEDA GLOBAL,
+// LIMPIAR LA BÚSQUEDA Y REGRESAR AL CATÁLOGO
+// =================================================
+
+if (
+    cambio > 0 &&
+    typeof limpiarBusquedaGlobal === "function"
+) {
+
+    limpiarBusquedaGlobal();
+
+}
+
 }
 
 // =====================================================
