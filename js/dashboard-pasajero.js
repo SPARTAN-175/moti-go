@@ -2127,7 +2127,18 @@ function cambiarCantidad(
 
 }
 
+// =====================================================
+// CLAVE ÚNICA DEL CARRITO
+// =====================================================
 
+function obtenerClaveCarrito(
+    productoId,
+    tiendaId
+) {
+
+    return `${tiendaId}__${productoId}`;
+
+}
 // =====================================================
 // OBTENER CANTIDAD
 // =====================================================
