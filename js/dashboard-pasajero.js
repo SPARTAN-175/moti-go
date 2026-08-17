@@ -1966,7 +1966,7 @@ function obtenerTextoUnidad(
 
 
 // =====================================================
-// CAMBIAR CANTIDAD
+// CAMBIAR CANTIDAD DEL PRODUCTO DE LA TIENDA ACTUAL
 // =====================================================
 
 function cambiarCantidad(
@@ -1974,10 +1974,73 @@ function cambiarCantidad(
     cambio
 ) {
 
-    const cantidadActual =
-        obtenerCantidad(
+    if (
+        !tiendaSeleccionadaId
+    ) {
+
+        console.warn(
+            "⚠️ No hay tienda seleccionada."
+        );
+
+        return;
+
+    }
+
+
+    const inventario =
+        inventarios.find(
+            item =>
+                item.productoId ===
+                productoId
+        );
+
+
+    if (!inventario) {
+
+        console.warn(
+            "⚠️ No existe inventario para:",
             productoId
         );
+
+        return;
+
+    }
+
+
+    const precio =
+        Number(
+            inventario.precio ??
+            0
+        );
+
+
+    const existencia =
+        Number(
+            inventario.existencia ??
+            0
+        );
+
+
+    const clave =
+        obtenerClaveCarrito(
+            productoId,
+            tiendaSeleccionadaId
+        );
+
+
+    const itemActual =
+        carrito[
+            clave
+        ];
+
+
+    const cantidadActual =
+        itemActual
+            ? Number(
+                itemActual.cantidad ||
+                0
+            )
+            : 0;
 
 
     const nuevaCantidad =
@@ -1985,24 +2048,13 @@ function cambiarCantidad(
         cambio;
 
 
-    const inventario =
-        obtenerMejorInventario(
-            productoId
-        );
-
-
     // =================================================
-    // NO PERMITIR MÁS PRODUCTOS QUE LA EXISTENCIA
+    // VALIDAR EXISTENCIA
     // =================================================
 
     if (
-        cambio > 0 &&
-        inventario &&
         nuevaCantidad >
-            Number(
-                inventario.existencia ??
-                0
-            )
+        existencia
     ) {
 
         console.warn(
@@ -2010,14 +2062,13 @@ function cambiarCantidad(
             productoId
         );
 
-
         return;
 
     }
 
 
     // =================================================
-    // ELIMINAR DEL CARRITO
+    // ELIMINAR
     // =================================================
 
     if (
@@ -2025,36 +2076,54 @@ function cambiarCantidad(
     ) {
 
         delete carrito[
-            productoId
+            clave
         ];
 
     }
+
+    // =================================================
+    // GUARDAR
+    // =================================================
+
     else {
 
         carrito[
-            productoId
-        ] =
-            nuevaCantidad;
+            clave
+        ] = {
+
+            productoId:
+                productoId,
+
+            tiendaId:
+                tiendaSeleccionadaId,
+
+            cantidad:
+                nuevaCantidad,
+
+            precio:
+                precio
+
+        };
 
     }
 
-
-    // =================================================
-    // GUARDAR LOCALMENTE
-    // =================================================
 
     guardarCarrito();
 
 
-    // =================================================
-    // ACTUALIZAR INTERFAZ
-    // =================================================
+    actualizarCantidadesVisibles();
 
-actualizarCantidadesVisibles();
+    actualizarCarrito();
 
-actualizarCarrito();
 
-actualizarPanelCarrito();
+    if (
+        typeof actualizarPanelCarrito ===
+        "function"
+    ) {
+
+        actualizarPanelCarrito();
+
+    }
 
 }
 
