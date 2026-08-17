@@ -4379,7 +4379,7 @@ function cerrarPanelCarrito() {
 
 
 // =====================================================
-// ACTUALIZAR PANEL
+// ACTUALIZAR PANEL DEL CARRITO
 // =====================================================
 
 function actualizarPanelCarrito() {
@@ -4421,9 +4421,7 @@ function actualizarPanelCarrito() {
         );
 
 
-    if (
-        !content
-    ) {
+    if (!content) {
 
         return;
 
@@ -4443,22 +4441,22 @@ function actualizarPanelCarrito() {
 
 
     // =================================================
-    // RECORRER CARRITO
+    // AGRUPAR POR TIENDA
     // =================================================
 
-    Object.entries(
+    const gruposTiendas =
+        {};
+
+
+    Object.values(
         carrito
     ).forEach(
-        ([productoId, cantidad]) => {
-
-            const cantidadNumero =
-                Number(
-                    cantidad || 0
-                );
-
+        item => {
 
             if (
-                cantidadNumero <= 0
+                !item ||
+                !item.productoId ||
+                !item.tiendaId
             ) {
 
                 return;
@@ -4466,213 +4464,282 @@ function actualizarPanelCarrito() {
             }
 
 
-            const producto =
-                productos.find(
-                    item =>
-                        item.id ===
-                        productoId
-                );
-
-
-            // -----------------------------------------
-            // En esta primera etapa mostramos los
-            // productos de la tienda actualmente cargada.
-            //
-            // Los productos de búsqueda global se
-            // integrarán completamente en el siguiente
-            // paso cuando estructuremos el carrito
-            // multi-tienda.
-            // -----------------------------------------
-
-            if (!producto) {
-
-                return;
-
-            }
-
-
-            const inventario =
-                obtenerMejorInventario(
-                    productoId
-                );
-
-
-            if (!inventario) {
-
-                return;
-
-            }
-
-
-            const precio =
+            const cantidad =
                 Number(
-                    inventario.precio ??
-                    producto.precio ??
+                    item.cantidad ||
                     0
                 );
 
 
-            const importe =
-                precio *
-                cantidadNumero;
+            if (
+                cantidad <= 0
+            ) {
+
+                return;
+
+            }
 
 
-            subtotal +=
-                importe;
+            if (
+                !gruposTiendas[
+                    item.tiendaId
+                ]
+            ) {
+
+                gruposTiendas[
+                    item.tiendaId
+                ] = [];
+
+            }
 
 
-            totalProductos +=
-                cantidadNumero;
+            gruposTiendas[
+                item.tiendaId
+            ].push(
+                item
+            );
+
+        }
+    );
 
 
-            // =================================================
-            // PRODUCTO
-            // =================================================
+    // =================================================
+    // MOSTRAR CADA TIENDA
+    // =================================================
 
-            const item =
-                document.createElement(
-                    "article"
+    Object.entries(
+        gruposTiendas
+    ).forEach(
+        ([tiendaId, items]) => {
+
+            const tienda =
+                tiendasDisponibles.find(
+                    item =>
+                        item.id ===
+                        tiendaId
                 );
 
 
-            item.className =
-                "moti-cart-product";
+            const tiendaNombre =
+                tienda?.nombre ||
+                "Tienda";
 
 
-            item.innerHTML = `
+            const tiendaHeader =
+                document.createElement(
+                    "div"
+                );
+
+
+            tiendaHeader.className =
+                "moti-cart-store";
+
+
+            tiendaHeader.innerHTML = `
 
                 <div
-                    class="moti-cart-product-info"
+                    class="moti-cart-store-title"
                 >
+
+                    <span
+                        class="material-symbols-outlined"
+                    >
+                        store
+                    </span>
 
                     <strong>
                         ${escaparHTML(
-                            producto.nombre ||
-                            "Producto"
+                            tiendaNombre
                         )}
                     </strong>
-
-
-                    ${
-                        producto.marca
-                            ? `
-                                <span>
-                                    ${escaparHTML(
-                                        producto.marca
-                                    )}
-                                </span>
-                            `
-                            : ""
-                    }
-
-
-                    <b>
-                        ${formatearPrecio(
-                            precio
-                        )}
-                    </b>
-
-
-                    <small>
-                        ${formatearPrecio(
-                            importe
-                        )}
-                    </small>
-
-                </div>
-
-
-                <div
-                    class="moti-cart-product-controls"
-                >
-
-                    <button
-                        type="button"
-                        class="moti-cart-minus"
-                        data-product-id="${producto.id}"
-                    >
-                        −
-                    </button>
-
-
-                    <span>
-                        ${cantidadNumero}
-                    </span>
-
-
-                    <button
-                        type="button"
-                        class="moti-cart-plus"
-                        data-product-id="${producto.id}"
-                    >
-                        +
-                    </button>
 
                 </div>
 
             `;
 
 
-            // =================================================
-            // MENOS
-            // =================================================
-
-            const minus =
-                item.querySelector(
-                    ".moti-cart-minus"
-                );
-
-
-            minus.addEventListener(
-                "click",
-                event => {
-
-                    event.stopPropagation();
-
-
-                    cambiarCantidad(
-                        producto.id,
-                        -1
-                    );
-
-
-                    actualizarPanelCarrito();
-
-                }
-            );
-
-
-            // =================================================
-            // MÁS
-            // =================================================
-
-            const plus =
-                item.querySelector(
-                    ".moti-cart-plus"
-                );
-
-
-            plus.addEventListener(
-                "click",
-                event => {
-
-                    event.stopPropagation();
-
-
-                    cambiarCantidad(
-                        producto.id,
-                        1
-                    );
-
-
-                    actualizarPanelCarrito();
-
-                }
-            );
-
-
             content.appendChild(
-                item
+                tiendaHeader
+            );
+
+
+            // =================================================
+            // PRODUCTOS DE ESTA TIENDA
+            // =================================================
+
+            items.forEach(
+                item => {
+
+                    const producto =
+                        productos.find(
+                            productoItem =>
+                                productoItem.id ===
+                                item.productoId
+                        );
+
+
+                    const nombre =
+                        producto?.nombre ||
+                        item.nombre ||
+                        "Producto";
+
+
+                    const precio =
+                        Number(
+                            item.precio ||
+                            0
+                        );
+
+
+                    const cantidad =
+                        Number(
+                            item.cantidad ||
+                            0
+                        );
+
+
+                    const importe =
+                        precio *
+                        cantidad;
+
+
+                    subtotal +=
+                        importe;
+
+
+                    totalProductos +=
+                        cantidad;
+
+
+                    const elemento =
+                        document.createElement(
+                            "article"
+                        );
+
+
+                    elemento.className =
+                        "moti-cart-product";
+
+
+                    elemento.innerHTML = `
+
+                        <div
+                            class="moti-cart-product-info"
+                        >
+
+                            <strong>
+                                ${escaparHTML(
+                                    nombre
+                                )}
+                            </strong>
+
+
+                            <b>
+                                ${formatearPrecio(
+                                    precio
+                                )}
+                            </b>
+
+
+                            <small>
+                                ${formatearPrecio(
+                                    importe
+                                )}
+                            </small>
+
+                        </div>
+
+
+                        <div
+                            class="moti-cart-product-controls"
+                        >
+
+                            <button
+                                type="button"
+                                class="moti-cart-minus"
+                            >
+                                −
+                            </button>
+
+
+                            <span>
+                                ${cantidad}
+                            </span>
+
+
+                            <button
+                                type="button"
+                                class="moti-cart-plus"
+                            >
+                                +
+                            </button>
+
+                        </div>
+
+                    `;
+
+
+                    // =================================================
+                    // MENOS
+                    // =================================================
+
+                    const minus =
+                        elemento.querySelector(
+                            ".moti-cart-minus"
+                        );
+
+
+                    minus.addEventListener(
+                        "click",
+                        event => {
+
+                            event.stopPropagation();
+
+
+                            cambiarCantidadDesdeTienda(
+                                item.productoId,
+                                item.tiendaId,
+                                -1,
+                                item.precio
+                            );
+
+                        }
+                    );
+
+
+                    // =================================================
+                    // MÁS
+                    // =================================================
+
+                    const plus =
+                        elemento.querySelector(
+                            ".moti-cart-plus"
+                        );
+
+
+                    plus.addEventListener(
+                        "click",
+                        event => {
+
+                            event.stopPropagation();
+
+
+                            cambiarCantidadDesdeTienda(
+                                item.productoId,
+                                item.tiendaId,
+                                1,
+                                item.precio
+                            );
+
+                        }
+                    );
+
+
+                    content.appendChild(
+                        elemento
+                    );
+
+                }
             );
 
         }
@@ -4719,7 +4786,7 @@ function actualizarPanelCarrito() {
 
 
     // =================================================
-    // COSTO DE ENTREGA
+    // ENTREGA
     // =================================================
 
     const costoEntrega =
@@ -4779,10 +4846,6 @@ function actualizarPanelCarrito() {
     }
 
 
-    // =================================================
-    // BOTÓN
-    // =================================================
-
     const confirmButton =
         document.getElementById(
             "motiCartConfirm"
@@ -4792,7 +4855,8 @@ function actualizarPanelCarrito() {
     if (confirmButton) {
 
         confirmButton.disabled =
-            totalProductos === 0;
+            totalProductos ===
+            0;
 
         confirmButton.style.opacity =
             totalProductos === 0
