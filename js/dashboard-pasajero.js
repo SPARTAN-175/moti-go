@@ -3656,30 +3656,54 @@ function cambiarCantidadDesdeTienda(
     // GUARDAR
     // =================================================
 
-    else {
+  else {
 
-        carrito[
-            clave
-        ] = {
+    carrito[
+        clave
+    ] = {
 
-            productoId:
-                productoId,
+        productoId:
+            productoId,
 
-            tiendaId:
-                tiendaId,
+        tiendaId:
+            tiendaId,
 
-            cantidad:
-                nuevaCantidad,
+        cantidad:
+            nuevaCantidad,
 
-            precio:
-                Number(
-                    precio ||
-                    0
+        precio:
+            Number(
+                precio ??
+                itemActual?.precio ??
+                0
+            ),
+
+        nombre:
+            nombreProducto ||
+            itemActual?.nombre ||
+            "Producto",
+
+        tiendaNombre:
+            tiendasDisponibles.find(
+                tienda =>
+                    tienda.id ===
+                    tiendaId
+            )?.nombre ||
+            itemActual?.tiendaNombre ||
+            "Tienda",
+
+        existencia:
+            existencia !== null &&
+            existencia !== undefined
+                ? existencia
+                : (
+                    itemActual?.existencia ??
+                    null
                 )
 
-        };
+    };
 
-    }
+}
 
 
     guardarCarrito();
