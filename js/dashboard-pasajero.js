@@ -3305,11 +3305,26 @@ function mostrarResultadosBusquedaGlobal(
                 );
 
 
-            const cantidad =
-                obtenerCantidadGlobal(
-                    producto.id,
-                    tienda.id
-                );
+            const clave =
+    obtenerClaveCarrito(
+        producto.id,
+        tienda.id
+    );
+
+
+const itemCarrito =
+    carrito[
+        clave
+    ];
+
+
+const cantidad =
+    itemCarrito
+        ? Number(
+            itemCarrito.cantidad ||
+            0
+        )
+        : 0;
 
 
             const item =
