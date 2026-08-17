@@ -3501,12 +3501,14 @@ const cantidad =
                     event.stopPropagation();
 
 
-                  cambiarCantidadDesdeTienda(
-                    producto.id,
-                    tienda.id,
-                        -1,
-                    inventario.precio
-                    );
+    cambiarCantidadDesdeTienda(
+    producto.id,
+    tienda.id,
+    -1,
+    inventario.precio,
+    producto.nombre,
+    inventario.existencia
+);
 
                 }
             );
@@ -3529,12 +3531,14 @@ const cantidad =
                     event.stopPropagation();
 
 
-                    cambiarCantidadDesdeTienda(
-                    producto.id,
-                    tienda.id,
-                      1,
-                    inventario.precio
-                    );
+    cambiarCantidadDesdeTienda(
+    producto.id,
+    tienda.id,
+    1,
+    inventario.precio,
+    producto.nombre,
+    inventario.existencia
+);
                 }
             );
 
