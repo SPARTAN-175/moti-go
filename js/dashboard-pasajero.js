@@ -3930,6 +3930,1347 @@ if (
 }
 
 // =====================================================
+// PANEL DEL CARRITO MOTI GO
+// =====================================================
+//
+// El carrito se abre sobre la misma pantalla.
+// No navegamos a otra página.
+//
+// En esta primera etapa:
+//
+// ✓ Mostrar productos
+// ✓ Mostrar cantidades
+// ✓ Botones + y -
+// ✓ Mostrar subtotal
+// ✓ Mostrar costo de entrega
+// ✓ Mostrar total
+// ✓ Cerrar panel
+//
+// Todavía NO se crea el pedido en Firebase.
+// =====================================================
+
+
+// =====================================================
+// CREAR ESTRUCTURA DEL PANEL
+// =====================================================
+
+let cartPanelOverlay = null;
+let cartPanel = null;
+
+
+// =====================================================
+// CREAR PANEL
+// =====================================================
+
+function crearPanelCarrito() {
+
+    // Evitar duplicarlo
+
+    if (
+        document.getElementById(
+            "motiCartOverlay"
+        )
+    ) {
+
+        cartPanelOverlay =
+            document.getElementById(
+                "motiCartOverlay"
+            );
+
+        cartPanel =
+            document.getElementById(
+                "motiCartPanel"
+            );
+
+        return;
+
+    }
+
+
+    // =================================================
+    // OVERLAY
+    // =================================================
+
+    cartPanelOverlay =
+        document.createElement(
+            "div"
+        );
+
+
+    cartPanelOverlay.id =
+        "motiCartOverlay";
+
+
+    // =================================================
+    // PANEL
+    // =================================================
+
+    cartPanel =
+        document.createElement(
+            "section"
+        );
+
+
+    cartPanel.id =
+        "motiCartPanel";
+
+
+    cartPanel.setAttribute(
+        "aria-label",
+        "Carrito de compra"
+    );
+
+
+    // =================================================
+    // HTML DEL PANEL
+    // =================================================
+
+    cartPanel.innerHTML = `
+
+        <div
+            class="moti-cart-header"
+        >
+
+            <div>
+
+                <span
+                    class="moti-cart-title"
+                >
+                    Mi pedido
+                </span>
+
+                <span
+                    class="moti-cart-subtitle"
+                    id="motiCartSubtitle"
+                >
+                    0 productos
+                </span>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="motiCartClose"
+                class="moti-cart-close"
+                aria-label="Cerrar carrito"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div
+            id="motiCartContent"
+            class="moti-cart-content"
+        ></div>
+
+
+        <div
+            class="moti-cart-footer"
+        >
+
+            <div
+                class="moti-cart-summary-row"
+            >
+
+                <span>
+                    Productos
+                </span>
+
+                <strong
+                    id="motiCartSubtotal"
+                >
+                    $0.00
+                </strong>
+
+            </div>
+
+
+            <div
+                class="moti-cart-summary-row"
+            >
+
+                <span>
+                    Entrega
+                </span>
+
+                <strong
+                    id="motiCartDelivery"
+                >
+                    $10.00
+                </strong>
+
+            </div>
+
+
+            <div
+                class="moti-cart-summary-total"
+            >
+
+                <span>
+                    Total
+                </span>
+
+                <strong
+                    id="motiCartTotal"
+                >
+                    $10.00
+                </strong>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="motiCartConfirm"
+                class="moti-cart-confirm"
+            >
+                Revisar pedido
+            </button>
+
+        </div>
+
+    `;
+
+
+    // =================================================
+    // INSERTAR
+    // =================================================
+
+    cartPanelOverlay.appendChild(
+        cartPanel
+    );
+
+
+    document.body.appendChild(
+        cartPanelOverlay
+    );
+
+
+    // =================================================
+    // CERRAR CON X
+    // =================================================
+
+    const closeButton =
+        document.getElementById(
+            "motiCartClose"
+        );
+
+
+    if (closeButton) {
+
+        closeButton.addEventListener(
+            "click",
+            cerrarPanelCarrito
+        );
+
+    }
+
+
+    // =================================================
+    // CERRAR TOCANDO EL FONDO
+    // =================================================
+
+    cartPanelOverlay.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target ===
+                cartPanelOverlay
+            ) {
+
+                cerrarPanelCarrito();
+
+            }
+
+        }
+    );
+
+
+    // =================================================
+    // BOTÓN REVISAR PEDIDO
+    // =================================================
+
+    const confirmButton =
+        document.getElementById(
+            "motiCartConfirm"
+        );
+
+
+    if (confirmButton) {
+
+        confirmButton.addEventListener(
+            "click",
+            () => {
+
+                console.log(
+                    "🧾 Revisar pedido:",
+                    carrito
+                );
+
+
+                // -----------------------------------------
+                // TODAVÍA NO CREAMOS EL PEDIDO.
+                // -----------------------------------------
+
+                alert(
+                    "La revisión del pedido estará disponible en el siguiente paso."
+                );
+
+            }
+        );
+
+    }
+
+
+    // =================================================
+    // CREAR ESTILOS
+    // =================================================
+
+    crearEstilosPanelCarrito();
+
+}
+
+
+// =====================================================
+// ABRIR PANEL
+// =====================================================
+
+function abrirPanelCarrito() {
+
+    crearPanelCarrito();
+
+
+    actualizarPanelCarrito();
+
+
+    requestAnimationFrame(
+        () => {
+
+            cartPanelOverlay.classList.add(
+                "moti-cart-open"
+            );
+
+        }
+    );
+
+
+    document.body.classList.add(
+        "moti-cart-lock"
+    );
+
+}
+
+
+// =====================================================
+// CERRAR PANEL
+// =====================================================
+
+function cerrarPanelCarrito() {
+
+    if (!cartPanelOverlay) {
+
+        return;
+
+    }
+
+
+    cartPanelOverlay.classList.remove(
+        "moti-cart-open"
+    );
+
+
+    document.body.classList.remove(
+        "moti-cart-lock"
+    );
+
+}
+
+
+// =====================================================
+// ACTUALIZAR PANEL
+// =====================================================
+
+function actualizarPanelCarrito() {
+
+    if (!cartPanel) {
+
+        return;
+
+    }
+
+
+    const content =
+        document.getElementById(
+            "motiCartContent"
+        );
+
+
+    const subtitle =
+        document.getElementById(
+            "motiCartSubtitle"
+        );
+
+
+    const subtotalElement =
+        document.getElementById(
+            "motiCartSubtotal"
+        );
+
+
+    const deliveryElement =
+        document.getElementById(
+            "motiCartDelivery"
+        );
+
+
+    const totalElement =
+        document.getElementById(
+            "motiCartTotal"
+        );
+
+
+    if (
+        !content
+    ) {
+
+        return;
+
+    }
+
+
+    content.innerHTML =
+        "";
+
+
+    let subtotal =
+        0;
+
+
+    let totalProductos =
+        0;
+
+
+    // =================================================
+    // RECORRER CARRITO
+    // =================================================
+
+    Object.entries(
+        carrito
+    ).forEach(
+        ([productoId, cantidad]) => {
+
+            const cantidadNumero =
+                Number(
+                    cantidad || 0
+                );
+
+
+            if (
+                cantidadNumero <= 0
+            ) {
+
+                return;
+
+            }
+
+
+            const producto =
+                productos.find(
+                    item =>
+                        item.id ===
+                        productoId
+                );
+
+
+            // -----------------------------------------
+            // En esta primera etapa mostramos los
+            // productos de la tienda actualmente cargada.
+            //
+            // Los productos de búsqueda global se
+            // integrarán completamente en el siguiente
+            // paso cuando estructuremos el carrito
+            // multi-tienda.
+            // -----------------------------------------
+
+            if (!producto) {
+
+                return;
+
+            }
+
+
+            const inventario =
+                obtenerMejorInventario(
+                    productoId
+                );
+
+
+            if (!inventario) {
+
+                return;
+
+            }
+
+
+            const precio =
+                Number(
+                    inventario.precio ??
+                    producto.precio ??
+                    0
+                );
+
+
+            const importe =
+                precio *
+                cantidadNumero;
+
+
+            subtotal +=
+                importe;
+
+
+            totalProductos +=
+                cantidadNumero;
+
+
+            // =================================================
+            // PRODUCTO
+            // =================================================
+
+            const item =
+                document.createElement(
+                    "article"
+                );
+
+
+            item.className =
+                "moti-cart-product";
+
+
+            item.innerHTML = `
+
+                <div
+                    class="moti-cart-product-info"
+                >
+
+                    <strong>
+                        ${escaparHTML(
+                            producto.nombre ||
+                            "Producto"
+                        )}
+                    </strong>
+
+
+                    ${
+                        producto.marca
+                            ? `
+                                <span>
+                                    ${escaparHTML(
+                                        producto.marca
+                                    )}
+                                </span>
+                            `
+                            : ""
+                    }
+
+
+                    <b>
+                        ${formatearPrecio(
+                            precio
+                        )}
+                    </b>
+
+
+                    <small>
+                        ${formatearPrecio(
+                            importe
+                        )}
+                    </small>
+
+                </div>
+
+
+                <div
+                    class="moti-cart-product-controls"
+                >
+
+                    <button
+                        type="button"
+                        class="moti-cart-minus"
+                        data-product-id="${producto.id}"
+                    >
+                        −
+                    </button>
+
+
+                    <span>
+                        ${cantidadNumero}
+                    </span>
+
+
+                    <button
+                        type="button"
+                        class="moti-cart-plus"
+                        data-product-id="${producto.id}"
+                    >
+                        +
+                    </button>
+
+                </div>
+
+            `;
+
+
+            // =================================================
+            // MENOS
+            // =================================================
+
+            const minus =
+                item.querySelector(
+                    ".moti-cart-minus"
+                );
+
+
+            minus.addEventListener(
+                "click",
+                event => {
+
+                    event.stopPropagation();
+
+
+                    cambiarCantidad(
+                        producto.id,
+                        -1
+                    );
+
+
+                    actualizarPanelCarrito();
+
+                }
+            );
+
+
+            // =================================================
+            // MÁS
+            // =================================================
+
+            const plus =
+                item.querySelector(
+                    ".moti-cart-plus"
+                );
+
+
+            plus.addEventListener(
+                "click",
+                event => {
+
+                    event.stopPropagation();
+
+
+                    cambiarCantidad(
+                        producto.id,
+                        1
+                    );
+
+
+                    actualizarPanelCarrito();
+
+                }
+            );
+
+
+            content.appendChild(
+                item
+            );
+
+        }
+    );
+
+
+    // =================================================
+    // CARRITO VACÍO
+    // =================================================
+
+    if (
+        totalProductos ===
+        0
+    ) {
+
+        content.innerHTML = `
+
+            <div
+                class="moti-cart-empty"
+            >
+
+                <span
+                    class="material-symbols-outlined"
+                >
+                    shopping_cart
+                </span>
+
+
+                <strong>
+                    Tu carrito está vacío
+                </strong>
+
+
+                <span>
+                    Agrega productos para comenzar
+                    tu pedido.
+                </span>
+
+            </div>
+
+        `;
+
+    }
+
+
+    // =================================================
+    // COSTO DE ENTREGA
+    // =================================================
+
+    const costoEntrega =
+        totalProductos > 0
+            ? 10
+            : 0;
+
+
+    const total =
+        subtotal +
+        costoEntrega;
+
+
+    // =================================================
+    // RESUMEN
+    // =================================================
+
+    if (subtitle) {
+
+        subtitle.textContent =
+            `${totalProductos} ${
+                totalProductos === 1
+                    ? "producto"
+                    : "productos"
+            }`;
+
+    }
+
+
+    if (subtotalElement) {
+
+        subtotalElement.textContent =
+            formatearPrecio(
+                subtotal
+            );
+
+    }
+
+
+    if (deliveryElement) {
+
+        deliveryElement.textContent =
+            formatearPrecio(
+                costoEntrega
+            );
+
+    }
+
+
+    if (totalElement) {
+
+        totalElement.textContent =
+            formatearPrecio(
+                total
+            );
+
+    }
+
+
+    // =================================================
+    // BOTÓN
+    // =================================================
+
+    const confirmButton =
+        document.getElementById(
+            "motiCartConfirm"
+        );
+
+
+    if (confirmButton) {
+
+        confirmButton.disabled =
+            totalProductos === 0;
+
+        confirmButton.style.opacity =
+            totalProductos === 0
+                ? "0.5"
+                : "1";
+
+    }
+
+}
+
+
+// =====================================================
+// ESTILOS DEL PANEL
+// =====================================================
+
+function crearEstilosPanelCarrito() {
+
+    if (
+        document.getElementById(
+            "motiCartStyles"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    const style =
+        document.createElement(
+            "style"
+        );
+
+
+    style.id =
+        "motiCartStyles";
+
+
+    style.textContent = `
+
+        /* ============================================
+           OVERLAY
+        ============================================ */
+
+        #motiCartOverlay {
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 99999;
+
+            background: rgba(
+                0,
+                0,
+                0,
+                0.42
+            );
+
+            opacity: 0;
+
+            visibility: hidden;
+
+            transition:
+                opacity 0.25s ease,
+                visibility 0.25s ease;
+
+        }
+
+
+        #motiCartOverlay.moti-cart-open {
+
+            opacity: 1;
+
+            visibility: visible;
+
+        }
+
+
+        /* ============================================
+           PANEL
+        ============================================ */
+
+        #motiCartPanel {
+
+            position: absolute;
+
+            left: 0;
+
+            right: 0;
+
+            bottom: 0;
+
+            max-height: 88vh;
+
+            background: #fff;
+
+            border-radius:
+                22px 22px 0 0;
+
+            display: flex;
+
+            flex-direction: column;
+
+            overflow: hidden;
+
+            transform:
+                translateY(100%);
+
+            transition:
+                transform 0.28s
+                cubic-bezier(
+                    0.22,
+                    1,
+                    0.36,
+                    1
+                );
+
+            box-shadow:
+                0 -8px 30px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.18
+                );
+
+        }
+
+
+        #motiCartOverlay.moti-cart-open
+        #motiCartPanel {
+
+            transform:
+                translateY(0);
+
+        }
+
+
+        /* ============================================
+           HEADER
+        ============================================ */
+
+        .moti-cart-header {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content:
+                space-between;
+
+            padding:
+                18px 20px 14px;
+
+            border-bottom:
+                1px solid #eeeeee;
+
+        }
+
+
+        .moti-cart-title {
+
+            display: block;
+
+            font-size: 20px;
+
+            font-weight: 700;
+
+            color: #151515;
+
+        }
+
+
+        .moti-cart-subtitle {
+
+            display: block;
+
+            margin-top: 3px;
+
+            font-size: 13px;
+
+            color: #777;
+
+        }
+
+
+        .moti-cart-close {
+
+            width: 40px;
+
+            height: 40px;
+
+            border: 0;
+
+            border-radius: 50%;
+
+            background: #f3f3f3;
+
+            font-size: 26px;
+
+            line-height: 1;
+
+            cursor: pointer;
+
+        }
+
+
+        /* ============================================
+           CONTENIDO
+        ============================================ */
+
+        .moti-cart-content {
+
+            flex: 1;
+
+            overflow-y: auto;
+
+            padding:
+                8px 18px 18px;
+
+            -webkit-overflow-scrolling:
+                touch;
+
+        }
+
+
+        /* ============================================
+           PRODUCTO
+        ============================================ */
+
+        .moti-cart-product {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content:
+                space-between;
+
+            gap: 12px;
+
+            padding:
+                14px 0;
+
+            border-bottom:
+                1px solid #eeeeee;
+
+        }
+
+
+        .moti-cart-product-info {
+
+            flex: 1;
+
+            min-width: 0;
+
+        }
+
+
+        .moti-cart-product-info strong {
+
+            display: block;
+
+            font-size: 15px;
+
+            color: #202020;
+
+        }
+
+
+        .moti-cart-product-info span {
+
+            display: block;
+
+            margin-top: 3px;
+
+            font-size: 12px;
+
+            color: #777;
+
+        }
+
+
+        .moti-cart-product-info b {
+
+            display: block;
+
+            margin-top: 6px;
+
+            font-size: 14px;
+
+        }
+
+
+        .moti-cart-product-info small {
+
+            display: block;
+
+            margin-top: 2px;
+
+            font-size: 12px;
+
+            color: #555;
+
+        }
+
+
+        /* ============================================
+           CONTROLES
+        ============================================ */
+
+        .moti-cart-product-controls {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            flex-shrink: 0;
+
+        }
+
+
+        .moti-cart-product-controls button {
+
+            width: 34px;
+
+            height: 34px;
+
+            border: 0;
+
+            border-radius: 50%;
+
+            background: #f1f1f1;
+
+            font-size: 20px;
+
+            cursor: pointer;
+
+        }
+
+
+        .moti-cart-product-controls span {
+
+            min-width: 20px;
+
+            text-align: center;
+
+            font-size: 15px;
+
+            font-weight: 600;
+
+            color: #222;
+
+        }
+
+
+        /* ============================================
+           FOOTER
+        ============================================ */
+
+        .moti-cart-footer {
+
+            padding:
+                14px 18px
+                calc(
+                    18px +
+                    env(
+                        safe-area-inset-bottom
+                    )
+                );
+
+            background: #fff;
+
+            border-top:
+                1px solid #eeeeee;
+
+            box-shadow:
+                0 -4px 15px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.06
+                );
+
+        }
+
+
+        .moti-cart-summary-row {
+
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            align-items: center;
+
+            margin-bottom: 8px;
+
+            font-size: 14px;
+
+            color: #555;
+
+        }
+
+
+        .moti-cart-summary-total {
+
+            display: flex;
+
+            justify-content:
+                space-between;
+
+            align-items: center;
+
+            margin-top: 10px;
+
+            padding-top: 12px;
+
+            border-top:
+                1px solid #eeeeee;
+
+            font-size: 18px;
+
+            font-weight: 700;
+
+            color: #111;
+
+        }
+
+
+        .moti-cart-confirm {
+
+            width: 100%;
+
+            margin-top: 14px;
+
+            padding: 14px 18px;
+
+            border: 0;
+
+            border-radius: 12px;
+
+            background: #111;
+
+            color: #fff;
+
+            font-size: 15px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+        }
+
+
+        .moti-cart-confirm:disabled {
+
+            cursor: default;
+
+        }
+
+
+        /* ============================================
+           CARRITO VACÍO
+        ============================================ */
+
+        .moti-cart-empty {
+
+            min-height: 240px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 8px;
+
+            text-align: center;
+
+            color: #777;
+
+        }
+
+
+        .moti-cart-empty
+        .material-symbols-outlined {
+
+            font-size: 42px;
+
+            margin-bottom: 5px;
+
+        }
+
+
+        .moti-cart-empty strong {
+
+            color: #333;
+
+            font-size: 16px;
+
+        }
+
+
+        /* ============================================
+           BLOQUEAR SCROLL DEL FONDO
+        ============================================ */
+
+        body.moti-cart-lock {
+
+            overflow: hidden;
+
+        }
+
+
+        /* ============================================
+           MÓVIL
+        ============================================ */
+
+        @media (
+            min-width: 700px
+        ) {
+
+            #motiCartPanel {
+
+                left: 50%;
+
+                right: auto;
+
+                width: 520px;
+
+                max-width: 95vw;
+
+                transform:
+                    translate(-50%, 100%);
+
+            }
+
+
+            #motiCartOverlay.moti-cart-open
+            #motiCartPanel {
+
+                transform:
+                    translate(-50%, 0);
+
+            }
+
+        }
+
+    `;
+
+
+    document.head.appendChild(
+        style
+    );
+
+}
+
+
+// =====================================================
 // BOTÓN DEL CARRITO
 // =====================================================
 
@@ -3937,33 +5278,14 @@ if (cartBar) {
 
     cartBar.addEventListener(
         "click",
-        () => {
+        event => {
 
-            console.log(
-                "🛒 Carrito:",
-                carrito
-            );
+            event.preventDefault();
+
+            event.stopPropagation();
 
 
-            /*
-                TODAVÍA NO ENVIAMOS EL PEDIDO.
-
-                En el siguiente paso construiremos:
-
-                carrito
-                    ↓
-                revisar pedido
-                    ↓
-                validar existencia
-                    ↓
-                determinar tienda(s)
-                    ↓
-                calcular tarifa
-                    ↓
-                crear pedido
-                    ↓
-                asignar repartidor
-            */
+            abrirPanelCarrito();
 
         }
     );
