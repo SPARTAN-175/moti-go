@@ -3151,6 +3151,91 @@ async function buscarAutomaticamenteEnOtrasTiendas() {
     }
 
 }
+
+// =====================================================
+// LIMPIAR BÚSQUEDA GLOBAL
+// =====================================================
+//
+// Se ejecuta cuando el cliente agrega un producto
+// encontrado en otra tienda.
+//
+// La búsqueda desaparece y el cliente vuelve a ver
+// el catálogo normal de la tienda seleccionada.
+// =====================================================
+
+function limpiarBusquedaGlobal() {
+
+    // =================================================
+    // INVALIDAR LA BÚSQUEDA GLOBAL ACTUAL
+    // =================================================
+
+    busquedaGlobalSolicitud++;
+
+
+    // =================================================
+    // CANCELAR BÚSQUEDA PENDIENTE
+    // =================================================
+
+    if (
+        busquedaGlobalTimer
+    ) {
+
+        clearTimeout(
+            busquedaGlobalTimer
+        );
+
+        busquedaGlobalTimer =
+            null;
+
+    }
+
+
+    // =================================================
+    // LIMPIAR TEXTO
+    // =================================================
+
+    textoBusqueda =
+        "";
+
+
+    // =================================================
+    // LIMPIAR CAMPO DE BÚSQUEDA
+    // =================================================
+
+    if (searchInput) {
+
+        searchInput.value =
+            "";
+
+    }
+
+
+    // =================================================
+    // OCULTAR BOTÓN DE LIMPIAR
+    // =================================================
+
+    if (searchClear) {
+
+        searchClear.style.display =
+            "none";
+
+    }
+
+
+    // =================================================
+    // OCULTAR RESULTADOS GLOBALES
+    // =================================================
+
+    ocultarResultadosBusquedaGlobal();
+
+
+    // =================================================
+    // VOLVER AL CATÁLOGO NORMAL
+    // =================================================
+
+    renderizarProductos();
+
+}
 // =====================================================
 // ESTADO DE BÚSQUEDA GLOBAL
 // =====================================================
