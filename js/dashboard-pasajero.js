@@ -3690,9 +3690,6 @@ function cambiarCantidadDesdeTienda(
 
     actualizarPanelCarrito();
 
-
-    mostrarResultadosBusquedaGlobalActualizados();
-
 }
 
 // =====================================================
