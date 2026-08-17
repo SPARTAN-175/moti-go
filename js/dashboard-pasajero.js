@@ -3691,13 +3691,12 @@ function cambiarCantidadDesdeTienda(
     actualizarPanelCarrito();
 
 // =================================================
-// SI SE AGREGÓ UN PRODUCTO DESDE BÚSQUEDA GLOBAL,
-// LIMPIAR LA BÚSQUEDA Y REGRESAR AL CATÁLOGO
+// SI SE AGREGA DESDE BÚSQUEDA GLOBAL,
+// LIMPIAR LA BÚSQUEDA Y VOLVER AL CATÁLOGO
 // =================================================
 
 if (
-    cambio > 0 &&
-    typeof limpiarBusquedaGlobal === "function"
+    cambio > 0
 ) {
 
     limpiarBusquedaGlobal();
