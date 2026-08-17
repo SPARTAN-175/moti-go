@@ -3605,28 +3605,15 @@ function cambiarCantidadDesdeTienda(
     // BUSCAR EXISTENCIA
     // =================================================
 
-    const inventario =
-        inventarios.find(
-            item =>
-                item.productoId ===
-                productoId &&
-                item.tiendaId ===
-                tiendaId
-        );
-
-
-    // Si la búsqueda global no tiene ese inventario
-    // en memoria, utilizamos el precio recibido y
-    // permitimos agregarlo. La existencia será validada
-    // nuevamente antes de crear el pedido.
-
     const existencia =
-        inventario
-            ? Number(
-                inventario.existencia ??
-                0
-            )
-            : null;
+    existenciaDisponible !==
+    undefined &&
+    existenciaDisponible !==
+    null
+        ? Number(
+            existenciaDisponible
+        )
+        : null;
 
 
     if (
@@ -3662,7 +3649,7 @@ function cambiarCantidadDesdeTienda(
     // GUARDAR
     // =================================================
 
-  else {
+ else {
 
     carrito[
         clave
@@ -3679,33 +3666,16 @@ function cambiarCantidadDesdeTienda(
 
         precio:
             Number(
-                precio ??
-                itemActual?.precio ??
+                precio ||
                 0
             ),
 
         nombre:
             nombreProducto ||
-            itemActual?.nombre ||
             "Producto",
 
-        tiendaNombre:
-            tiendasDisponibles.find(
-                tienda =>
-                    tienda.id ===
-                    tiendaId
-            )?.nombre ||
-            itemActual?.tiendaNombre ||
-            "Tienda",
-
         existencia:
-            existencia !== null &&
-            existencia !== undefined
-                ? existencia
-                : (
-                    itemActual?.existencia ??
-                    null
-                )
+            existencia
 
     };
 
