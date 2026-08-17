@@ -3569,7 +3569,9 @@ function cambiarCantidadDesdeTienda(
     productoId,
     tiendaId,
     cambio,
-    precio
+    precio,
+    nombreProducto,
+    existenciaDisponible
 ) {
 
     const clave =
