@@ -2186,7 +2186,7 @@ function actualizarCantidadesVisibles() {
 
 
 // =====================================================
-// ACTUALIZAR CARRITO
+// ACTUALIZAR BARRA DEL CARRITO
 // =====================================================
 
 function actualizarCarrito() {
@@ -2199,63 +2199,59 @@ function actualizarCarrito() {
         0;
 
 
-    Object.entries(
+    Object.values(
         carrito
     ).forEach(
-        ([productoId, cantidad]) => {
+        item => {
 
-            const producto =
-                productos.find(
-                    item =>
-                        item.id ===
-                        productoId
-                );
+            if (
+                !item ||
+                !item.productoId ||
+                !item.tiendaId
+            ) {
 
-
-            if (!producto) {
                 return;
+
             }
 
 
-            const inventario =
-                obtenerMejorInventario(
-                    productoId
-                );
-
-
-            if (!inventario) {
-                return;
-            }
-
-
-            const precio =
+            const cantidad =
                 Number(
-                    inventario.precio ??
-                    producto.precio ??
+                    item.cantidad ||
                     0
                 );
 
 
-            const cantidadNumero =
+            const precio =
                 Number(
-                    cantidad || 0
+                    item.precio ||
+                    0
                 );
 
 
+            if (
+                cantidad <= 0
+            ) {
+
+                return;
+
+            }
+
+
             totalProductos +=
-                cantidadNumero;
+                cantidad;
 
 
             total +=
                 precio *
-                cantidadNumero;
+                cantidad;
 
         }
     );
 
 
     // =================================================
-    // CANTIDAD DE PRODUCTOS
+    // CANTIDAD
     // =================================================
 
     if (cartItems) {
@@ -2271,7 +2267,7 @@ function actualizarCarrito() {
 
 
     // =================================================
-    // TOTAL
+    // TOTAL PRODUCTOS
     // =================================================
 
     if (cartTotal) {
