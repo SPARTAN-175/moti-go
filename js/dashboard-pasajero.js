@@ -2050,9 +2050,11 @@ function cambiarCantidad(
     // ACTUALIZAR INTERFAZ
     // =================================================
 
-    actualizarCantidadesVisibles();
+actualizarCantidadesVisibles();
 
-    actualizarCarrito();
+actualizarCarrito();
+
+actualizarPanelCarrito();
 
 }
 
