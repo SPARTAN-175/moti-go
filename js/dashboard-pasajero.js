@@ -2147,11 +2147,34 @@ function obtenerCantidad(
     productoId
 ) {
 
-    return Number(
+    if (
+        !tiendaSeleccionadaId
+    ) {
+
+        return 0;
+
+    }
+
+
+    const clave =
+        obtenerClaveCarrito(
+            productoId,
+            tiendaSeleccionadaId
+        );
+
+
+    const item =
         carrito[
-            productoId
-        ] || 0
-    );
+            clave
+        ];
+
+
+    return item
+        ? Number(
+            item.cantidad ||
+            0
+        )
+        : 0;
 
 }
 
