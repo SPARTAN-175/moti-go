@@ -4153,7 +4153,9 @@ if (
                 destinoGuardado
             );
 
-
+    window.motiGoDestinoSeleccionado =
+    destino;
+        
         console.log(
             "Destino seleccionado:",
             destino
