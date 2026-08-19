@@ -1,3 +1,9 @@
+import {
+    auth,
+    db
+} from "./firebase-config.js";
+
+
 // =====================================================
 // MOTI GO
 // GESTIÓN DE PEDIDOS DEL CLIENTE
