@@ -4474,7 +4474,11 @@ if (confirmButton) {
                 "function"
             ) {
 
-                abrirRevisionPedido();
+               abrirRevisionPedido(
+                carrito,
+                productos,
+                tiendasDisponibles
+                );
 
             }
             else {
