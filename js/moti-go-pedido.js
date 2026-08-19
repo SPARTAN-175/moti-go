@@ -45,75 +45,9 @@ let pedidoCarrito =
     {};
 
 
-// =====================================================
-// ELEMENTOS DEL DOM
-// =====================================================
-
-const pedidoCarritoBar =
-    document.getElementById(
-        "cartBar"
-    );
 
 
-// =====================================================
-// INICIALIZAR
-// =====================================================
-
-inicializarMotiGoPedido();
-
-
-// =====================================================
-// INICIALIZACIÓN PRINCIPAL
-// =====================================================
-
-function inicializarMotiGoPedido() {
-
-    if (
-        !pedidoCarritoBar
-    ) {
-
-        console.warn(
-            "⚠️ MOTI GO Pedido: no se encontró #cartBar."
-        );
-
-        return;
-
-    }
-
-
-    // =================================================
-    // EVITAR DOBLE REGISTRO
-    // =================================================
-
-    if (
-        pedidoCarritoBar.dataset
-            .motiGoPedidoInicializado ===
-        "true"
-    ) {
-
-        return;
-
-    }
-
-
-    pedidoCarritoBar.dataset
-        .motiGoPedidoInicializado =
-        "true";
-
-
-    // =================================================
-    // ABRIR REVISIÓN DEL PEDIDO
-    // =================================================
-
-    pedidoCarritoBar.addEventListener(
-        "click",
-        () => {
-
-            abrirRevisionPedido();
-
-        }
-    );
-
+  function inicializarMotiGoPedido() {
 
     console.log(
         "🛍️ MOTI GO PEDIDOS INICIADO"
