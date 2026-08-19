@@ -731,6 +731,12 @@ window.abrirRevisionPedido = function (
     pedidoCarrito =
         carritoActual || {};
 
+    pedidoProductos =
+    productosActuales || [];
+
+    pedidoTiendas =
+    tiendasActuales || [];
+
 
     const productosDisponibles =
         productosActuales || [];
@@ -1115,7 +1121,11 @@ function prepararConfirmacionPedido() {
 
 
     const productosPedido =
-        obtenerProductosDelCarrito();
+    obtenerProductosDelCarrito(
+        pedidoCarrito,
+        pedidoProductos,
+        pedidoTiendas
+    );
 
 
     if (
