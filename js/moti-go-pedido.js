@@ -707,7 +707,7 @@ function crearPanelRevisionPedido() {
 }
 
 
-function abrirRevisionPedido(
+window.abrirRevisionPedido = function (
     carritoActual,
     productosActuales,
     tiendasActuales
