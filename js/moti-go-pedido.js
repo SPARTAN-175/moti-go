@@ -1671,3 +1671,100 @@ function agregarEstilosPanelPedido() {
     );
 
 }
+
+
+// =====================================================
+// GENERAR FOLIO DEL PEDIDO
+// =====================================================
+
+function generarFolioPedido() {
+
+    const ahora =
+        new Date();
+
+    const fecha =
+        ahora
+            .toISOString()
+            .slice(0, 10)
+            .replaceAll("-", "");
+
+    const hora =
+        ahora
+            .toTimeString()
+            .slice(0, 8)
+            .replaceAll(":", "");
+
+    const aleatorio =
+        Math.floor(
+            100 +
+            Math.random() *
+            900
+        );
+
+    return `MG-${fecha}-${hora}-${aleatorio}`;
+
+}
+
+
+// =====================================================
+// GENERAR CÓDIGO DE ENTREGA
+// =====================================================
+
+function generarCodigoEntrega() {
+
+    return String(
+        Math.floor(
+            100000 +
+            Math.random() *
+            900000
+        )
+    );
+
+}
+
+// =====================================================
+// OBTENER DESTINO DEL CLIENTE
+// =====================================================
+
+function obtenerDestinoClienteMotiGo() {
+
+    const destino =
+        window.motiGoDestinoSeleccionado;
+
+
+    if (
+        !destino
+    ) {
+
+        console.warn(
+            "⚠️ MOTI GO: no se encontró destino seleccionado."
+        );
+
+        return null;
+
+    }
+
+
+    return {
+
+        latitud:
+            Number(
+                destino.latitud
+            ),
+
+        longitud:
+            Number(
+                destino.longitud
+            ),
+
+        localidad:
+            destino.localidad ||
+            "",
+
+        referencia:
+            destino.referencia ||
+            ""
+
+    };
+
+}
