@@ -4469,25 +4469,25 @@ if (confirmButton) {
             // Todavía NO crea el pedido.
             // =================================================
 
-            if (
-                typeof abrirRevisionPedido ===
-                "function"
-            ) {
+           if (
+    typeof window.abrirRevisionPedido ===
+    "function"
+) {
 
-               abrirRevisionPedido(
-                carrito,
-                productos,
-                tiendasDisponibles
-                );
+    window.abrirRevisionPedido(
+        carrito,
+        productos,
+        tiendasDisponibles
+    );
 
-            }
-            else {
+}
+else {
 
-                console.error(
-                    "❌ MOTI GO: abrirRevisionPedido() no está disponible."
-                );
+    console.error(
+        "❌ MOTI GO: abrirRevisionPedido() no está disponible."
+    );
 
-            }
+}
 
         }
     );
