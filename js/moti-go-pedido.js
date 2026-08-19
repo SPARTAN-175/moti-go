@@ -154,109 +154,35 @@ function cargarCarritoPedido() {
 // uniforme para trabajar con el pedido.
 // =====================================================
 
-function obtenerProductosDelCarrito() {
+function obtenerProductosDelCarrito(
+    carritoActual,
+    productosDisponibles,
+    tiendasDisponiblesActuales
+) {
 
     const productosPedido =
         [];
 
 
-    Object.entries(
-        pedidoCarrito
+    Object.values(
+        carritoActual || {}
     ).forEach(
-        (
-            [
-                clave,
-                valor
-            ]
-        ) => {
-
-
-            // =========================================
-            // PRODUCTO DE OTRA TIENDA
-            // =========================================
+        item => {
 
             if (
-                valor &&
-                typeof valor ===
-                "object" &&
-                !Array.isArray(
-                    valor
-                )
+                !item ||
+                !item.productoId ||
+                !item.tiendaId
             ) {
-
-                const cantidad =
-                    Number(
-                        valor.cantidad ||
-                        0
-                    );
-
-
-                if (
-                    cantidad <=
-                    0
-                ) {
-
-                    return;
-
-                }
-
-
-                productosPedido.push({
-
-                    clave:
-
-                        clave,
-
-                    productoId:
-
-                        valor.productoId ||
-                        null,
-
-                    tiendaId:
-
-                        valor.tiendaId ||
-                        null,
-
-                    cantidad:
-
-                        cantidad,
-
-                    precio:
-
-                        Number(
-                            valor.precio ||
-                            0
-                        ),
-
-                    nombre:
-
-                        valor.nombre ||
-                        "Producto",
-
-                    existencia:
-
-                        valor.existencia !==
-                        undefined
-                            ? Number(
-                                valor.existencia
-                            )
-                            : null
-
-                });
-
 
                 return;
 
             }
 
 
-            // =========================================
-            // PRODUCTO NORMAL
-            // =========================================
-
             const cantidad =
                 Number(
-                    valor ||
+                    item.cantidad ||
                     0
                 );
 
@@ -271,35 +197,88 @@ function obtenerProductosDelCarrito() {
             }
 
 
+            // =================================================
+            // BUSCAR PRODUCTO MAESTRO
+            // =================================================
+
+            const producto =
+                productosDisponibles.find(
+                    productoItem =>
+                        productoItem.id ===
+                        item.productoId
+                );
+
+
+            // =================================================
+            // NOMBRE
+            // =================================================
+
+            const nombre =
+                producto?.nombre ||
+                item.nombre ||
+                "Producto";
+
+
+            // =================================================
+            // PRECIO
+            // =================================================
+
+            const precio =
+                Number(
+                    item.precio ??
+                    producto?.precio ??
+                    0
+                );
+
+
+            // =================================================
+            // TIENDA
+            // =================================================
+
+            const tienda =
+                tiendasDisponiblesActuales.find(
+                    tiendaItem =>
+                        tiendaItem.id ===
+                        item.tiendaId
+                );
+
+
+            const tiendaNombre =
+                tienda?.nombre ||
+                "Tienda";
+
+
+            // =================================================
+            // AGREGAR PRODUCTO
+            // =================================================
+
             productosPedido.push({
 
-                clave:
-
-                    clave,
-
                 productoId:
-
-                    clave,
+                    item.productoId,
 
                 tiendaId:
+                    item.tiendaId,
 
-                    null,
+                tiendaNombre:
+                    tiendaNombre,
 
                 cantidad:
-
                     cantidad,
 
                 precio:
-
-                    0,
+                    precio,
 
                 nombre:
-
-                    "Producto",
+                    nombre,
 
                 existencia:
-
-                    null
+                    item.existencia !==
+                    undefined
+                        ? Number(
+                            item.existencia
+                        )
+                        : null
 
             });
 
@@ -328,8 +307,7 @@ function agruparProductosPorTienda(
         producto => {
 
             const tiendaId =
-                producto.tiendaId ||
-                "tienda_actual";
+                producto.tiendaId;
 
 
             if (
@@ -343,18 +321,13 @@ function agruparProductosPorTienda(
                 ] = {
 
                     tiendaId:
-
                         tiendaId,
 
                     nombre:
-
-                        tiendaId ===
-                        "tienda_actual"
-                            ? "Tienda seleccionada"
-                            : "Tienda",
+                        producto.tiendaNombre ||
+                        "Tienda",
 
                     productos:
-
                         []
 
                 };
