@@ -50,6 +50,11 @@ import {
 let pedidoCarrito =
     {};
 
+let pedidoProductos =
+    [];
+
+let pedidoTiendas =
+    [];
 
 
 
