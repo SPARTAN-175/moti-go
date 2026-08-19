@@ -734,17 +734,38 @@ function crearPanelRevisionPedido() {
 }
 
 
-// =====================================================
-// MOSTRAR PANEL
-// =====================================================
+function abrirRevisionPedido(
+    carritoActual,
+    productosActuales,
+    tiendasActuales
+) {
 
-function abrirRevisionPedido() {
+    // =================================================
+    // GUARDAR LOS DATOS ACTUALES DEL DASHBOARD
+    // =================================================
 
-    cargarCarritoPedido();
+    pedidoCarrito =
+        carritoActual || {};
 
+
+    const productosDisponibles =
+        productosActuales || [];
+
+
+    const tiendasDisponiblesActuales =
+        tiendasActuales || [];
+
+
+    // =================================================
+    // OBTENER PRODUCTOS REALES DEL CARRITO
+    // =================================================
 
     const productosPedido =
-        obtenerProductosDelCarrito();
+        obtenerProductosDelCarrito(
+            pedidoCarrito,
+            productosDisponibles,
+            tiendasDisponiblesActuales
+        );
 
 
     if (
@@ -761,14 +782,27 @@ function abrirRevisionPedido() {
     }
 
 
+    // =================================================
+    // CREAR / OBTENER PANEL
+    // =================================================
+
     const panel =
         crearPanelRevisionPedido();
 
 
+    // =================================================
+    // MOSTRAR CONTENIDO
+    // =================================================
+
     renderizarRevisionPedido(
-        productosPedido
+        productosPedido,
+        tiendasDisponiblesActuales
     );
 
+
+    // =================================================
+    // MOSTRAR PANEL
+    // =================================================
 
     panel.style.display =
         "block";
@@ -779,7 +813,8 @@ function abrirRevisionPedido() {
 
 
     console.log(
-        "🧾 MOTI GO: revisión de pedido abierta."
+        "🧾 MOTI GO: revisión de pedido abierta.",
+        productosPedido
     );
 
 }
