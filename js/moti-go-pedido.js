@@ -1150,9 +1150,14 @@ function prepararConfirmacionPedido() {
     );
 
 
-    alert(
-        "La revisión del pedido funciona correctamente. Todavía no se ha creado ningún pedido."
-    );
+console.log(
+    "🧾 MOTI GO - DATOS DEL PEDIDO:",
+    {
+        carrito: pedidoCarrito,
+        productos: pedidoProductos,
+        tiendas: pedidoTiendas
+    }
+);
 
 }
 
