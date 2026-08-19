@@ -4433,40 +4433,62 @@ function crearPanelCarrito() {
 
 
     // =================================================
-    // BOTÓN REVISAR PEDIDO
-    // =================================================
+// BOTÓN REVISAR PEDIDO
+// =================================================
 
-    const confirmButton =
-        document.getElementById(
-            "motiCartConfirm"
-        );
-
-
-    if (confirmButton) {
-
-        confirmButton.addEventListener(
-            "click",
-            () => {
-
-                console.log(
-                    "🧾 Revisar pedido:",
-                    carrito
-                );
+const confirmButton =
+    document.getElementById(
+        "motiCartConfirm"
+    );
 
 
-                // -----------------------------------------
-                // TODAVÍA NO CREAMOS EL PEDIDO.
-                // -----------------------------------------
+if (confirmButton) {
 
-                alert(
-                    "La revisión del pedido estará disponible en el siguiente paso."
+    confirmButton.addEventListener(
+        "click",
+        () => {
+
+            console.log(
+                "🧾 Revisar pedido MOTI GO:",
+                carrito
+            );
+
+
+            // =================================================
+            // ABRIR EL NUEVO MÓDULO DE PEDIDOS
+            // =================================================
+            //
+            // moti-go-pedido.js se encarga de:
+            //
+            // - leer nuevamente el carrito
+            // - agrupar productos
+            // - calcular subtotal
+            // - calcular entrega
+            // - mostrar el panel de revisión
+            //
+            // Todavía NO crea el pedido.
+            // =================================================
+
+            if (
+                typeof abrirRevisionPedido ===
+                "function"
+            ) {
+
+                abrirRevisionPedido();
+
+            }
+            else {
+
+                console.error(
+                    "❌ MOTI GO: abrirRevisionPedido() no está disponible."
                 );
 
             }
-        );
 
-    }
+        }
+    );
 
+}
 
     // =================================================
     // CREAR ESTILOS
