@@ -7127,15 +7127,24 @@ function abrirPedidoDesdeMisPedidos(
     );
 
 
+    // =================================================
+    // PEDIDO ACTIVO
+    // =================================================
+
+    const estadosActivos = [
+
+        "pendiente_asignacion",
+        "asignado",
+        "en_compra",
+        "listo_entrega",
+        "en_ruta",
+        "entregando"
+
+    ];
+
+
     if (
-        [
-            "pendiente_asignacion",
-            "asignado",
-            "en_compra",
-            "listo_entrega",
-            "en_ruta",
-            "entregando"
-        ].includes(
+        estadosActivos.includes(
             pedido.estado
         )
     ) {
@@ -7145,29 +7154,12 @@ function abrirPedidoDesdeMisPedidos(
         );
 
 
-        // Por ahora cerramos Mis pedidos.
         cerrarPanelMisPedidos();
 
 
-        // Más adelante aquí abriremos
-        // el seguimiento real del pedido.
-        if (
-            typeof window.abrirSeguimientoPedidoMotiGo ===
-            "function"
-        ) {
-
-            window.abrirSeguimientoPedidoMotiGo(
-                pedido
-            );
-
-        }
-        else {
-
-            console.log(
-                "ℹ️ MOTI GO: seguimiento de pedido se conectará en el siguiente paso."
-            );
-
-        }
+        abrirSeguimientoPedidoMotiGo(
+            pedido
+        );
 
 
         return;
@@ -7175,9 +7167,528 @@ function abrirPedidoDesdeMisPedidos(
     }
 
 
+    // =================================================
+    // PEDIDO FINALIZADO
+    // =================================================
+
     console.log(
-        "🧾 MOTI GO: pedido histórico seleccionado.",
+        "🧾 MOTI GO: pedido histórico seleccionado:",
         pedido
+    );
+
+}
+
+function abrirSeguimientoPedidoMotiGo(
+    pedido
+) {
+
+    console.log(
+        "🛵 MOTI GO: abriendo seguimiento:",
+        pedido
+    );
+
+
+    let panel =
+        document.getElementById(
+            "motiPanelSeguimientoPedido"
+        );
+
+
+    // =================================================
+    // SI YA EXISTE
+    // =================================================
+
+    if (
+        panel
+    ) {
+
+        actualizarPanelSeguimientoPedido(
+            pedido
+        );
+
+
+        panel.classList.add(
+            "activo"
+        );
+
+
+        escucharEstadoPedidoMotiGo(
+            pedido.id
+        );
+
+
+        return;
+
+    }
+
+
+    // =================================================
+    // CREAR PANEL
+    // =================================================
+
+    panel =
+        document.createElement(
+            "div"
+        );
+
+
+    panel.id =
+        "motiPanelSeguimientoPedido";
+
+
+    panel.innerHTML = `
+
+        <div class="moti-seguimiento-panel">
+
+            <div class="moti-seguimiento-header">
+
+                <button
+                    type="button"
+                    id="cerrarSeguimientoPedido"
+                    class="moti-seguimiento-regresar"
+                >
+
+                    <span class="material-symbols-outlined">
+                        arrow_back
+                    </span>
+
+                </button>
+
+
+                <div>
+
+                    <span>
+                        MOTI GO
+                    </span>
+
+                    <h2>
+                        Seguimiento del pedido
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="motiSeguimientoContenido"
+                class="moti-seguimiento-contenido"
+            ></div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        panel
+    );
+
+
+    const cerrar =
+        document.getElementById(
+            "cerrarSeguimientoPedido"
+        );
+
+
+    if (
+        cerrar
+    ) {
+
+        cerrar.addEventListener(
+            "click",
+            () => {
+
+                cerrarSeguimientoPedidoMotiGo();
+
+            }
+        );
+
+    }
+
+
+    actualizarPanelSeguimientoPedido(
+        pedido
+    );
+
+
+    crearEstilosSeguimientoPedido();
+
+
+    requestAnimationFrame(
+        () => {
+
+            panel.classList.add(
+                "activo"
+            );
+
+        }
+    );
+
+
+    escucharEstadoPedidoMotiGo(
+        pedido.id
+    );
+
+}
+
+function actualizarPanelSeguimientoPedido(
+    pedido
+) {
+
+    const contenido =
+        document.getElementById(
+            "motiSeguimientoContenido"
+        );
+
+
+    if (
+        !contenido
+    ) {
+
+        return;
+
+    }
+
+
+    const configuracion =
+        obtenerConfiguracionEstadoPedido(
+            pedido.estado
+        );
+
+
+    const total =
+        Number(
+            pedido.total || 0
+        );
+
+
+    const folio =
+        pedido.folio ||
+        pedido.id;
+
+
+    const productos =
+        Array.isArray(
+            pedido.productos
+        )
+            ? pedido.productos.length
+            : 0;
+
+
+    contenido.innerHTML = `
+
+        <div class="moti-seguimiento-estado">
+
+            <div class="moti-seguimiento-icono">
+
+                <span class="material-symbols-outlined">
+                    ${configuracion.icono}
+                </span>
+
+            </div>
+
+
+            <h3>
+                ${configuracion.titulo}
+            </h3>
+
+
+            <p>
+                ${configuracion.descripcion}
+            </p>
+
+
+            <div class="moti-seguimiento-barra">
+
+                <div
+                    class="moti-seguimiento-progreso"
+                    style="
+                        width:
+                        ${configuracion.progreso}%;
+                    "
+                ></div>
+
+            </div>
+
+
+            <div class="moti-seguimiento-pasos">
+
+                <span class="${
+                    configuracion.progreso >= 25
+                        ? "activo"
+                        : ""
+                }">
+                    Pedido
+                </span>
+
+                <span class="${
+                    configuracion.progreso >= 50
+                        ? "activo"
+                        : ""
+                }">
+                    Compra
+                </span>
+
+                <span class="${
+                    configuracion.progreso >= 75
+                        ? "activo"
+                        : ""
+                }">
+                    En camino
+                </span>
+
+                <span class="${
+                    configuracion.progreso >= 100
+                        ? "activo"
+                        : ""
+                }">
+                    Entregado
+                </span>
+
+            </div>
+
+
+            <div class="moti-seguimiento-resumen">
+
+                <div>
+
+                    <span>
+                        Pedido
+                    </span>
+
+                    <strong>
+                        ${String(
+                            folio
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Productos
+                    </span>
+
+                    <strong>
+                        ${productos}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Total
+                    </span>
+
+                    <strong>
+                        $${total.toFixed(2)}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            ${
+                pedido.estado ===
+                "pendiente_asignacion"
+
+                    ? `
+
+                        <button
+                            type="button"
+                            id="cancelarPedidoMotiGo"
+                            class="moti-seguimiento-cancelar"
+                        >
+
+                            Cancelar pedido
+
+                        </button>
+
+                    `
+
+                    : ""
+            }
+
+        </div>
+
+    `;
+
+
+    const cancelar =
+        document.getElementById(
+            "cancelarPedidoMotiGo"
+        );
+
+
+    if (
+        cancelar
+    ) {
+
+        cancelar.addEventListener(
+            "click",
+            () => {
+
+                console.log(
+                    "⚠️ MOTI GO: cancelar pedido pendiente."
+                );
+
+            }
+        );
+
+    }
+
+}
+
+function obtenerConfiguracionEstadoPedido(
+    estado
+) {
+
+    const estados = {
+
+        pendiente_asignacion: {
+
+            icono:
+                "search",
+
+            titulo:
+                "Buscando repartidor",
+
+            descripcion:
+                "Estamos buscando un repartidor para tu pedido.",
+
+            progreso:
+                25
+
+        },
+
+
+        asignado: {
+
+            icono:
+                "two_wheeler",
+
+            titulo:
+                "Repartidor asignado",
+
+            descripcion:
+                "Un repartidor aceptó tu pedido.",
+
+            progreso:
+                35
+
+        },
+
+
+        en_compra: {
+
+            icono:
+                "shopping_basket",
+
+            titulo:
+                "Comprando tus productos",
+
+            descripcion:
+                "El repartidor está realizando tu compra.",
+
+            progreso:
+                55
+
+        },
+
+
+        listo_entrega: {
+
+            icono:
+                "inventory_2",
+
+            titulo:
+                "Pedido preparado",
+
+            descripcion:
+                "Tu pedido está listo para ser entregado.",
+
+            progreso:
+                70
+
+        },
+
+
+        en_ruta: {
+
+            icono:
+                "delivery_dining",
+
+            titulo:
+                "Tu pedido va en camino",
+
+            descripcion:
+                "El repartidor se dirige hacia ti.",
+
+            progreso:
+                85
+
+        },
+
+
+        entregando: {
+
+            icono:
+                "location_on",
+
+            titulo:
+                "El repartidor está llegando",
+
+            descripcion:
+                "Tu pedido está muy cerca.",
+
+            progreso:
+                95
+
+        },
+
+
+        entregado: {
+
+            icono:
+                "check_circle",
+
+            titulo:
+                "Pedido entregado",
+
+            descripcion:
+                "Tu pedido fue entregado correctamente.",
+
+            progreso:
+                100
+
+        }
+
+    };
+
+
+    return (
+        estados[estado] ||
+        {
+
+            icono:
+                "receipt_long",
+
+            titulo:
+                "Pedido en proceso",
+
+            descripcion:
+                "Estamos actualizando tu pedido.",
+
+            progreso:
+                25
+
+        }
     );
 
 }
