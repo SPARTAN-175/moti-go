@@ -4477,10 +4477,11 @@ if (confirmButton) {
 ) {
 
     window.abrirRevisionPedido(
-        carrito,
-        productos,
-        tiendasDisponibles
-    );
+    carrito,
+    productos,
+    tiendasDisponibles,
+    perfilCliente
+);
 
 }
 else {
