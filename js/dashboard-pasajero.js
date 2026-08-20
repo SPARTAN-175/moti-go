@@ -5718,3 +5718,977 @@ onAuthStateChanged(
 console.log(
     "🛒 MOTI GO - CATÁLOGO INICIADO"
 );
+
+
+
+
+// =====================================================
+// MENÚ LATERAL — MOTI GO
+// =====================================================
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        // -------------------------------------------------
+        // MI CARRITO
+        // -------------------------------------------------
+
+        const menuMiCarrito =
+            document.getElementById(
+                "menuMiCarrito"
+            );
+
+
+        if (
+            menuMiCarrito
+        ) {
+
+            menuMiCarrito.addEventListener(
+                "click",
+                (event) => {
+
+                    event.preventDefault();
+
+                    console.log(
+                        "🛒 MOTI GO: Mi carrito seleccionado."
+                    );
+
+
+                    if (
+                        typeof abrirPanelCarrito ===
+                        "function"
+                    ) {
+
+                        abrirPanelCarrito();
+
+                    }
+                    else if (
+                        typeof window.abrirPanelCarrito ===
+                        "function"
+                    ) {
+
+                        window.abrirPanelCarrito();
+
+                    }
+                    else {
+
+                        console.error(
+                            "❌ MOTI GO: abrirPanelCarrito() no está disponible."
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        // -------------------------------------------------
+        // MIS PEDIDOS
+        // -------------------------------------------------
+
+        const menuMisPedidos =
+            document.getElementById(
+                "menuMisPedidos"
+            );
+
+
+        if (
+            menuMisPedidos
+        ) {
+
+            menuMisPedidos.addEventListener(
+                "click",
+                (event) => {
+
+                    event.preventDefault();
+
+                    console.log(
+                        "🧾 MOTI GO: Mis pedidos seleccionado."
+                    );
+
+                    abrirPanelMisPedidos();
+
+                }
+            );
+
+        }
+
+    }
+);
+
+// =====================================================
+// PANEL — MIS PEDIDOS
+// =====================================================
+
+function abrirPanelMisPedidos() {
+
+    let panel =
+        document.getElementById(
+            "motiPanelMisPedidos"
+        );
+
+
+    // -------------------------------------------------
+    // SI YA EXISTE, SOLAMENTE LO MOSTRAMOS
+    // -------------------------------------------------
+
+    if (
+        panel
+    ) {
+
+        panel.classList.add(
+            "activo"
+        );
+
+        cargarMisPedidos();
+
+        return;
+
+    }
+
+
+    // -------------------------------------------------
+    // CREAR PANEL
+    // -------------------------------------------------
+
+    panel =
+        document.createElement(
+            "div"
+        );
+
+
+    panel.id =
+        "motiPanelMisPedidos";
+
+
+    panel.innerHTML = `
+
+        <div class="moti-pedidos-panel">
+
+            <div class="moti-pedidos-header">
+
+                <button
+                    type="button"
+                    id="cerrarMisPedidos"
+                    class="moti-pedidos-cerrar"
+                    aria-label="Cerrar"
+                >
+
+                    <span class="material-symbols-outlined">
+                        arrow_back
+                    </span>
+
+                </button>
+
+
+                <div>
+
+                    <span>
+                        MOTI GO
+                    </span>
+
+                    <h2>
+                        Mis pedidos
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="motiPedidosContenido"
+                class="moti-pedidos-contenido"
+            >
+
+                <div class="moti-pedidos-cargando">
+
+                    <span class="material-symbols-outlined">
+                        progress_activity
+                    </span>
+
+                    <p>
+                        Cargando tus pedidos...
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        panel
+    );
+
+
+    // -------------------------------------------------
+    // CERRAR
+    // -------------------------------------------------
+
+    const cerrar =
+        document.getElementById(
+            "cerrarMisPedidos"
+        );
+
+
+    if (
+        cerrar
+    ) {
+
+        cerrar.addEventListener(
+            "click",
+            () => {
+
+                cerrarPanelMisPedidos();
+
+            }
+        );
+
+    }
+
+
+    // -------------------------------------------------
+    // MOSTRAR
+    // -------------------------------------------------
+
+    requestAnimationFrame(
+        () => {
+
+            panel.classList.add(
+                "activo"
+            );
+
+        }
+    );
+
+
+    cargarMisPedidos();
+
+}
+
+function cerrarPanelMisPedidos() {
+
+    const panel =
+        document.getElementById(
+            "motiPanelMisPedidos"
+        );
+
+
+    if (
+        !panel
+    ) {
+
+        return;
+
+    }
+
+
+    panel.classList.remove(
+        "activo"
+    );
+
+}
+
+
+async function cargarMisPedidos() {
+
+    const contenido =
+        document.getElementById(
+            "motiPedidosContenido"
+        );
+
+
+    if (
+        !contenido
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+        // -------------------------------------------------
+        // USUARIO ACTUAL
+        // -------------------------------------------------
+
+        const usuario =
+            auth.currentUser;
+
+
+        if (
+            !usuario
+        ) {
+
+            contenido.innerHTML = `
+
+                <div class="moti-pedidos-vacio">
+
+                    <span class="material-symbols-outlined">
+                        person_off
+                    </span>
+
+                    <strong>
+                        Sesión no disponible
+                    </strong>
+
+                    <p>
+                        No pudimos identificar tu cuenta.
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        console.log(
+            "🧾 MOTI GO: cargando pedidos de:",
+            usuario.uid
+        );
+
+
+        // -------------------------------------------------
+        // CONSULTAR PEDIDOS
+        // -------------------------------------------------
+
+        const consulta =
+            query(
+                collection(
+                    db,
+                    "pedidos"
+                ),
+                where(
+                    "clienteId",
+                    "==",
+                    usuario.uid
+                )
+            );
+
+
+        const resultado =
+            await getDocs(
+                consulta
+            );
+
+
+        const pedidos =
+            resultado.docs.map(
+                (doc) => ({
+
+                    id:
+                        doc.id,
+
+                    ...doc.data()
+
+                })
+            );
+
+
+        console.log(
+            "🧾 MOTI GO: pedidos encontrados:",
+            pedidos.length
+        );
+
+
+        // -------------------------------------------------
+        // ORDENAR — MÁS RECIENTE PRIMERO
+        // -------------------------------------------------
+
+        pedidos.sort(
+            (a, b) => {
+
+                const fechaA =
+                    obtenerFechaPedido(
+                        a
+                    );
+
+                const fechaB =
+                    obtenerFechaPedido(
+                        b
+                    );
+
+
+                return (
+                    fechaB -
+                    fechaA
+                );
+
+            }
+        );
+
+
+        renderizarMisPedidos(
+            pedidos
+        );
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "❌ MOTI GO: error cargando pedidos:",
+            error
+        );
+
+
+        contenido.innerHTML = `
+
+            <div class="moti-pedidos-vacio">
+
+                <span class="material-symbols-outlined">
+                    error
+                </span>
+
+                <strong>
+                    No pudimos cargar tus pedidos
+                </strong>
+
+                <p>
+                    Intenta nuevamente.
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+function obtenerFechaPedido(
+    pedido
+) {
+
+    if (
+        pedido.creadoEn?.toMillis
+    ) {
+
+        return pedido.creadoEn.toMillis();
+
+    }
+
+
+    if (
+        pedido.creadoEn?.seconds
+    ) {
+
+        return (
+            pedido.creadoEn.seconds *
+            1000
+        );
+
+    }
+
+
+    if (
+        pedido.creadoEn
+    ) {
+
+        const fecha =
+            new Date(
+                pedido.creadoEn
+            );
+
+
+        if (
+            !Number.isNaN(
+                fecha.getTime()
+            )
+        ) {
+
+            return fecha.getTime();
+
+        }
+
+    }
+
+
+    return 0;
+
+}
+
+function renderizarMisPedidos(
+    pedidos
+) {
+
+    const contenido =
+        document.getElementById(
+            "motiPedidosContenido"
+        );
+
+
+    if (
+        !contenido
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !pedidos.length
+    ) {
+
+        contenido.innerHTML = `
+
+            <div class="moti-pedidos-vacio">
+
+                <span class="material-symbols-outlined">
+                    receipt_long
+                </span>
+
+                <strong>
+                    Aún no tienes pedidos
+                </strong>
+
+                <p>
+                    Cuando hagas tu primer mandado,
+                    aparecerá aquí.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    const estadosActivos = [
+
+        "pendiente_asignacion",
+        "asignado",
+        "en_compra",
+        "listo_entrega",
+        "en_ruta",
+        "entregando"
+
+    ];
+
+
+    const pedidosActivos =
+        pedidos.filter(
+            (pedido) =>
+                estadosActivos.includes(
+                    pedido.estado
+                )
+        );
+
+
+    const pedidosHistorial =
+        pedidos.filter(
+            (pedido) =>
+                !estadosActivos.includes(
+                    pedido.estado
+                )
+        );
+
+
+    let html = "";
+
+
+    // -------------------------------------------------
+    // EN CURSO
+    // -------------------------------------------------
+
+    if (
+        pedidosActivos.length
+    ) {
+
+        html += `
+
+            <section class="moti-pedidos-seccion">
+
+                <div class="moti-pedidos-titulo">
+
+                    <span class="material-symbols-outlined">
+                        schedule
+                    </span>
+
+                    <h3>
+                        En curso
+                    </h3>
+
+                </div>
+
+        `;
+
+
+        pedidosActivos.forEach(
+            (pedido) => {
+
+                html += crearTarjetaPedido(
+                    pedido,
+                    true
+                );
+
+            }
+        );
+
+
+        html += `
+
+            </section>
+
+        `;
+
+    }
+
+
+    // -------------------------------------------------
+    // HISTORIAL
+    // -------------------------------------------------
+
+    if (
+        pedidosHistorial.length
+    ) {
+
+        html += `
+
+            <section class="moti-pedidos-seccion">
+
+                <div class="moti-pedidos-titulo">
+
+                    <span class="material-symbols-outlined">
+                        history
+                    </span>
+
+                    <h3>
+                        Historial
+                    </h3>
+
+                </div>
+
+        `;
+
+
+        pedidosHistorial.forEach(
+            (pedido) => {
+
+                html += crearTarjetaPedido(
+                    pedido,
+                    false
+                );
+
+            }
+        );
+
+
+        html += `
+
+            </section>
+
+        `;
+
+    }
+
+
+    contenido.innerHTML =
+        html;
+
+
+    // -------------------------------------------------
+    // EVENTOS
+    // -------------------------------------------------
+
+    contenido
+        .querySelectorAll(
+            "[data-pedido-id]"
+        )
+        .forEach(
+            (boton) => {
+
+                boton.addEventListener(
+                    "click",
+                    () => {
+
+                        const pedidoId =
+                            boton.dataset.pedidoId;
+
+
+                        const pedido =
+                            pedidos.find(
+                                (item) =>
+                                    item.id ===
+                                    pedidoId
+                            );
+
+
+                        if (
+                            pedido
+                        ) {
+
+                            abrirPedidoDesdeMisPedidos(
+                                pedido
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+function crearTarjetaPedido(
+    pedido,
+    activo
+) {
+
+    const estado =
+        obtenerTextoEstadoPedido(
+            pedido.estado
+        );
+
+
+    const icono =
+        obtenerIconoEstadoPedido(
+            pedido.estado
+        );
+
+
+    const total =
+        Number(
+            pedido.total || 0
+        );
+
+
+    const folio =
+        pedido.folio ||
+        pedido.id;
+
+
+    const productos =
+        Array.isArray(
+            pedido.productos
+        )
+            ? pedido.productos.length
+            : 0;
+
+
+    return `
+
+        <button
+            type="button"
+            class="moti-pedido-card ${activo ? "activo" : ""}"
+            data-pedido-id="${escaparHTMLDashboard(
+                pedido.id
+            )}"
+        >
+
+            <div class="moti-pedido-icono">
+
+                <span class="material-symbols-outlined">
+                    ${icono}
+                </span>
+
+            </div>
+
+
+            <div class="moti-pedido-info">
+
+                <strong>
+                    Pedido ${escaparHTMLDashboard(
+                        folio
+                    )}
+                </strong>
+
+
+                <span>
+                    ${productos}
+                    ${
+                        productos === 1
+                            ? "producto"
+                            : "productos"
+                    }
+                </span>
+
+
+                <small>
+                    ${estado}
+                </small>
+
+            </div>
+
+
+            <div class="moti-pedido-total">
+
+                <strong>
+                    $${total.toFixed(2)}
+                </strong>
+
+
+                <span class="material-symbols-outlined">
+                    chevron_right
+                </span>
+
+            </div>
+
+        </button>
+
+    `;
+
+}
+
+function obtenerTextoEstadoPedido(
+    estado
+) {
+
+    const estados = {
+
+        pendiente_asignacion:
+            "Buscando repartidor",
+
+        asignado:
+            "Repartidor asignado",
+
+        en_compra:
+            "Repartidor comprando",
+
+        listo_entrega:
+            "Pedido listo",
+
+        en_ruta:
+            "En camino",
+
+        entregando:
+            "Llegando contigo",
+
+        entregado:
+            "Pedido entregado",
+
+        cancelado:
+            "Pedido cancelado"
+
+    };
+
+
+    return (
+        estados[estado] ||
+        "Pedido en proceso"
+    );
+
+}
+
+
+function obtenerIconoEstadoPedido(
+    estado
+) {
+
+    const iconos = {
+
+        pendiente_asignacion:
+            "search",
+
+        asignado:
+            "two_wheeler",
+
+        en_compra:
+            "shopping_basket",
+
+        listo_entrega:
+            "inventory_2",
+
+        en_ruta:
+            "delivery_dining",
+
+        entregando:
+            "location_on",
+
+        entregado:
+            "check_circle",
+
+        cancelado:
+            "cancel"
+
+    };
+
+
+    return (
+        iconos[estado] ||
+        "receipt_long"
+    );
+
+}
+
+function abrirPedidoDesdeMisPedidos(
+    pedido
+) {
+
+    console.log(
+        "🧾 MOTI GO: pedido seleccionado:",
+        pedido
+    );
+
+
+    if (
+        [
+            "pendiente_asignacion",
+            "asignado",
+            "en_compra",
+            "listo_entrega",
+            "en_ruta",
+            "entregando"
+        ].includes(
+            pedido.estado
+        )
+    ) {
+
+        console.log(
+            "🛵 MOTI GO: pedido activo seleccionado."
+        );
+
+
+        // Por ahora cerramos Mis pedidos.
+        cerrarPanelMisPedidos();
+
+
+        // Más adelante aquí abriremos
+        // el seguimiento real del pedido.
+        if (
+            typeof window.abrirSeguimientoPedidoMotiGo ===
+            "function"
+        ) {
+
+            window.abrirSeguimientoPedidoMotiGo(
+                pedido
+            );
+
+        }
+        else {
+
+            console.log(
+                "ℹ️ MOTI GO: seguimiento de pedido se conectará en el siguiente paso."
+            );
+
+        }
+
+
+        return;
+
+    }
+
+
+    console.log(
+        "🧾 MOTI GO: pedido histórico seleccionado.",
+        pedido
+    );
+
+}
