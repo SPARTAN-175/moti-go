@@ -2118,180 +2118,105 @@ function generarCodigoEntrega() {
 }
 
 // =====================================================
-// OBTENER DESTINO DEL CLIENTE
+// OBTENER UBICACIÓN DE ENTREGA DEL CLIENTE
+// =====================================================
+//
+// MOTI GO NO utiliza "destinoViaje".
+//
+// En MOTI GO, mientras el cliente no tenga direcciones
+// guardadas, el pedido se entrega en su ubicación actual.
+//
+// La ubicación viene del perfil recibido desde
+// dashboard-pasajero.js.
 // =====================================================
 
 function obtenerDestinoClienteMotiGo() {
 
     // =================================================
-    // 1. INTENTAR DESDE SESSION STORAGE
+    // VALIDAR PERFIL DEL CLIENTE
     // =================================================
 
-    const destinoGuardado =
-        sessionStorage.getItem(
-            "destinoViaje"
+    if (
+        !pedidoCliente
+    ) {
+
+        console.warn(
+            "⚠️ MOTI GO: no se recibió el perfil del cliente."
+        );
+
+        return null;
+
+    }
+
+
+    // =================================================
+    // OBTENER COORDENADAS ACTUALES
+    // =================================================
+
+    const latitud =
+        Number(
+            pedidoCliente.latitud
         );
 
 
+    const longitud =
+        Number(
+            pedidoCliente.longitud
+        );
+
+
+    // =================================================
+    // VALIDAR COORDENADAS
+    // =================================================
+
     if (
-        destinoGuardado
+        !Number.isFinite(
+            latitud
+        ) ||
+        !Number.isFinite(
+            longitud
+        )
     ) {
 
-        try {
+        console.error(
+            "❌ MOTI GO: el cliente no tiene coordenadas válidas:",
+            pedidoCliente
+        );
 
-            const destino =
-                JSON.parse(
-                    destinoGuardado
-                );
-
-
-            const latitud =
-                Number(
-                    destino.latitud
-                );
-
-
-            const longitud =
-                Number(
-                    destino.longitud
-                );
-
-
-            if (
-                Number.isFinite(
-                    latitud
-                ) &&
-                Number.isFinite(
-                    longitud
-                )
-            ) {
-
-                console.log(
-                    "📍 MOTI GO: destino recuperado directamente de sessionStorage:",
-                    {
-                        latitud,
-                        longitud
-                    }
-                );
-
-
-                return {
-
-                    latitud:
-
-                        latitud,
-
-                    longitud:
-
-                        longitud,
-
-                    localidad:
-
-                        destino.localidad ||
-                        "",
-
-                    referencia:
-
-                        destino.referencia ||
-                        ""
-
-                };
-
-            }
-
-        }
-        catch (
-            error
-        ) {
-
-            console.error(
-                "❌ MOTI GO: error leyendo destinoViaje:",
-                error
-            );
-
-        }
+        return null;
 
     }
 
 
     // =================================================
-    // 2. RESPALDO: VARIABLE GLOBAL
+    // CONSTRUIR UBICACIÓN DE ENTREGA
     // =================================================
 
-    const destinoGlobal =
-        window.motiGoDestinoSeleccionado;
+    const destino = {
+
+        latitud:
+            latitud,
+
+        longitud:
+            longitud,
+
+        localidad:
+            pedidoCliente.localidad ||
+            "",
+
+        referencia:
+            pedidoCliente.referencia ||
+            ""
+
+    };
 
 
-    if (
-        destinoGlobal
-    ) {
-
-        const latitud =
-            Number(
-                destinoGlobal.latitud
-            );
-
-
-        const longitud =
-            Number(
-                destinoGlobal.longitud
-            );
-
-
-        if (
-            Number.isFinite(
-                latitud
-            ) &&
-            Number.isFinite(
-                longitud
-            )
-        ) {
-
-            console.log(
-                "📍 MOTI GO: destino recuperado desde variable global:",
-                {
-                    latitud,
-                    longitud
-                }
-            );
-
-
-            return {
-
-                latitud:
-
-                    latitud,
-
-                longitud:
-
-                    longitud,
-
-                localidad:
-
-                    destinoGlobal.localidad ||
-                    "",
-
-                referencia:
-
-                    destinoGlobal.referencia ||
-                    ""
-
-            };
-
-        }
-
-    }
-
-
-    // =================================================
-    // 3. NO HAY DESTINO
-    // =================================================
-
-    console.warn(
-        "⚠️ MOTI GO: no se encontró destino seleccionado."
+    console.log(
+        "📍 MOTI GO - UBICACIÓN DE ENTREGA DEL CLIENTE:",
+        destino
     );
 
 
-    return null;
+    return destino;
 
 }
