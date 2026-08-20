@@ -44,6 +44,7 @@ let tiendaSeleccionada = null;
 
 let tiendaSeleccionadaId = null;
 
+let perfilCliente = null;
 
 // =====================================================
 // ELEMENTOS DEL DOM
