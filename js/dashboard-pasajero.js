@@ -317,6 +317,8 @@ async function cargarContextoCliente() {
     const usuario =
         usuarioSnap.data();
 
+    perfilCliente =
+    usuario;
 
     console.log(
         "👤 Perfil cliente:",
