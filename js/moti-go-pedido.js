@@ -1133,7 +1133,92 @@ console.log(
     "📍 MOTI GO - DESTINO PARA PEDIDO:",
     destino
 );
+// =====================================================
+// CONSTRUIR TIENDAS DEL PEDIDO
+// =====================================================
 
+const tiendasPedido =
+    agruparProductosPorTienda(
+        productosPedido
+    ).map(
+        grupo => {
+
+            const tienda =
+                pedidoTiendas.find(
+                    item =>
+                        item.id ===
+                        grupo.tiendaId
+                );
+
+
+            return {
+
+                tiendaId:
+                    grupo.tiendaId,
+
+                nombre:
+                    grupo.nombre,
+
+                latitud:
+                    tienda
+                        ? Number(
+                            tienda.latitud
+                        )
+                        : null,
+
+                longitud:
+                    tienda
+                        ? Number(
+                            tienda.longitud
+                        )
+                        : null,
+
+                productos:
+                    grupo.productos.map(
+                        producto => {
+
+                            return {
+
+                                productoId:
+                                    producto.productoId,
+
+                                nombre:
+                                    producto.nombre,
+
+                                cantidad:
+                                    Number(
+                                        producto.cantidad
+                                    ),
+
+                                precio:
+                                    Number(
+                                        producto.precio
+                                    ),
+
+                                importe:
+                                    Number(
+                                        producto.precio
+                                    ) *
+                                    Number(
+                                        producto.cantidad
+                                    )
+
+                            };
+
+                        }
+                    )
+
+            };
+
+        }
+    );
+
+
+console.log(
+    "🏪 MOTI GO - TIENDAS DEL PEDIDO:",
+    tiendasPedido
+);
+    
     if (
         productosPedido.length ===
         0
