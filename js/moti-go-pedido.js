@@ -56,6 +56,8 @@ let pedidoProductos =
 let pedidoTiendas =
     [];
 
+let pedidoCliente =
+    null;
 
 
   function inicializarMotiGoPedido() {
@@ -721,7 +723,8 @@ function crearPanelRevisionPedido() {
 window.abrirRevisionPedido = function (
     carritoActual,
     productosActuales,
-    tiendasActuales
+    tiendasActuales,
+    clienteActual
 ) {
 
     // =================================================
@@ -736,6 +739,9 @@ window.abrirRevisionPedido = function (
 
     pedidoTiendas =
     tiendasActuales || [];
+
+    pedidoCliente =
+    clienteActual || null;
 
 
     const productosDisponibles =
@@ -1308,10 +1314,10 @@ const pedido = {
         usuario.uid,
 
 
-    clienteNombre:
+   clienteNombre:
 
-        usuario.displayName ||
-        "",
+    pedidoCliente?.nombre ||
+    "",
 
 
     estado:
