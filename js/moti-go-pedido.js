@@ -2123,9 +2123,64 @@ function generarCodigoEntrega() {
 
 function obtenerDestinoClienteMotiGo() {
 
-    const destino =
+    // =================================================
+    // 1. INTENTAR DESDE LA VARIABLE GLOBAL
+    // =================================================
+
+    let destino =
         window.motiGoDestinoSeleccionado;
 
+
+    // =================================================
+    // 2. SI NO EXISTE, RECUPERAR DESDE SESSION STORAGE
+    // =================================================
+
+    if (
+        !destino
+    ) {
+
+        const destinoGuardado =
+            sessionStorage.getItem(
+                "destinoViaje"
+            );
+
+
+        if (
+            destinoGuardado
+        ) {
+
+            try {
+
+                destino =
+                    JSON.parse(
+                        destinoGuardado
+                    );
+
+
+                console.log(
+                    "📍 MOTI GO: destino recuperado desde sessionStorage."
+                );
+
+            }
+            catch (
+                error
+            ) {
+
+                console.error(
+                    "❌ MOTI GO: error leyendo destinoViaje:",
+                    error
+                );
+
+            }
+
+        }
+
+    }
+
+
+    // =================================================
+    // 3. VALIDAR DESTINO
+    // =================================================
 
     if (
         !destino
@@ -2140,23 +2195,65 @@ function obtenerDestinoClienteMotiGo() {
     }
 
 
+    // =================================================
+    // 4. NORMALIZAR COORDENADAS
+    // =================================================
+
+    const latitud =
+        Number(
+            destino.latitud
+        );
+
+
+    const longitud =
+        Number(
+            destino.longitud
+        );
+
+
+    if (
+        !Number.isFinite(
+            latitud
+        ) ||
+        !Number.isFinite(
+            longitud
+        )
+    ) {
+
+        console.error(
+            "❌ MOTI GO: destino sin coordenadas válidas:",
+            destino
+        );
+
+        return null;
+
+    }
+
+
+    // =================================================
+    // 5. DEVOLVER DESTINO
+    // =================================================
+
     return {
 
         latitud:
-            Number(
-                destino.latitud
-            ),
+
+            latitud,
+
 
         longitud:
-            Number(
-                destino.longitud
-            ),
+
+            longitud,
+
 
         localidad:
+
             destino.localidad ||
             "",
 
+
         referencia:
+
             destino.referencia ||
             ""
 
