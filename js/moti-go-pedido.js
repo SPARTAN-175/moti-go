@@ -1453,6 +1453,75 @@ console.log(
     pedido
 );
 
+    // =====================================================
+// GUARDAR PEDIDO EN FIRESTORE
+// =====================================================
+
+try {
+
+    console.log(
+        "🔥 MOTI GO: guardando pedido en Firebase..."
+    );
+
+
+    const pedidoParaFirebase = {
+
+        ...pedido,
+
+        creadoEn:
+            serverTimestamp(),
+
+        actualizadoEn:
+            serverTimestamp()
+
+    };
+
+
+    const referenciaPedido =
+        await addDoc(
+            collection(
+                db,
+                "pedidos"
+            ),
+            pedidoParaFirebase
+        );
+
+
+    console.log(
+        "✅ MOTI GO: PEDIDO CREADO EN FIREBASE:",
+        referenciaPedido.id
+    );
+
+
+    console.log(
+        "🧾 MOTI GO: FOLIO:",
+        pedido.folio
+    );
+
+
+    console.log(
+        "🔐 MOTI GO: CÓDIGO DE ENTREGA:",
+        pedido.codigoEntrega
+    );
+
+}
+catch (
+    error
+) {
+
+    console.error(
+        "❌ MOTI GO: ERROR CREANDO PEDIDO:",
+        error
+    );
+
+
+    alert(
+        "No pudimos crear tu pedido. Intenta nuevamente."
+    );
+
+    return;
+
+}
     
     if (
         productosPedido.length ===
