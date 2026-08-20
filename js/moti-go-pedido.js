@@ -849,6 +849,509 @@ function cerrarRevisionPedido() {
 
 }
 
+// =====================================================
+// MOSTRAR ESTADO: BUSCANDO REPARTIDOR
+// =====================================================
+
+function mostrarBuscandoRepartidorMotiGo(
+    pedido
+) {
+
+    // -----------------------------------------
+    // CERRAR REVISIÓN DEL PEDIDO
+    // -----------------------------------------
+
+    cerrarRevisionPedido();
+
+
+    // -----------------------------------------
+    // ELIMINAR PANEL ANTERIOR
+    // -----------------------------------------
+
+    const panelAnterior =
+        document.getElementById(
+            "motiGoBuscandoRepartidor"
+        );
+
+
+    if (
+        panelAnterior
+    ) {
+
+        panelAnterior.remove();
+
+    }
+
+
+    // -----------------------------------------
+    // CREAR PANEL
+    // -----------------------------------------
+
+    const panel =
+        document.createElement(
+            "div"
+        );
+
+
+    panel.id =
+        "motiGoBuscandoRepartidor";
+
+
+    panel.innerHTML = `
+
+        <div
+            class="moti-go-buscando-overlay"
+        >
+
+            <div
+                class="moti-go-buscando-panel"
+            >
+
+                <div
+                    class="moti-go-buscando-icono"
+                >
+
+                    <span
+                        class="material-symbols-outlined"
+                    >
+                        delivery_dining
+                    </span>
+
+                </div>
+
+
+                <h2>
+                    Buscando repartidor
+                </h2>
+
+
+                <p>
+                    Estamos buscando un repartidor
+                    disponible para llevar tu pedido.
+                </p>
+
+
+                <div
+                    class="moti-go-buscando-folio"
+                >
+
+                    <span>
+                        Pedido
+                    </span>
+
+                    <strong>
+                        ${escaparHTMLPedido(
+                            pedido.folio
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div
+                    class="moti-go-buscando-cargando"
+                    aria-label="Buscando repartidor"
+                >
+
+                    <span></span>
+                    <span></span>
+                    <span></span>
+
+                </div>
+
+
+                <p
+                    class="moti-go-buscando-ayuda"
+                >
+                    Te avisaremos cuando un
+                    repartidor acepte tu pedido.
+                </p>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        panel
+    );
+
+
+    agregarEstilosBuscandoRepartidorMotiGo();
+
+
+    console.log(
+        "🕐 MOTI GO: buscando repartidor para:",
+        pedido.folio
+    );
+
+}
+
+
+// =====================================================
+// ESCAPAR TEXTO
+// =====================================================
+
+function escaparHTMLPedido(
+    texto
+) {
+
+    return String(
+        texto || ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+// =====================================================
+// ESTILOS - BUSCANDO REPARTIDOR
+// =====================================================
+
+function agregarEstilosBuscandoRepartidorMotiGo() {
+
+    if (
+        document.getElementById(
+            "motiGoBuscandoRepartidorEstilos"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    const estilos =
+        document.createElement(
+            "style"
+        );
+
+
+    estilos.id =
+        "motiGoBuscandoRepartidorEstilos";
+
+
+    estilos.textContent = `
+
+        #motiGoBuscandoRepartidor {
+
+            position:
+                fixed;
+
+            inset:
+                0;
+
+            z-index:
+                100000;
+
+        }
+
+
+        .moti-go-buscando-overlay {
+
+            position:
+                absolute;
+
+            inset:
+                0;
+
+            background:
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.52
+                );
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            padding:
+                20px;
+
+        }
+
+
+        .moti-go-buscando-panel {
+
+            width:
+                min(
+                    100%,
+                    380px
+                );
+
+            background:
+                #ffffff;
+
+            border-radius:
+                24px;
+
+            padding:
+                32px 24px;
+
+            text-align:
+                center;
+
+            box-shadow:
+                0
+                20px
+                60px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.22
+                );
+
+        }
+
+
+        .moti-go-buscando-icono {
+
+            width:
+                76px;
+
+            height:
+                76px;
+
+            margin:
+                0
+                auto
+                20px;
+
+            border-radius:
+                50%;
+
+            background:
+                #f1f5f3;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+        }
+
+
+        .moti-go-buscando-icono span {
+
+            font-size:
+                42px;
+
+        }
+
+
+        .moti-go-buscando-panel h2 {
+
+            margin:
+                0
+                0
+                10px;
+
+            font-size:
+                24px;
+
+            color:
+                #111111;
+
+        }
+
+
+        .moti-go-buscando-panel > p {
+
+            margin:
+                0;
+
+            color:
+                #666666;
+
+            line-height:
+                1.5;
+
+        }
+
+
+        .moti-go-buscando-folio {
+
+            margin:
+                22px 0;
+
+            padding:
+                14px;
+
+            border-radius:
+                14px;
+
+            background:
+                #f7f7f7;
+
+            display:
+                flex;
+
+            flex-direction:
+                column;
+
+            gap:
+                4px;
+
+        }
+
+
+        .moti-go-buscando-folio span {
+
+            font-size:
+                12px;
+
+            color:
+                #777777;
+
+        }
+
+
+        .moti-go-buscando-folio strong {
+
+            font-size:
+                15px;
+
+            color:
+                #111111;
+
+            word-break:
+                break-word;
+
+        }
+
+
+        .moti-go-buscando-cargando {
+
+            display:
+                flex;
+
+            justify-content:
+                center;
+
+            gap:
+                7px;
+
+            margin:
+                20px 0;
+
+        }
+
+
+        .moti-go-buscando-cargando span {
+
+            width:
+                8px;
+
+            height:
+                8px;
+
+            border-radius:
+                50%;
+
+            background:
+                #111111;
+
+            animation:
+                motiGoPunto
+                1.2s
+                infinite
+                ease-in-out;
+
+        }
+
+
+        .moti-go-buscando-cargando span:nth-child(2) {
+
+            animation-delay:
+                .15s;
+
+        }
+
+
+        .moti-go-buscando-cargando span:nth-child(3) {
+
+            animation-delay:
+                .30s;
+
+        }
+
+
+        .moti-go-buscando-ayuda {
+
+            font-size:
+                13px !important;
+
+        }
+
+
+        @keyframes motiGoPunto {
+
+            0%,
+            80%,
+            100% {
+
+                opacity:
+                    .3;
+
+                transform:
+                    translateY(0);
+
+            }
+
+            40% {
+
+                opacity:
+                    1;
+
+                transform:
+                    translateY(-5px);
+
+            }
+
+        }
+
+    `;
+
+
+    document.head.appendChild(
+        estilos
+    );
+
+}
+
 
 // =====================================================
 // RENDERIZAR REVISIÓN
