@@ -7528,22 +7528,133 @@ function actualizarPanelSeguimientoPedido(
 
 
     if (
-        cancelar
-    ) {
+    cancelar
+) {
 
-        cancelar.addEventListener(
-            "click",
-            () => {
+    cancelar.addEventListener(
+        "click",
+        async () => {
+
+            const confirmar =
+                confirm(
+                    "¿Seguro que quieres cancelar este pedido?"
+                );
+
+
+            if (
+                !confirmar
+            ) {
+
+                return;
+
+            }
+
+
+            try {
 
                 console.log(
-                    "⚠️ MOTI GO: cancelar pedido pendiente."
+                    "⚠️ MOTI GO: cancelando pedido:",
+                    pedido.id
+                );
+
+
+                // =========================================
+                // VERIFICAR QUE SIGA PENDIENTE
+                // =========================================
+
+                const referencia =
+                    doc(
+                        db,
+                        "pedidos",
+                        pedido.id
+                    );
+
+
+                const pedidoActual =
+                    await getDoc(
+                        referencia
+                    );
+
+
+                if (
+                    !pedidoActual.exists()
+                ) {
+
+                    alert(
+                        "El pedido ya no existe."
+                    );
+
+                    return;
+
+                }
+
+
+                const datosActuales =
+                    pedidoActual.data();
+
+
+                if (
+                    datosActuales.estado !==
+                    "pendiente_asignacion"
+                ) {
+
+                    alert(
+                        "Este pedido ya no puede cancelarse porque su estado cambió."
+                    );
+
+                    return;
+
+                }
+
+
+                // =========================================
+                // CANCELAR
+                // =========================================
+
+                await updateDoc(
+                    referencia,
+                    {
+
+                        estado:
+                            "cancelado",
+
+                        canceladoEn:
+                            new Date(),
+
+                        canceladoPor:
+                            "cliente"
+
+                    }
+                );
+
+
+                console.log(
+                    "✅ MOTI GO: pedido cancelado:",
+                    pedido.id
+                );
+
+
+            }
+            catch (
+                error
+            ) {
+
+                console.error(
+                    "❌ MOTI GO: error cancelando pedido:",
+                    error
+                );
+
+
+                alert(
+                    "No pudimos cancelar el pedido. Inténtalo nuevamente."
                 );
 
             }
-        );
 
-    }
+        }
+    );
 
+}
 }
 
 function obtenerConfiguracionEstadoPedido(
@@ -7691,6 +7802,8 @@ function obtenerConfiguracionEstadoPedido(
 
         }
     );
+
+    
 
 }
 
