@@ -5820,6 +5820,487 @@ document.addEventListener(
 );
 
 // =====================================================
+// ESTILOS — MIS PEDIDOS MOTI GO
+// =====================================================
+
+function crearEstilosMisPedidos() {
+
+    if (
+        document.getElementById(
+            "motiEstilosMisPedidos"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    const estilo =
+        document.createElement(
+            "style"
+        );
+
+
+    estilo.id =
+        "motiEstilosMisPedidos";
+
+
+    estilo.textContent = `
+
+        #motiPanelMisPedidos {
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 99999;
+
+            background: #f7f7f7;
+
+            visibility: hidden;
+
+            opacity: 0;
+
+            transform: translateX(100%);
+
+            transition:
+                opacity .25s ease,
+                transform .25s ease,
+                visibility .25s ease;
+
+        }
+
+
+        #motiPanelMisPedidos.activo {
+
+            visibility: visible;
+
+            opacity: 1;
+
+            transform: translateX(0);
+
+        }
+
+
+        .moti-pedidos-panel {
+
+            width: 100%;
+
+            height: 100%;
+
+            display: flex;
+
+            flex-direction: column;
+
+            background: #f7f7f7;
+
+        }
+
+
+        .moti-pedidos-header {
+
+            min-height: 72px;
+
+            padding:
+                12px
+                16px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            background: #ffffff;
+
+            border-bottom:
+                1px solid
+                #e5e5e5;
+
+        }
+
+
+        .moti-pedidos-header > div {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 2px;
+
+        }
+
+
+        .moti-pedidos-header span {
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+            color: #777;
+
+            letter-spacing: .08em;
+
+        }
+
+
+        .moti-pedidos-header h2 {
+
+            margin: 0;
+
+            font-size: 22px;
+
+            color: #111;
+
+        }
+
+
+        .moti-pedidos-cerrar {
+
+            width: 44px;
+
+            height: 44px;
+
+            border: 0;
+
+            border-radius: 50%;
+
+            background: #f0f0f0;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            cursor: pointer;
+
+        }
+
+
+        .moti-pedidos-contenido {
+
+            flex: 1;
+
+            overflow-y: auto;
+
+            padding: 20px 16px 32px;
+
+        }
+
+
+        .moti-pedidos-seccion {
+
+            margin-bottom: 28px;
+
+        }
+
+
+        .moti-pedidos-titulo {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .moti-pedidos-titulo .material-symbols-outlined {
+
+            font-size: 21px;
+
+        }
+
+
+        .moti-pedidos-titulo h3 {
+
+            margin: 0;
+
+            font-size: 16px;
+
+            color: #222;
+
+        }
+
+
+        .moti-pedido-card {
+
+            width: 100%;
+
+            margin-bottom: 12px;
+
+            padding: 16px;
+
+            border: 1px solid #e5e5e5;
+
+            border-radius: 18px;
+
+            background: #ffffff;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            text-align: left;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 3px 12px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    .05
+                );
+
+        }
+
+
+        .moti-pedido-card.activo {
+
+            border-color: #111;
+
+        }
+
+
+        .moti-pedido-icono {
+
+            width: 46px;
+
+            height: 46px;
+
+            flex: 0 0 46px;
+
+            border-radius: 14px;
+
+            background: #f0f0f0;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+        }
+
+
+        .moti-pedido-icono .material-symbols-outlined {
+
+            font-size: 23px;
+
+            color: #222;
+
+        }
+
+
+        .moti-pedido-info {
+
+            min-width: 0;
+
+            flex: 1;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 3px;
+
+        }
+
+
+        .moti-pedido-info strong {
+
+            font-size: 14px;
+
+            color: #111;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+
+            white-space: nowrap;
+
+        }
+
+
+        .moti-pedido-info span {
+
+            font-size: 13px;
+
+            color: #777;
+
+        }
+
+
+        .moti-pedido-info small {
+
+            font-size: 12px;
+
+            font-weight: 600;
+
+            color: #333;
+
+        }
+
+
+        .moti-pedido-total {
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: flex-end;
+
+            gap: 5px;
+
+        }
+
+
+        .moti-pedido-total strong {
+
+            font-size: 14px;
+
+            color: #111;
+
+            white-space: nowrap;
+
+        }
+
+
+        .moti-pedido-total .material-symbols-outlined {
+
+            font-size: 19px;
+
+            color: #888;
+
+        }
+
+
+        .moti-pedidos-vacio {
+
+            min-height: 300px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+
+            text-align: center;
+
+            padding: 30px;
+
+            color: #777;
+
+        }
+
+
+        .moti-pedidos-vacio
+        .material-symbols-outlined {
+
+            font-size: 52px;
+
+            margin-bottom: 12px;
+
+            color: #999;
+
+        }
+
+
+        .moti-pedidos-vacio strong {
+
+            font-size: 17px;
+
+            color: #222;
+
+            margin-bottom: 6px;
+
+        }
+
+
+        .moti-pedidos-vacio p {
+
+            margin: 0;
+
+            max-width: 280px;
+
+            line-height: 1.5;
+
+            font-size: 14px;
+
+        }
+
+
+        .moti-pedidos-cargando {
+
+            min-height: 300px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 10px;
+
+            color: #777;
+
+        }
+
+
+        .moti-pedidos-cargando
+        .material-symbols-outlined {
+
+            font-size: 35px;
+
+        }
+
+
+        @media (
+            min-width: 700px
+        ) {
+
+            .moti-pedidos-panel {
+
+                max-width: 600px;
+
+                margin-left: auto;
+
+                box-shadow:
+                    -8px 0 30px
+                    rgba(
+                        0,
+                        0,
+                        0,
+                        .12
+                    );
+
+            }
+
+        }
+
+    `;
+
+
+    document.head.appendChild(
+        estilo
+    );
+
+}
+
+// =====================================================
 // PANEL — MIS PEDIDOS
 // =====================================================
 
