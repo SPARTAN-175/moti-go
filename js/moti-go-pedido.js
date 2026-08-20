@@ -1998,32 +1998,60 @@ try {
 
 
     const referenciaPedido =
-        await addDoc(
-            collection(
-                db,
-                "pedidos"
-            ),
-            pedidoParaFirebase
-        );
-
-
-    console.log(
-        "✅ MOTI GO: PEDIDO CREADO EN FIREBASE:",
-        referenciaPedido.id
+    await addDoc(
+        collection(
+            db,
+            "pedidos"
+        ),
+        pedidoParaFirebase
     );
 
 
-    console.log(
-        "🧾 MOTI GO: FOLIO:",
-        pedido.folio
-    );
+console.log(
+    "✅ MOTI GO: PEDIDO CREADO EN FIREBASE:",
+    referenciaPedido.id
+);
 
 
-    console.log(
-        "🔐 MOTI GO: CÓDIGO DE ENTREGA:",
-        pedido.codigoEntrega
-    );
+console.log(
+    "🧾 MOTI GO: FOLIO:",
+    pedido.folio
+);
 
+
+console.log(
+    "🔐 MOTI GO: CÓDIGO DE ENTREGA:",
+    pedido.codigoEntrega
+);
+
+
+// =====================================================
+// PEDIDO CREADO
+// =====================================================
+//
+// Guardamos temporalmente el ID real de Firestore
+// para que todo el flujo posterior pueda trabajar
+// con este pedido.
+// =====================================================
+
+const pedidoCreado =
+    {
+
+        ...pedido,
+
+        id:
+            referenciaPedido.id
+
+    };
+
+
+// =====================================================
+// MOSTRAR AL CLIENTE QUE ESTAMOS BUSCANDO REPARTIDOR
+// =====================================================
+
+mostrarBuscandoRepartidorMotiGo(
+    pedidoCreado
+);
 }
 catch (
     error
