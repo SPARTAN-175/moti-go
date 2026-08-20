@@ -1218,6 +1218,229 @@ console.log(
     "🏪 MOTI GO - TIENDAS DEL PEDIDO:",
     tiendasPedido
 );
+
+
+// =====================================================
+// CONSTRUIR PEDIDO FINAL
+// =====================================================
+
+const usuario =
+    auth.currentUser;
+
+
+if (
+    !usuario
+) {
+
+    throw new Error(
+        "No hay un usuario autenticado."
+    );
+
+}
+
+
+const folio =
+    generarFolioPedido();
+
+
+const codigoEntrega =
+    generarCodigoEntrega();
+
+
+// =====================================================
+// SUBTOTAL
+// =====================================================
+
+const subtotal =
+    productosPedido.reduce(
+        (
+            total,
+            producto
+        ) => {
+
+            return (
+                total +
+                (
+                    Number(
+                        producto.precio
+                    ) *
+                    Number(
+                        producto.cantidad
+                    )
+                )
+            );
+
+        },
+        0
+    );
+
+
+// =====================================================
+// COMISIÓN DE ENTREGA
+// =====================================================
+
+const costoEntrega =
+    obtenerCostoEntregaPedido();
+
+
+// =====================================================
+// TOTAL
+// =====================================================
+
+const total =
+    subtotal +
+    costoEntrega;
+
+
+// =====================================================
+// PEDIDO
+// =====================================================
+
+const pedido = {
+
+    folio:
+
+        folio,
+
+
+    clienteId:
+
+        usuario.uid,
+
+
+    clienteNombre:
+
+        usuario.displayName ||
+        "",
+
+
+    estado:
+
+        "pendiente_asignacion",
+
+
+    pago: {
+
+        metodo:
+
+            "efectivo",
+
+        estado:
+
+            "pendiente"
+
+    },
+
+
+    tiendas:
+
+        tiendasPedido,
+
+
+    productos:
+
+        productosPedido.map(
+            producto => {
+
+                return {
+
+                    productoId:
+                        producto.productoId,
+
+                    tiendaId:
+                        producto.tiendaId,
+
+                    nombre:
+                        producto.nombre,
+
+                    cantidad:
+                        Number(
+                            producto.cantidad
+                        ),
+
+                    precio:
+                        Number(
+                            producto.precio
+                        ),
+
+                    importe:
+                        Number(
+                            producto.precio
+                        ) *
+                        Number(
+                            producto.cantidad
+                        ),
+
+                    estado:
+                        "pendiente",
+
+                    cantidadComprada:
+                        0
+
+                };
+
+            }
+        ),
+
+
+    destino: {
+
+        latitud:
+            destino.latitud,
+
+        longitud:
+            destino.longitud,
+
+        localidad:
+            destino.localidad,
+
+        referencia:
+            destino.referencia
+
+    },
+
+
+    subtotal:
+
+        subtotal,
+
+
+    costoEntrega:
+
+        costoEntrega,
+
+
+    total:
+
+        total,
+
+
+    codigoEntrega:
+
+        codigoEntrega,
+
+
+    creadoEn:
+
+        new Date(),
+
+
+    actualizadoEn:
+
+        new Date()
+
+};
+
+
+// =====================================================
+// MOSTRAR PEDIDO COMPLETO
+// =====================================================
+
+console.log(
+    "🧾🧾🧾 MOTI GO - PEDIDO FINAL:",
+    pedido
+);
+
     
     if (
         productosPedido.length ===
