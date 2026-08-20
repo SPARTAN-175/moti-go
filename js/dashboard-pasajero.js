@@ -7781,6 +7781,42 @@ function obtenerConfiguracionEstadoPedido(
 
         }
 
+
+            entregado: {
+
+        icono:
+            "check_circle",
+
+        titulo:
+            "Pedido entregado",
+
+        descripcion:
+            "Tu pedido fue entregado correctamente.",
+
+        progreso:
+            100
+
+    },
+
+
+    cancelado: {
+
+        icono:
+            "cancel",
+
+        titulo:
+            "Pedido cancelado",
+
+        descripcion:
+            "Este pedido fue cancelado.",
+
+        progreso:
+            0
+
+    }
+
+};
+        
     };
 
 
