@@ -1126,7 +1126,13 @@ function prepararConfirmacionPedido() {
         pedidoProductos,
         pedidoTiendas
     );
+const destino =
+    obtenerDestinoClienteMotiGo();
 
+console.log(
+    "📍 MOTI GO - DESTINO PARA PEDIDO:",
+    destino
+);
 
     if (
         productosPedido.length ===
