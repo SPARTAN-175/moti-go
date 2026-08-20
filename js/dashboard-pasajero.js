@@ -7692,3 +7692,600 @@ function obtenerConfiguracionEstadoPedido(
     );
 
 }
+
+function crearEstilosSeguimientoPedido() {
+
+    if (
+        document.getElementById(
+            "motiEstilosSeguimientoPedido"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    const estilo =
+        document.createElement(
+            "style"
+        );
+
+
+    estilo.id =
+        "motiEstilosSeguimientoPedido";
+
+
+    estilo.textContent = `
+
+        #motiPanelSeguimientoPedido {
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 100000;
+
+            background: #f7f7f7;
+
+            visibility: hidden;
+
+            opacity: 0;
+
+            transform: translateX(100%);
+
+            transition:
+                opacity .25s ease,
+                transform .25s ease,
+                visibility .25s ease;
+
+        }
+
+
+        #motiPanelSeguimientoPedido.activo {
+
+            visibility: visible;
+
+            opacity: 1;
+
+            transform: translateX(0);
+
+        }
+
+
+        .moti-seguimiento-panel {
+
+            width: 100%;
+
+            height: 100%;
+
+            display: flex;
+
+            flex-direction: column;
+
+            background: #f7f7f7;
+
+        }
+
+
+        .moti-seguimiento-header {
+
+            min-height: 72px;
+
+            padding: 12px 16px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            background: #ffffff;
+
+            border-bottom:
+                1px solid
+                #e5e5e5;
+
+        }
+
+
+        .moti-seguimiento-header > div {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 2px;
+
+        }
+
+
+        .moti-seguimiento-header span {
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+            color: #777;
+
+            letter-spacing: .08em;
+
+        }
+
+
+        .moti-seguimiento-header h2 {
+
+            margin: 0;
+
+            font-size: 20px;
+
+            color: #111;
+
+        }
+
+
+        .moti-seguimiento-regresar {
+
+            width: 44px;
+
+            height: 44px;
+
+            border: 0;
+
+            border-radius: 50%;
+
+            background: #f0f0f0;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            cursor: pointer;
+
+        }
+
+
+        .moti-seguimiento-contenido {
+
+            flex: 1;
+
+            overflow-y: auto;
+
+            padding:
+                24px 16px 40px;
+
+        }
+
+
+        .moti-seguimiento-estado {
+
+            max-width: 560px;
+
+            margin: 0 auto;
+
+            text-align: center;
+
+        }
+
+
+        .moti-seguimiento-icono {
+
+            width: 82px;
+
+            height: 82px;
+
+            margin:
+                20px auto 18px;
+
+            border-radius: 50%;
+
+            background: #eeeeee;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+        }
+
+
+        .moti-seguimiento-icono
+        .material-symbols-outlined {
+
+            font-size: 42px;
+
+        }
+
+
+        .moti-seguimiento-estado h3 {
+
+            margin:
+                0 0 8px;
+
+            font-size: 25px;
+
+            color: #111;
+
+        }
+
+
+        .moti-seguimiento-estado p {
+
+            margin:
+                0 auto 28px;
+
+            max-width: 340px;
+
+            line-height: 1.5;
+
+            font-size: 15px;
+
+            color: #707070;
+
+        }
+
+
+        .moti-seguimiento-barra {
+
+            width: 100%;
+
+            height: 8px;
+
+            overflow: hidden;
+
+            border-radius: 20px;
+
+            background: #e5e5e5;
+
+        }
+
+
+        .moti-seguimiento-progreso {
+
+            height: 100%;
+
+            border-radius: 20px;
+
+            background: #111;
+
+            transition:
+                width .35s ease;
+
+        }
+
+
+        .moti-seguimiento-pasos {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            margin:
+                10px 0 30px;
+
+            font-size: 11px;
+
+            color: #999;
+
+        }
+
+
+        .moti-seguimiento-pasos span.activo {
+
+            color: #111;
+
+            font-weight: 700;
+
+        }
+
+
+        .moti-seguimiento-resumen {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 1px;
+
+            overflow: hidden;
+
+            border:
+                1px solid
+                #e5e5e5;
+
+            border-radius: 18px;
+
+            background: #ffffff;
+
+            text-align: left;
+
+        }
+
+
+        .moti-seguimiento-resumen > div {
+
+            padding:
+                14px 16px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 15px;
+
+            border-bottom:
+                1px solid
+                #eeeeee;
+
+        }
+
+
+        .moti-seguimiento-resumen > div:last-child {
+
+            border-bottom: 0;
+
+        }
+
+
+        .moti-seguimiento-resumen span {
+
+            color: #777;
+
+            font-size: 13px;
+
+        }
+
+
+        .moti-seguimiento-resumen strong {
+
+            color: #111;
+
+            font-size: 13px;
+
+            text-align: right;
+
+        }
+
+
+        .moti-seguimiento-cancelar {
+
+            width: 100%;
+
+            margin-top: 18px;
+
+            padding: 14px;
+
+            border:
+                1px solid
+                #dddddd;
+
+            border-radius: 14px;
+
+            background: #ffffff;
+
+            color: #555;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+        }
+
+
+        @media (
+            min-width: 700px
+        ) {
+
+            .moti-seguimiento-panel {
+
+                max-width: 600px;
+
+                margin-left: auto;
+
+                box-shadow:
+                    -8px 0 30px
+                    rgba(
+                        0,
+                        0,
+                        0,
+                        .12
+                    );
+
+            }
+
+        }
+
+    `;
+
+
+    document.head.appendChild(
+        estilo
+    );
+
+}
+
+function escucharEstadoPedidoMotiGo(
+    pedidoId
+) {
+
+    if (
+        !pedidoId
+    ) {
+
+        console.warn(
+            "⚠️ MOTI GO: no se puede escuchar pedido sin ID."
+        );
+
+        return;
+
+    }
+
+
+    // ---------------------------------------------
+    // Evitar listeners duplicados
+    // ---------------------------------------------
+
+    if (
+        window.motiGoListenerPedido
+    ) {
+
+        try {
+
+            window.motiGoListenerPedido();
+
+        }
+        catch (
+            error
+        ) {
+
+            console.warn(
+                "⚠️ MOTI GO: no se pudo cerrar listener anterior.",
+                error
+            );
+
+        }
+
+    }
+
+
+    console.log(
+        "👂 MOTI GO: escuchando cambios del pedido:",
+        pedidoId
+    );
+
+
+    try {
+
+        const referencia =
+            doc(
+                db,
+                "pedidos",
+                pedidoId
+            );
+
+
+        window.motiGoListenerPedido =
+            onSnapshot(
+                referencia,
+                (
+                    snapshot
+                ) => {
+
+                    if (
+                        !snapshot.exists()
+                    ) {
+
+                        console.warn(
+                            "⚠️ MOTI GO: el pedido ya no existe."
+                        );
+
+                        return;
+
+                    }
+
+
+                    const pedidoActual = {
+
+                        id:
+                            snapshot.id,
+
+                        ...snapshot.data()
+
+                    };
+
+
+                    console.log(
+                        "🔄 MOTI GO: pedido actualizado:",
+                        pedidoActual
+                    );
+
+
+                    actualizarPanelSeguimientoPedido(
+                        pedidoActual
+                    );
+
+                },
+
+
+                (
+                    error
+                ) => {
+
+                    console.error(
+                        "❌ MOTI GO: error escuchando pedido:",
+                        error
+                    );
+
+                }
+            );
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "❌ MOTI GO: no se pudo iniciar listener:",
+            error
+        );
+
+    }
+
+}
+
+function cerrarSeguimientoPedidoMotiGo() {
+
+    const panel =
+        document.getElementById(
+            "motiPanelSeguimientoPedido"
+        );
+
+
+    if (
+        panel
+    ) {
+
+        panel.classList.remove(
+            "activo"
+        );
+
+    }
+
+
+    if (
+        window.motiGoListenerPedido
+    ) {
+
+        try {
+
+            window.motiGoListenerPedido();
+
+        }
+        catch (
+            error
+        ) {
+
+            console.warn(
+                "⚠️ MOTI GO: error cerrando listener.",
+                error
+            );
+
+        }
+
+
+        window.motiGoListenerPedido =
+            null;
+
+    }
+
+
+    console.log(
+        "↩️ MOTI GO: seguimiento cerrado."
+    );
+
+}
