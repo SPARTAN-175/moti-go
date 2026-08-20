@@ -6306,6 +6306,8 @@ function crearEstilosMisPedidos() {
 
 function abrirPanelMisPedidos() {
 
+    crearEstilosMisPedidos();
+
     let panel =
         document.getElementById(
             "motiPanelMisPedidos"
