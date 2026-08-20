@@ -1145,6 +1145,23 @@ console.log(
     "📍 MOTI GO - DESTINO PARA PEDIDO:",
     destino
 );
+
+// =====================================================
+// VALIDAR UBICACIÓN DE ENTREGA
+// =====================================================
+
+if (
+    !destino
+) {
+
+    alert(
+        "No pudimos obtener tu ubicación actual. Activa el GPS e intenta nuevamente."
+    );
+
+    return;
+
+}
+    
 // =====================================================
 // CONSTRUIR TIENDAS DEL PEDIDO
 // =====================================================
