@@ -1127,7 +1127,7 @@ function renderizarRevisionPedido(
 //
 // =====================================================
 
-function prepararConfirmacionPedido() {
+async function prepararConfirmacionPedido() {
 
     cargarCarritoPedido();
 
