@@ -6488,8 +6488,11 @@ function crearTarjetaPedido(
         <button
             type="button"
             class="moti-pedido-card ${activo ? "activo" : ""}"
-            data-pedido-id="${escaparHTMLDashboard(
-                pedido.id
+            data-pedido-id="${String(
+            pedido.id || ""
+            ).replace(
+            /"/g,
+            "&quot;"
             )}"
         >
 
@@ -6505,9 +6508,12 @@ function crearTarjetaPedido(
             <div class="moti-pedido-info">
 
                 <strong>
-                    Pedido ${escaparHTMLDashboard(
-                        folio
-                    )}
+                    Pedido ${String(
+                        folio || ""
+                        ).replace(
+                        /"/g,
+                        "&quot;"
+                        )}
                 </strong>
 
 
