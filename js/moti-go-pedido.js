@@ -2124,54 +2124,90 @@ function generarCodigoEntrega() {
 function obtenerDestinoClienteMotiGo() {
 
     // =================================================
-    // 1. INTENTAR DESDE LA VARIABLE GLOBAL
+    // 1. INTENTAR DESDE SESSION STORAGE
     // =================================================
 
-    let destino =
-        window.motiGoDestinoSeleccionado;
+    const destinoGuardado =
+        sessionStorage.getItem(
+            "destinoViaje"
+        );
 
-
-    // =================================================
-    // 2. SI NO EXISTE, RECUPERAR DESDE SESSION STORAGE
-    // =================================================
 
     if (
-        !destino
+        destinoGuardado
     ) {
 
-        const destinoGuardado =
-            sessionStorage.getItem(
-                "destinoViaje"
-            );
+        try {
 
-
-        if (
-            destinoGuardado
-        ) {
-
-            try {
-
-                destino =
-                    JSON.parse(
-                        destinoGuardado
-                    );
-
-
-                console.log(
-                    "📍 MOTI GO: destino recuperado desde sessionStorage."
+            const destino =
+                JSON.parse(
+                    destinoGuardado
                 );
 
-            }
-            catch (
-                error
+
+            const latitud =
+                Number(
+                    destino.latitud
+                );
+
+
+            const longitud =
+                Number(
+                    destino.longitud
+                );
+
+
+            if (
+                Number.isFinite(
+                    latitud
+                ) &&
+                Number.isFinite(
+                    longitud
+                )
             ) {
 
-                console.error(
-                    "❌ MOTI GO: error leyendo destinoViaje:",
-                    error
+                console.log(
+                    "📍 MOTI GO: destino recuperado directamente de sessionStorage:",
+                    {
+                        latitud,
+                        longitud
+                    }
                 );
 
+
+                return {
+
+                    latitud:
+
+                        latitud,
+
+                    longitud:
+
+                        longitud,
+
+                    localidad:
+
+                        destino.localidad ||
+                        "",
+
+                    referencia:
+
+                        destino.referencia ||
+                        ""
+
+                };
+
             }
+
+        }
+        catch (
+            error
+        ) {
+
+            console.error(
+                "❌ MOTI GO: error leyendo destinoViaje:",
+                error
+            );
 
         }
 
@@ -2179,84 +2215,83 @@ function obtenerDestinoClienteMotiGo() {
 
 
     // =================================================
-    // 3. VALIDAR DESTINO
+    // 2. RESPALDO: VARIABLE GLOBAL
     // =================================================
 
+    const destinoGlobal =
+        window.motiGoDestinoSeleccionado;
+
+
     if (
-        !destino
+        destinoGlobal
     ) {
 
-        console.warn(
-            "⚠️ MOTI GO: no se encontró destino seleccionado."
-        );
+        const latitud =
+            Number(
+                destinoGlobal.latitud
+            );
 
-        return null;
+
+        const longitud =
+            Number(
+                destinoGlobal.longitud
+            );
+
+
+        if (
+            Number.isFinite(
+                latitud
+            ) &&
+            Number.isFinite(
+                longitud
+            )
+        ) {
+
+            console.log(
+                "📍 MOTI GO: destino recuperado desde variable global:",
+                {
+                    latitud,
+                    longitud
+                }
+            );
+
+
+            return {
+
+                latitud:
+
+                    latitud,
+
+                longitud:
+
+                    longitud,
+
+                localidad:
+
+                    destinoGlobal.localidad ||
+                    "",
+
+                referencia:
+
+                    destinoGlobal.referencia ||
+                    ""
+
+            };
+
+        }
 
     }
 
 
     // =================================================
-    // 4. NORMALIZAR COORDENADAS
+    // 3. NO HAY DESTINO
     // =================================================
 
-    const latitud =
-        Number(
-            destino.latitud
-        );
+    console.warn(
+        "⚠️ MOTI GO: no se encontró destino seleccionado."
+    );
 
 
-    const longitud =
-        Number(
-            destino.longitud
-        );
-
-
-    if (
-        !Number.isFinite(
-            latitud
-        ) ||
-        !Number.isFinite(
-            longitud
-        )
-    ) {
-
-        console.error(
-            "❌ MOTI GO: destino sin coordenadas válidas:",
-            destino
-        );
-
-        return null;
-
-    }
-
-
-    // =================================================
-    // 5. DEVOLVER DESTINO
-    // =================================================
-
-    return {
-
-        latitud:
-
-            latitud,
-
-
-        longitud:
-
-            longitud,
-
-
-        localidad:
-
-            destino.localidad ||
-            "",
-
-
-        referencia:
-
-            destino.referencia ||
-            ""
-
-    };
+    return null;
 
 }
