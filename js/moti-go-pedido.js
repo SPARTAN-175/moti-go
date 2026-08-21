@@ -6,8 +6,18 @@ import {
 import {
     collection,
     addDoc,
-    serverTimestamp
+    serverTimestamp,
+    getDocs
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+// =====================================================
+// MOTOR DE ASIGNACIÓN MOTI GO
+// =====================================================
+
+import {
+    ejecutarMotor
+}
+from "./dispatcher/motor-asignacion.js";
 
 
 // =====================================================
