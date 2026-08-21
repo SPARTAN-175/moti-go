@@ -19,6 +19,11 @@ import {
 }
 from "./motor/motor-asignacion.js";
 
+import {
+    iniciarDispatcher
+}
+from "./dispatcher/dispatcher.js";
+
 
 // =====================================================
 // MOTI GO
