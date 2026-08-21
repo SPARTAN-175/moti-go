@@ -7343,20 +7343,16 @@ function actualizarPanelSeguimientoPedido(
         );
 
 
-    if (
-        !contenido
-    ) {
+    if (!contenido) {
 
         return;
 
     }
 
 
-    const configuracion =
-        obtenerConfiguracionEstadoPedido(
-            pedido.estado
-        );
-
+    // =================================================
+    // DATOS PRINCIPALES DEL PEDIDO
+    // =================================================
 
     const total =
         Number(
@@ -7366,24 +7362,615 @@ function actualizarPanelSeguimientoPedido(
 
     const folio =
         pedido.folio ||
-        pedido.id;
+        pedido.id ||
+        "Sin folio";
 
 
-    const productos =
+    const codigoEntrega =
+        pedido.codigoEntrega ||
+        pedido.codigoConfirmacion ||
+        pedido.codigo ||
+        pedido.codigoEntregaPedido ||
+        "";
+
+
+    const fecha =
+        obtenerFechaPedido(
+            pedido
+        );
+
+
+    const fechaFormateada =
+        fecha
+            ? new Intl.DateTimeFormat(
+                "es-MX",
+                {
+                    dateStyle: "medium",
+                    timeStyle: "short"
+                }
+            ).format(
+                new Date(
+                    fecha
+                )
+            )
+            : "Fecha no disponible";
+
+
+    // =================================================
+    // PRODUCTOS
+    // =================================================
+
+    const productosPedido =
         Array.isArray(
             pedido.productos
         )
-            ? pedido.productos.length
-            : 0;
+            ? pedido.productos
+            : [];
+
+
+    // =================================================
+    // ESTADO
+    // =================================================
+
+    const estado =
+        pedido.estado ||
+        "pendiente_asignacion";
+
+
+    // =================================================
+    // SI ESTÁ ASIGNADO
+    // MOSTRAR CONFIRMACIÓN + TICKET
+    // =================================================
+
+    if (
+        estado ===
+        "asignado"
+    ) {
+
+        const gruposTiendas =
+            {};
+
+
+        // =============================================
+        // AGRUPAR PRODUCTOS POR TIENDA
+        // =============================================
+
+        productosPedido.forEach(
+            item => {
+
+                const tiendaId =
+                    item.tiendaId ||
+                    item.tienda?.id ||
+                    "tienda";
+
+
+                if (
+                    !gruposTiendas[
+                        tiendaId
+                    ]
+                ) {
+
+                    gruposTiendas[
+                        tiendaId
+                    ] = {
+
+                        nombre:
+                            item.tiendaNombre ||
+                            item.tienda?.nombre ||
+                            "Tienda",
+
+                        productos:
+                            []
+
+                    };
+
+                }
+
+
+                gruposTiendas[
+                    tiendaId
+                ].productos.push(
+                    item
+                );
+
+            }
+        );
+
+
+        // =============================================
+        // CONSTRUIR TICKET
+        // =============================================
+
+        let ticketHTML =
+            "";
+
+
+        Object.values(
+            gruposTiendas
+        ).forEach(
+            tienda => {
+
+                let subtotalTienda =
+                    0;
+
+
+                let productosHTML =
+                    "";
+
+
+                tienda.productos.forEach(
+                    item => {
+
+                        const nombre =
+                            item.nombre ||
+                            item.productoNombre ||
+                            "Producto";
+
+
+                        const cantidad =
+                            Number(
+                                item.cantidad ||
+                                0
+                            );
+
+
+                        const precio =
+                            Number(
+                                item.precio ||
+                                0
+                            );
+
+
+                        const importe =
+                            cantidad *
+                            precio;
+
+
+                        subtotalTienda +=
+                            importe;
+
+
+                        productosHTML += `
+
+                            <div
+                                class="moti-ticket-producto"
+                            >
+
+                                <div
+                                    class="moti-ticket-producto-info"
+                                >
+
+                                    <strong>
+                                        ${escaparHTML(
+                                            nombre
+                                        )}
+                                    </strong>
+
+                                    <span>
+                                        ${cantidad}
+                                        ×
+                                        ${formatearPrecio(
+                                            precio
+                                        )}
+                                    </span>
+
+                                </div>
+
+
+                                <strong
+                                    class="moti-ticket-importe"
+                                >
+                                    ${formatearPrecio(
+                                        importe
+                                    )}
+                                </strong>
+
+                            </div>
+
+                        `;
+
+                    }
+                );
+
+
+                ticketHTML += `
+
+                    <div
+                        class="moti-ticket-tienda"
+                    >
+
+                        <div
+                            class="moti-ticket-tienda-header"
+                        >
+
+                            <span
+                                class="material-symbols-outlined"
+                            >
+                                store
+                            </span>
+
+
+                            <strong>
+                                ${escaparHTML(
+                                    tienda.nombre
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div
+                            class="moti-ticket-productos"
+                        >
+
+                            ${productosHTML}
+
+                        </div>
+
+
+                        <div
+                            class="moti-ticket-subtotal"
+                        >
+
+                            <span>
+                                Subtotal
+                            </span>
+
+                            <strong>
+                                ${formatearPrecio(
+                                    subtotalTienda
+                                )}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+        );
+
+
+        // =============================================
+        // INFORMACIÓN DE PAGO
+        // =============================================
+
+        const pago =
+            pedido.pago ||
+            {};
+
+
+        const subtotalPedido =
+            Number(
+                pago.subtotal ??
+                pedido.subtotal ??
+                0
+            );
+
+
+        const costoEntrega =
+            Number(
+                pedido.costoEntrega ??
+                pago.costoEntrega ??
+                pago.entrega ??
+                0
+            );
+
+
+        const comision =
+            Number(
+                pedido.comision ??
+                pago.comision ??
+                costoEntrega
+            );
+
+
+        const totalPedido =
+            Number(
+                pedido.total ??
+                pago.total ??
+                (
+                    subtotalPedido +
+                    comision
+                )
+            );
+
+
+        // =============================================
+        // HTML COMPLETO
+        // =============================================
+
+        contenido.innerHTML = `
+
+            <div
+                class="moti-ticket-wrapper"
+            >
+
+                <!-- ================================= -->
+                <!-- CONFIRMACIÓN -->
+                <!-- ================================= -->
+
+                <section
+                    class="moti-asignado-confirmacion"
+                >
+
+                    <div
+                        class="moti-asignado-icono"
+                    >
+
+                        <span
+                            class="material-symbols-outlined"
+                        >
+                            two_wheeler
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <h3>
+                            ¡Tu pedido fue aceptado!
+                        </h3>
+
+
+                        <p>
+                            Un repartidor ya fue
+                            asignado a tu pedido.
+                        </p>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ================================= -->
+                <!-- CÓDIGO DE ENTREGA -->
+                <!-- ================================= -->
+
+                <section
+                    class="moti-codigo-entrega-card"
+                >
+
+                    <div
+                        class="moti-codigo-entrega-icono"
+                    >
+
+                        <span
+                            class="material-symbols-outlined"
+                        >
+                            lock
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="moti-codigo-entrega-texto"
+                    >
+
+                        <span>
+                            CÓDIGO DE ENTREGA
+                        </span>
+
+
+                        <strong>
+                            ${
+                                codigoEntrega
+                                    ? escaparHTML(
+                                        codigoEntrega
+                                    )
+                                    : "------"
+                            }
+                        </strong>
+
+
+                        <p>
+                            Proporciona este código
+                            al repartidor cuando te
+                            entregue tu pedido.
+                        </p>
+
+                    </div>
+
+                </section>
+
+
+                <!-- ================================= -->
+                <!-- TICKET -->
+                <!-- ================================= -->
+
+                <section
+                    class="moti-ticket"
+                    id="motiTicketPedido"
+                >
+
+                    <header
+                        class="moti-ticket-header"
+                    >
+
+                        <div>
+
+                            <span>
+                                MOTI GO
+                            </span>
+
+                            <h3>
+                                Ticket de compra
+                            </h3>
+
+                        </div>
+
+
+                        <span
+                            class="material-symbols-outlined"
+                        >
+                            receipt_long
+                        </span>
+
+                    </header>
+
+
+                    <div
+                        class="moti-ticket-datos"
+                    >
+
+                        <div>
+
+                            <span>
+                                Pedido
+                            </span>
+
+                            <strong>
+                                ${escaparHTML(
+                                    folio
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Fecha
+                            </span>
+
+                            <strong>
+                                ${escaparHTML(
+                                    fechaFormateada
+                                )}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PRODUCTOS -->
+
+                    <div
+                        class="moti-ticket-contenido"
+                    >
+
+                        ${ticketHTML}
+
+                    </div>
+
+
+                    <!-- RESUMEN -->
+
+                    <div
+                        class="moti-ticket-resumen"
+                    >
+
+                        <div>
+
+                            <span>
+                                Productos
+                            </span>
+
+                            <strong>
+                                ${formatearPrecio(
+                                    subtotalPedido
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Comisión de entrega
+                            </span>
+
+                            <strong>
+                                ${formatearPrecio(
+                                    comision
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div
+                            class="moti-ticket-total"
+                        >
+
+                            <span>
+                                TOTAL
+                            </span>
+
+                            <strong>
+                                ${formatearPrecio(
+                                    totalPedido
+                                )}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PIE -->
+
+                    <footer
+                        class="moti-ticket-footer"
+                    >
+
+                        <span>
+                            Gracias por usar MOTI GO
+                        </span>
+
+
+                        <small>
+                            Conserva este comprobante
+                            hasta recibir tu pedido.
+                        </small>
+
+                    </footer>
+
+                </section>
+
+            </div>
+
+        `;
+
+
+        return;
+
+    }
+
+
+    // =================================================
+    // PEDIDO PENDIENTE
+    // =================================================
+
+    const configuracion =
+        obtenerConfiguracionEstadoPedido(
+            estado
+        );
+
+
+    const productos =
+        productosPedido.length;
 
 
     contenido.innerHTML = `
 
-        <div class="moti-seguimiento-estado">
+        <div
+            class="moti-seguimiento-estado"
+        >
 
-            <div class="moti-seguimiento-icono">
+            <div
+                class="moti-seguimiento-icono"
+            >
 
-                <span class="material-symbols-outlined">
+                <span
+                    class="material-symbols-outlined"
+                >
                     ${configuracion.icono}
                 </span>
 
@@ -7400,57 +7987,9 @@ function actualizarPanelSeguimientoPedido(
             </p>
 
 
-            <div class="moti-seguimiento-barra">
-
-                <div
-                    class="moti-seguimiento-progreso"
-                    style="
-                        width:
-                        ${configuracion.progreso}%;
-                    "
-                ></div>
-
-            </div>
-
-
-            <div class="moti-seguimiento-pasos">
-
-                <span class="${
-                    configuracion.progreso >= 25
-                        ? "activo"
-                        : ""
-                }">
-                    Pedido
-                </span>
-
-                <span class="${
-                    configuracion.progreso >= 50
-                        ? "activo"
-                        : ""
-                }">
-                    Compra
-                </span>
-
-                <span class="${
-                    configuracion.progreso >= 75
-                        ? "activo"
-                        : ""
-                }">
-                    En camino
-                </span>
-
-                <span class="${
-                    configuracion.progreso >= 100
-                        ? "activo"
-                        : ""
-                }">
-                    Entregado
-                </span>
-
-            </div>
-
-
-            <div class="moti-seguimiento-resumen">
+            <div
+                class="moti-seguimiento-resumen"
+            >
 
                 <div>
 
@@ -7459,7 +7998,7 @@ function actualizarPanelSeguimientoPedido(
                     </span>
 
                     <strong>
-                        ${String(
+                        ${escaparHTML(
                             folio
                         )}
                     </strong>
@@ -7487,7 +8026,9 @@ function actualizarPanelSeguimientoPedido(
                     </span>
 
                     <strong>
-                        $${total.toFixed(2)}
+                        ${formatearPrecio(
+                            total
+                        )}
                     </strong>
 
                 </div>
@@ -7496,7 +8037,7 @@ function actualizarPanelSeguimientoPedido(
 
 
             ${
-                pedido.estado ===
+                estado ===
                 "pendiente_asignacion"
 
                     ? `
@@ -7521,6 +8062,10 @@ function actualizarPanelSeguimientoPedido(
     `;
 
 
+    // =================================================
+    // CANCELAR PEDIDO
+    // =================================================
+
     const cancelar =
         document.getElementById(
             "cancelarPedidoMotiGo"
@@ -7528,133 +8073,125 @@ function actualizarPanelSeguimientoPedido(
 
 
     if (
-    cancelar
-) {
+        cancelar
+    ) {
 
-    cancelar.addEventListener(
-        "click",
-        async () => {
+        cancelar.addEventListener(
+            "click",
+            async () => {
 
-            const confirmar =
-                confirm(
-                    "¿Seguro que quieres cancelar este pedido?"
-                );
-
-
-            if (
-                !confirmar
-            ) {
-
-                return;
-
-            }
+                const confirmar =
+                    confirm(
+                        "¿Seguro que quieres cancelar este pedido?"
+                    );
 
 
-            try {
+                if (
+                    !confirmar
+                ) {
 
-                console.log(
-                    "⚠️ MOTI GO: cancelando pedido:",
-                    pedido.id
-                );
+                    return;
+
+                }
 
 
-                // =========================================
-                // VERIFICAR QUE SIGA PENDIENTE
-                // =========================================
+                try {
 
-                const referencia =
-                    doc(
-                        db,
-                        "pedidos",
+                    console.log(
+                        "⚠️ MOTI GO: cancelando pedido:",
                         pedido.id
                     );
 
 
-                const pedidoActual =
-                    await getDoc(
-                        referencia
-                    );
+                    const referencia =
+                        doc(
+                            db,
+                            "pedidos",
+                            pedido.id
+                        );
 
 
-                if (
-                    !pedidoActual.exists()
-                ) {
-
-                    alert(
-                        "El pedido ya no existe."
-                    );
-
-                    return;
-
-                }
+                    const pedidoActual =
+                        await getDoc(
+                            referencia
+                        );
 
 
-                const datosActuales =
-                    pedidoActual.data();
+                    if (
+                        !pedidoActual.exists()
+                    ) {
 
+                        alert(
+                            "El pedido ya no existe."
+                        );
 
-                if (
-                    datosActuales.estado !==
-                    "pendiente_asignacion"
-                ) {
-
-                    alert(
-                        "Este pedido ya no puede cancelarse porque su estado cambió."
-                    );
-
-                    return;
-
-                }
-
-
-                // =========================================
-                // CANCELAR
-                // =========================================
-
-                await updateDoc(
-                    referencia,
-                    {
-
-                        estado:
-                            "cancelado",
-
-                        canceladoEn:
-                            new Date(),
-
-                        canceladoPor:
-                            "cliente"
+                        return;
 
                     }
-                );
 
 
-                console.log(
-                    "✅ MOTI GO: pedido cancelado:",
-                    pedido.id
-                );
+                    const datosActuales =
+                        pedidoActual.data();
 
 
-            }
-            catch (
-                error
-            ) {
+                    if (
+                        datosActuales.estado !==
+                        "pendiente_asignacion"
+                    ) {
 
-                console.error(
-                    "❌ MOTI GO: error cancelando pedido:",
+                        alert(
+                            "Este pedido ya no puede cancelarse porque su estado cambió."
+                        );
+
+                        return;
+
+                    }
+
+
+                    await updateDoc(
+                        referencia,
+                        {
+
+                            estado:
+                                "cancelado",
+
+                            canceladoEn:
+                                new Date(),
+
+                            canceladoPor:
+                                "cliente"
+
+                        }
+                    );
+
+
+                    console.log(
+                        "✅ MOTI GO: pedido cancelado:",
+                        pedido.id
+                    );
+
+                }
+                catch (
                     error
-                );
+                ) {
+
+                    console.error(
+                        "❌ MOTI GO: error cancelando pedido:",
+                        error
+                    );
 
 
-                alert(
-                    "No pudimos cancelar el pedido. Inténtalo nuevamente."
-                );
+                    alert(
+                        "No pudimos cancelar el pedido. Inténtalo nuevamente."
+                    );
+
+                }
 
             }
+        );
 
-        }
-    );
+    }
 
-}
 }
 
 function obtenerConfiguracionEstadoPedido(
