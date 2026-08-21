@@ -1,39 +1,312 @@
 // =====================================================
 // MOTI GO - DISPATCHER
 // =====================================================
-// Se encarga de recorrer los candidatos de asignación
-// UNO POR UNO.
 //
-// Flujo:
+// Recibe los grupos generados por el motor.
+//
+// IMPORTANTE:
+// NO manda el pedido a todo el grupo.
+//
+// Los candidatos se recorren UNO POR UNO:
 //
 // repartidor 1
 //      ↓
-// espera respuesta
+// espera
 //      ↓
-// acepta → termina
-// rechaza / expira → siguiente
+// rechaza / expira
+//      ↓
+// repartidor 2
+//      ↓
+// espera
+//      ↓
+// etc.
 //
-// Cuando llega al último candidato, vuelve al primero
-// mientras el pedido siga pendiente de asignación.
+// El estado de la solicitud se guarda en el mismo
+// documento del pedido.
+//
 // =====================================================
+
+
+import {
+    db
+}
+from "../firebase-config.js";
+
+
+import {
+    doc,
+    updateDoc,
+    getDoc,
+    serverTimestamp
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
 // =====================================================
 // CONFIGURACIÓN
 // =====================================================
 
-const TIEMPO_ESPERA = 15;
+const TIEMPO_ESPERA =
+    15;
 
 
 // =====================================================
-// ESTADO DEL DISPATCHER
+// ESTADO INTERNO
 // =====================================================
 
-let dispatcherActivo = false;
+let temporizadorDispatcher =
+    null;
 
-let pedidoActualId = null;
+let resolverSolicitud =
+    null;
 
-let indiceActual = 0;
+let dispatcherActivo =
+    false;
+
+
+// =====================================================
+// ESPERAR RESPUESTA DEL REPARTIDOR
+// =====================================================
+
+function esperarRespuestaPedido(
+    pedidoId,
+    repartidorId
+) {
+
+    return new Promise(
+        resolve => {
+
+            resolverSolicitud = {
+
+                pedidoId,
+
+                repartidorId,
+
+                resolve
+
+            };
+
+
+            console.log(
+                "⏳ MOTI GO: esperando respuesta de:",
+                repartidorId
+            );
+
+
+            temporizadorDispatcher =
+                setTimeout(
+
+                    () => {
+
+                        temporizadorDispatcher =
+                            null;
+
+                        if (
+                            resolverSolicitud
+                        ) {
+
+                            const resolver =
+                                resolverSolicitud.resolve;
+
+                            resolverSolicitud =
+                                null;
+
+                            console.log(
+                                "⌛ MOTI GO: solicitud expirada:",
+                                repartidorId
+                            );
+
+                            resolver(
+                                "expirada"
+                            );
+
+                        }
+
+                    },
+
+                    TIEMPO_ESPERA * 1000
+
+                );
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// RESPONDER DESDE EL REPARTIDOR
+// =====================================================
+//
+// Esta función será llamada posteriormente cuando el
+// repartidor acepte o rechace.
+//
+// =====================================================
+
+export function responderDispatcherMotiGo(
+    pedidoId,
+    repartidorId,
+    respuesta
+) {
+
+    if (
+        !resolverSolicitud
+    ) {
+
+        console.warn(
+            "⚠️ MOTI GO: no hay solicitud activa en dispatcher."
+        );
+
+        return false;
+
+    }
+
+
+    if (
+        resolverSolicitud.pedidoId !==
+        pedidoId
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        resolverSolicitud.repartidorId !==
+        repartidorId
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        temporizadorDispatcher
+    ) {
+
+        clearTimeout(
+            temporizadorDispatcher
+        );
+
+        temporizadorDispatcher =
+            null;
+
+    }
+
+
+    const resolver =
+        resolverSolicitud.resolve;
+
+
+    resolverSolicitud =
+        null;
+
+
+    resolver(
+        respuesta
+    );
+
+
+    return true;
+
+}
+
+
+// =====================================================
+// ENVIAR SOLICITUD A UN REPARTIDOR
+// =====================================================
+
+async function enviarSolicitudRepartidor(
+    pedido,
+    repartidor,
+    indice
+) {
+
+    const pedidoRef =
+        doc(
+            db,
+            "pedidos",
+            pedido.id
+        );
+
+
+    console.log("");
+
+    console.log(
+        "📤 MOTI GO: enviando solicitud"
+    );
+
+
+    console.log(
+        `🎯 Repartidor #${indice + 1}:`,
+        repartidor.nombre ||
+        repartidor.id
+    );
+
+
+    // =================================================
+    // MARCAR PEDIDO COMO SOLICITUD ACTIVA
+    // =================================================
+
+    await updateDoc(
+
+        pedidoRef,
+
+        {
+
+            estado:
+                "solicitud_repartidor",
+
+            repartidorId:
+                repartidor.id,
+
+            repartidorNombre:
+                repartidor.nombre ||
+                "",
+
+            repartidorPlaca:
+                repartidor.placa ||
+                "",
+
+            indiceRepartidor:
+                indice,
+
+            solicitudEnviadaEn:
+                serverTimestamp(),
+
+            actualizadoEn:
+                serverTimestamp()
+
+        }
+
+    );
+
+
+    console.log(
+        "📨 MOTI GO: solicitud enviada a:",
+        repartidor.id
+    );
+
+
+    // =================================================
+    // ESPERAR RESPUESTA
+    // =================================================
+
+    const respuesta =
+        await esperarRespuestaPedido(
+
+            pedido.id,
+
+            repartidor.id
+
+        );
+
+
+    return respuesta;
+
+}
 
 
 // =====================================================
@@ -42,285 +315,318 @@ let indiceActual = 0;
 
 export async function iniciarDispatcher(
 
-    pedidoId,
+    pedido,
 
-    candidatos,
+    grupos
 
-    opciones = {}
+) {
 
-){
-
-    console.log("");
-    console.log("🛒 MOTI GO - DISPATCHER");
-    console.log("==============================");
-
-    console.log(
-        "📦 Pedido:",
-        pedidoId
-    );
-
-    console.log(
-        "👥 Candidatos:",
-        candidatos?.length || 0
-    );
-
-    console.log("");
-
-    if(
-
-        !pedidoId ||
-
-        !Array.isArray(candidatos) ||
-
-        candidatos.length === 0
-
-    ){
+    if (
+        dispatcherActivo
+    ) {
 
         console.warn(
-            "⚠️ MOTI GO DISPATCHER: no hay candidatos."
+            "⚠️ MOTI GO: ya existe un dispatcher activo."
         );
 
         return {
 
-            asignado: false,
+            asignado:
+                false,
 
             motivo:
-                "sin_candidatos"
+                "dispatcher_activo"
 
         };
 
     }
 
 
-    dispatcherActivo = true;
+    dispatcherActivo =
+        true;
 
-    pedidoActualId =
-        pedidoId;
-
-    indiceActual = 0;
-
-
-    // =================================================
-    // RECORRER CANDIDATOS
-    // =================================================
-
-    while(
-
-        dispatcherActivo
-
-    ){
-
-        const candidato =
-            candidatos[
-                indiceActual
-            ];
-
-
-        if(!candidato){
-
-            indiceActual = 0;
-
-            continue;
-
-        }
-
-
-        console.log("");
-
-        console.log(
-            "🎯 MOTI GO: candidato actual:",
-            candidato
-        );
-
-
-        // =============================================
-        // NOTIFICAR CANDIDATO
-        // =============================================
-
-        let resultado;
-
-        if(
-
-            typeof opciones.enviarSolicitud ===
-            "function"
-
-        ){
-
-            resultado =
-                await opciones.enviarSolicitud(
-
-                    pedidoId,
-
-                    candidato
-
-                );
-
-        }else{
-
-            console.warn(
-                "⚠️ MOTI GO DISPATCHER: enviarSolicitud no está configurada."
-            );
-
-            resultado = {
-
-                respuesta:
-                    "sin_respuesta"
-
-            };
-
-        }
-
-
-        // =============================================
-        // REVISAR RESULTADO
-        // =============================================
-
-        if(
-
-            resultado?.respuesta ===
-            "aceptado"
-
-        ){
-
-            console.log("");
-
-            console.log(
-                "✅ MOTI GO: pedido aceptado por:",
-                candidato.id ||
-                candidato.uid ||
-                candidato.repartidorId
-            );
-
-            dispatcherActivo =
-                false;
-
-            return {
-
-                asignado: true,
-
-                candidato:
-
-                    candidato
-
-            };
-
-        }
-
-
-        // =============================================
-        // RECHAZADO / EXPIRADO
-        // =============================================
-
-        console.log("");
-
-        console.log(
-            "↪️ MOTI GO: candidato no aceptó."
-        );
-
-
-        // =============================================
-        // SIGUIENTE CANDIDATO
-        // =============================================
-
-        indiceActual++;
-
-
-        // =============================================
-        // SI LLEGAMOS AL FINAL
-        // =============================================
-
-        if(
-
-            indiceActual >=
-            candidatos.length
-
-        ){
-
-            console.log("");
-
-            console.log(
-                "🔄 MOTI GO: se recorrieron todos los candidatos."
-            );
-
-            console.log(
-                "🔁 MOTI GO: reiniciando desde el primer candidato."
-            );
-
-
-            indiceActual = 0;
-
-        }
-
-
-        // =============================================
-        // PEQUEÑA PAUSA ANTES DEL SIGUIENTE
-        // =============================================
-
-        if(
-
-            dispatcherActivo
-
-        ){
-
-            console.log("");
-
-            console.log(
-                "⏭️ MOTI GO: preparando siguiente candidato..."
-            );
-
-        }
-
-    }
-
-
-    return {
-
-        asignado: false,
-
-        motivo:
-            "dispatcher_detendido"
-
-    };
-
-}
-
-
-// =====================================================
-// DETENER DISPATCHER
-// =====================================================
-
-export function detenerDispatcher(){
 
     console.log("");
 
     console.log(
-        "🛑 MOTI GO: deteniendo dispatcher."
+        "🚖 MOTI GO - DISPATCHER INICIADO"
     );
 
 
-    dispatcherActivo =
-        false;
+    try {
+
+        // =================================================
+        // CONVERTIR GRUPOS EN UNA SOLA LISTA
+        // =================================================
+        //
+        // El motor crea grupos de hasta 3 repartidores.
+        //
+        // Nosotros los recorremos individualmente.
+        //
+        // Así conservamos el orden del puntaje.
+        // =================================================
+
+        const candidatos =
+            [];
+
+
+        for (
+            const grupo of
+            (grupos || [])
+        ) {
+
+            for (
+                const repartidor of
+                (grupo || [])
+            ) {
+
+                if (
+                    !repartidor?.id
+                ) {
+
+                    continue;
+
+                }
+
+
+                if (
+                    candidatos.some(
+                        item =>
+                            item.id ===
+                            repartidor.id
+                    )
+                ) {
+
+                    continue;
+
+                }
+
+
+                candidatos.push(
+                    repartidor
+                );
+
+            }
+
+        }
+
+
+        console.log(
+            "👥 MOTI GO: candidatos para despacho:",
+            candidatos.length
+        );
+
+
+        // =================================================
+        // NO HAY REPARTIDORES
+        // =================================================
+
+        if (
+            candidatos.length ===
+            0
+        ) {
+
+            console.warn(
+                "⚠️ MOTI GO: no hay candidatos para enviar."
+            );
+
+
+            await marcarSinRepartidor(
+                pedido
+            );
+
+
+            return {
+
+                asignado:
+                    false,
+
+                motivo:
+                    "sin_candidatos"
+
+            };
+
+        }
+
+
+        // =================================================
+        // ENVIAR UNO POR UNO
+        // =================================================
+
+        for (
+            let indice = 0;
+
+            indice <
+            candidatos.length;
+
+            indice++
+        ) {
+
+            const repartidor =
+                candidatos[indice];
+
+
+            const respuesta =
+                await enviarSolicitudRepartidor(
+
+                    pedido,
+
+                    repartidor,
+
+                    indice
+
+                );
+
+
+            console.log(
+                "📥 MOTI GO: respuesta:",
+                respuesta
+            );
+
+
+            // =============================================
+            // ACEPTADO
+            // =============================================
+
+            if (
+                respuesta ===
+                "aceptado"
+            ) {
+
+                console.log(
+                    "🎉 MOTI GO: pedido aceptado por:",
+                    repartidor.nombre ||
+                    repartidor.id
+                );
+
+
+                return {
+
+                    asignado:
+                        true,
+
+                    repartidor
+
+                };
+
+            }
+
+
+            // =============================================
+            // RECHAZADO / EXPIRADO
+            // =============================================
+
+            console.log(
+                "➡️ MOTI GO: continuando con el siguiente repartidor..."
+            );
+
+        }
+
+
+        // =================================================
+        // TERMINAR CANDIDATOS
+        // =================================================
+
+        await marcarSinRepartidor(
+            pedido
+        );
+
+
+        return {
+
+            asignado:
+                false,
+
+            motivo:
+                "sin_respuesta"
+
+        };
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "❌ MOTI GO: error en dispatcher:",
+            error
+        );
+
+
+        return {
+
+            asignado:
+                false,
+
+            motivo:
+                "error",
+
+            error
+
+        };
+
+    }
+    finally {
+
+        dispatcherActivo =
+            false;
+
+    }
 
 }
 
 
 // =====================================================
-// CONSULTAR ESTADO
+// MARCAR QUE NO HAY REPARTIDOR
 // =====================================================
 
-export function dispatcherEstaActivo(){
+async function marcarSinRepartidor(
+    pedido
+) {
 
-    return dispatcherActivo;
+    try {
 
-}
+        await updateDoc(
+
+            doc(
+                db,
+                "pedidos",
+                pedido.id
+            ),
+
+            {
+
+                estado:
+                    "sin_repartidor",
+
+                repartidorId:
+                    null,
+
+                repartidorNombre:
+                    null,
+
+                actualizadoEn:
+                    serverTimestamp()
+
+            }
+
+        );
 
 
-// =====================================================
-// OBTENER PEDIDO ACTUAL
-// =====================================================
+        console.log(
+            "😕 MOTI GO: no se encontró repartidor."
+        );
 
-export function obtenerPedidoDispatcher(){
+    }
+    catch (
+        error
+    ) {
 
-    return pedidoActualId;
+        console.error(
+            "❌ MOTI GO: error marcando sin repartidor:",
+            error
+        );
+
+    }
 
 }
