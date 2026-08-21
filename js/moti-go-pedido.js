@@ -2304,7 +2304,48 @@ const pedidoCreado =
 
     };
 
+// =====================================================
+// EJECUTAR MOTOR DE ASIGNACIÓN
+// =====================================================
 
+const resultadoAsignacion =
+    await ejecutarAsignacionInicialMotiGo(
+        pedidoCreado
+    );
+
+
+// =====================================================
+// GUARDAR RESULTADO TEMPORALMENTE EN MEMORIA
+// =====================================================
+//
+// Todavía NO modificamos Firebase.
+//
+// En el siguiente paso el dispatcher utilizará estos
+// candidatos para enviar la solicitud uno por uno.
+// =====================================================
+
+if (
+    resultadoAsignacion
+) {
+
+    pedidoCreado.resultadoAsignacion =
+        resultadoAsignacion;
+
+
+    console.log(
+        "🛵 MOTI GO: motor de asignación completado."
+    );
+
+}
+else {
+
+    console.warn(
+        "⚠️ MOTI GO: el motor no pudo generar candidatos."
+    );
+
+}
+    
+    
 // =====================================================
 // MOSTRAR AL CLIENTE QUE ESTAMOS BUSCANDO REPARTIDOR
 // =====================================================
