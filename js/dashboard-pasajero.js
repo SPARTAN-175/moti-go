@@ -7935,11 +7935,32 @@ function actualizarPanelSeguimientoPedido(
                     </div>
 
 
-                    <!-- PIE -->
+                    <!-- CANCELACIÓN -->
 
-                    <footer
-                        class="moti-ticket-footer"
-                    >
+${
+    pedidoPuedeSerCancelado(estado)
+        ? `
+
+            <button
+                type="button"
+                id="cancelarPedidoMotiGo"
+                class="moti-seguimiento-cancelar"
+            >
+
+                Cancelar pedido
+
+            </button>
+
+        `
+        : ""
+}
+
+
+<!-- PIE -->
+
+<footer
+    class="moti-ticket-footer"
+>
 
                         <span>
                             Gracias por usar MOTI GO
