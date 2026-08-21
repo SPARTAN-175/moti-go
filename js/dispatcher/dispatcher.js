@@ -2,27 +2,17 @@
 // MOTI GO - DISPATCHER
 // =====================================================
 //
-// Recibe los grupos generados por el motor.
+// Asignación UNO POR UNO.
 //
-// IMPORTANTE:
-// NO manda el pedido a todo el grupo.
-//
-// Los candidatos se recorren UNO POR UNO:
-//
-// repartidor 1
-//      ↓
-// espera
-//      ↓
-// rechaza / expira
-//      ↓
-// repartidor 2
-//      ↓
-// espera
-//      ↓
-// etc.
-//
-// El estado de la solicitud se guarda en el mismo
-// documento del pedido.
+// El dispatcher:
+// 1. recibe los grupos del motor;
+// 2. toma un repartidor;
+// 3. escribe la solicitud en Firestore;
+// 4. espera respuesta REAL desde Firestore;
+// 5. si acepta -> termina;
+// 6. si rechaza -> siguiente;
+// 7. si expira -> siguiente;
+// 8. si no quedan candidatos -> sin_repartidor.
 //
 // =====================================================
 
@@ -36,7 +26,7 @@ from "../firebase-config.js";
 import {
     doc,
     updateDoc,
-    getDoc,
+    onSnapshot,
     serverTimestamp
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
@@ -51,76 +41,265 @@ const TIEMPO_ESPERA =
 
 
 // =====================================================
-// ESTADO INTERNO
+// ESTADO
 // =====================================================
-
-let temporizadorDispatcher =
-    null;
-
-let resolverSolicitud =
-    null;
 
 let dispatcherActivo =
     false;
 
 
 // =====================================================
-// ESPERAR RESPUESTA DEL REPARTIDOR
+// ESPERAR RESPUESTA REAL DESDE FIREBASE
 // =====================================================
 
 function esperarRespuestaPedido(
+
     pedidoId,
+
     repartidorId
+
 ) {
 
     return new Promise(
         resolve => {
 
-            resolverSolicitud = {
-
-                pedidoId,
-
-                repartidorId,
-
-                resolve
-
-            };
-
-
             console.log(
-                "⏳ MOTI GO: esperando respuesta de:",
-                repartidorId
+                "👂 MOTI GO: esperando respuesta Firebase:",
+                pedidoId
             );
 
 
-            temporizadorDispatcher =
+            const pedidoRef =
+                doc(
+                    db,
+                    "pedidos",
+                    pedidoId
+                );
+
+
+            let finalizado =
+                false;
+
+
+            let temporizador =
+                null;
+
+
+            // =============================================
+            // FINALIZAR
+            // =============================================
+
+            const finalizar =
+                respuesta => {
+
+                    if (
+                        finalizado
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    finalizado =
+                        true;
+
+
+                    if (
+                        temporizador
+                    ) {
+
+                        clearTimeout(
+                            temporizador
+                        );
+
+                    }
+
+
+                    if (
+                        detenerListener
+                    ) {
+
+                        detenerListener();
+
+                    }
+
+
+                    resolve(
+                        respuesta
+                    );
+
+                };
+
+
+            // =============================================
+            // LISTENER
+            // =============================================
+
+            const detenerListener =
+                onSnapshot(
+
+                    pedidoRef,
+
+                    snapshot => {
+
+                        if (
+                            !snapshot.exists()
+                        ) {
+
+                            console.warn(
+                                "⚠️ MOTI GO: el pedido ya no existe."
+                            );
+
+
+                            finalizar(
+                                "cancelado"
+                            );
+
+
+                            return;
+
+                        }
+
+
+                        const pedido =
+                            snapshot.data();
+
+
+                        console.log(
+                            "🔄 MOTI GO: cambio en pedido:",
+                            {
+                                id:
+                                    pedidoId,
+
+                                estado:
+                                    pedido.estado,
+
+                                repartidorId:
+                                    pedido.repartidorId,
+
+                                rechazo:
+                                    pedido.solicitudRechazadaPor
+                            }
+                        );
+
+
+                        // =================================
+                        // ACEPTADO
+                        // =================================
+
+                        if (
+                            pedido.estado ===
+                            "asignado" &&
+
+                            pedido.repartidorId ===
+                            repartidorId
+                        ) {
+
+                            console.log(
+                                "🎉 MOTI GO: repartidor aceptó:",
+                                repartidorId
+                            );
+
+
+                            finalizar(
+                                "aceptado"
+                            );
+
+
+                            return;
+
+                        }
+
+
+                        // =================================
+                        // RECHAZADO
+                        // =================================
+
+                        if (
+                            pedido.estado ===
+                            "pendiente_asignacion" &&
+
+                            pedido.solicitudRechazadaPor ===
+                            repartidorId
+                        ) {
+
+                            console.log(
+                                "❌ MOTI GO: repartidor rechazó:",
+                                repartidorId
+                            );
+
+
+                            finalizar(
+                                "rechazado"
+                            );
+
+
+                            return;
+
+                        }
+
+
+                        // =================================
+                        // CLIENTE CANCELÓ
+                        // =================================
+
+                        if (
+                            pedido.estado ===
+                            "cancelado"
+                        ) {
+
+                            console.log(
+                                "🛑 MOTI GO: cliente canceló el pedido."
+                            );
+
+
+                            finalizar(
+                                "cancelado"
+                            );
+
+
+                            return;
+
+                        }
+
+                    },
+
+                    error => {
+
+                        console.error(
+                            "❌ MOTI GO: error escuchando respuesta:",
+                            error
+                        );
+
+
+                        finalizar(
+                            "error"
+                        );
+
+                    }
+
+                );
+
+
+            // =============================================
+            // TEMPORIZADOR
+            // =============================================
+
+            temporizador =
                 setTimeout(
 
                     () => {
 
-                        temporizadorDispatcher =
-                            null;
+                        console.log(
+                            "⌛ MOTI GO: solicitud expirada:",
+                            repartidorId
+                        );
 
-                        if (
-                            resolverSolicitud
-                        ) {
 
-                            const resolver =
-                                resolverSolicitud.resolve;
-
-                            resolverSolicitud =
-                                null;
-
-                            console.log(
-                                "⌛ MOTI GO: solicitud expirada:",
-                                repartidorId
-                            );
-
-                            resolver(
-                                "expirada"
-                            );
-
-                        }
+                        finalizar(
+                            "expirada"
+                        );
 
                     },
 
@@ -135,93 +314,17 @@ function esperarRespuestaPedido(
 
 
 // =====================================================
-// RESPONDER DESDE EL REPARTIDOR
-// =====================================================
-//
-// Esta función será llamada posteriormente cuando el
-// repartidor acepte o rechace.
-//
-// =====================================================
-
-export function responderDispatcherMotiGo(
-    pedidoId,
-    repartidorId,
-    respuesta
-) {
-
-    if (
-        !resolverSolicitud
-    ) {
-
-        console.warn(
-            "⚠️ MOTI GO: no hay solicitud activa en dispatcher."
-        );
-
-        return false;
-
-    }
-
-
-    if (
-        resolverSolicitud.pedidoId !==
-        pedidoId
-    ) {
-
-        return false;
-
-    }
-
-
-    if (
-        resolverSolicitud.repartidorId !==
-        repartidorId
-    ) {
-
-        return false;
-
-    }
-
-
-    if (
-        temporizadorDispatcher
-    ) {
-
-        clearTimeout(
-            temporizadorDispatcher
-        );
-
-        temporizadorDispatcher =
-            null;
-
-    }
-
-
-    const resolver =
-        resolverSolicitud.resolve;
-
-
-    resolverSolicitud =
-        null;
-
-
-    resolver(
-        respuesta
-    );
-
-
-    return true;
-
-}
-
-
-// =====================================================
 // ENVIAR SOLICITUD A UN REPARTIDOR
 // =====================================================
 
 async function enviarSolicitudRepartidor(
+
     pedido,
+
     repartidor,
+
     indice
+
 ) {
 
     const pedidoRef =
@@ -233,7 +336,6 @@ async function enviarSolicitudRepartidor(
 
 
     console.log("");
-
     console.log(
         "📤 MOTI GO: enviando solicitud"
     );
@@ -247,45 +349,52 @@ async function enviarSolicitudRepartidor(
 
 
     // =================================================
-    // MARCAR PEDIDO COMO SOLICITUD ACTIVA
+    // LIMPIAR MARCA DE RECHAZO ANTERIOR
+    // =================================================
+
+    const datosSolicitud = {
+
+        estado:
+            "solicitud_repartidor",
+
+        repartidorId:
+            repartidor.id,
+
+        repartidorNombre:
+            repartidor.nombre ||
+            "",
+
+        repartidorPlaca:
+            repartidor.placa ||
+            "",
+
+        indiceRepartidor:
+            indice,
+
+        solicitudEnviadaEn:
+            serverTimestamp(),
+
+        actualizadoEn:
+            serverTimestamp()
+
+    };
+
+
+    // =================================================
+    // ESCRIBIR SOLICITUD
     // =================================================
 
     await updateDoc(
 
         pedidoRef,
 
-        {
-
-            estado:
-                "solicitud_repartidor",
-
-            repartidorId:
-                repartidor.id,
-
-            repartidorNombre:
-                repartidor.nombre ||
-                "",
-
-            repartidorPlaca:
-                repartidor.placa ||
-                "",
-
-            indiceRepartidor:
-                indice,
-
-            solicitudEnviadaEn:
-                serverTimestamp(),
-
-            actualizadoEn:
-                serverTimestamp()
-
-        }
+        datosSolicitud
 
     );
 
 
     console.log(
-        "📨 MOTI GO: solicitud enviada a:",
+        "📨 MOTI GO: solicitud enviada:",
         repartidor.id
     );
 
@@ -329,6 +438,7 @@ export async function iniciarDispatcher(
             "⚠️ MOTI GO: ya existe un dispatcher activo."
         );
 
+
         return {
 
             asignado:
@@ -347,7 +457,6 @@ export async function iniciarDispatcher(
 
 
     console.log("");
-
     console.log(
         "🚖 MOTI GO - DISPATCHER INICIADO"
     );
@@ -356,14 +465,7 @@ export async function iniciarDispatcher(
     try {
 
         // =================================================
-        // CONVERTIR GRUPOS EN UNA SOLA LISTA
-        // =================================================
-        //
-        // El motor crea grupos de hasta 3 repartidores.
-        //
-        // Nosotros los recorremos individualmente.
-        //
-        // Así conservamos el orden del puntaje.
+        // APLANAR GRUPOS
         // =================================================
 
         const candidatos =
@@ -389,6 +491,10 @@ export async function iniciarDispatcher(
                 }
 
 
+                // =========================================
+                // EVITAR DUPLICADOS
+                // =========================================
+
                 if (
                     candidatos.some(
                         item =>
@@ -412,24 +518,19 @@ export async function iniciarDispatcher(
 
 
         console.log(
-            "👥 MOTI GO: candidatos para despacho:",
+            "👥 MOTI GO: candidatos:",
             candidatos.length
         );
 
 
         // =================================================
-        // NO HAY REPARTIDORES
+        // SIN CANDIDATOS
         // =================================================
 
         if (
             candidatos.length ===
             0
         ) {
-
-            console.warn(
-                "⚠️ MOTI GO: no hay candidatos para enviar."
-            );
-
 
             await marcarSinRepartidor(
                 pedido
@@ -450,7 +551,7 @@ export async function iniciarDispatcher(
 
 
         // =================================================
-        // ENVIAR UNO POR UNO
+        // RECORRER UNO POR UNO
         // =================================================
 
         for (
@@ -466,6 +567,12 @@ export async function iniciarDispatcher(
                 candidatos[indice];
 
 
+            console.log("");
+            console.log(
+                `🔄 MOTI GO: ronda ${indice + 1}/${candidatos.length}`
+            );
+
+
             const respuesta =
                 await enviarSolicitudRepartidor(
 
@@ -479,7 +586,7 @@ export async function iniciarDispatcher(
 
 
             console.log(
-                "📥 MOTI GO: respuesta:",
+                "📥 MOTI GO: respuesta recibida:",
                 respuesta
             );
 
@@ -494,9 +601,7 @@ export async function iniciarDispatcher(
             ) {
 
                 console.log(
-                    "🎉 MOTI GO: pedido aceptado por:",
-                    repartidor.nombre ||
-                    repartidor.id
+                    "🎉 MOTI GO: PEDIDO ASIGNADO"
                 );
 
 
@@ -513,11 +618,38 @@ export async function iniciarDispatcher(
 
 
             // =============================================
+            // CANCELADO
+            // =============================================
+
+            if (
+                respuesta ===
+                "cancelado"
+            ) {
+
+                console.log(
+                    "🛑 MOTI GO: dispatcher detenido por cancelación."
+                );
+
+
+                return {
+
+                    asignado:
+                        false,
+
+                    motivo:
+                        "cancelado"
+
+                };
+
+            }
+
+
+            // =============================================
             // RECHAZADO / EXPIRADO
             // =============================================
 
             console.log(
-                "➡️ MOTI GO: continuando con el siguiente repartidor..."
+                "➡️ MOTI GO: pasando al siguiente repartidor..."
             );
 
         }
@@ -577,7 +709,7 @@ export async function iniciarDispatcher(
 
 
 // =====================================================
-// MARCAR QUE NO HAY REPARTIDOR
+// SIN REPARTIDOR
 // =====================================================
 
 async function marcarSinRepartidor(
@@ -614,7 +746,7 @@ async function marcarSinRepartidor(
 
 
         console.log(
-            "😕 MOTI GO: no se encontró repartidor."
+            "😕 MOTI GO: no quedan repartidores."
         );
 
     }
