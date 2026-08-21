@@ -17,7 +17,7 @@ import {
 import {
     ejecutarMotor
 }
-from "./dispatcher/motor-asignacion.js";
+from "./motor/motor-asignacion.js";
 
 
 // =====================================================
