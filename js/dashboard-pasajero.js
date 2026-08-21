@@ -7333,6 +7333,27 @@ function abrirSeguimientoPedidoMotiGo(
 
 }
 
+// =====================================================
+// ESTADOS EN LOS QUE EL CLIENTE PUEDE CANCELAR
+// =====================================================
+
+function pedidoPuedeSerCancelado(
+    estado
+) {
+
+    return [
+
+        "pendiente_asignacion",
+        "asignado",
+        "en_compra",
+        "listo_entrega"
+
+    ].includes(
+        estado
+    );
+
+}
+
 function actualizarPanelSeguimientoPedido(
     pedido
 ) {
