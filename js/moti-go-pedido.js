@@ -2320,43 +2320,116 @@ const resultadoAsignacion =
 
 
 // =====================================================
-// GUARDAR RESULTADO TEMPORALMENTE EN MEMORIA
-// =====================================================
-//
-// Todavía NO modificamos Firebase.
-//
-// En el siguiente paso el dispatcher utilizará estos
-// candidatos para enviar la solicitud uno por uno.
+// RESULTADO DEL MOTOR
 // =====================================================
 
 if (
-    resultadoAsignacion
+    !resultadoAsignacion
 ) {
-
-    pedidoCreado.resultadoAsignacion =
-        resultadoAsignacion;
-
-
-    console.log(
-        "🛵 MOTI GO: motor de asignación completado."
-    );
-
-}
-else {
 
     console.warn(
         "⚠️ MOTI GO: el motor no pudo generar candidatos."
     );
 
+
+    mostrarBuscandoRepartidorMotiGo(
+        pedidoCreado
+    );
+
+
+    return;
+
 }
-    
-    
+
+
 // =====================================================
-// MOSTRAR AL CLIENTE QUE ESTAMOS BUSCANDO REPARTIDOR
+// GUARDAR RESULTADO DEL MOTOR
+// =====================================================
+
+pedidoCreado.resultadoAsignacion =
+    resultadoAsignacion;
+
+
+console.log(
+    "🛵 MOTI GO: motor de asignación completado."
+);
+
+
+console.log(
+    "📦 MOTI GO: grupos para dispatcher:",
+    resultadoAsignacion.grupos
+);
+
+
+// =====================================================
+// MOSTRAR AL CLIENTE QUE ESTAMOS BUSCANDO
+// =====================================================
+//
+// Lo hacemos inmediatamente para que el cliente no
+// tenga que esperar mientras comienza el dispatcher.
 // =====================================================
 
 mostrarBuscandoRepartidorMotiGo(
     pedidoCreado
+);
+
+
+// =====================================================
+// INICIAR DISPATCHER
+// =====================================================
+//
+// IMPORTANTE:
+//
+// NO usamos "await" aquí.
+//
+// El dispatcher continuará trabajando en segundo plano:
+//
+// grupo 1
+//    ↓
+// repartidor 1
+//    ↓
+// espera respuesta
+//    ↓
+// rechaza / expira
+//    ↓
+// siguiente
+//
+// Mientras tanto el cliente ya está viendo:
+//
+// "Buscando repartidor"
+// =====================================================
+
+console.log(
+    "📤 MOTI GO: iniciando dispatcher..."
+);
+
+
+iniciarDispatcher(
+
+    pedidoCreado,
+
+    resultadoAsignacion.grupos
+
+)
+.then(
+    resultadoDispatcher => {
+
+        console.log(
+            "🏁 MOTI GO: dispatcher finalizado:",
+            resultadoDispatcher
+        );
+
+    }
+)
+.catch(
+    error => {
+
+        console.error(
+            "❌ MOTI GO: error en dispatcher:",
+            error
+        );
+
+    }
 );
 }
 catch (
