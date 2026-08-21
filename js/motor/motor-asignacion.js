@@ -1,27 +1,62 @@
+// =====================================================
+// MOTI GO - MOTOR DE ASIGNACIÓN
+// =====================================================
+//
+// Adaptación del motor original de MOTI para MOTI GO.
+//
+// Flujo:
+//
+// repartidores registrados
+//        ↓
+// disponibles
+//        ↓
+// distancia al cliente
+//        ↓
+// radio
+//        ↓
+// rutas especiales (si aplica)
+//        ↓
+// puntaje
+//        ↓
+// ordenar
+//        ↓
+// grupos de prioridad
+//
+// IMPORTANTE:
+// El dispatcher será quien posteriormente envíe
+// la solicitud UNO POR UNO.
+// =====================================================
+
+
 import {
     buscarConductores
 }
 from "./buscar-conductores.js";
+
 
 import {
     calcularDistancia
 }
 from "./calcular-distancia.js";
 
+
 import {
     filtrarRadio
 }
 from "./filtrar-radio.js";
+
 
 import {
     calcularPuntaje
 }
 from "./calcular-puntaje.js";
 
+
 import {
     filtrarRutasEspeciales
 }
 from "./filtrar-rutas-especiales.js";
+
 
 import {
     seleccionarGrupos
@@ -29,61 +64,239 @@ import {
 from "./seleccionar-grupo.js";
 
 
+// =====================================================
+// EJECUTAR MOTOR
+// =====================================================
+
 export function ejecutarMotor(
 
-    conductores,
+    conductores = [],
 
-    viaje,
+    pedido = {},
 
-    pasajero
+    cliente = {}
 
 ){
 
-    const log=[];
+    const log = [];
 
-    log.push("🚖 MOTI ENGINE INICIADO");
 
-    let disponibles=
-
-    buscarConductores(
-
-        conductores
-
+    log.push(
+        "🛒 MOTI GO - MOTOR DE ASIGNACIÓN INICIADO"
     );
+
+
+    // =================================================
+    // VALIDAR CLIENTE
+    // =================================================
+
+    if(
+
+        typeof cliente.latitud !== "number" ||
+
+        typeof cliente.longitud !== "number"
+
+    ){
+
+        log.push(
+            "❌ Ubicación del cliente no válida."
+        );
+
+
+        return {
+
+            mejorRepartidor: null,
+
+            candidatos: [],
+
+            grupos: [],
+
+            log,
+
+            estadisticas: {
+
+                registrados:
+                    conductores.length,
+
+                disponibles: 0,
+
+                candidatos: 0,
+
+                grupos: 0,
+
+                radio: null
+
+            }
+
+        };
+
+    }
+
+
+    // =================================================
+    // 1. BUSCAR REPARTIDORES DISPONIBLES
+    // =================================================
+
+    let disponibles =
+
+        buscarConductores(
+
+            conductores
+
+        );
+
 
     log.push(
 
-        `Conductores registrados: ${conductores.length}`
+        `👥 Repartidores registrados: ${conductores.length}`
 
     );
+
 
     log.push(
 
-        `Disponibles: ${disponibles.length}`
+        `🟢 Repartidores disponibles: ${disponibles.length}`
 
     );
 
 
+    // =================================================
+    // 2. CALCULAR DISTANCIA
+    // =================================================
 
     disponibles.forEach(
 
-        conductor=>{
+        repartidor => {
 
-            conductor.distancia=
+            repartidor.distancia =
 
-            Math.round(
+                Math.round(
 
-                calcularDistancia(
+                    calcularDistancia(
 
-                    pasajero.latitud,
+                        cliente.latitud,
 
-                    pasajero.longitud,
+                        cliente.longitud,
 
-                    conductor.latitud,
+                        repartidor.latitud,
 
-                    conductor.longitud
+                        repartidor.longitud
 
-                )
+                    )
+
+                );
+
+        }
+
+    );
+
+
+    log.push(
+        "📍 Distancias calculadas."
+    );
+
+
+    // =================================================
+    // 3. FILTRAR POR RADIO
+    // =================================================
+
+    const resultadoRadio =
+
+        filtrarRadio(
+
+            disponibles
+
+        );
+
+
+    log.push(
+
+        `📡 Radio utilizado: ${resultadoRadio.radio} m`
+
+    );
+
+
+    let candidatos =
+
+        resultadoRadio.conductores;
+
+
+    // =================================================
+    // 4. RUTAS ESPECIALES
+    // =================================================
+    //
+    // MOTI GO puede utilizar pedido.tipoViaje o
+    // pedido.tipo para identificar un pedido especial.
+    //
+    // Si no es especial, no aplicamos este filtro.
+    // =================================================
+
+    const tipoViaje =
+
+        pedido.tipoViaje ||
+
+        pedido.tipo ||
+
+        "local";
+
+
+    if(
+
+        tipoViaje === "especial"
+
+    ){
+
+        candidatos =
+
+            filtrarRutasEspeciales(
+
+                candidatos,
+
+                pedido
+
+            );
+
+
+        log.push(
+
+            `🛣️ Repartidores compatibles con ruta especial: ${candidatos.length}`
+
+        );
+
+    }
+
+
+    // =================================================
+    // 5. CALCULAR PUNTAJE
+    // =================================================
+
+    candidatos =
+
+        calcularPuntaje(
+
+            candidatos
+
+        );
+
+
+    log.push(
+        "⭐ Puntajes calculados."
+    );
+
+
+    // =================================================
+    // 6. ORDENAR CANDIDATOS
+    // =================================================
+
+    candidatos.sort(
+
+        (a, b) => {
+
+            return (
+
+                b.puntaje -
+
+                a.puntaje
 
             );
 
@@ -92,165 +305,158 @@ export function ejecutarMotor(
     );
 
 
-
     log.push(
-
-        "Distancias calculadas."
-
+        "📊 Repartidores ordenados por prioridad."
     );
 
 
+    // =================================================
+    // 7. CREAR GRUPOS
+    // =================================================
+    //
+    // Conservamos la estructura original del motor.
+    //
+    // El dispatcher de MOTI GO NO enviará estos grupos
+    // simultáneamente.
+    //
+    // Los utilizará como bloques de prioridad y recorrerá
+    // los repartidores UNO POR UNO.
+    // =================================================
 
-    const resultadoRadio=
+    const grupos =
 
-    filtrarRadio(
+        seleccionarGrupos(
 
-        disponibles
-
-    );
-
-
-
-    log.push(
-
-        `Radio utilizado: ${resultadoRadio.radio}`
-
-    );
-
-
-
-    let candidatos=
-
-    resultadoRadio.conductores;
-
-
-
-    if(
-
-        viaje.tipoViaje==="especial"
-
-    ){
-
-        candidatos=
-
-        filtrarRutasEspeciales(
-
-            candidatos,
-
-            viaje
+            candidatos
 
         );
 
 
-
-        log.push(
-
-            `Conductores compatibles: ${candidatos.length}`
-
-        );
-
-    }
-
-
-
-    candidatos=
-
-    calcularPuntaje(
-
-        candidatos
-
-    );
-
-
-
     log.push(
 
-        "Puntajes calculados."
+        `📦 Grupos de prioridad creados: ${grupos.length}`
 
     );
 
 
+    // =================================================
+    // LOG DE CANDIDATOS
+    // =================================================
 
-    candidatos.sort(
+    candidatos.forEach(
 
-        (a,b)=>
+        (repartidor, indice) => {
 
-        b.puntaje-a.puntaje
+            log.push(
+
+                `🎯 #${indice + 1} ` +
+
+                `${repartidor.nombre || "Sin nombre"} ` +
+
+                `| distancia: ${repartidor.distancia} m ` +
+
+                `| puntaje: ${repartidor.puntaje}`
+
+            );
+
+        }
 
     );
 
 
+    // =================================================
+    // FINAL
+    // =================================================
 
     log.push(
-
-        "Conductores ordenados."
-
+        "🏁 MOTI GO - MOTOR FINALIZADO"
     );
 
 
+    // =================================================
+    // RESULTADO
+    // =================================================
 
-    const grupos=
+    return {
 
-    seleccionarGrupos(
+        // ---------------------------------------------
+        // PRIMER REPARTIDOR
+        // ---------------------------------------------
 
-        candidatos
+        mejorRepartidor:
 
-    );
+            candidatos.length > 0
 
+                ?
 
+                candidatos[0]
 
-    log.push(
+                :
 
-        `Grupos creados: ${grupos.length}`
-
-    );
-
-
-
-    log.push(
-
-        "🏁 MOTOR FINALIZADO"
-
-    );
+                null,
 
 
+        // ---------------------------------------------
+        // COMPATIBILIDAD CON NOMBRE ORIGINAL
+        // ---------------------------------------------
 
-   return{
+        mejorConductor:
 
-    mejorConductor:
+            candidatos.length > 0
 
-    candidatos.length > 0
+                ?
 
-    ?
+                candidatos[0]
 
-    candidatos[0]
+                :
 
-    :
+                null,
 
-    null,
 
-    grupos,
+        // ---------------------------------------------
+        // TODOS LOS CANDIDATOS
+        // ---------------------------------------------
 
-    log,
+        candidatos,
 
-    estadisticas:{
 
-        registrados:
-        conductores.length,
+        // ---------------------------------------------
+        // GRUPOS
+        // ---------------------------------------------
 
-        disponibles:
-        disponibles.length,
+        grupos,
 
-        radio:
-        resultadoRadio.radio,
 
-        candidatos:
-        candidatos.length,
+        // ---------------------------------------------
+        // LOG
+        // ---------------------------------------------
 
-        grupos:
-        grupos.length
+        log,
 
-    }
 
-};
+        // ---------------------------------------------
+        // ESTADÍSTICAS
+        // ---------------------------------------------
+
+        estadisticas: {
+
+            registrados:
+                conductores.length,
+
+            disponibles:
+                disponibles.length,
+
+            radio:
+                resultadoRadio.radio,
+
+            candidatos:
+                candidatos.length,
+
+            grupos:
+                grupos.length
+
+        }
+
+    };
+
 }
