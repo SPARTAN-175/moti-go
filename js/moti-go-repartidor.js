@@ -20,6 +20,14 @@ import {
 
 
 // =====================================================
+// CONFIGURACIÓN
+// =====================================================
+
+const TIEMPO_SOLICITUD =
+    15;
+
+
+// =====================================================
 // ESTADO DEL MÓDULO
 // =====================================================
 
@@ -29,7 +37,8 @@ let pedidoActual = null;
 
 let escuchandoPedidos = false;
 
-let pedidosEscuchados = new Set();
+let solicitudesActivas =
+    new Map();
 
 
 // =====================================================
@@ -68,20 +77,51 @@ async function iniciarMotiGoRepartidor() {
     );
 
 
-    escucharPedidosDisponibles();
+    escucharSolicitudesAsignadas();
 
 }
 
 
 // =====================================================
-// ESCUCHAR PEDIDOS DISPONIBLES
+// ESCUCHAR SOLICITUDES ASIGNADAS
+// =====================================================
+//
+// IMPORTANTE:
+//
+// Ya NO escuchamos:
+//
+// estado == pendiente_asignacion
+//
+// Ahora escuchamos:
+//
+// estado == solicitud_repartidor
+//
+// Y además:
+//
+// repartidorId == MI UID
+//
+// Por lo tanto solamente este repartidor recibe
+// la solicitud que el dispatcher le asignó.
 // =====================================================
 
-function escucharPedidosDisponibles() {
+function escucharSolicitudesAsignadas() {
 
     if (
         escuchandoPedidos
     ) {
+
+        return;
+
+    }
+
+
+    if (
+        !usuarioRepartidor
+    ) {
+
+        console.warn(
+            "⚠️ MOTI GO: usuario repartidor no disponible."
+        );
 
         return;
 
@@ -94,24 +134,41 @@ function escucharPedidosDisponibles() {
 
     const pedidosQuery =
         query(
+
             collection(
                 db,
                 "pedidos"
             ),
+
             where(
                 "estado",
                 "==",
-                "pendiente_asignacion"
+                "solicitud_repartidor"
+            ),
+
+            where(
+                "repartidorId",
+                "==",
+                usuarioRepartidor.uid
             )
+
         );
 
 
+    console.log(
+        "👂 MOTI GO: escuchando solicitudes para:",
+        usuarioRepartidor.uid
+    );
+
+
     onSnapshot(
+
         pedidosQuery,
+
         snapshot => {
 
             console.log(
-                "📦 MOTI GO - PEDIDOS DISPONIBLES:",
+                "📦 MOTI GO - SOLICITUDES PARA ESTE REPARTIDOR:",
                 snapshot.size
             );
 
@@ -119,16 +176,6 @@ function escucharPedidosDisponibles() {
             snapshot.docChanges()
                 .forEach(
                     cambio => {
-
-                        if (
-                            cambio.type !==
-                            "added"
-                        ) {
-
-                            return;
-
-                        }
-
 
                         const pedido = {
 
@@ -140,38 +187,73 @@ function escucharPedidosDisponibles() {
                         };
 
 
+                        // =================================
+                        // NUEVA SOLICITUD
+                        // =================================
+
                         if (
-                            pedidosEscuchados.has(
-                                pedido.id
-                            )
+                            cambio.type ===
+                            "added"
                         ) {
 
-                            return;
+                            mostrarSolicitudPedido(
+                                pedido
+                            );
 
                         }
 
 
-                        pedidosEscuchados.add(
-                            pedido.id
-                        );
+                        // =================================
+                        // CAMBIO DE SOLICITUD
+                        // =================================
+
+                        if (
+                            cambio.type ===
+                            "modified"
+                        ) {
+
+                            console.log(
+                                "🔄 MOTI GO: solicitud actualizada:",
+                                pedido.id
+                            );
+
+                        }
 
 
-                        mostrarSolicitudPedido(
-                            pedido
-                        );
+                        // =================================
+                        // SOLICITUD ELIMINADA
+                        // =================================
+
+                        if (
+                            cambio.type ===
+                            "removed"
+                        ) {
+
+                            console.log(
+                                "↩️ MOTI GO: solicitud retirada:",
+                                pedido.id
+                            );
+
+                            limpiarSolicitud(
+                                pedido.id
+                            );
+
+                        }
 
                     }
                 );
 
         },
+
         error => {
 
             console.error(
-                "❌ MOTI GO: error escuchando pedidos:",
+                "❌ MOTI GO: error escuchando solicitudes:",
                 error
             );
 
         }
+
     );
 
 }
@@ -185,8 +267,29 @@ function mostrarSolicitudPedido(
     pedido
 ) {
 
+    if (
+        !pedido ||
+        !pedido.id
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        solicitudesActivas.has(
+            pedido.id
+        )
+    ) {
+
+        return;
+
+    }
+
+
     console.log(
-        "🔔 MOTI GO - NUEVO PEDIDO:",
+        "🔔 MOTI GO - NUEVA SOLICITUD:",
         pedido
     );
 
@@ -207,6 +310,12 @@ function mostrarSolicitudPedido(
             : 0;
 
 
+    const total =
+        Number(
+            pedido.total || 0
+        );
+
+
     const mensaje =
         `
 🛒 NUEVO PEDIDO MOTI GO
@@ -215,17 +324,97 @@ Productos: ${cantidadProductos}
 Tiendas: ${cantidadTiendas}
 
 Total:
-$${Number(
-    pedido.total || 0
-).toFixed(2)}
+$${total.toFixed(2)}
 
 Pago:
 ${pedido.pago?.metodo || "efectivo"}
+
+⏱️ Tienes ${TIEMPO_SOLICITUD} segundos para responder.
         `.trim();
 
 
-    alert(
-        mensaje
+    // =============================================
+    // MOSTRAR SOLICITUD
+    // =============================================
+
+    const respuesta =
+        window.confirm(
+            mensaje +
+            "\n\n¿Quieres aceptar este pedido?"
+        );
+
+
+    if (
+        respuesta
+    ) {
+
+        aceptarPedido(
+            pedido
+        );
+
+    }
+    else {
+
+        rechazarPedido(
+            pedido
+        );
+
+    }
+
+
+    // =============================================
+    // TEMPORIZADOR DE SEGURIDAD
+    // =============================================
+    //
+    // El dispatcher también tiene su temporizador.
+    //
+    // Este temporizador solamente evita que una
+    // solicitud quede abierta indefinidamente en
+    // la interfaz del repartidor.
+    // =============================================
+
+    const temporizador =
+        setTimeout(
+
+            () => {
+
+                if (
+                    solicitudesActivas.has(
+                        pedido.id
+                    )
+                ) {
+
+                    console.log(
+                        "⌛ MOTI GO: solicitud expirada en repartidor:",
+                        pedido.id
+                    );
+
+
+                    solicitudesActivas.delete(
+                        pedido.id
+                    );
+
+                }
+
+            },
+
+            TIEMPO_SOLICITUD * 1000
+
+        );
+
+
+    solicitudesActivas.set(
+
+        pedido.id,
+
+        {
+
+            pedido,
+
+            temporizador
+
+        }
+
     );
 
 }
@@ -241,7 +430,8 @@ async function aceptarPedido(
 
     if (
         !pedido ||
-        !pedido.id
+        !pedido.id ||
+        !usuarioRepartidor
     ) {
 
         return;
@@ -250,6 +440,12 @@ async function aceptarPedido(
 
 
     try {
+
+        console.log(
+            "✅ MOTI GO: aceptando pedido:",
+            pedido.id
+        );
+
 
         const pedidoRef =
             doc(
@@ -260,7 +456,9 @@ async function aceptarPedido(
 
 
         await updateDoc(
+
             pedidoRef,
+
             {
 
                 estado:
@@ -271,6 +469,7 @@ async function aceptarPedido(
 
                 repartidorNombre:
                     usuarioRepartidor.displayName ||
+                    pedido.repartidorNombre ||
                     "",
 
                 fechaAsignacion:
@@ -280,6 +479,7 @@ async function aceptarPedido(
                     serverTimestamp()
 
             }
+
         );
 
 
@@ -287,13 +487,26 @@ async function aceptarPedido(
             pedido;
 
 
-        console.log(
-            "✅ MOTI GO - PEDIDO ACEPTADO:",
+        limpiarSolicitud(
             pedido.id
         );
 
+
+        console.log(
+            "🎉 MOTI GO - PEDIDO ACEPTADO:",
+            pedido.id
+        );
+
+
+        console.log(
+            "🛵 MOTI GO - REPARTIDOR ASIGNADO:",
+            usuarioRepartidor.uid
+        );
+
     }
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "❌ MOTI GO - ERROR ACEPTANDO PEDIDO:",
@@ -301,6 +514,146 @@ async function aceptarPedido(
         );
 
     }
+
+}
+
+
+// =====================================================
+// RECHAZAR PEDIDO
+// =====================================================
+//
+// El repartidor NO cancela el pedido.
+//
+// Solamente rechaza esta oportunidad.
+//
+// El dispatcher debe continuar con el siguiente
+// candidato.
+// =====================================================
+
+async function rechazarPedido(
+    pedido
+) {
+
+    if (
+        !pedido ||
+        !pedido.id ||
+        !usuarioRepartidor
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+        console.log(
+            "❌ MOTI GO: rechazando pedido:",
+            pedido.id
+        );
+
+
+        const pedidoRef =
+            doc(
+                db,
+                "pedidos",
+                pedido.id
+            );
+
+
+        // =============================================
+        // IMPORTANTE
+        // =============================================
+        //
+        // Regresamos el pedido a pendiente_asignacion.
+        //
+        // El dispatcher está esperando la respuesta.
+        // Cuando detecte el rechazo continuará con
+        // el siguiente candidato.
+        //
+        // =============================================
+
+        await updateDoc(
+
+            pedidoRef,
+
+            {
+
+                estado:
+                    "pendiente_asignacion",
+
+                repartidorId:
+                    null,
+
+                repartidorNombre:
+                    null,
+
+                solicitudRechazadaPor:
+                    usuarioRepartidor.uid,
+
+                solicitudRechazadaEn:
+                    serverTimestamp(),
+
+                actualizadoEn:
+                    serverTimestamp()
+
+            }
+
+        );
+
+
+        limpiarSolicitud(
+            pedido.id
+        );
+
+
+        console.log(
+            "↪️ MOTI GO: pedido rechazado, buscando siguiente repartidor."
+        );
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "❌ MOTI GO - ERROR RECHAZANDO PEDIDO:",
+            error
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// LIMPIAR SOLICITUD
+// =====================================================
+
+function limpiarSolicitud(
+    pedidoId
+) {
+
+    const solicitud =
+        solicitudesActivas.get(
+            pedidoId
+        );
+
+
+    if (
+        solicitud?.temporizador
+    ) {
+
+        clearTimeout(
+            solicitud.temporizador
+        );
+
+    }
+
+
+    solicitudesActivas.delete(
+        pedidoId
+    );
 
 }
 
@@ -315,7 +668,10 @@ window.motiGoRepartidor = {
         iniciarMotiGoRepartidor,
 
     aceptarPedido:
-        aceptarPedido
+        aceptarPedido,
+
+    rechazarPedido:
+        rechazarPedido
 
 };
 
@@ -334,6 +690,7 @@ if (
 else {
 
     auth.onAuthStateChanged(
+
         usuario => {
 
             if (
@@ -345,6 +702,7 @@ else {
             }
 
         }
+
     );
 
 }
