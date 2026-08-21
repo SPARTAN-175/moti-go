@@ -1584,6 +1584,292 @@ function renderizarRevisionPedido(
 
 }
 
+// =====================================================
+// OBTENER REPARTIDORES PARA EL MOTOR
+// =====================================================
+//
+// Traemos los usuarios que tienen tipo "repartidor".
+//
+// NO filtramos aquí por disponibilidad.
+//
+// Eso lo hace el propio motor mediante:
+//
+// buscarConductores()
+//      ↓
+// estadoServicio === "disponible"
+//
+// Así mantenemos separadas las responsabilidades.
+// =====================================================
+
+async function obtenerRepartidoresParaMotorMotiGo() {
+
+    console.log(
+        "🔎 MOTI GO: buscando repartidores registrados..."
+    );
+
+
+    const snapshot =
+        await getDocs(
+            collection(
+                db,
+                "usuarios"
+            )
+        );
+
+
+    const repartidores =
+        [];
+
+
+    snapshot.forEach(
+        docSnap => {
+
+            const datos =
+                docSnap.data();
+
+
+            if (
+                datos.tipo !==
+                "repartidor"
+            ) {
+
+                return;
+
+            }
+
+
+            repartidores.push({
+
+                id:
+                    docSnap.id,
+
+                ...datos
+
+            });
+
+        }
+    );
+
+
+    console.log(
+        "👥 MOTI GO: repartidores registrados encontrados:",
+        repartidores.length
+    );
+
+
+    console.log(
+        "👥 MOTI GO: repartidores:",
+        repartidores
+    );
+
+
+    return repartidores;
+
+}
+
+
+// =====================================================
+// EJECUTAR MOTOR DE ASIGNACIÓN
+// =====================================================
+//
+// Este paso solamente calcula los candidatos.
+//
+// TODAVÍA NO enviamos la solicitud al repartidor.
+//
+// Eso lo hará el dispatcher en el siguiente paso.
+// =====================================================
+
+async function ejecutarAsignacionInicialMotiGo(
+    pedido
+) {
+
+    console.log("");
+    console.log(
+        "🛒 MOTI GO: iniciando motor de asignación..."
+    );
+
+
+    try {
+
+        // =============================================
+        // VALIDAR UBICACIÓN
+        // =============================================
+
+        if (
+            !pedido?.destino
+        ) {
+
+            console.warn(
+                "⚠️ MOTI GO: el pedido no tiene destino."
+            );
+
+            return null;
+
+        }
+
+
+        const clienteMotor = {
+
+            latitud:
+                Number(
+                    pedido.destino.latitud
+                ),
+
+            longitud:
+                Number(
+                    pedido.destino.longitud
+                )
+
+        };
+
+
+        // =============================================
+        // OBTENER REPARTIDORES
+        // =============================================
+
+        const repartidores =
+            await obtenerRepartidoresParaMotorMotiGo();
+
+
+        if (
+            repartidores.length ===
+            0
+        ) {
+
+            console.warn(
+                "⚠️ MOTI GO: no existen repartidores registrados."
+            );
+
+            return {
+
+                mejorRepartidor:
+                    null,
+
+                candidatos:
+                    [],
+
+                grupos:
+                    [],
+
+                estadisticas: {
+
+                    registrados:
+                        0,
+
+                    disponibles:
+                        0,
+
+                    candidatos:
+                        0,
+
+                    grupos:
+                        0
+
+                }
+
+            };
+
+        }
+
+
+        // =============================================
+        // EJECUTAR MOTOR
+        // =============================================
+
+        const resultado =
+            ejecutarMotor(
+
+                repartidores,
+
+                pedido,
+
+                clienteMotor
+
+            );
+
+
+        // =============================================
+        // MOSTRAR LOG DEL MOTOR
+        // =============================================
+
+        console.log("");
+
+        console.log(
+            "📊 MOTI GO - RESULTADO DEL MOTOR"
+        );
+
+
+        console.log(
+            "--------------------------------"
+        );
+
+
+        if (
+            Array.isArray(
+                resultado.log
+            )
+        ) {
+
+            resultado.log.forEach(
+                linea => {
+
+                    console.log(
+                        linea
+                    );
+
+                }
+            );
+
+        }
+
+
+        console.log(
+            "--------------------------------"
+        );
+
+
+        console.log(
+            "📊 MOTI GO - ESTADÍSTICAS:",
+            resultado.estadisticas
+        );
+
+
+        console.log(
+            "🎯 MOTI GO - MEJOR REPARTIDOR:",
+            resultado.mejorRepartidor
+        );
+
+
+        console.log(
+            "👥 MOTI GO - CANDIDATOS:",
+            resultado.candidatos
+        );
+
+
+        console.log(
+            "📦 MOTI GO - GRUPOS:",
+            resultado.grupos
+        );
+
+
+        return resultado;
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "❌ MOTI GO: error ejecutando motor de asignación:",
+            error
+        );
+
+
+        return null;
+
+    }
+
+}
 
 // =====================================================
 // PREPARAR CONFIRMACIÓN
