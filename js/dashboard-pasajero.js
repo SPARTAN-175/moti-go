@@ -8293,6 +8293,252 @@ if (
 }
 }
 
+// =====================================================
+// MOTI GO - CONFIGURAR BOTÓN CANCELAR PEDIDO
+// =====================================================
+
+function configurarBotonCancelarPedido(
+    pedido
+) {
+
+    const cancelar =
+        document.getElementById(
+            "cancelarPedidoMotiGo"
+        );
+
+
+    if (
+        !cancelar
+    ) {
+
+        return;
+
+    }
+
+
+    // Evitar registrar el evento más de una vez
+
+    if (
+        cancelar.dataset.listenerActivo ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+
+    cancelar.dataset.listenerActivo =
+        "true";
+
+
+    cancelar.addEventListener(
+        "click",
+        async () => {
+
+            if (
+                cancelar.disabled
+            ) {
+
+                return;
+
+            }
+
+
+            const confirmar =
+                confirm(
+                    "¿Seguro que quieres cancelar este pedido?"
+                );
+
+
+            if (
+                !confirmar
+            ) {
+
+                return;
+
+            }
+
+
+            try {
+
+                cancelar.disabled =
+                    true;
+
+
+                cancelar.textContent =
+                    "Cancelando...";
+
+
+                console.log(
+                    "⚠️ MOTI GO: verificando cancelación:",
+                    pedido.id
+                );
+
+
+                const referencia =
+                    doc(
+                        db,
+                        "pedidos",
+                        pedido.id
+                    );
+
+
+                // =====================================
+                // CONSULTAR ESTADO REAL EN FIREBASE
+                // =====================================
+
+                const pedidoActual =
+                    await getDoc(
+                        referencia
+                    );
+
+
+                if (
+                    !pedidoActual.exists()
+                ) {
+
+                    alert(
+                        "El pedido ya no existe."
+                    );
+
+                    return;
+
+                }
+
+
+                const datosActuales =
+                    pedidoActual.data();
+
+
+                const estadoActual =
+                    datosActuales.estado ||
+                    "";
+
+
+                console.log(
+                    "📦 MOTI GO: estado real:",
+                    estadoActual
+                );
+
+
+                // =====================================
+                // VERIFICAR SI TODAVÍA SE PUEDE CANCELAR
+                // =====================================
+
+                if (
+                    !pedidoPuedeSerCancelado(
+                        estadoActual
+                    )
+                ) {
+
+                    alert(
+                        "Este pedido ya está en proceso de entrega y ya no puede cancelarse."
+                    );
+
+
+                    actualizarPanelSeguimientoPedido({
+
+                        id:
+                            pedidoActual.id,
+
+                        ...datosActuales
+
+                    });
+
+
+                    return;
+
+                }
+
+
+                // =====================================
+                // CANCELAR
+                // =====================================
+
+                await updateDoc(
+                    referencia,
+                    {
+
+                        estado:
+                            "cancelado",
+
+                        canceladoEn:
+                            new Date(),
+
+                        canceladoPor:
+                            "cliente"
+
+                    }
+                );
+
+
+                console.log(
+                    "✅ MOTI GO: pedido cancelado:",
+                    pedido.id
+                );
+
+
+                alert(
+                    "Tu pedido fue cancelado correctamente."
+                );
+
+
+                actualizarPanelSeguimientoPedido({
+
+                    id:
+                        pedido.id,
+
+                    ...datosActuales,
+
+                    estado:
+                        "cancelado"
+
+                });
+
+            }
+            catch (
+                error
+            ) {
+
+                console.error(
+                    "❌ MOTI GO: error cancelando pedido:",
+                    error
+                );
+
+
+                alert(
+                    "No pudimos cancelar el pedido. Inténtalo nuevamente."
+                );
+
+            }
+            finally {
+
+                const botonActual =
+                    document.getElementById(
+                        "cancelarPedidoMotiGo"
+                    );
+
+
+                if (
+                    botonActual
+                ) {
+
+                    botonActual.disabled =
+                        false;
+
+                    botonActual.textContent =
+                        "Cancelar pedido";
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
 function obtenerConfiguracionEstadoPedido(
     estado
 ) {
