@@ -8079,25 +8079,24 @@ ${
 
 
             ${
-                estado ===
-                "pendiente_asignacion"
+    pedidoPuedeSerCancelado(estado)
 
-                    ? `
+        ? `
 
-                        <button
-                            type="button"
-                            id="cancelarPedidoMotiGo"
-                            class="moti-seguimiento-cancelar"
-                        >
+            <button
+                type="button"
+                id="cancelarPedidoMotiGo"
+                class="moti-seguimiento-cancelar"
+            >
 
-                            Cancelar pedido
+                Cancelar pedido
 
-                        </button>
+            </button>
 
-                    `
+        `
 
-                    : ""
-            }
+        : ""
+}
 
         </div>
 
