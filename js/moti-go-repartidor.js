@@ -863,15 +863,24 @@ async function aceptarPedido(
         );
 
 
-        pedidoActual =
-            {
+       pedidoActual =
+{
+    id:
+        pedido.id,
 
-                id:
-                    pedido.id,
+    ...datosActuales,
 
-                ...datosActuales
+    estado:
+        "asignado",
 
-            };
+    repartidorId:
+        usuarioRepartidor.uid,
+
+    repartidorNombre:
+        usuarioRepartidor.displayName ||
+        pedido.repartidorNombre ||
+        ""
+};
 
 
         limpiarSolicitud(
