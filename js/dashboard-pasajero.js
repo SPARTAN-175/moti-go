@@ -7981,6 +7981,10 @@ ${
         `;
 
 
+        configurarBotonCancelarPedido(
+    pedido
+);
+        
         return;
 
     }
