@@ -2277,6 +2277,27 @@ console.log(
     referenciaPedido.id
 );
 
+ // =====================================================
+// MOTI GO - AVISAR AL DASHBOARD DEL CLIENTE
+// =====================================================
+
+if (
+    typeof window.motiGoEscucharPedidoActivo ===
+    "function"
+) {
+
+    window.motiGoEscucharPedidoActivo(
+        pedidoRef.id
+    );
+
+}
+else {
+
+    console.warn(
+        "⚠️ MOTI GO: el listener del pedido activo todavía no está disponible."
+    );
+
+}   
 
 console.log(
     "🧾 MOTI GO: FOLIO:",
