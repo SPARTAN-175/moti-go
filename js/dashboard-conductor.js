@@ -474,9 +474,28 @@ function escucharEstadoRepartidor(
                     snapshot.data();
 
 
-                const nuevoEstado =
-                    datos.estadoServicio ||
-                    "disponible";
+// =========================================
+// DETERMINAR ESTADO REAL DEL REPARTIDOR
+// =========================================
+
+const viajeActivo =
+    datos.viajeActivo;
+
+
+const tieneViajeActivo =
+    viajeActivo &&
+    typeof viajeActivo ===
+        "object" &&
+    viajeActivo.pedidoId;
+
+
+const nuevoEstado =
+    tieneViajeActivo
+        ? "ocupado"
+        : (
+            datos.estadoServicio ||
+            "disponible"
+        );
 
 
                 const estadoAnterior =
