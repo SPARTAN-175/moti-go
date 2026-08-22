@@ -138,7 +138,7 @@ menuOverlay.addEventListener(
 // =========================================
 
 let currentState = null;
-
+let listenerUsuario = null;
 
 // =========================================
 // SOLICITUD ACTUAL
