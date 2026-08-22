@@ -227,10 +227,11 @@ async function iniciarMotiGoRepartidor() {
     );
 
 
-    await verificarViajeActivo();
+await verificarViajeActivo();
 
+escucharEstadoRepartidor();
 
-    escucharSolicitudesAsignadas();
+escucharSolicitudesAsignadas();
 
 }
 
