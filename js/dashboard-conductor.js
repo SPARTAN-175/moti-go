@@ -408,6 +408,149 @@ onAuthStateChanged(
     }
 );
 
+// =========================================
+// ESCUCHAR ESTADO DEL REPARTIDOR
+// =========================================
+
+function escucharEstadoRepartidor(
+    user
+) {
+
+    if (
+        listenerUsuario
+    ) {
+
+        listenerUsuario();
+
+        listenerUsuario =
+            null;
+
+    }
+
+
+    const usuarioRef =
+        doc(
+            db,
+            "usuarios",
+            user.uid
+        );
+
+
+    listenerUsuario =
+        onSnapshot(
+
+            usuarioRef,
+
+            snapshot => {
+
+                if (
+                    !snapshot.exists()
+                ) {
+
+                    return;
+
+                }
+
+
+                const datos =
+                    snapshot.data();
+
+
+                const nuevoEstado =
+                    datos.estadoServicio ||
+                    "disponible";
+
+
+                const estadoAnterior =
+                    currentState;
+
+
+                currentState =
+                    nuevoEstado;
+
+
+                console.log(
+                    "🔄 MOTI GO: estado del repartidor actualizado:",
+                    currentState
+                );
+
+
+                actualizarVista();
+
+
+                // =================================
+                // SI ESTÁ OCUPADO
+                // =================================
+
+                if (
+                    currentState ===
+                    "ocupado"
+                ) {
+
+                    detenerEscuchaSolicitudes();
+
+
+                    verificarViajeActivo();
+
+                }
+
+
+                // =================================
+                // SI ESTÁ DISPONIBLE
+                // =================================
+
+                if (
+                    currentState ===
+                    "disponible"
+                ) {
+
+                    escucharSolicitudes();
+
+                }
+
+
+                // =================================
+                // SI ESTÁ NO DISPONIBLE
+                // =================================
+
+                if (
+                    currentState ===
+                    "no_disponible"
+                ) {
+
+                    detenerEscuchaSolicitudes();
+
+                }
+
+
+                if (
+                    estadoAnterior !==
+                    currentState
+                ) {
+
+                    console.log(
+                        "🔄 MOTI GO: cambio de estado:",
+                        estadoAnterior,
+                        "→",
+                        currentState
+                    );
+
+                }
+
+            },
+
+            error => {
+
+                console.error(
+                    "❌ MOTI GO: error escuchando estado del repartidor:",
+                    error
+                );
+
+            }
+
+        );
+
+}
 
 // =========================================
 // VISTA DEL ESTADO
