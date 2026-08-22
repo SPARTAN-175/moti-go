@@ -10265,3 +10265,538 @@ function cerrarSeguimientoPedidoMotiGo() {
     );
 
 }
+
+
+// =====================================================
+// MOTI GO - MOSTRAR TICKET DEL PEDIDO
+// =====================================================
+
+function mostrarTicketPedido(
+    pedido
+) {
+
+    if (
+        !pedido
+    ) {
+
+        console.warn(
+            "⚠️ MOTI GO: no hay pedido para mostrar ticket."
+        );
+
+        return;
+
+    }
+
+
+    console.log(
+        "🧾 MOTI GO: mostrando ticket:",
+        pedido.id
+    );
+
+
+    // =================================================
+    // CREAR CONTENEDOR
+    // =================================================
+
+    const ticketExistente =
+        document.getElementById(
+            "motiGoTicketModal"
+        );
+
+
+    if (
+        ticketExistente
+    ) {
+
+        ticketExistente.remove();
+
+    }
+
+
+    const modal =
+        document.createElement(
+            "div"
+        );
+
+
+    modal.id =
+        "motiGoTicketModal";
+
+
+    modal.innerHTML = `
+        <div class="moti-go-ticket-overlay">
+
+            <div class="moti-go-ticket">
+
+                <button
+                    type="button"
+                    class="moti-go-ticket-close"
+                    id="cerrarTicketMotiGo"
+                >
+                    ×
+                </button>
+
+
+                <div class="moti-go-ticket-header">
+
+                    <div class="moti-go-ticket-logo">
+                        MOTI GO
+                    </div>
+
+                    <div class="moti-go-ticket-subtitulo">
+                        Ticket de pedido
+                    </div>
+
+                </div>
+
+
+                <div class="moti-go-ticket-folio">
+
+                    <strong>
+                        ${pedido.folio || "Sin folio"}
+                    </strong>
+
+                    <span>
+                        ${formatearFechaTicket(
+                            pedido.creadoEn
+                        )}
+                    </span>
+
+                </div>
+
+
+                <div class="moti-go-ticket-estado">
+
+                    ✓ PEDIDO ACEPTADO
+
+                    <small>
+                        Repartidor asignado
+                    </small>
+
+                </div>
+
+
+                <div
+                    id="motiGoTicketProductos"
+                    class="moti-go-ticket-productos"
+                >
+                </div>
+
+
+                <div
+                    id="motiGoTicketTotales"
+                    class="moti-go-ticket-totales"
+                >
+                </div>
+
+
+                <div class="moti-go-ticket-entrega">
+
+                    <div class="moti-go-ticket-seccion-titulo">
+                        ENTREGA
+                    </div>
+
+                    <div>
+                        ${
+                            pedido.destino?.localidad ||
+                            pedido.ubicacionEntrega?.localidad ||
+                            "Ubicación registrada"
+                        }
+                    </div>
+
+                </div>
+
+
+                <div class="moti-go-ticket-codigo">
+
+                    <div>
+                        CÓDIGO DE ENTREGA
+                    </div>
+
+                    <strong>
+                        ${
+                            pedido.codigoEntrega ||
+                            "------"
+                        }
+                    </strong>
+
+                    <small>
+                        Proporciona este código al
+                        repartidor al finalizar la entrega.
+                    </small>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="guardarTicketMotiGo"
+                    class="moti-go-ticket-descargar"
+                >
+                    📥 Guardar ticket como imagen
+                </button>
+
+            </div>
+
+        </div>
+    `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    // =================================================
+    // PRODUCTOS
+    // =================================================
+
+    const contenedorProductos =
+        document.getElementById(
+            "motiGoTicketProductos"
+        );
+
+
+    const productos =
+        Array.isArray(
+            pedido.productos
+        )
+            ? pedido.productos
+            : [];
+
+
+    if (
+        productos.length === 0
+    ) {
+
+        contenedorProductos.innerHTML = `
+            <div class="moti-go-ticket-vacio">
+                No hay productos registrados.
+            </div>
+        `;
+
+    }
+    else {
+
+        const productosAgrupados =
+            {};
+
+
+        productos.forEach(
+            producto => {
+
+                const tienda =
+                    producto.tiendaNombre ||
+                    producto.nombreTienda ||
+                    "Tienda";
+
+
+                if (
+                    !productosAgrupados[
+                        tienda
+                    ]
+                ) {
+
+                    productosAgrupados[
+                        tienda
+                    ] = [];
+
+                }
+
+
+                productosAgrupados[
+                    tienda
+                ].push(
+                    producto
+                );
+
+            }
+        );
+
+
+        let html =
+            "";
+
+
+        Object.entries(
+            productosAgrupados
+        ).forEach(
+            (
+                [
+                    tienda,
+                    lista
+                ]
+            ) => {
+
+                html += `
+                    <div class="moti-go-ticket-tienda">
+
+                        <div class="moti-go-ticket-tienda-nombre">
+                            ${tienda}
+                        </div>
+                `;
+
+
+                lista.forEach(
+                    producto => {
+
+                        const cantidad =
+                            Number(
+                                producto.cantidad
+                            ) || 1;
+
+
+                        const precio =
+                            Number(
+                                producto.precio
+                            ) || 0;
+
+
+                        const subtotal =
+                            cantidad *
+                            precio;
+
+
+                        html += `
+                            <div class="moti-go-ticket-producto">
+
+                                <div>
+
+                                    <strong>
+                                        ${producto.nombre || "Producto"}
+                                    </strong>
+
+                                    <small>
+                                        ${cantidad} ×
+                                        $${precio.toFixed(2)}
+                                    </small>
+
+                                </div>
+
+                                <span>
+                                    $${subtotal.toFixed(2)}
+                                </span>
+
+                            </div>
+                        `;
+
+                    }
+                );
+
+
+                html += `
+                    </div>
+                `;
+
+            }
+        );
+
+
+        contenedorProductos.innerHTML =
+            html;
+
+    }
+
+
+    // =================================================
+    // TOTALES
+    // =================================================
+
+    const pago =
+        pedido.pago ||
+        {};
+
+
+    const subtotal =
+        Number(
+            pago.subtotalProductos ??
+            pedido.subtotalProductos ??
+            0
+        );
+
+
+    const comision =
+        Number(
+            pago.comision ??
+            pedido.comision ??
+            0
+        );
+
+
+    const total =
+        Number(
+            pago.total ??
+            pedido.total ??
+            (
+                subtotal +
+                comision
+            )
+        );
+
+
+    const contenedorTotales =
+        document.getElementById(
+            "motiGoTicketTotales"
+        );
+
+
+    contenedorTotales.innerHTML = `
+
+        <div>
+
+            <span>
+                Subtotal
+            </span>
+
+            <strong>
+                $${subtotal.toFixed(2)}
+            </strong>
+
+        </div>
+
+
+        <div>
+
+            <span>
+                Comisión MOTI GO
+            </span>
+
+            <strong>
+                $${comision.toFixed(2)}
+            </strong>
+
+        </div>
+
+
+        <div class="moti-go-ticket-total">
+
+            <span>
+                TOTAL
+            </span>
+
+            <strong>
+                $${total.toFixed(2)}
+            </strong>
+
+        </div>
+
+    `;
+
+
+    // =================================================
+    // CERRAR
+    // =================================================
+
+    document
+        .getElementById(
+            "cerrarTicketMotiGo"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                modal.remove();
+
+            }
+        );
+
+
+    // =================================================
+    // GUARDAR COMO IMAGEN
+    // =================================================
+
+    document
+        .getElementById(
+            "guardarTicketMotiGo"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                console.log(
+                    "📸 MOTI GO: preparando ticket para imagen."
+                );
+
+
+                alert(
+                    "La opción de guardar el ticket como imagen la conectaremos en el siguiente paso."
+                );
+
+            }
+        );
+
+}
+
+
+// =====================================================
+// FECHA DEL TICKET
+// =====================================================
+
+function formatearFechaTicket(
+    fecha
+) {
+
+    if (
+        !fecha
+    ) {
+
+        return "";
+
+    }
+
+
+    let date;
+
+
+    if (
+        fecha?.toDate
+    ) {
+
+        date =
+            fecha.toDate();
+
+    }
+    else {
+
+        date =
+            new Date(
+                fecha
+            );
+
+    }
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "";
+
+    }
+
+
+    return date.toLocaleString(
+        "es-MX",
+        {
+
+            day:
+                "2-digit",
+
+            month:
+                "2-digit",
+
+            year:
+                "numeric",
+
+            hour:
+                "2-digit",
+
+            minute:
+                "2-digit"
+
+        }
+    );
+
+}
