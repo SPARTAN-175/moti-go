@@ -294,10 +294,37 @@ const viajeActivo =
     datos.viajeActivo;
 
 
-const tieneViajeActivo =
+const pedidoActivoId =
     viajeActivo &&
-    typeof viajeActivo === "object" &&
-    viajeActivo.pedidoId;
+    typeof viajeActivo === "object"
+        ? viajeActivo.pedidoId
+        : (
+            typeof viajeActivo === "string"
+                ? viajeActivo
+                : null
+        );
+
+
+const tieneViajeActivo =
+    typeof pedidoActivoId === "string" &&
+    pedidoActivoId.trim() !== "";
+
+console.log(
+    "🔎 MOTI GO: comprobando viaje activo:",
+    {
+        estadoServicio:
+            datos.estadoServicio,
+
+        viajeActivo:
+            datos.viajeActivo,
+
+        pedidoActivoId:
+            pedidoActivoId,
+
+        tieneViajeActivo:
+            tieneViajeActivo
+    }
+);
 
 
 const nuevoEstado =
