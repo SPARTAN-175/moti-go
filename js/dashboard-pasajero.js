@@ -48,6 +48,9 @@ let tiendaSeleccionadaId = null;
 
 let perfilCliente = null;
 
+let pedidoActivoClienteId = null;
+let listenerPedidoActivoCliente = null;
+
 // =====================================================
 // ELEMENTOS DEL DOM
 // =====================================================
