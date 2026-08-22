@@ -119,6 +119,9 @@ async function verificarViajeActivo() {
             !snapshot.exists()
         ) {
 
+            pedidoActual =
+                null;
+
             return null;
 
         }
@@ -128,31 +131,199 @@ async function verificarViajeActivo() {
             snapshot.data();
 
 
+        const viajeActivo =
+            datos.viajeActivo;
+
+
+        // =================================================
+        // NO HAY VIAJE ACTIVO
+        // =================================================
+
         if (
-            datos.viajeActivo
+            !viajeActivo
         ) {
 
             pedidoActual =
-                datos.viajeActivo;
+                null;
 
 
             console.log(
-                "🚗 MOTI GO: el repartidor tiene un viaje activo:",
-                datos.viajeActivo
+                "🟢 MOTI GO: repartidor sin viaje activo."
             );
 
 
-            mostrarViajeActivo(
-                datos.viajeActivo
-            );
+            // Ocultar tarjeta si existe
+
+            const activeTripCard =
+                document.getElementById(
+                    "motiGoActiveTrip"
+                );
 
 
-            return datos.viajeActivo;
+            if (
+                activeTripCard
+            ) {
+
+                activeTripCard.style.display =
+                    "none";
+
+            }
+
+
+            return null;
 
         }
 
 
-        return null;
+        // =================================================
+        // OBTENER ID DEL PEDIDO
+        // =================================================
+
+        const pedidoId =
+            typeof viajeActivo === "string"
+                ? viajeActivo
+                : viajeActivo?.pedidoId;
+
+
+        if (
+            !pedidoId
+        ) {
+
+            console.warn(
+                "⚠️ MOTI GO: viajeActivo no contiene pedidoId válido:",
+                viajeActivo
+            );
+
+
+            pedidoActual =
+                null;
+
+
+            return null;
+
+        }
+
+
+        // =================================================
+        // CONSULTAR EL PEDIDO REAL
+        // =================================================
+
+        const pedidoRef =
+            doc(
+                db,
+                "pedidos",
+                pedidoId
+            );
+
+
+        const pedidoSnapshot =
+            await getDoc(
+                pedidoRef
+            );
+
+
+        // =================================================
+        // PEDIDO YA NO EXISTE
+        // =================================================
+
+        if (
+            !pedidoSnapshot.exists()
+        ) {
+
+            console.warn(
+                "⚠️ MOTI GO: el pedido del viaje ya no existe."
+            );
+
+
+            await limpiarViajeActivoRepartidor(
+                repartidorRef,
+                pedidoId,
+                "pedido_inexistente"
+            );
+
+
+            return null;
+
+        }
+
+
+        const pedido =
+            pedidoSnapshot.data();
+
+
+        // =================================================
+        // PEDIDO CANCELADO
+        // =================================================
+
+        if (
+            pedido.estado ===
+            "cancelado"
+        ) {
+
+            console.log(
+                "❌ MOTI GO: el pedido fue cancelado. Liberando repartidor..."
+            );
+
+
+            await limpiarViajeActivoRepartidor(
+                repartidorRef,
+                pedidoId,
+                "pedido_cancelado"
+            );
+
+
+            return null;
+
+        }
+
+
+        // =================================================
+        // PEDIDO FINALIZADO
+        // =================================================
+
+        if (
+            pedido.estado ===
+            "entregado"
+        ) {
+
+            console.log(
+                "✅ MOTI GO: el pedido ya fue entregado. Liberando repartidor..."
+            );
+
+
+            await limpiarViajeActivoRepartidor(
+                repartidorRef,
+                pedidoId,
+                "pedido_entregado"
+            );
+
+
+            return null;
+
+        }
+
+
+        // =================================================
+        // VIAJE REALMENTE ACTIVO
+        // =================================================
+
+        pedidoActual =
+            viajeActivo;
+
+
+        console.log(
+            "🚗 MOTI GO: viaje activo confirmado:",
+            pedidoId,
+            pedido.estado
+        );
+
+
+        mostrarViajeActivo(
+            viajeActivo
+        );
+
+
+        return viajeActivo;
 
     }
     catch (
@@ -170,6 +341,65 @@ async function verificarViajeActivo() {
 
 }
 
+
+// =====================================================
+// LIMPIAR VIAJE ACTIVO DEL REPARTIDOR
+// =====================================================
+
+async function limpiarViajeActivoRepartidor(
+    repartidorRef,
+    pedidoId,
+    motivo
+) {
+
+    try {
+
+        await updateDoc(
+            repartidorRef,
+            {
+
+                viajeActivo:
+                    null,
+
+                estadoServicio:
+                    "disponible",
+
+                actualizadoEn:
+                    serverTimestamp(),
+
+                viajeCanceladoEn:
+                    serverTimestamp(),
+
+                viajeCanceladoMotivo:
+                    motivo
+
+            }
+        );
+
+
+        pedidoActual =
+            null;
+
+
+        console.log(
+            "🧹 MOTI GO: repartidor liberado automáticamente:",
+            pedidoId,
+            motivo
+        );
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "❌ MOTI GO: no se pudo liberar automáticamente al repartidor:",
+            error
+        );
+
+    }
+
+}
 
 // =====================================================
 // ESCUCHAR SOLICITUDES ASIGNADAS
