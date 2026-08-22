@@ -7189,6 +7189,8 @@ abrirSeguimientoPedidoMotiGo(
     pedido
 );
 
+}
+ 
 function abrirSeguimientoPedidoMotiGo(
     pedido
 ) {
