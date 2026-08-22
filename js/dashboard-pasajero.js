@@ -6583,6 +6583,50 @@ async function cargarMisPedidos() {
                 })
             );
 
+        // =================================================
+// DETECTAR PEDIDO ACTIVO DEL CLIENTE
+// =================================================
+
+const estadosPedidoActivo = [
+
+    "pendiente_asignacion",
+
+    "solicitud_repartidor",
+
+    "sin_repartidor",
+
+    "asignado",
+
+    "en_compra",
+
+    "listo_entrega",
+
+    "en_ruta",
+
+    "entregando"
+
+];
+
+
+const pedidoActivo =
+    pedidos.find(
+        pedido =>
+            estadosPedidoActivo.includes(
+                pedido.estado
+            )
+    );
+
+
+if (
+    pedidoActivo
+) {
+
+    escucharPedidoActivoCliente(
+        pedidoActivo.id
+    );
+
+}
+        
 
         console.log(
             "🧾 MOTI GO: pedidos encontrados:",
