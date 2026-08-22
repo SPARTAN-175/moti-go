@@ -309,11 +309,24 @@ const nuevoEstado =
         );
 
 
-            actualizarVista();
-            
-            escucharEstadoRepartidor(
-            user
-            );
+currentState =
+    nuevoEstado;
+
+
+console.log(
+    "🔄 MOTI GO: estado inicial calculado:",
+    currentState,
+    "viajeActivo:",
+    datos.viajeActivo
+);
+
+
+actualizarVista();
+
+
+escucharEstadoRepartidor(
+    user
+);
 
 
             // =============================
