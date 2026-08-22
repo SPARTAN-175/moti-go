@@ -10800,3 +10800,529 @@ function formatearFechaTicket(
     );
 
 }
+
+
+// =====================================================
+// MOTI GO - ESTILOS DEL TICKET
+// =====================================================
+
+if (
+    !document.getElementById(
+        "motiGoTicketStyles"
+    )
+) {
+
+    const estilosTicket =
+        document.createElement(
+            "style"
+        );
+
+    estilosTicket.id =
+        "motiGoTicketStyles";
+
+
+    estilosTicket.textContent = `
+
+        #motiGoTicketModal {
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 999999;
+
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+        }
+
+
+        .moti-go-ticket-overlay {
+
+            position: fixed;
+
+            inset: 0;
+
+            background:
+                rgba(
+                    15,
+                    23,
+                    42,
+                    0.72
+                );
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 20px;
+
+            overflow-y: auto;
+
+            box-sizing: border-box;
+
+        }
+
+
+        .moti-go-ticket {
+
+            position: relative;
+
+            width: min(
+                420px,
+                100%
+            );
+
+            max-height: 92vh;
+
+            overflow-y: auto;
+
+            background: #ffffff;
+
+            border-radius: 24px;
+
+            padding: 24px;
+
+            box-sizing: border-box;
+
+            box-shadow:
+                0 25px 70px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.30
+                );
+
+            color: #1f2937;
+
+        }
+
+
+        .moti-go-ticket-close {
+
+            position: absolute;
+
+            top: 12px;
+
+            right: 14px;
+
+            width: 36px;
+
+            height: 36px;
+
+            border: 0;
+
+            border-radius: 50%;
+
+            background: #f1f5f9;
+
+            color: #475569;
+
+            font-size: 24px;
+
+            line-height: 1;
+
+            cursor: pointer;
+
+        }
+
+
+        .moti-go-ticket-header {
+
+            text-align: center;
+
+            padding:
+                8px
+                25px
+                18px;
+
+            border-bottom:
+                1px dashed
+                #cbd5e1;
+
+        }
+
+
+        .moti-go-ticket-logo {
+
+            font-size: 28px;
+
+            font-weight: 800;
+
+            letter-spacing: 1px;
+
+        }
+
+
+        .moti-go-ticket-subtitulo {
+
+            margin-top: 4px;
+
+            font-size: 13px;
+
+            color: #64748b;
+
+        }
+
+
+        .moti-go-ticket-folio {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            gap: 12px;
+
+            padding:
+                16px
+                0;
+
+            font-size: 12px;
+
+            color: #64748b;
+
+        }
+
+
+        .moti-go-ticket-folio strong {
+
+            color: #334155;
+
+            font-size: 13px;
+
+        }
+
+
+        .moti-go-ticket-estado {
+
+            text-align: center;
+
+            background:
+                #ecfdf5;
+
+            color:
+                #047857;
+
+            border-radius: 14px;
+
+            padding: 12px;
+
+            margin-bottom: 20px;
+
+            font-weight: 700;
+
+        }
+
+
+        .moti-go-ticket-estado small {
+
+            display: block;
+
+            margin-top: 4px;
+
+            font-weight: 400;
+
+            color: #059669;
+
+        }
+
+
+        .moti-go-ticket-tienda {
+
+            margin-bottom: 18px;
+
+        }
+
+
+        .moti-go-ticket-tienda-nombre {
+
+            font-size: 13px;
+
+            font-weight: 800;
+
+            color: #334155;
+
+            padding-bottom: 8px;
+
+            border-bottom:
+                1px solid
+                #e2e8f0;
+
+        }
+
+
+        .moti-go-ticket-producto {
+
+            display: flex;
+
+            align-items: flex-start;
+
+            justify-content: space-between;
+
+            gap: 12px;
+
+            padding:
+                10px
+                0;
+
+            border-bottom:
+                1px solid
+                #f1f5f9;
+
+        }
+
+
+        .moti-go-ticket-producto strong {
+
+            display: block;
+
+            font-size: 14px;
+
+            color: #334155;
+
+        }
+
+
+        .moti-go-ticket-producto small {
+
+            display: block;
+
+            margin-top: 3px;
+
+            color: #64748b;
+
+            font-size: 12px;
+
+        }
+
+
+        .moti-go-ticket-producto span {
+
+            font-weight: 700;
+
+            white-space: nowrap;
+
+            font-size: 14px;
+
+        }
+
+
+        .moti-go-ticket-totales {
+
+            margin-top: 18px;
+
+            padding-top: 14px;
+
+            border-top:
+                1px dashed
+                #cbd5e1;
+
+        }
+
+
+        .moti-go-ticket-totales > div {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            padding: 6px 0;
+
+            font-size: 13px;
+
+            color: #64748b;
+
+        }
+
+
+        .moti-go-ticket-totales strong {
+
+            color: #334155;
+
+        }
+
+
+        .moti-go-ticket-totales
+        .moti-go-ticket-total {
+
+            margin-top: 8px;
+
+            padding-top: 12px;
+
+            border-top:
+                2px solid
+                #e2e8f0;
+
+            font-size: 18px;
+
+            font-weight: 800;
+
+            color: #0f172a;
+
+        }
+
+
+        .moti-go-ticket-entrega {
+
+            margin-top: 20px;
+
+            padding: 14px;
+
+            background: #f8fafc;
+
+            border-radius: 14px;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+
+        }
+
+
+        .moti-go-ticket-seccion-titulo {
+
+            font-size: 11px;
+
+            font-weight: 800;
+
+            letter-spacing: .8px;
+
+            color: #64748b;
+
+            margin-bottom: 5px;
+
+        }
+
+
+        .moti-go-ticket-codigo {
+
+            margin-top: 18px;
+
+            text-align: center;
+
+            padding: 18px;
+
+            border-radius: 16px;
+
+            background: #f8fafc;
+
+            border:
+                1px solid
+                #e2e8f0;
+
+        }
+
+
+        .moti-go-ticket-codigo > div {
+
+            font-size: 10px;
+
+            font-weight: 800;
+
+            letter-spacing: 1px;
+
+            color: #64748b;
+
+        }
+
+
+        .moti-go-ticket-codigo strong {
+
+            display: block;
+
+            margin:
+                8px
+                0;
+
+            font-size: 30px;
+
+            letter-spacing: 5px;
+
+            color: #0f172a;
+
+        }
+
+
+        .moti-go-ticket-codigo small {
+
+            display: block;
+
+            font-size: 11px;
+
+            line-height: 1.4;
+
+            color: #64748b;
+
+        }
+
+
+        .moti-go-ticket-descargar {
+
+            width: 100%;
+
+            margin-top: 20px;
+
+            border: 0;
+
+            border-radius: 14px;
+
+            padding: 14px;
+
+            background: #0f172a;
+
+            color: white;
+
+            font-size: 14px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+        }
+
+
+        .moti-go-ticket-descargar:active {
+
+            transform:
+                scale(
+                    0.98
+                );
+
+        }
+
+
+        @media (
+            max-width: 480px
+        ) {
+
+            .moti-go-ticket-overlay {
+
+                padding: 10px;
+
+            }
+
+
+            .moti-go-ticket {
+
+                padding: 20px;
+
+                border-radius: 20px;
+
+            }
+
+        }
+
+    `;
+
+
+    document.head.appendChild(
+        estilosTicket
+    );
+
+}
