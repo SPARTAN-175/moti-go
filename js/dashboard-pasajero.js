@@ -8422,8 +8422,8 @@ if (
                 }
 
 
-               // =====================================================
-// LIBERAR REPARTIDOR SI EL PEDIDO YA ESTABA ASIGNADO
+// =====================================================
+// LIBERAR REPARTIDOR
 // =====================================================
 
 const repartidorId =
@@ -8435,7 +8435,7 @@ if (
 ) {
 
     console.log(
-        "🧹 MOTI GO: pedido tiene repartidor asignado:",
+        "🧹 MOTI GO: liberando repartidor:",
         repartidorId
     );
 
@@ -8466,16 +8466,21 @@ if (
             datosRepartidor.viajeActivo;
 
 
-        // =================================================
-        // SOLO LIBERAR SI EL VIAJE ACTIVO CORRESPONDE
-        // EXACTAMENTE A ESTE PEDIDO
-        // =================================================
-
         const pedidoActivoId =
             typeof viajeActivo === "string"
                 ? viajeActivo
                 : viajeActivo?.pedidoId;
 
+
+        console.log(
+            "🔎 MOTI GO: viajeActivo del repartidor:",
+            viajeActivo
+        );
+
+
+        // =================================================
+        // CASO NORMAL
+        // =================================================
 
         if (
             pedidoActivoId ===
@@ -8486,11 +8491,52 @@ if (
                 repartidorRef,
                 {
 
+                    viajeActivo:
+                        null,
+
                     estadoServicio:
                         "disponible",
 
-                    viajeActivo:
-                        null,
+                    actualizadoEn:
+                        serverTimestamp(),
+
+                    viajeCanceladoEn:
+                        serverTimestamp(),
+
+                    viajeCanceladoMotivo:
+                        "cliente"
+
+                }
+            );
+
+
+            console.log(
+                "✅ MOTI GO: repartidor liberado correctamente:",
+                repartidorId
+            );
+
+        }
+
+        // =================================================
+        // CASO DE RECUPERACIÓN
+        // =================================================
+        //
+        // El pedido dice que el repartidor es este,
+        // pero viajeActivo ya está vacío.
+        //
+        // Dejamos igualmente el estado disponible.
+        //
+
+        else if (
+            !viajeActivo
+        ) {
+
+            await updateDoc(
+                repartidorRef,
+                {
+
+                    estadoServicio:
+                        "disponible",
 
                     actualizadoEn:
                         serverTimestamp()
@@ -8500,23 +8546,30 @@ if (
 
 
             console.log(
-                "✅ MOTI GO: repartidor liberado:",
-                repartidorId
+                "🟢 MOTI GO: repartidor ya no tenía viajeActivo. Estado normalizado."
             );
 
         }
+
         else {
 
             console.warn(
-                "⚠️ MOTI GO: el repartidor tiene otro viaje activo. No se modificará."
+                "⚠️ MOTI GO: el repartidor tiene otro viaje activo. NO se modificará."
             );
 
         }
 
     }
+    else {
+
+        console.warn(
+            "⚠️ MOTI GO: no existe el documento del repartidor:",
+            repartidorId
+        );
+
+    }
 
 }
-
 
 // =====================================================
 // CANCELAR PEDIDO
