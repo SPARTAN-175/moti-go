@@ -8710,6 +8710,21 @@ function obtenerConfiguracionEstadoPedido(
         30
 
 },
+        sin_repartidor: {
+
+    icono:
+        "person_search",
+
+    titulo:
+        "No encontramos repartidor",
+
+    descripcion:
+        "Ningún repartidor aceptó tu pedido.",
+
+    progreso:
+        25
+
+},
         
         asignado: {
 
