@@ -2287,7 +2287,7 @@ if (
 ) {
 
     window.motiGoEscucharPedidoActivo(
-        pedidoRef.id
+        referenciaPedido.id
     );
 
 }
