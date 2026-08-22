@@ -7053,7 +7053,10 @@ function obtenerTextoEstadoPedido(
 
         pendiente_asignacion:
             "Buscando repartidor",
-
+        
+        solicitud_repartidor:
+        "Solicitud enviada",
+        
         asignado:
             "Repartidor asignado",
 
