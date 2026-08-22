@@ -8690,6 +8690,22 @@ function obtenerConfiguracionEstadoPedido(
         },
 
 
+        solicitud_repartidor: {
+
+    icono:
+        "notifications_active",
+
+    titulo:
+        "Solicitud enviada",
+
+    descripcion:
+        "Estamos esperando que el repartidor acepte tu pedido.",
+
+    progreso:
+        30
+
+},
+        
         asignado: {
 
             icono:
