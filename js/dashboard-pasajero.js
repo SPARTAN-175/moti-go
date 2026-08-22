@@ -9,7 +9,8 @@ import {
     query,
     where,
     documentId,
-    onSnapshot
+    onSnapshot,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 import {
@@ -8243,25 +8244,124 @@ if (
                 }
 
 
-                // =============================================
-                // CANCELAR
-                // =============================================
+               // =====================================================
+// LIBERAR REPARTIDOR SI EL PEDIDO YA ESTABA ASIGNADO
+// =====================================================
 
-                await updateDoc(
-                    referencia,
-                    {
+const repartidorId =
+    datosActuales.repartidorId;
 
-                        estado:
-                            "cancelado",
 
-                        canceladoEn:
-                            new Date(),
+if (
+    repartidorId
+) {
 
-                        canceladoPor:
-                            "cliente"
+    console.log(
+        "🧹 MOTI GO: pedido tiene repartidor asignado:",
+        repartidorId
+    );
 
-                    }
-                );
+
+    const repartidorRef =
+        doc(
+            db,
+            "usuarios",
+            repartidorId
+        );
+
+
+    const repartidorSnapshot =
+        await getDoc(
+            repartidorRef
+        );
+
+
+    if (
+        repartidorSnapshot.exists()
+    ) {
+
+        const datosRepartidor =
+            repartidorSnapshot.data();
+
+
+        const viajeActivo =
+            datosRepartidor.viajeActivo;
+
+
+        // =================================================
+        // SOLO LIBERAR SI EL VIAJE ACTIVO CORRESPONDE
+        // EXACTAMENTE A ESTE PEDIDO
+        // =================================================
+
+        const pedidoActivoId =
+            typeof viajeActivo === "string"
+                ? viajeActivo
+                : viajeActivo?.pedidoId;
+
+
+        if (
+            pedidoActivoId ===
+            pedido.id
+        ) {
+
+            await updateDoc(
+                repartidorRef,
+                {
+
+                    estadoServicio:
+                        "disponible",
+
+                    viajeActivo:
+                        null,
+
+                    actualizadoEn:
+                        serverTimestamp()
+
+                }
+            );
+
+
+            console.log(
+                "✅ MOTI GO: repartidor liberado:",
+                repartidorId
+            );
+
+        }
+        else {
+
+            console.warn(
+                "⚠️ MOTI GO: el repartidor tiene otro viaje activo. No se modificará."
+            );
+
+        }
+
+    }
+
+}
+
+
+// =====================================================
+// CANCELAR PEDIDO
+// =====================================================
+
+await updateDoc(
+    referencia,
+    {
+
+        estado:
+            "cancelado",
+
+        canceladoEn:
+            serverTimestamp(),
+
+        canceladoPor:
+            "cliente",
+
+        actualizadoEn:
+            serverTimestamp()
+
+    }
+);
 
 
                 console.log(
