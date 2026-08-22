@@ -621,29 +621,30 @@ function actualizarVista() {
     }
 
 
-    if (
-        currentState ===
-        "en_viaje"
-    ) {
+   if (
+    currentState ===
+    "ocupado"
+) {
 
-        statusButton.textContent =
-            "En entrega";
-
-
-        statusDescription.textContent =
-            "Tienes un pedido activo";
+    statusButton.textContent =
+        "Ocupado";
 
 
-        statusButton.classList.add(
-            "status-yellow"
-        );
+    statusDescription.textContent =
+        "Tienes un pedido activo";
 
 
-        statusIndicator.style.background =
-            "var(--go-warning)";
+    statusButton.classList.add(
+        "status-yellow"
+    );
 
-    }
 
+    statusIndicator.style.background =
+        "var(--go-warning)";
+
+    return;
+
+}
 }
 
 
