@@ -9696,30 +9696,21 @@ function escucharPedidoActivoCliente(
                 // SI EL PEDIDO FUE ACEPTADO
                 // =================================================
 
-                if (
-                    pedidoActual.estado ===
-                    "asignado"
-                ) {
+               if (
+    pedidoActual.estado ===
+    "asignado"
+) {
 
-                    console.log(
-                        "🎉 MOTI GO: el repartidor aceptó el pedido."
-                    );
+    console.log(
+        "🎉 MOTI GO: el repartidor aceptó el pedido."
+    );
 
 
-                    // Si el seguimiento no está abierto,
-                    // lo abrimos automáticamente.
+    mostrarAvisoPedidoAceptado(
+        pedidoActual
+    );
 
-                    if (
-                        !panelSeguimiento
-                    ) {
-
-                        abrirSeguimientoPedidoMotiGo(
-                            pedidoActual
-                        );
-
-                    }
-
-                }
+}
 
 
                 // =================================================
