@@ -7356,8 +7356,13 @@ function pedidoPuedeSerCancelado(
     return [
 
         "pendiente_asignacion",
+
+        "solicitud_repartidor",
+
         "asignado",
+
         "en_compra",
+
         "listo_entrega"
 
     ].includes(
