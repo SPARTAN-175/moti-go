@@ -7169,15 +7169,25 @@ function abrirPedidoDesdeMisPedidos(
 
 
     // =================================================
-    // PEDIDO FINALIZADO
-    // =================================================
+// PEDIDO HISTÓRICO
+// =================================================
 
-    console.log(
-        "🧾 MOTI GO: pedido histórico seleccionado:",
-        pedido
-    );
+console.log(
+    "🧾 MOTI GO: pedido histórico seleccionado:",
+    pedido
+);
 
-}
+
+// Cerramos la lista
+
+cerrarPanelMisPedidos();
+
+
+// Abrimos igualmente el pedido
+
+abrirSeguimientoPedidoMotiGo(
+    pedido
+);
 
 function abrirSeguimientoPedidoMotiGo(
     pedido
