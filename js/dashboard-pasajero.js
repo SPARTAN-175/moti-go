@@ -7378,7 +7378,6 @@ function pedidoPuedeSerCancelado(
     );
 
 }
-
 function actualizarPanelSeguimientoPedido(
     pedido
 ) {
