@@ -1322,17 +1322,56 @@ async function verificarViajeActivo() {
         }
 
 
-        const viajeDoc =
-            await getDoc(
+       // =========================================
+// VIAJE ACTIVO — COMPATIBILIDAD MOTI GO
+// =========================================
 
-                doc(
-                    db,
-                    "solicitudes",
-                    usuario.viajeActivo
-                )
+const viajeActivo =
+    usuario.viajeActivo;
 
-            );
 
+// MOTI GO guarda viajeActivo como:
+// {
+//     pedidoId: "...",
+//     estado: "asignado",
+//     iniciadoEn: Timestamp
+// }
+
+const pedidoId =
+    typeof viajeActivo === "string"
+        ? viajeActivo
+        : viajeActivo?.pedidoId;
+
+
+if (
+    !pedidoId
+) {
+
+    console.warn(
+        "⚠️ MOTI GO: viajeActivo existe pero no contiene pedidoId válido:",
+        viajeActivo
+    );
+
+
+    activeTripCard.style.display =
+        "none";
+
+
+    return;
+
+}
+
+
+const viajeDoc =
+    await getDoc(
+
+        doc(
+            db,
+            "pedidos",
+            pedidoId
+        )
+
+    );
 
         if (
             !viajeDoc.exists()
@@ -1346,28 +1385,31 @@ async function verificarViajeActivo() {
         }
 
 
-        const viaje =
-            viajeDoc.data();
+       const viaje =
+    viajeDoc.data();
 
 
-        activePassenger.textContent =
-            viaje.nombrePasajero ||
-            "Cliente";
+activePassenger.textContent =
+    viaje.clienteNombre ||
+    viaje.nombrePasajero ||
+    "Cliente";
 
 
-        activeDestination.textContent =
-            viaje.destino ||
-            "Destino";
+activeDestination.textContent =
+    viaje.destino?.localidad ||
+    viaje.destino?.direccion ||
+    viaje.destino ||
+    "Destino";
 
 
-        activeStatus.textContent =
-            viaje.estado ||
-            "En curso";
+activeStatus.textContent =
+    viaje.estado ||
+    viajeActivo.estado ||
+    "En curso";
 
 
-        activeTripCard.style.display =
-            "block";
-
+activeTripCard.style.display =
+    "block";
     }
     catch (error) {
 
