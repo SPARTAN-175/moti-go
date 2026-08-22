@@ -7371,6 +7371,8 @@ function pedidoPuedeSerCancelado(
 
         "solicitud_repartidor",
 
+        "sin_repartidor",
+
         "asignado",
 
         "en_compra",
