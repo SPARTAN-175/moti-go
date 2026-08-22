@@ -296,6 +296,10 @@ onAuthStateChanged(
 
 
             actualizarVista();
+            
+            escucharEstadoRepartidor(
+            user
+            );
 
 
             // =============================
