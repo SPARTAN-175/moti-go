@@ -9563,6 +9563,251 @@ function crearEstilosSeguimientoPedido() {
 }
 
 // =====================================================
+// MOTI GO - AVISO DE PEDIDO ACEPTADO
+// =====================================================
+
+function mostrarAvisoPedidoAceptado(
+    pedido
+) {
+
+    if (
+        !pedido
+    ) {
+
+        return;
+
+    }
+
+
+    // Evitar mostrarlo dos veces
+    if (
+        document.getElementById(
+            "motiAvisoPedidoAceptado"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    const repartidor =
+        pedido.repartidorNombre ||
+        "Un repartidor";
+
+
+    const folio =
+        pedido.folio ||
+        pedido.id;
+
+
+    const overlay =
+        document.createElement(
+            "div"
+        );
+
+
+    overlay.id =
+        "motiAvisoPedidoAceptado";
+
+
+    overlay.innerHTML = `
+
+        <div
+            style="
+                position:fixed;
+                inset:0;
+                background:rgba(0,0,0,.55);
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                padding:20px;
+                z-index:99999;
+            "
+        >
+
+            <div
+                style="
+                    width:100%;
+                    max-width:430px;
+                    background:#ffffff;
+                    border-radius:24px;
+                    padding:28px 24px;
+                    box-shadow:0 20px 60px rgba(0,0,0,.25);
+                    text-align:center;
+                "
+            >
+
+                <div
+                    style="
+                        width:70px;
+                        height:70px;
+                        margin:0 auto 18px;
+                        border-radius:50%;
+                        background:#e8f7ee;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        font-size:36px;
+                    "
+                >
+                    🛵
+                </div>
+
+
+                <h2
+                    style="
+                        margin:0 0 10px;
+                        font-size:24px;
+                        color:#1f2937;
+                    "
+                >
+                    ¡Tu pedido fue aceptado!
+                </h2>
+
+
+                <p
+                    style="
+                        margin:0 0 8px;
+                        color:#4b5563;
+                        font-size:16px;
+                        line-height:1.5;
+                    "
+                >
+                    ${repartidor}
+                    ya aceptó tu pedido.
+                </p>
+
+
+                <p
+                    style="
+                        margin:0 0 22px;
+                        color:#6b7280;
+                        font-size:14px;
+                        line-height:1.5;
+                    "
+                >
+                    Tu pedido está siendo atendido.
+                    Al finalizar la entrega, proporciona
+                    tu código al repartidor.
+                </p>
+
+
+                <div
+                    style="
+                        background:#f5f7fa;
+                        border-radius:14px;
+                        padding:12px;
+                        margin-bottom:20px;
+                    "
+                >
+
+                    <div
+                        style="
+                            font-size:12px;
+                            color:#6b7280;
+                            margin-bottom:4px;
+                        "
+                    >
+                        Pedido
+                    </div>
+
+
+                    <div
+                        style="
+                            font-weight:700;
+                            color:#1f2937;
+                            font-size:15px;
+                        "
+                    >
+                        ${folio}
+                    </div>
+
+                </div>
+
+
+                <button
+                    id="motiBtnVerTicketAceptado"
+                    type="button"
+                    style="
+                        width:100%;
+                        border:none;
+                        border-radius:14px;
+                        padding:15px;
+                        background:#111827;
+                        color:#ffffff;
+                        font-size:16px;
+                        font-weight:700;
+                        cursor:pointer;
+                        margin-bottom:10px;
+                    "
+                >
+                    Ver ticket
+                </button>
+
+
+                <button
+                    id="motiBtnCerrarAvisoAceptado"
+                    type="button"
+                    style="
+                        width:100%;
+                        border:none;
+                        background:transparent;
+                        padding:10px;
+                        color:#6b7280;
+                        font-size:14px;
+                        cursor:pointer;
+                    "
+                >
+                    Cerrar
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        overlay
+    );
+
+
+    document
+        .getElementById(
+            "motiBtnCerrarAvisoAceptado"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                overlay.remove();
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            "motiBtnVerTicketAceptado"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                overlay.remove();
+
+                mostrarTicketPedido(
+                    pedido
+                );
+
+            }
+        );
+
+}
+
+// =====================================================
 // MOTI GO - ESCUCHAR PEDIDO ACTIVO DEL CLIENTE
 // =====================================================
 
