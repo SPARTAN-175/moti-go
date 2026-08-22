@@ -5675,6 +5675,123 @@ actualizarCarrito();
 //
 // =====================================================
 
+// =====================================================
+// MOTI GO - INICIAR ESCUCHA DEL PEDIDO ACTIVO
+// =====================================================
+
+async function iniciarEscuchaPedidoActivoCliente(
+    clienteId
+) {
+
+    if (
+        !clienteId
+    ) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const consulta =
+            query(
+                collection(
+                    db,
+                    "pedidos"
+                ),
+                where(
+                    "clienteId",
+                    "==",
+                    clienteId
+                )
+            );
+
+
+        const resultado =
+            await getDocs(
+                consulta
+            );
+
+
+        const pedidos =
+            resultado.docs.map(
+                documento => ({
+
+                    id:
+                        documento.id,
+
+                    ...documento.data()
+
+                })
+            );
+
+
+        const estadosActivos = [
+
+            "pendiente_asignacion",
+
+            "solicitud_repartidor",
+
+            "sin_repartidor",
+
+            "asignado",
+
+            "en_compra",
+
+            "listo_entrega",
+
+            "en_ruta",
+
+            "entregando"
+
+        ];
+
+
+        const pedidoActivo =
+            pedidos.find(
+                pedido =>
+                    estadosActivos.includes(
+                        pedido.estado
+                    )
+            );
+
+
+        if (
+            !pedidoActivo
+        ) {
+
+            console.log(
+                "ℹ️ MOTI GO: el cliente no tiene pedido activo."
+            );
+
+            return;
+
+        }
+
+
+        console.log(
+            "🛒 MOTI GO: pedido activo encontrado:",
+            pedidoActivo.id,
+            pedidoActivo.estado
+        );
+
+
+        escucharPedidoActivoCliente(
+            pedidoActivo.id
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "❌ MOTI GO: error buscando pedido activo:",
+            error
+        );
+
+    }
+
+}
 
 onAuthStateChanged(
     auth,
@@ -5701,7 +5818,9 @@ onAuthStateChanged(
         try {
 
             await cargarCatalogo();
-
+            await iniciarEscuchaPedidoActivoCliente(
+            user.uid
+            );
         }
         catch (error) {
 
