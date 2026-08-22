@@ -9986,6 +9986,27 @@ function escucharPedidoActivoCliente(
 
 }
 
+// =====================================================
+// MOTI GO - ACTIVAR LISTENER DESDE OTROS MÓDULOS
+// =====================================================
+
+window.motiGoEscucharPedidoActivo =
+    function (
+        pedidoId
+    ) {
+
+        console.log(
+            "📡 MOTI GO: pedido activo recibido desde otro módulo:",
+            pedidoId
+        );
+
+
+        escucharPedidoActivoCliente(
+            pedidoId
+        );
+
+    };
+
 function escucharEstadoPedidoMotiGo(
     pedidoId
 ) {
