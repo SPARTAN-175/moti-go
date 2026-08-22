@@ -8585,25 +8585,135 @@ function configurarBotonCancelarPedido(
                 }
 
 
-                // =====================================
-                // CANCELAR
-                // =====================================
+               // =====================================================
+// LIBERAR REPARTIDOR SI EL PEDIDO YA ESTABA ASIGNADO
+// =====================================================
 
-                await updateDoc(
-                    referencia,
-                    {
+const repartidorId =
+    datosActuales.repartidorId;
 
-                        estado:
-                            "cancelado",
 
-                        canceladoEn:
-                            new Date(),
+if (
+    repartidorId
+) {
 
-                        canceladoPor:
-                            "cliente"
+    console.log(
+        "🧹 MOTI GO: pedido tiene repartidor asignado:",
+        repartidorId
+    );
 
-                    }
-                );
+
+    const repartidorRef =
+        doc(
+            db,
+            "usuarios",
+            repartidorId
+        );
+
+
+    const repartidorSnapshot =
+        await getDoc(
+            repartidorRef
+        );
+
+
+    if (
+        repartidorSnapshot.exists()
+    ) {
+
+        const datosRepartidor =
+            repartidorSnapshot.data();
+
+
+        const viajeActivo =
+            datosRepartidor.viajeActivo;
+
+
+        // =============================================
+        // OBTENER ID DEL PEDIDO ACTIVO
+        // =============================================
+
+        const pedidoActivoId =
+            typeof viajeActivo === "string"
+                ? viajeActivo
+                : viajeActivo?.pedidoId;
+
+
+        // =============================================
+        // SOLO LIBERAR SI ES ESTE MISMO PEDIDO
+        // =============================================
+
+        if (
+            pedidoActivoId ===
+            pedido.id
+        ) {
+
+            await updateDoc(
+                repartidorRef,
+                {
+
+                    estadoServicio:
+                        "disponible",
+
+                    viajeActivo:
+                        null,
+
+                    actualizadoEn:
+                        serverTimestamp()
+
+                }
+            );
+
+
+            console.log(
+                "✅ MOTI GO: repartidor liberado:",
+                repartidorId
+            );
+
+        }
+        else {
+
+            console.warn(
+                "⚠️ MOTI GO: el repartidor no tiene este pedido como viaje activo. No se modificará."
+            );
+
+        }
+
+    }
+    else {
+
+        console.warn(
+            "⚠️ MOTI GO: no se encontró el repartidor:",
+            repartidorId
+        );
+
+    }
+
+}
+
+
+// =====================================================
+// CANCELAR PEDIDO
+// =====================================================
+
+await updateDoc(
+    referencia,
+    {
+
+        estado:
+            "cancelado",
+
+        canceladoEn:
+            serverTimestamp(),
+
+        canceladoPor:
+            "cliente",
+
+        actualizadoEn:
+            serverTimestamp()
+
+    }
+);
 
 
                 console.log(
