@@ -6756,14 +6756,21 @@ function renderizarMisPedidos(
 
     const estadosActivos = [
 
-        "pendiente_asignacion",
-        "asignado",
-        "en_compra",
-        "listo_entrega",
-        "en_ruta",
-        "entregando"
+    "pendiente_asignacion",
 
-    ];
+    "solicitud_repartidor",
+
+    "asignado",
+
+    "en_compra",
+
+    "listo_entrega",
+
+    "en_ruta",
+
+    "entregando"
+
+];
 
 
     const pedidosActivos =
