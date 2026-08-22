@@ -39,7 +39,158 @@ let escuchandoPedidos = false;
 
 let solicitudesActivas = new Map();
 
+let listenerEstadoRepartidor = null;
 
+// =====================================================
+// ESCUCHAR ESTADO DEL REPARTIDOR EN TIEMPO REAL
+// =====================================================
+
+function escucharEstadoRepartidor() {
+
+    if (
+        !usuarioRepartidor
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        listenerEstadoRepartidor
+    ) {
+
+        listenerEstadoRepartidor();
+
+        listenerEstadoRepartidor =
+            null;
+
+    }
+
+
+    const repartidorRef =
+        doc(
+            db,
+            "usuarios",
+            usuarioRepartidor.uid
+        );
+
+
+    listenerEstadoRepartidor =
+        onSnapshot(
+            repartidorRef,
+
+            async snapshot => {
+
+                if (
+                    !snapshot.exists()
+                ) {
+
+                    return;
+
+                }
+
+
+                const datos =
+                    snapshot.data();
+
+
+                const viajeActivo =
+                    datos.viajeActivo;
+
+
+                // =================================================
+                // SIN VIAJE
+                // =================================================
+
+                if (
+                    !viajeActivo
+                ) {
+
+                    if (
+                        pedidoActual
+                    ) {
+
+                        console.log(
+                            "🟢 MOTI GO: viaje eliminado de Firebase. Limpiando estado local."
+                        );
+
+                    }
+
+
+                    pedidoActual =
+                        null;
+
+
+                    return;
+
+                }
+
+
+                // =================================================
+                // VIAJE ACTIVO
+                // =================================================
+
+                const pedidoId =
+                    typeof viajeActivo === "string"
+                        ? viajeActivo
+                        : viajeActivo?.pedidoId;
+
+
+                if (
+                    !pedidoId
+                ) {
+
+                    pedidoActual =
+                        null;
+
+                    return;
+
+                }
+
+
+                // =================================================
+                // EVITAR CONSULTA SI YA ES EL MISMO VIAJE
+                // =================================================
+
+                const pedidoActualId =
+                    typeof pedidoActual === "string"
+                        ? pedidoActual
+                        : pedidoActual?.pedidoId;
+
+
+                if (
+                    pedidoActualId ===
+                    pedidoId
+                ) {
+
+                    return;
+
+                }
+
+
+                console.log(
+                    "🔄 MOTI GO: nuevo viaje activo detectado:",
+                    pedidoId
+                );
+
+
+                await verificarViajeActivo();
+
+            },
+
+            error => {
+
+                console.error(
+                    "❌ MOTI GO: error escuchando estado del repartidor:",
+                    error
+                );
+
+            }
+
+        );
+
+}
 // =====================================================
 // INICIO
 // =====================================================
