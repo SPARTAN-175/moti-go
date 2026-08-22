@@ -9937,15 +9937,36 @@ function escucharPedidoActivoCliente(
                 }
 
 
-                // =================================================
-                // SI EL PEDIDO FUE ACEPTADO
-                // =================================================
+// =================================================
+// SI EL PEDIDO FUE ACEPTADO
+// =================================================
 
                if (
     pedidoActual.estado ===
     "asignado"
 ) {
 
+                   // =====================================================
+// CERRAR PANEL "BUSCANDO REPARTIDOR"
+// =====================================================
+
+const panelBuscando =
+    document.getElementById(
+        "motiGoBuscandoRepartidor"
+    );
+
+if (
+    panelBuscando
+) {
+
+    panelBuscando.remove();
+
+    console.log(
+        "🧹 MOTI GO: panel 'Buscando repartidor' cerrado."
+    );
+
+}
+                   
     console.log(
         "🎉 MOTI GO: el repartidor aceptó el pedido."
     );
