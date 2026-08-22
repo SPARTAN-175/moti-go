@@ -286,13 +286,27 @@ onAuthStateChanged(
             }
 
 
-            // =============================
-            // ESTADO
-            // =============================
+// =========================================
+// ESTADO REAL DEL REPARTIDOR
+// =========================================
 
-            currentState =
-                datos.estadoServicio ||
-                "disponible";
+const viajeActivo =
+    datos.viajeActivo;
+
+
+const tieneViajeActivo =
+    viajeActivo &&
+    typeof viajeActivo === "object" &&
+    viajeActivo.pedidoId;
+
+
+const nuevoEstado =
+    tieneViajeActivo
+        ? "ocupado"
+        : (
+            datos.estadoServicio ||
+            "disponible"
+        );
 
 
             actualizarVista();
@@ -350,11 +364,11 @@ onAuthStateChanged(
                 async () => {
 
                     if (
-                        currentState ===
-                        "en_viaje"
+                    currentState ===
+                    "ocupado"
                     ) {
 
-                        return;
+                    return;
 
                     }
 
