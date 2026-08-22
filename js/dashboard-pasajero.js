@@ -9399,6 +9399,194 @@ function crearEstilosSeguimientoPedido() {
 
 }
 
+// =====================================================
+// MOTI GO - ESCUCHAR PEDIDO ACTIVO DEL CLIENTE
+// =====================================================
+
+function escucharPedidoActivoCliente(
+    pedidoId
+) {
+
+    if (
+        !pedidoId
+    ) {
+
+        return;
+
+    }
+
+
+    // =================================================
+    // SI YA ESTAMOS ESCUCHANDO ESTE MISMO PEDIDO
+    // =================================================
+
+    if (
+        pedidoActivoClienteId ===
+        pedidoId &&
+        listenerPedidoActivoCliente
+    ) {
+
+        return;
+
+    }
+
+
+    // =================================================
+    // CERRAR LISTENER ANTERIOR
+    // =================================================
+
+    if (
+        listenerPedidoActivoCliente
+    ) {
+
+        try {
+
+            listenerPedidoActivoCliente();
+
+        }
+        catch (error) {
+
+            console.warn(
+                "⚠️ MOTI GO: no se pudo cerrar listener anterior:",
+                error
+            );
+
+        }
+
+    }
+
+
+    pedidoActivoClienteId =
+        pedidoId;
+
+
+    console.log(
+        "👂 MOTI GO: escuchando pedido activo del cliente:",
+        pedidoId
+    );
+
+
+    const referencia =
+        doc(
+            db,
+            "pedidos",
+            pedidoId
+        );
+
+
+    listenerPedidoActivoCliente =
+        onSnapshot(
+            referencia,
+            snapshot => {
+
+                if (
+                    !snapshot.exists()
+                ) {
+
+                    console.warn(
+                        "⚠️ MOTI GO: el pedido activo ya no existe."
+                    );
+
+                    return;
+
+                }
+
+
+                const pedidoActual = {
+
+                    id:
+                        snapshot.id,
+
+                    ...snapshot.data()
+
+                };
+
+
+                console.log(
+                    "🔄 MOTI GO: cambio recibido del pedido activo:",
+                    pedidoActual.estado
+                );
+
+
+                // =================================================
+                // ACTUALIZAR EL PEDIDO EN EL PANEL SI ESTÁ ABIERTO
+                // =================================================
+
+                const panelSeguimiento =
+                    document.getElementById(
+                        "motiPanelSeguimientoPedido"
+                    );
+
+
+                if (
+                    panelSeguimiento
+                ) {
+
+                    actualizarPanelSeguimientoPedido(
+                        pedidoActual
+                    );
+
+                }
+
+
+                // =================================================
+                // SI EL PEDIDO FUE ACEPTADO
+                // =================================================
+
+                if (
+                    pedidoActual.estado ===
+                    "asignado"
+                ) {
+
+                    console.log(
+                        "🎉 MOTI GO: el repartidor aceptó el pedido."
+                    );
+
+
+                    // Si el seguimiento no está abierto,
+                    // lo abrimos automáticamente.
+
+                    if (
+                        !panelSeguimiento
+                    ) {
+
+                        abrirSeguimientoPedidoMotiGo(
+                            pedidoActual
+                        );
+
+                    }
+
+                }
+
+
+                // =================================================
+                // SI FUE CANCELADO
+                // =================================================
+
+                if (
+                    pedidoActual.estado ===
+                    "cancelado"
+                ) {
+
+                    console.log(
+                        "❌ MOTI GO: pedido cancelado."
+                    );
+
+                }
+
+            },
+            error => {
+
+                console.error(
+                    "❌ MOTI GO: error escuchando pedido activo:",
+                    error
+                );
+
+            }
+        );
+
+}
+
 function escucharEstadoPedidoMotiGo(
     pedidoId
 ) {
