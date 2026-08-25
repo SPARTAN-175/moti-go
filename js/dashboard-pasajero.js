@@ -5729,23 +5729,25 @@ async function iniciarEscuchaPedidoActivoCliente(
 
         const estadosActivos = [
 
-            "pendiente_asignacion",
+    "pendiente_asignacion",
+    "solicitud_repartidor",
+    "sin_repartidor",
 
-            "solicitud_repartidor",
+    "asignado",
 
-            "sin_repartidor",
+    "en_camino",
+    "esperando_cliente",
+    "en_entrega",
 
-            "asignado",
+    "en_compra",
 
-            "en_compra",
+    "listo_entrega",
 
-            "listo_entrega",
+    "en_ruta",
 
-            "en_ruta",
+    "entregando"
 
-            "entregando"
-
-        ];
+];
 
 
         const pedidoActivo =
