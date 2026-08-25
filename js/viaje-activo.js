@@ -78,7 +78,7 @@ onAuthStateChanged(
         if (!user) {
 
             window.location.href =
-                "dashboard-conductor.html";
+                "dashboard-repartidor.html"
 
             return;
 
@@ -104,7 +104,7 @@ onAuthStateChanged(
             ) {
 
                 window.location.href =
-                    "dashboard-conductor.html";
+                    "dashboard-repartidor.html"
 
                 return;
 
@@ -139,7 +139,7 @@ onAuthStateChanged(
 
 
                 window.location.href =
-                    "dashboard-conductor.html";
+                    "dashboard-repartidor.html"
 
                 return;
 
@@ -166,7 +166,7 @@ onAuthStateChanged(
 
 
             window.location.href =
-                "dashboard-conductor.html";
+                "dashboard-repartidor.html"
 
         }
 
@@ -886,7 +886,7 @@ async function finalizarViaje(){
         console.log("Redirigiendo...");
 
         window.location.replace(
-            "dashboard-conductor.html"
+            "dashboard-repartidor.html"
         );
 
     }
