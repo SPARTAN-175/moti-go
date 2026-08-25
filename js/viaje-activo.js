@@ -73,44 +73,106 @@ onAuthStateChanged(
 
     auth,
 
-    async(user)=>{
+    async (user) => {
 
-        if(!user) return;
-
-        const usuarioDoc =
-        await getDoc(
-
-            doc(
-                db,
-                "usuarios",
-                user.uid
-
-            )
-
-        );
-
-        if(!usuarioDoc.exists()) return;
-
-        const usuario =
-        usuarioDoc.data();
-
-        if(!usuario.viajeActivo){
+        if (!user) {
 
             window.location.href =
-            "dashboard-conductor.html";
+                "dashboard-conductor.html";
 
             return;
 
         }
 
-        await cargarViaje(
-            usuario.viajeActivo
-        );
+
+        try {
+
+            const usuarioDoc =
+                await getDoc(
+
+                    doc(
+                        db,
+                        "usuarios",
+                        user.uid
+                    )
+
+                );
+
+
+            if (
+                !usuarioDoc.exists()
+            ) {
+
+                window.location.href =
+                    "dashboard-conductor.html";
+
+                return;
+
+            }
+
+
+            const usuario =
+                usuarioDoc.data();
+
+
+            const viajeActivo =
+                usuario.viajeActivo;
+
+
+            // =====================================
+            // OBTENER PEDIDO ID
+            // =====================================
+
+            const pedidoId =
+                typeof viajeActivo === "string"
+                    ? viajeActivo
+                    : viajeActivo?.pedidoId;
+
+
+            if (
+                !pedidoId
+            ) {
+
+                console.warn(
+                    "⚠️ MOTI GO: no existe pedido activo."
+                );
+
+
+                window.location.href =
+                    "dashboard-conductor.html";
+
+                return;
+
+            }
+
+
+            console.log(
+                "🚗 MOTI GO: pedido activo:",
+                pedidoId
+            );
+
+
+            await cargarViaje(
+                pedidoId
+            );
+
+        }
+        catch (error) {
+
+            console.error(
+                "❌ MOTI GO: error cargando viaje activo:",
+                error
+            );
+
+
+            window.location.href =
+                "dashboard-conductor.html";
+
+        }
 
     }
 
 );
-
 
 // =========================
 // CARGAR DATOS DEL VIAJE
@@ -125,7 +187,7 @@ async function cargarViaje(id){
 
         doc(
             db,
-            "solicitudes",
+            "pedidos",
             id
         )
 
