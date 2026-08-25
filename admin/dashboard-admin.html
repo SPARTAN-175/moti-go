@@ -40,55 +40,55 @@
 
     <script type="module">
 
-        import {
-            getAuth,
-            onAuthStateChanged,
-            signOut
-        } from
-        "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    import {
+        auth
+    } from "../js/firebase-config.js";
 
 
-        import {
-            app
-        } from
-        "../js/firebase-config.js";
+    import {
+        onAuthStateChanged,
+        signOut
+    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
-        const auth =
-            getAuth(app);
+    onAuthStateChanged(
+        auth,
+        (
+            usuario
+        ) => {
 
+            if (!usuario) {
 
-        onAuthStateChanged(
-            auth,
-            (
-                usuario
-            ) => {
-
-                if (!usuario) {
-
-                    window.location.href =
-                        "../index.html";
-
-                    return;
-
-                }
-
-                console.log(
-                    "👑 MOTI GO - ADMINISTRADOR:",
-                    usuario.uid
+                console.warn(
+                    "⚠️ MOTI GO: administrador no autenticado."
                 );
 
+                window.location.href =
+                    "../index.html";
+
+                return;
+
             }
-        );
 
 
-        document
-            .getElementById(
-                "btnCerrarSesion"
-            )
-            .addEventListener(
-                "click",
-                async () => {
+            console.log(
+                "👑 MOTI GO - ADMINISTRADOR:",
+                usuario.uid
+            );
+
+        }
+    );
+
+
+    document
+        .getElementById(
+            "btnCerrarSesion"
+        )
+        .addEventListener(
+            "click",
+            async () => {
+
+                try {
 
                     await signOut(auth);
 
@@ -96,9 +96,21 @@
                         "../index.html";
 
                 }
-            );
+                catch (
+                    error
+                ) {
 
-    </script>
+                    console.error(
+                        "❌ MOTI GO: error cerrando sesión:",
+                        error
+                    );
+
+                }
+
+            }
+        );
+
+</script>
 
 </body>
 
