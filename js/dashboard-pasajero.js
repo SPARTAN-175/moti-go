@@ -6937,6 +6937,12 @@ function renderizarMisPedidos(
 
     "asignado",
 
+    "en_camino",
+
+    "esperando_cliente",
+
+    "en_entrega",
+
     "en_compra",
 
     "listo_entrega",
