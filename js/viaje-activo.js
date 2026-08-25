@@ -1,7 +1,6 @@
 import { auth, db }
 from "./firebase-config.js";
 
-
 import {
     doc,
     getDoc,
@@ -17,25 +16,38 @@ import {
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 
+// =====================================================
+// VARIABLES
+// =====================================================
+
 let viajeActual = null;
 let viajeId = null;
+
 let map = null;
+
 let conductorMarker = null;
 let pasajeroMarker = null;
-let rutaControl = null;
-let listenerMovimiento = false;
 
+let rutaControl = null;
+
+let listenerMovimiento = false;
+let listenerPedido = null;
+
+
+// =====================================================
+// ICONOS
+// =====================================================
 
 const motoIcon = L.icon({
 
     iconUrl:
-    "../assets/icons/mototaxi.svg",
+        "../assets/icons/mototaxi.svg",
 
-    iconSize:[42,42],
+    iconSize: [42, 42],
 
-    iconAnchor:[21,21],
+    iconAnchor: [21, 21],
 
-    popupAnchor:[0,-18]
+    popupAnchor: [0, -18]
 
 });
 
@@ -43,13 +55,13 @@ const motoIcon = L.icon({
 const pasajeroIcon = L.icon({
 
     iconUrl:
-    "../assets/icons/pasajero.svg",
+        "../assets/icons/pasajero.svg",
 
-    iconSize:[40,40],
+    iconSize: [40, 40],
 
-    iconAnchor:[20,20],
+    iconAnchor: [20, 20],
 
-    popupAnchor:[0,-18]
+    popupAnchor: [0, -18]
 
 });
 
@@ -57,17 +69,18 @@ const pasajeroIcon = L.icon({
 const destinoIcon = L.icon({
 
     iconUrl:
-    "../assets/icons/destino.svg",
+        "../assets/icons/destino.svg",
 
-    iconSize:[38,38],
+    iconSize: [38, 38],
 
-    iconAnchor:[19,19]
+    iconAnchor: [19, 19]
 
 });
 
-// =========================
-// CARGAR VIAJE ACTIVO
-// =========================
+
+// =====================================================
+// INICIO
+// =====================================================
 
 onAuthStateChanged(
 
@@ -77,8 +90,7 @@ onAuthStateChanged(
 
         if (!user) {
 
-            window.location.href =
-                "dashboard-repartidor.html"
+            volverAlDashboard();
 
             return;
 
@@ -87,24 +99,25 @@ onAuthStateChanged(
 
         try {
 
-            const usuarioDoc =
+            const usuarioRef =
+                doc(
+                    db,
+                    "usuarios",
+                    user.uid
+                );
+
+
+            const usuarioSnap =
                 await getDoc(
-
-                    doc(
-                        db,
-                        "usuarios",
-                        user.uid
-                    )
-
+                    usuarioRef
                 );
 
 
             if (
-                !usuarioDoc.exists()
+                !usuarioSnap.exists()
             ) {
 
-                window.location.href =
-                    "dashboard-repartidor.html"
+                volverAlDashboard();
 
                 return;
 
@@ -112,53 +125,17 @@ onAuthStateChanged(
 
 
             const usuario =
-                usuarioDoc.data();
-
-            console.log(
-    "🔎 MOTI GO VIAJE ACTIVO - USUARIO:",
-    usuario
-);
-
-console.log(
-    "🔎 MOTI GO VIAJE ACTIVO - viajeActivo:",
-    usuario.viajeActivo
-);
+                usuarioSnap.data();
 
 
             const viajeActivo =
                 usuario.viajeActivo;
 
 
-            // =====================================
-            // OBTENER PEDIDO ID
-            // =====================================
-
             const pedidoId =
                 typeof viajeActivo === "string"
                     ? viajeActivo
                     : viajeActivo?.pedidoId;
-
-            console.log(
-    "🔎 MOTI GO VIAJE ACTIVO - pedidoId obtenido:",
-    pedidoId
-);
-
-
-            if (
-                !pedidoId
-            ) {
-
-                console.warn(
-                    "⚠️ MOTI GO: no existe pedido activo."
-                );
-
-
-                window.location.href =
-                    "dashboard-repartidor.html"
-
-                return;
-
-            }
 
 
             console.log(
@@ -167,21 +144,40 @@ console.log(
             );
 
 
-            await cargarViaje(
+            if (!pedidoId) {
+
+                console.warn(
+                    "⚠️ MOTI GO: no existe pedido activo."
+                );
+
+                volverAlDashboard();
+
+                return;
+
+            }
+
+
+            viajeId =
+                pedidoId;
+
+
+            escucharPedidoActivo(
                 pedidoId
             );
 
+
+            escucharMovimientoConductor();
+
         }
+
         catch (error) {
 
             console.error(
-                "❌ MOTI GO: error cargando viaje activo:",
+                "❌ MOTI GO: error iniciando viaje activo:",
                 error
             );
 
-
-            window.location.href =
-                "dashboard-repartidor.html"
+            volverAlDashboard();
 
         }
 
@@ -189,102 +185,227 @@ console.log(
 
 );
 
-// =========================
-// CARGAR DATOS DEL VIAJE
-// =========================
 
-async function cargarViaje(id){
+// =====================================================
+// ESCUCHAR PEDIDO EN TIEMPO REAL
+// =====================================================
 
-    viajeId = id;
+function escucharPedidoActivo(
+    pedidoId
+) {
 
-    const viajeDoc =
-    await getDoc(
+    if (listenerPedido) {
 
-        doc(
-            db,
-            "pedidos",
-            id
-        )
+        listenerPedido();
 
-    );
+        listenerPedido = null;
 
-    console.log(
-    "🔎 MOTI GO VIAJE ACTIVO - buscando pedido:",
-    id
-);
+    }
 
-console.log(
-    "🔎 MOTI GO VIAJE ACTIVO - pedido existe:",
-    viajeDoc.exists()
-);
-    
-    if(!viajeDoc.exists()) return;
 
-    viajeActual =
-    viajeDoc.data();
+    listenerPedido =
+        onSnapshot(
 
-    console.log(
-    "📦 MOTI GO VIAJE ACTIVO - datos del pedido:",
-    viajeActual
-);
+            doc(
+                db,
+                "pedidos",
+                pedidoId
+            ),
+
+            async (snapshot) => {
+
+                if (
+                    !snapshot.exists()
+                ) {
+
+                    console.warn(
+                        "⚠️ MOTI GO: el pedido ya no existe."
+                    );
+
+                    manejarCancelacion();
+
+                    return;
+
+                }
+
+
+                viajeActual = {
+
+                    id:
+                        snapshot.id,
+
+                    ...snapshot.data()
+
+                };
+
+
+                console.log(
+                    "🔄 MOTI GO: pedido actualizado:",
+                    viajeActual
+                );
+
+
+                // =====================================
+                // PEDIDO CANCELADO
+                // =====================================
+
+                if (
+                    viajeActual.estado ===
+                    "cancelado"
+                ) {
+
+                    manejarCancelacion();
+
+                    return;
+
+                }
+
+
+                // =====================================
+                // PEDIDO ENTREGADO
+                // =====================================
+
+                if (
+                    viajeActual.estado ===
+                    "entregado"
+                ) {
+
+                    actualizarInterfaz();
+
+                    return;
+
+                }
+
+
+                actualizarInterfaz();
+
+
+                await actualizarDatosVisuales();
+
+            },
+
+            (error) => {
+
+                console.error(
+                    "❌ MOTI GO: error escuchando pedido:",
+                    error
+                );
+
+            }
+
+        );
+
+}
+
+
+// =====================================================
+// ACTUALIZAR DATOS VISUALES
+// =====================================================
+
+async function actualizarDatosVisuales() {
+
+    if (!viajeActual) {
+        return;
+    }
+
+
+    const nombreCliente =
+        viajeActual.clienteNombre ||
+        "Cliente";
+
 
     document.getElementById(
         "nombrePasajero"
     ).textContent =
-    viajeActual.nombrePasajero;
+        nombreCliente;
+
+
+    const ubicacionEntrega =
+        viajeActual.ubicacionEntrega ||
+        viajeActual.destino ||
+        {};
+
+
+    const localidad =
+        ubicacionEntrega.localidad ||
+        viajeActual.localidad ||
+        "Destino de entrega";
+
+
+    const referencia =
+        ubicacionEntrega.referencia ||
+        viajeActual.referencia ||
+        viajeActual.observaciones ||
+        "-";
+
 
     document.getElementById(
         "destinoViaje"
     ).textContent =
-    viajeActual.destino;
+        localidad;
+
 
     document.getElementById(
         "referenciaViaje"
     ).textContent =
-    viajeActual.observaciones || "-";
+        referencia;
 
-   actualizarInterfaz();
 
-    await cargarMapa();
+    try {
 
-    if(!listenerMovimiento){
+        await cargarMapa();
 
-        escucharMovimientoConductor();
+    }
 
-        listenerMovimiento = true;
+    catch (error) {
+
+        console.error(
+            "⚠️ MOTI GO: error actualizando mapa:",
+            error
+        );
 
     }
 
 }
 
 
-// =========================
+// =====================================================
 // INTERFAZ
-// =========================
+// =====================================================
 
-function actualizarInterfaz(){
+function actualizarInterfaz() {
+
+    if (!viajeActual) {
+        return;
+    }
+
 
     const estado =
-    document.getElementById(
-        "estadoViaje"
-    );
+        document.getElementById(
+            "estadoViaje"
+        );
+
 
     const boton =
-    document.getElementById(
-        "btnAccion"
-    );
+        document.getElementById(
+            "btnAccion"
+        );
+
 
     boton.disabled = false;
 
-    switch(viajeActual.estado){
 
-        case "aceptada":
+    switch (
+        viajeActual.estado
+    ) {
+
+        case "asignado":
 
             estado.textContent =
-            "En camino al pasajero";
+                "Pedido asignado";
 
             boton.textContent =
-            "Iniciar recorrido";
+                "Iniciar recorrido";
 
             break;
 
@@ -292,46 +413,71 @@ function actualizarInterfaz(){
         case "en_camino":
 
             estado.textContent =
-            "En camino al pasajero";
+                "En camino al cliente";
 
             boton.textContent =
-            "Llegué al pasajero";
+                "Llegué al cliente";
 
             break;
 
 
-        case "esperando_pasajero":
+        case "esperando_cliente":
 
             estado.textContent =
-            "Esperando al pasajero";
+                "Esperando al cliente";
 
             boton.textContent =
-            "Iniciar viaje";
+                "Iniciar entrega";
 
             break;
 
 
-        case "en_viaje":
+        case "en_entrega":
 
             estado.textContent =
-            "Viaje en curso";
+                "Entrega en curso";
 
             boton.textContent =
-            "Finalizar viaje";
+                "Finalizar entrega";
 
             break;
 
 
-        case "finalizada":
+        case "entregado":
 
             estado.textContent =
-            "Viaje finalizado";
+                "Pedido entregado";
 
             boton.textContent =
-            "Viaje finalizado";
+                "Pedido entregado";
 
             boton.disabled =
-            true;
+                true;
+
+            break;
+
+
+        case "cancelado":
+
+            estado.textContent =
+                "Pedido cancelado";
+
+            boton.textContent =
+                "Pedido cancelado";
+
+            boton.disabled =
+                true;
+
+            break;
+
+
+        default:
+
+            estado.textContent =
+                "Pedido asignado";
+
+            boton.textContent =
+                "Iniciar recorrido";
 
             break;
 
@@ -340,36 +486,42 @@ function actualizarInterfaz(){
 }
 
 
-// =========================
+// =====================================================
 // BOTÓN PRINCIPAL
-// =========================
+// =====================================================
 
 document
-.getElementById(
-    "btnAccion"
-)
-.addEventListener(
-
-    "click",
-
-    ejecutarAccion
-
-);
+    .getElementById(
+        "btnAccion"
+    )
+    .addEventListener(
+        "click",
+        ejecutarAccion
+    );
 
 
-// =========================
-// MÁQUINA DE ESTADOS
-// =========================
+// =====================================================
+// ACCIONES DEL VIAJE
+// =====================================================
 
-async function ejecutarAccion(){
+async function ejecutarAccion() {
 
-console.log("Botón presionado");
-console.log("Estado actual:", viajeActual.estado);
+    if (!viajeActual) {
+        return;
+    }
 
-    
-    switch(viajeActual.estado){
 
-        case "aceptada":
+    console.log(
+        "🛵 MOTI GO: acción:",
+        viajeActual.estado
+    );
+
+
+    switch (
+        viajeActual.estado
+    ) {
+
+        case "asignado":
 
             await cambiarEstado(
                 "en_camino"
@@ -381,135 +533,229 @@ console.log("Estado actual:", viajeActual.estado);
         case "en_camino":
 
             await cambiarEstado(
-                "esperando_pasajero"
+                "esperando_cliente"
             );
 
             break;
 
 
-        case "esperando_pasajero":
+        case "esperando_cliente":
 
             await cambiarEstado(
-                "en_viaje"
+                "en_entrega"
             );
 
             break;
 
 
-        case "en_viaje":
+        case "en_entrega":
 
-    await finalizarViaje();
+            await finalizarViaje();
 
-    break;
+            break;
+
+
+        default:
+
+            console.warn(
+                "⚠️ MOTI GO: estado sin acción:",
+                viajeActual.estado
+            );
 
     }
 
 }
 
 
-// =========================
+// =====================================================
 // CAMBIAR ESTADO
-// =========================
+// =====================================================
 
-async function cambiarEstado(nuevoEstado){
+async function cambiarEstado(
+    nuevoEstado
+) {
 
-    await updateDoc(
+    if (!viajeId) {
+        return;
+    }
 
-        doc(
-            db,
-            "solicitudes",
-            viajeId
-        ),
 
-        {
+    try {
 
-            estado:
+        console.log(
+            "🔄 MOTI GO: cambiando estado:",
+            viajeActual.estado,
+            "→",
             nuevoEstado
+        );
 
-        }
 
-    );
+        await updateDoc(
 
-    await cargarViaje(
-        viajeId
-    );
+            doc(
+                db,
+                "pedidos",
+                viajeId
+            ),
+
+            {
+
+                estado:
+                    nuevoEstado
+
+            }
+
+        );
+
+
+        console.log(
+            "✅ MOTI GO: estado actualizado:",
+            nuevoEstado
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "❌ MOTI GO: error cambiando estado:",
+            error
+        );
+
+
+        alert(
+            "No se pudo actualizar el estado del pedido."
+        );
+
+    }
 
 }
 
 
-// =========================
+// =====================================================
 // CARGAR MAPA
-// =========================
-async function cargarMapa(){
+// =====================================================
 
-   
-    const usuarioDoc =
-    await getDoc(
+async function cargarMapa() {
 
-        doc(
-            db,
-            "usuarios",
-            auth.currentUser.uid
-        )
+    if (!viajeActual) {
+        return;
+    }
 
-    );
+
+    const usuarioSnap =
+        await getDoc(
+
+            doc(
+                db,
+                "usuarios",
+                auth.currentUser.uid
+            )
+
+        );
+
+
+    if (
+        !usuarioSnap.exists()
+    ) {
+        return;
+    }
+
 
     const conductor =
-    usuarioDoc.data();
+        usuarioSnap.data();
 
 
-    console.log(
-    "Datos del conductor:",
-    conductor
-);
-
-console.log(
-    "Latitud conductor:",
-    conductor.latitud
-);
-
-console.log(
-    "Longitud conductor:",
-    conductor.longitud
-);
-
-console.log(
-    "Datos del viaje:",
-    viajeActual
-);
-
-console.log(
-    "Latitud pasajero:",
-    viajeActual.latitud
-);
-
-console.log(
-    "Longitud pasajero:",
-    viajeActual.longitud
-);
+    const conductorLat =
+        Number(
+            conductor.latitud
+        );
 
 
-    
+    const conductorLng =
+        Number(
+            conductor.longitud
+        );
+
+
+    if (
+        !Number.isFinite(
+            conductorLat
+        ) ||
+        !Number.isFinite(
+            conductorLng
+        )
+    ) {
+
+        console.warn(
+            "⚠️ MOTI GO: ubicación del repartidor no disponible."
+        );
+
+        return;
+
+    }
+
+
+    const ubicacionEntrega =
+        viajeActual.ubicacionEntrega ||
+        {};
+
+
+    const pasajeroLat =
+        Number(
+            ubicacionEntrega.latitud ??
+            viajeActual.latitud
+        );
+
+
+    const pasajeroLng =
+        Number(
+            ubicacionEntrega.longitud ??
+            viajeActual.longitud
+        );
+
+
+    if (
+        !Number.isFinite(
+            pasajeroLat
+        ) ||
+        !Number.isFinite(
+            pasajeroLng
+        )
+    ) {
+
+        console.warn(
+            "⚠️ MOTI GO: ubicación del cliente no disponible."
+        );
+
+        return;
+
+    }
+
 
     const conductorPos = [
 
-        conductor.latitud,
-
-        conductor.longitud
+        conductorLat,
+        conductorLng
 
     ];
+
 
     const pasajeroPos = [
 
-        viajeActual.latitud,
-
-        viajeActual.longitud
+        pasajeroLat,
+        pasajeroLng
 
     ];
 
-    if(!map){
 
-        map = L.map("map");
+    if (!map) {
+
+        map =
+            L.map(
+                "map"
+            );
+
 
         L.tileLayer(
 
@@ -517,9 +763,10 @@ console.log(
 
             {
 
-                maxZoom:19,
+                maxZoom: 19,
 
-                attribution:"© OpenStreetMap"
+                attribution:
+                    "© OpenStreetMap"
 
             }
 
@@ -527,7 +774,10 @@ console.log(
 
     }
 
-    if(conductorMarker){
+
+    if (
+        conductorMarker
+    ) {
 
         map.removeLayer(
             conductorMarker
@@ -535,7 +785,10 @@ console.log(
 
     }
 
-    if(pasajeroMarker){
+
+    if (
+        pasajeroMarker
+    ) {
 
         map.removeLayer(
             pasajeroMarker
@@ -543,205 +796,127 @@ console.log(
 
     }
 
+
     conductorMarker =
-L.marker(
+        L.marker(
 
-    conductorPos,
+            conductorPos,
 
-    {
+            {
 
-        icon:
-        motoIcon
+                icon:
+                    motoIcon
 
-    }
+            }
 
-)
-.addTo(map)
-.bindPopup("Tú");
+        )
+        .addTo(map)
+        .bindPopup(
+            "Tú"
+        );
 
-  // =========================
-// PASAJERO O DESTINO
-// =========================
 
-const icono =
+    let destinoPos =
+        pasajeroPos;
 
-viajeActual.estado === "en_viaje"
 
-?
+    let icono =
+        pasajeroIcon;
 
-destinoIcon
 
-:
+    let texto =
+        viajeActual.clienteNombre ||
+        "Cliente";
 
-pasajeroIcon;
 
-const texto =
+    if (
+        viajeActual.estado ===
+        "en_entrega"
+    ) {
 
-viajeActual.estado === "en_viaje"
+        const destinoLat =
+            Number(
+                viajeActual.destinoLatitud
+            );
 
-?
 
-"Destino"
+        const destinoLng =
+            Number(
+                viajeActual.destinoLongitud
+            );
 
-:
 
-viajeActual.nombrePasajero;
+        if (
+            Number.isFinite(
+                destinoLat
+            ) &&
+            Number.isFinite(
+                destinoLng
+            )
+        ) {
 
-const posicion =
+            destinoPos = [
 
-viajeActual.estado === "en_viaje"
-
-?
-
-[
-
-    viajeActual.destinoLatitud,
-
-    viajeActual.destinoLongitud
-
-]
-
-:
-
-pasajeroPos;
-
-pasajeroMarker =
-
-L.marker(
-
-    posicion,
-
-    {
-
-        icon:icono
-
-    }
-
-)
-
-.addTo(map)
-
-.bindPopup(
-
-    texto
-
-);
-
-
-dibujarRuta(
-    conductorPos,
-    pasajeroPos
-);
-
-const grupo =
-L.featureGroup([
-
-    conductorMarker,
-
-    pasajeroMarker
-
-]);
-
-map.fitBounds(
-
-    grupo.getBounds(),
-
-    {
-
-        padding:[40,40]
-
-    }
-
-);
-
-}
-
-
-function escucharMovimientoConductor(){
-
-    onSnapshot(
-
-        doc(
-
-            db,
-
-            "usuarios",
-
-            auth.currentUser.uid
-
-        ),
-
-        (docSnap)=>{
-
-            const datos =
-            docSnap.data();
-
-            if(
-                !datos ||
-                !conductorMarker
-            ) return;
-
-            const nuevaPos = [
-
-                datos.latitud,
-
-                datos.longitud
+                destinoLat,
+                destinoLng
 
             ];
 
-            conductorMarker.setLatLng(
-                nuevaPos
-            );
+            icono =
+                destinoIcon;
 
-            map.panTo(
+            texto =
+                "Destino";
 
-    nuevaPos,
-
-    {
-
-        animate:true,
-
-        duration:0.8
+        }
 
     }
-                
-);
 
-            let destinoRuta = [
 
-    viajeActual.latitud,
+    pasajeroMarker =
+        L.marker(
 
-    viajeActual.longitud
+            destinoPos,
 
-];
+            {
 
-// =======================
-// SI YA INICIÓ EL VIAJE
-// =======================
+                icon:
+                    icono
 
-if(
+            }
 
-    viajeActual.estado === "en_viaje"
+        )
+        .addTo(map)
+        .bindPopup(
+            texto
+        );
 
-){
 
-    destinoRuta = [
+    dibujarRuta(
 
-        viajeActual.destinoLatitud,
+        conductorPos,
+        destinoPos
 
-        viajeActual.destinoLongitud
+    );
 
-    ];
 
-}
+    const grupo =
+        L.featureGroup([
 
-dibujarRuta(
+            conductorMarker,
+            pasajeroMarker
 
-    nuevaPos,
+        ]);
 
-    destinoRuta
 
-);
+    map.fitBounds(
+
+        grupo.getBounds(),
+
+        {
+
+            padding:
+                [40, 40]
 
         }
 
@@ -750,114 +925,379 @@ dibujarRuta(
 }
 
 
-function dibujarRuta(origen,destino){
+// =====================================================
+// ESCUCHAR UBICACIÓN DEL REPARTIDOR
+// =====================================================
 
-    if(!rutaControl){
+function escucharMovimientoConductor() {
 
-        rutaControl = L.Routing.control({
+    if (
+        listenerMovimiento
+    ) {
+        return;
+    }
 
-            waypoints:[
 
-                L.latLng(origen[0], origen[1]),
+    listenerMovimiento =
+        true;
 
-                L.latLng(destino[0], destino[1])
 
-            ],
+    onSnapshot(
 
-            showAlternatives:false,
+        doc(
+            db,
+            "usuarios",
+            auth.currentUser.uid
+        ),
 
-            collapsible:true,
+        (snapshot) => {
 
-            routeWhileDragging:false,
+            const datos =
+                snapshot.data();
 
-            addWaypoints:false,
 
-            draggableWaypoints:false,
+            if (
+                !datos ||
+                !map
+            ) {
+                return;
+            }
 
-            fitSelectedRoutes:false,
 
-            show:false,
+            const lat =
+                Number(
+                    datos.latitud
+                );
 
-            createMarker:()=>null,
 
-            lineOptions:{
+            const lng =
+                Number(
+                    datos.longitud
+                );
 
-                styles:[{
 
-                    color:
-                    viajeActual.tipoViaje==="especial"
-                    ?
-                    "#f97316"
-                    :
-                    "#16a34a",
+            if (
+                !Number.isFinite(lat) ||
+                !Number.isFinite(lng)
+            ) {
+                return;
+            }
 
-                    weight:6,
 
-                    opacity:0.9
+            const nuevaPos = [
 
-                }]
+                lat,
+                lng
+
+            ];
+
+
+            if (
+                !conductorMarker
+            ) {
+
+                conductorMarker =
+                    L.marker(
+
+                        nuevaPos,
+
+                        {
+                            icon:
+                                motoIcon
+                        }
+
+                    )
+                    .addTo(map)
+                    .bindPopup(
+                        "Tú"
+                    );
 
             }
 
-        }).addTo(map);
+            else {
+
+                conductorMarker.setLatLng(
+                    nuevaPos
+                );
+
+            }
 
 
+            let destinoRuta = null;
 
 
-rutaControl.on(
+            if (
+                viajeActual
+            ) {
 
-    "routesfound",
+                const ubicacionEntrega =
+                    viajeActual.ubicacionEntrega ||
+                    {};
 
-    function(e){
 
-        const ruta =
-        e.routes[0];
+                if (
+                    viajeActual.estado ===
+                    "en_entrega"
+                ) {
 
-        const distancia =
-        (
-            ruta.summary.totalDistance
-            /
-            1000
-        ).toFixed(1);
+                    const latDestino =
+                        Number(
+                            viajeActual.destinoLatitud
+                        );
 
-        const tiempo =
-        Math.ceil(
 
-            ruta.summary.totalTime
-            /
-            60
+                    const lngDestino =
+                        Number(
+                            viajeActual.destinoLongitud
+                        );
+
+
+                    if (
+                        Number.isFinite(
+                            latDestino
+                        ) &&
+                        Number.isFinite(
+                            lngDestino
+                        )
+                    ) {
+
+                        destinoRuta = [
+
+                            latDestino,
+                            lngDestino
+
+                        ];
+
+                    }
+
+                }
+
+
+                if (
+                    !destinoRuta
+                ) {
+
+                    const latCliente =
+                        Number(
+                            ubicacionEntrega.latitud ??
+                            viajeActual.latitud
+                        );
+
+
+                    const lngCliente =
+                        Number(
+                            ubicacionEntrega.longitud ??
+                            viajeActual.longitud
+                        );
+
+
+                    if (
+                        Number.isFinite(
+                            latCliente
+                        ) &&
+                        Number.isFinite(
+                            lngCliente
+                        )
+                    ) {
+
+                        destinoRuta = [
+
+                            latCliente,
+                            lngCliente
+
+                        ];
+
+                    }
+
+                }
+
+            }
+
+
+            if (
+                destinoRuta
+            ) {
+
+                dibujarRuta(
+
+                    nuevaPos,
+                    destinoRuta
+
+                );
+
+            }
+
+        }
+
+    );
+
+}
+
+
+// =====================================================
+// DIBUJAR RUTA
+// =====================================================
+
+function dibujarRuta(
+    origen,
+    destino
+) {
+
+    if (
+        !map ||
+        !origen ||
+        !destino
+    ) {
+        return;
+    }
+
+
+    if (!rutaControl) {
+
+        rutaControl =
+            L.Routing.control({
+
+                waypoints: [
+
+                    L.latLng(
+                        origen[0],
+                        origen[1]
+                    ),
+
+                    L.latLng(
+                        destino[0],
+                        destino[1]
+                    )
+
+                ],
+
+                showAlternatives:
+                    false,
+
+                collapsible:
+                    true,
+
+                routeWhileDragging:
+                    false,
+
+                addWaypoints:
+                    false,
+
+                draggableWaypoints:
+                    false,
+
+                fitSelectedRoutes:
+                    false,
+
+                show:
+                    false,
+
+                createMarker:
+                    () => null,
+
+                lineOptions: {
+
+                    styles: [{
+
+                        color:
+                            viajeActual?.tipoViaje ===
+                            "especial"
+                                ? "#f97316"
+                                : "#16a34a",
+
+                        weight: 6,
+
+                        opacity: 0.9
+
+                    }]
+
+                }
+
+            })
+            .addTo(map);
+
+
+        rutaControl.on(
+
+            "routesfound",
+
+            function (e) {
+
+                const ruta =
+                    e.routes[0];
+
+
+                if (!ruta) {
+                    return;
+                }
+
+
+                const distancia =
+                    (
+                        ruta.summary.totalDistance /
+                        1000
+                    ).toFixed(1);
+
+
+                const tiempo =
+                    Math.ceil(
+
+                        ruta.summary.totalTime /
+                        60
+
+                    );
+
+
+                const distanceElement =
+                    document.getElementById(
+                        "distanceText"
+                    );
+
+
+                const timeElement =
+                    document.getElementById(
+                        "timeText"
+                    );
+
+
+                if (
+                    distanceElement
+                ) {
+
+                    distanceElement.textContent =
+                        distancia + " km";
+
+                }
+
+
+                if (
+                    timeElement
+                ) {
+
+                    timeElement.textContent =
+                        tiempo + " min";
+
+                }
+
+            }
 
         );
 
-        document.getElementById(
-
-            "distanceText"
-
-        ).textContent =
-        distancia + " km";
-
-        document.getElementById(
-
-            "timeText"
-
-        ).textContent =
-        tiempo + " min";
-
     }
 
-);
-
-        
-
-    }
-
-    else{
+    else {
 
         rutaControl.setWaypoints([
 
-            L.latLng(origen[0], origen[1]),
+            L.latLng(
+                origen[0],
+                origen[1]
+            ),
 
-            L.latLng(destino[0], destino[1])
+            L.latLng(
+                destino[0],
+                destino[1]
+            )
 
         ]);
 
@@ -866,29 +1306,44 @@ rutaControl.on(
 }
 
 
-async function finalizarViaje(){
+// =====================================================
+// FINALIZAR ENTREGA
+// =====================================================
 
-    try{
+async function finalizarViaje() {
+
+    if (!viajeId) {
+        return;
+    }
+
+
+    try {
 
         await updateDoc(
 
             doc(
                 db,
-                "solicitudes",
+                "pedidos",
                 viajeId
             ),
 
             {
 
-                estado:"finalizada",
+                estado:
+                    "entregado",
 
-                fechaFinalizacion:new Date()
+                fechaFinalizacion:
+                    new Date()
 
             }
 
         );
 
-        console.log("Actualizando estadísticas del conductor...");
+
+        console.log(
+            "✅ MOTI GO: pedido marcado como entregado."
+        );
+
 
         await updateDoc(
 
@@ -900,20 +1355,27 @@ async function finalizarViaje(){
 
             {
 
-                estadoServicio:"disponible",
+                estadoServicio:
+                    "disponible",
 
-                viajeActivo:null,
-            
-                viajesHoy: increment(1),
-                
-                viajesTotales: increment(1)
+                viajeActivo:
+                    null,
+
+                viajesHoy:
+                    increment(1),
+
+                viajesTotales:
+                    increment(1)
 
             }
 
         );
-        console.log("Estadísticas actualizadas correctamente");
 
-        console.log("Redirigiendo...");
+
+        console.log(
+            "✅ MOTI GO: repartidor liberado."
+        );
+
 
         window.location.replace(
             "dashboard-repartidor.html"
@@ -921,10 +1383,98 @@ async function finalizarViaje(){
 
     }
 
-    catch(error){
+    catch (error) {
 
-        console.error(error);
+        console.error(
+            "❌ MOTI GO: error finalizando entrega:",
+            error
+        );
+
+
+        alert(
+            "No se pudo finalizar la entrega."
+        );
 
     }
+
+}
+
+
+// =====================================================
+// PEDIDO CANCELADO
+// =====================================================
+
+async function manejarCancelacion() {
+
+    console.warn(
+        "🚨 MOTI GO: el pedido fue cancelado."
+    );
+
+
+    alert(
+        "El cliente canceló este pedido."
+    );
+
+
+    try {
+
+        await updateDoc(
+
+            doc(
+                db,
+                "usuarios",
+                auth.currentUser.uid
+            ),
+
+            {
+
+                estadoServicio:
+                    "disponible",
+
+                viajeActivo:
+                    null
+
+            }
+
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "❌ MOTI GO: error liberando repartidor:",
+            error
+        );
+
+    }
+
+
+    volverAlDashboard();
+
+}
+
+
+// =====================================================
+// VOLVER AL DASHBOARD
+// =====================================================
+
+function volverAlDashboard() {
+
+    if (
+        listenerPedido
+    ) {
+
+        listenerPedido();
+
+        listenerPedido =
+            null;
+
+    }
+
+
+    window.location.replace(
+        "dashboard-repartidor.html"
+    );
 
 }
