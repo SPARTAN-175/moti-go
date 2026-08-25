@@ -699,6 +699,7 @@ async function cargarMapa() {
     const ubicacionEntrega =
         viajeActual.ubicacionEntrega ||
         {};
+    
 
 
     const pasajeroLat =
@@ -713,6 +714,23 @@ async function cargarMapa() {
             ubicacionEntrega.longitud ??
             viajeActual.longitud
         );
+
+    console.log(
+    "🗺️ MOTI GO - UBICACIÓN ENTREGA:",
+    ubicacionEntrega
+);
+
+console.log(
+    "🗺️ MOTI GO - COORDENADAS REPARTIDOR:",
+    conductorLat,
+    conductorLng
+);
+
+console.log(
+    "🗺️ MOTI GO - COORDENADAS CLIENTE:",
+    pasajeroLat,
+    pasajeroLng
+);
 
 
     if (
