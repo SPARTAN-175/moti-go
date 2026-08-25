@@ -114,6 +114,16 @@ onAuthStateChanged(
             const usuario =
                 usuarioDoc.data();
 
+            console.log(
+    "🔎 MOTI GO VIAJE ACTIVO - USUARIO:",
+    usuario
+);
+
+console.log(
+    "🔎 MOTI GO VIAJE ACTIVO - viajeActivo:",
+    usuario.viajeActivo
+);
+
 
             const viajeActivo =
                 usuario.viajeActivo;
@@ -127,6 +137,11 @@ onAuthStateChanged(
                 typeof viajeActivo === "string"
                     ? viajeActivo
                     : viajeActivo?.pedidoId;
+
+            console.log(
+    "🔎 MOTI GO VIAJE ACTIVO - pedidoId obtenido:",
+    pedidoId
+);
 
 
             if (
