@@ -223,6 +223,11 @@ console.log(
     viajeActual =
     viajeDoc.data();
 
+    console.log(
+    "📦 MOTI GO VIAJE ACTIVO - datos del pedido:",
+    viajeActual
+);
+
     document.getElementById(
         "nombrePasajero"
     ).textContent =
