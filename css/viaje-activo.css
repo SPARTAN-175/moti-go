@@ -1,252 +1,1365 @@
-.container{
+/* =========================================================
+   MOTI GO — VIAJE ACTIVO
+   Interfaz operativa del repartidor
+========================================================= */
 
-    max-width:420px;
 
-    margin:auto;
+/* =========================================================
+   BASE
+========================================================= */
 
-    padding:20px;
+* {
+    box-sizing: border-box;
 }
 
-.trip-card{
-
-    background:white;
-
-    border-radius:20px;
-
-    padding:20px;
-
-    margin-top:20px;
-
-    box-shadow:0 2px 10px rgba(0,0,0,.08);
+body {
+    margin: 0;
+    background: #f5f7fa;
+    color: #172033;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
-/* LOCAL */
-
-.local{
-
-    border-left:6px solid #16a34a;
+button,
+input {
+    font: inherit;
 }
 
-/* ESPECIAL */
-
-.especial{
-
-    border-left:6px solid #f97316;
-}
-
-.trip-badge{
-
-    display:inline-block;
-
-    padding:8px 14px;
-
-    border-radius:999px;
-
-    font-size:13px;
-
-    font-weight:700;
-
-    background:#f3f4f6;
-
-    margin-bottom:20px;
-}
-
-.trip-section{
-
-    padding:12px 0;
-
-    border-bottom:1px solid #e5e7eb;
-}
-
-.trip-section:last-of-type{
-
-    border-bottom:none;
-}
-
-.label{
-
-    display:block;
-
-    font-size:13px;
-
-    color:#6b7280;
-
-    margin-bottom:4px;
-}
-
-.fare{
-
-    font-size:22px;
-}
-
-.actions{
-
-    margin-top:25px;
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:10px;
-}
-
-.call-btn{
-
-    height:50px;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    border-radius:12px;
-
-    border:1px solid #d1d5db;
-
-    text-decoration:none;
-
-    color:#374151;
-
-    font-weight:600;
-
-    background:white;
-}
-
-.finish-btn{
-
-    height:55px;
-
-    border:none;
-
-    border-radius:12px;
-
-    background:#16a34a;
-
-    color:white;
-
-    font-size:15px;
-
-    font-weight:700;
-
-    cursor:pointer;
-}
-
-/* ==========================
-   ESTADO DEL VIAJE
-========================== */
-
-.status-card{
-
-    background:#E8F5E9;
-
-    border-left:5px solid #16a34a;
-
-    border-radius:14px;
-
-    padding:15px;
-
-    margin:20px 0;
-
-}
-
-.status-card p{
-
-    margin:0;
-
-    font-size:16px;
-
-    font-weight:600;
-
-    color:#166534;
-
+button {
+    -webkit-tap-highlight-color: transparent;
 }
 
 
-/* ==========================
+/* =========================================================
+   CONTENEDOR PRINCIPAL
+========================================================= */
+
+.moti-viaje {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.viaje-header {
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    position: relative;
+    z-index: 20;
+}
+
+.viaje-header-top {
+    min-height: 68px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+}
+
+.btn-icon {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #f3f4f6;
+    color: #172033;
+
+    cursor: pointer;
+}
+
+.btn-icon:active {
+    transform: scale(.96);
+}
+
+.btn-icon .material-symbols-outlined {
+    font-size: 22px;
+}
+
+
+/* =========================================================
+   TÍTULO
+========================================================= */
+
+.viaje-header-title {
+    flex: 1;
+    min-width: 0;
+}
+
+.viaje-brand {
+    display: block;
+
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+
+    color: #16a34a;
+}
+
+.viaje-header-title h1 {
+    margin: 2px 0 0;
+
+    font-size: 20px;
+    line-height: 1.1;
+
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   NÚMERO DE PEDIDO
+========================================================= */
+
+.pedido-indicador {
+    max-width: 120px;
+
+    padding: 7px 10px;
+
+    border-radius: 10px;
+
+    background: #f3f4f6;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    color: #4b5563;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* =========================================================
+   ESTADO ACTUAL
+========================================================= */
+
+.estado-viaje {
+    margin: 0 16px 14px;
+
+    min-height: 66px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 12px 14px;
+
+    border-radius: 16px;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease;
+}
+
+.estado-viaje > .material-symbols-outlined {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    font-size: 22px;
+}
+
+.estado-viaje strong {
+    display: block;
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.estado-viaje small {
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 12px;
+    line-height: 1.35;
+
+    color: #667085;
+}
+
+
+/* ESTADOS */
+
+.estado-asignado {
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+}
+
+.estado-asignado > .material-symbols-outlined {
+    background: #dbeafe;
+    color: #2563eb;
+}
+
+
+.estado-compra {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+}
+
+.estado-compra > .material-symbols-outlined {
+    background: #ffedd5;
+    color: #ea580c;
+}
+
+
+.estado-entrega {
+    background: #ecfdf5;
+    border: 1px solid #bbf7d0;
+}
+
+.estado-entrega > .material-symbols-outlined {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+
+.estado-finalizado {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+}
+
+.estado-finalizado > .material-symbols-outlined {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+
+/* =========================================================
+   CONTENIDO
+========================================================= */
+
+.viaje-contenido {
+    width: 100%;
+    max-width: 720px;
+
+    margin: 0 auto;
+
+    padding-bottom: 110px;
+}
+
+
+/* =========================================================
    MAPA
-========================== */
+========================================================= */
 
-.map-card{
+.mapa-seccion {
+    position: relative;
 
-    margin:20px 0;
+    background: #ffffff;
 
-    border-radius:18px;
+    overflow: hidden;
 
-    overflow:hidden;
-
-    border:1px solid #ddd;
-
-    box-shadow:0 4px 10px rgba(0,0,0,.08);
-
-}
-
-#map{
-
-    width:100%;
-
-    height:350px;
-
+    border-bottom:
+        1px solid #e5e7eb;
 }
 
 
-/* ==========================
-   BOTÓN PRINCIPAL
-========================== */
+/* =========================================================
+   PANEL DE NAVEGACIÓN
+========================================================= */
 
-#btnAccion{
+.mapa-navegacion {
+    position: absolute;
 
-    width:100%;
+    top: 12px;
+    left: 12px;
+    right: 12px;
 
-    margin-top:20px;
+    z-index: 1000;
 
-}
-.navigation-card{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 
-    background:#fff;
+    gap: 12px;
 
-    border-radius:18px;
+    padding: 12px 14px;
 
-    padding:18px;
+    background: rgba(255, 255, 255, .96);
 
-    margin-bottom:15px;
+    border: 1px solid rgba(229, 231, 235, .95);
 
-    box-shadow:0 3px 10px rgba(0,0,0,.08);
+    border-radius: 16px;
 
-}
+    box-shadow:
+        0 8px 24px rgba(15, 23, 42, .14);
 
-.navigation-title{
-
-    font-size:18px;
-
-    font-weight:700;
-
-    margin-bottom:15px;
-
+    backdrop-filter: blur(8px);
 }
 
-.navigation-info{
+.navegacion-destino {
+    min-width: 0;
 
-    display:flex;
+    display: flex;
+    align-items: center;
 
-    justify-content:space-between;
+    gap: 10px;
+}
+
+.navegacion-destino > .material-symbols-outlined {
+    width: 38px;
+    height: 38px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 11px;
+
+    background: #ecfdf5;
+    color: #16a34a;
+
+    font-size: 21px;
+}
+
+.navegacion-destino > div {
+    min-width: 0;
+}
+
+.navegacion-label {
+    display: block;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    color: #667085;
+
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+#navigationTitle {
+    display: block;
+
+    margin-top: 2px;
+
+    max-width: 180px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   MÉTRICAS
+========================================================= */
+
+.navegacion-metricas {
+    flex-shrink: 0;
+
+    display: flex;
+
+    gap: 14px;
+}
+
+.navegacion-metricas > div {
+    text-align: right;
+}
+
+.navegacion-metricas span {
+    display: block;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    color: #667085;
+
+    text-transform: uppercase;
+}
+
+.navegacion-metricas strong {
+    display: block;
+
+    margin-top: 2px;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    color: #172033;
+}
+
+
+/* =========================================================
+   MAPA REAL
+========================================================= */
+
+.mapa {
+    width: 100%;
+    height: 430px;
+
+    background: #e5e7eb;
+}
+
+#map {
+    width: 100%;
+    height: 430px;
+}
+
+
+/* Leaflet */
+
+.leaflet-container {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.leaflet-control-attribution {
+    font-size: 8px;
+}
+
+
+/* =========================================================
+   PANEL DEL PEDIDO
+========================================================= */
+
+.pedido-panel {
+    margin: 12px;
+
+    background: #ffffff;
+
+    border:
+        1px solid #e5e7eb;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 6px 20px rgba(15, 23, 42, .07);
+}
+
+
+/* =========================================================
+   CLIENTE
+========================================================= */
+
+.pedido-cliente {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 16px;
+
+    border-bottom: 1px solid #eef0f3;
+}
+
+.pedido-cliente-icon {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 13px;
+
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.pedido-cliente-icon .material-symbols-outlined {
+    font-size: 21px;
+}
+
+.pedido-cliente-info span,
+.pedido-destino span {
+    display: block;
+
+    margin-bottom: 2px;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    color: #667085;
+
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+.pedido-cliente-info strong {
+    display: block;
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   DESTINO
+========================================================= */
+
+.pedido-destino {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 12px;
+
+    padding: 15px 16px;
+
+    border-bottom: 1px solid #eef0f3;
+}
+
+.destino-icon {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 13px;
+
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.destino-icon .material-symbols-outlined {
+    font-size: 21px;
+}
+
+.pedido-destino > div:last-child {
+    min-width: 0;
+}
+
+.pedido-destino strong {
+    display: block;
+
+    font-size: 14px;
+    line-height: 1.35;
+}
+
+.pedido-destino small {
+    display: block;
+
+    margin-top: 4px;
+
+    color: #667085;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   ENCABEZADO DEL PEDIDO
+========================================================= */
+
+.pedido-resumen-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 16px;
+
+    border-bottom: 1px solid #eef0f3;
+}
+
+.pedido-resumen-header > div {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.pedido-resumen-header > div > .material-symbols-outlined {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 11px;
+
+    background: #f0fdf4;
+    color: #16a34a;
+
+    font-size: 20px;
+}
+
+.pedido-resumen-header strong {
+    display: block;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.pedido-resumen-header small {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #667085;
+
+    font-size: 11px;
+}
+
+.pedido-total {
+    font-size: 17px !important;
+
+    color: #16a34a;
+}
+
+
+/* =========================================================
+   TIENDAS
+========================================================= */
+
+.tiendas-pedido {
+    padding: 4px 0;
+}
+
+
+/* =========================================================
+   TIENDA
+========================================================= */
+
+.tienda-pedido {
+    padding: 15px 16px;
+
+    border-bottom: 1px solid #eef0f3;
+}
+
+.tienda-pedido:last-child {
+    border-bottom: none;
+}
+
+.tienda-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-bottom: 10px;
+}
+
+.tienda-identidad {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.tienda-icono {
+    width: 36px;
+    height: 36px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #fff7ed;
+    color: #ea580c;
+}
+
+.tienda-icono .material-symbols-outlined {
+    font-size: 19px;
+}
+
+.tienda-nombre {
+    min-width: 0;
+}
+
+.tienda-nombre strong {
+    display: block;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.tienda-nombre small {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #667085;
+
+    font-size: 10px;
+}
+
+.tienda-numero {
+    flex-shrink: 0;
+
+    padding: 5px 8px;
+
+    border-radius: 8px;
+
+    background: #f3f4f6;
+
+    color: #667085;
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   PRODUCTOS
+========================================================= */
+
+.productos-lista {
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+.producto-item {
+    min-height: 48px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 8px 9px;
+
+    border-radius: 11px;
+
+    background: #f8fafc;
+
+    border: 1px solid transparent;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease;
+}
+
+.producto-item.disponible {
+    background: #f0fdf4;
+
+    border-color: #dcfce7;
+}
+
+.producto-item.no-disponible {
+    background: #fff7ed;
+
+    border-color: #fed7aa;
+}
+
+.producto-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.producto-nombre {
+    display: block;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    line-height: 1.3;
+}
+
+.producto-cantidad {
+    display: inline-block;
+
+    margin-top: 2px;
+
+    color: #667085;
+
+    font-size: 10px;
+}
+
+.producto-precio {
+    flex-shrink: 0;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   BOTÓN DISPONIBILIDAD
+========================================================= */
+
+.producto-estado {
+    min-width: 38px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 7px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    background: #e5e7eb;
+    color: #667085;
+}
+
+.producto-estado .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.producto-item.disponible .producto-estado {
+    background: #16a34a;
+    color: #ffffff;
+}
+
+.producto-item.no-disponible .producto-estado {
+    background: #f97316;
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   CARGANDO PEDIDO
+========================================================= */
+
+.pedido-cargando {
+    min-height: 90px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    color: #667085;
+
+    font-size: 12px;
+}
+
+.pedido-cargando .material-symbols-outlined {
+    font-size: 18px;
+
+    animation: motiSpin 1.1s linear infinite;
+}
+
+@keyframes motiSpin {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 
 }
 
-.navigation-info div{
 
-    text-align:center;
+/* =========================================================
+   PROGRESO DEL PEDIDO
+========================================================= */
+
+.progreso-pedido {
+    padding: 17px 16px 16px;
+
+    border-top: 1px solid #eef0f3;
+
+    background: #fafbfc;
+}
+
+.progreso-linea {
+    height: 3px;
+
+    margin: 0 12px -20px;
+
+    background: #e5e7eb;
+
+    position: relative;
+}
+
+.progreso-activo {
+    width: 0%;
+    height: 100%;
+
+    background: #16a34a;
+
+    border-radius: 999px;
+
+    transition: width .3s ease;
+}
+
+.progreso-pasos {
+    position: relative;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+}
+
+.progreso-paso {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #98a2b3;
+}
+
+.progreso-paso .material-symbols-outlined {
+    width: 28px;
+    height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #e5e7eb;
+
+    font-size: 15px;
+}
+
+.progreso-paso small {
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.progreso-paso.activo {
+    color: #16a34a;
+}
+
+.progreso-paso.activo .material-symbols-outlined {
+    background: #16a34a;
+    color: #ffffff;
+}
+
+.progreso-paso.completado {
+    color: #16a34a;
+}
+
+.progreso-paso.completado .material-symbols-outlined {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+
+/* =========================================================
+   CONFIRMACIÓN DE ENTREGA
+========================================================= */
+
+.confirmacion-entrega {
+    margin: 12px;
+
+    display: flex;
+    align-items: flex-start;
+
+    gap: 13px;
+
+    padding: 17px;
+
+    border-radius: 18px;
+
+    background: #fffbeb;
+
+    border: 1px solid #fde68a;
+}
+
+.confirmacion-entrega.oculto {
+    display: none;
+}
+
+.confirmacion-icono {
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.confirmacion-icono .material-symbols-outlined {
+    font-size: 21px;
+}
+
+.confirmacion-contenido {
+    flex: 1;
+    min-width: 0;
+}
+
+.confirmacion-contenido h2 {
+    margin: 1px 0 4px;
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.confirmacion-contenido p {
+    margin: 0;
+
+    color: #667085;
+
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   CÓDIGO DE ENTREGA
+========================================================= */
+
+.codigo-inputs {
+    display: flex;
+
+    gap: 6px;
+
+    margin-top: 14px;
+}
+
+.codigo-inputs input {
+    width: 40px;
+    height: 46px;
+
+    padding: 0;
+
+    border:
+        1px solid #d1d5db;
+
+    border-radius: 10px;
+
+    background: #ffffff;
+
+    text-align: center;
+
+    font-size: 20px;
+    font-weight: 800;
+
+    color: #172033;
+
+    outline: none;
+}
+
+.codigo-inputs input:focus {
+    border-color: #16a34a;
+
+    box-shadow:
+        0 0 0 3px rgba(22, 163, 74, .12);
+}
+
+
+/* =========================================================
+   ACCIONES
+========================================================= */
+
+.acciones-viaje {
+    position: fixed;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    z-index: 2000;
+
+    padding:
+        10px
+        max(16px, env(safe-area-inset-right))
+        calc(10px + env(safe-area-inset-bottom))
+        max(16px, env(safe-area-inset-left));
+
+    background:
+        rgba(255, 255, 255, .94);
+
+    border-top:
+        1px solid #e5e7eb;
+
+    backdrop-filter: blur(12px);
+}
+
+.btn-accion {
+    width: 100%;
+    max-width: 720px;
+
+    min-height: 54px;
+
+    margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 9px;
+
+    border: none;
+
+    border-radius: 15px;
+
+    background: #16a34a;
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 800;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 5px 14px rgba(22, 163, 74, .25);
+
+    transition:
+        transform .15s ease,
+        background .2s ease,
+        box-shadow .2s ease;
+}
+
+.btn-accion:active {
+    transform: scale(.985);
+}
+
+.btn-accion:disabled {
+    background: #9ca3af;
+
+    box-shadow: none;
+
+    cursor: not-allowed;
+}
+
+.btn-accion .material-symbols-outlined {
+    font-size: 21px;
+}
+
+
+/* =========================================================
+   ESTADOS DEL BOTÓN
+========================================================= */
+
+.btn-accion.estado-compra {
+    background: #ea580c;
+}
+
+.btn-accion.estado-entrega {
+    background: #16a34a;
+}
+
+.btn-accion.estado-confirmacion {
+    background: #d97706;
+}
+
+
+/* =========================================================
+   MARCADORES DEL MAPA
+========================================================= */
+
+.moti-marker {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    border: 3px solid #ffffff;
+
+    box-shadow:
+        0 3px 10px rgba(15, 23, 42, .25);
+}
+
+.moti-marker .material-symbols-outlined {
+    font-size: 19px;
+}
+
+.moti-marker-repartidor {
+    background: #16a34a;
+    color: #ffffff;
+}
+
+.moti-marker-tienda {
+    background: #f97316;
+    color: #ffffff;
+}
+
+.moti-marker-cliente {
+    background: #dc2626;
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   RUTA LEAFLET
+========================================================= */
+
+.leaflet-routing-container {
+    display: none !important;
+}
+
+
+/* =========================================================
+   MENSAJES / ALERTAS
+========================================================= */
+
+.moti-mensaje {
+    margin: 10px 12px;
+
+    padding: 11px 13px;
+
+    border-radius: 12px;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.moti-mensaje.error {
+    background: #fef2f2;
+
+    border: 1px solid #fecaca;
+
+    color: #b91c1c;
+}
+
+.moti-mensaje.exito {
+    background: #f0fdf4;
+
+    border: 1px solid #bbf7d0;
+
+    color: #166534;
+}
+
+.moti-mensaje.aviso {
+    background: #fffbeb;
+
+    border: 1px solid #fde68a;
+
+    color: #92400e;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (min-width: 700px) {
+
+    body {
+        background: #eef1f5;
+    }
+
+    .moti-viaje {
+        max-width: 900px;
+
+        margin: 0 auto;
+
+        background: #f5f7fa;
+
+        min-height: 100vh;
+    }
+
+    .viaje-header {
+        border-radius: 0 0 20px 20px;
+    }
+
+    .mapa-seccion {
+        margin: 12px;
+
+        border-radius: 20px;
+
+        overflow: hidden;
+
+        box-shadow:
+            0 6px 20px rgba(15, 23, 42, .08);
+    }
+
+    .pedido-panel {
+        margin: 12px;
+    }
+
+    .acciones-viaje {
+        position: static;
+
+        margin-top: 4px;
+
+        background: transparent;
+
+        border: none;
+
+        backdrop-filter: none;
+    }
 
 }
 
-.navigation-info strong{
 
-    display:block;
+/* =========================================================
+   PANTALLAS MUY PEQUEÑAS
+========================================================= */
 
-    font-size:24px;
+@media (max-width: 360px) {
 
-    margin-top:6px;
+    .viaje-header-top {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
 
-    color:#16a34a;
+    .estado-viaje {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    .mapa-navegacion {
+        left: 8px;
+        right: 8px;
+    }
+
+    .navegacion-metricas {
+        gap: 8px;
+    }
+
+    .navegacion-metricas strong {
+        font-size: 12px;
+    }
+
+    .codigo-inputs {
+        gap: 4px;
+    }
+
+    .codigo-inputs input {
+        width: 35px;
+        height: 43px;
+    }
 
 }
