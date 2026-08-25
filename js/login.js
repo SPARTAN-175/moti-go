@@ -179,15 +179,14 @@ async function iniciarSesion() {
         // ============================
 
         if (
-            usuario.tipo === "admin"
-        ) {
+    usuario.tipo === "admin"
+) {
 
-            window.location.href =
-                "dashboard-admin.html";
+    window.location.href =
+        "admin/dashboard-admin.html";
 
-
-            return;
-        }
+    return;
+}
 
 
 // ============================
