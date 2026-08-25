@@ -12,59 +12,489 @@
 
     <title>MOTI GO - Administración</title>
 
-    <link
-        rel="stylesheet"
-        href="../css/moti-go.css"
-    >
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        body {
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                #f4f6f8;
+
+            color:
+                #1f2937;
+
+        }
+
+
+        .admin-header {
+
+            background:
+                #111827;
+
+            color:
+                white;
+
+            padding:
+                20px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+        }
+
+
+        .admin-header h1 {
+
+            font-size:
+                22px;
+
+        }
+
+
+        .admin-header span {
+
+            font-size:
+                13px;
+
+            opacity:
+                .75;
+
+        }
+
+
+        .contenedor {
+
+            width:
+                min(1100px, 92%);
+
+            margin:
+                30px auto;
+
+        }
+
+
+        .bienvenida {
+
+            background:
+                white;
+
+            border-radius:
+                16px;
+
+            padding:
+                25px;
+
+            margin-bottom:
+                25px;
+
+            box-shadow:
+                0 4px 15px rgba(
+                    0,
+                    0,
+                    0,
+                    .06
+                );
+
+        }
+
+
+        .bienvenida h2 {
+
+            margin-bottom:
+                8px;
+
+        }
+
+
+        .bienvenida p {
+
+            color:
+                #6b7280;
+
+        }
+
+
+        .grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(
+                        220px,
+                        1fr
+                    )
+                );
+
+            gap:
+                18px;
+
+        }
+
+
+        .card {
+
+            background:
+                white;
+
+            border-radius:
+                16px;
+
+            padding:
+                25px;
+
+            min-height:
+                150px;
+
+            box-shadow:
+                0 4px 15px rgba(
+                    0,
+                    0,
+                    0,
+                    .06
+                );
+
+        }
+
+
+        .card h3 {
+
+            margin-bottom:
+                10px;
+
+        }
+
+
+        .card p {
+
+            color:
+                #6b7280;
+
+            font-size:
+                14px;
+
+        }
+
+
+        .card button {
+
+            margin-top:
+                18px;
+
+            border:
+                none;
+
+            border-radius:
+                10px;
+
+            padding:
+                10px 16px;
+
+            cursor:
+                pointer;
+
+            background:
+                #111827;
+
+            color:
+                white;
+
+        }
+
+
+        .cerrar {
+
+            background:
+                #dc2626 !important;
+
+        }
+
+
+        #estadoAdmin {
+
+            margin-top:
+                15px;
+
+            font-size:
+                14px;
+
+            color:
+                #16a34a;
+
+        }
+
+    </style>
 
 </head>
 
+
 <body>
 
-    <main>
 
-        <h1>MOTI GO</h1>
+<header class="admin-header">
 
-        <h2>Panel de administración</h2>
+    <div>
+
+        <h1>
+            MOTI GO
+        </h1>
+
+        <span>
+            Panel de administración
+        </span>
+
+    </div>
+
+
+    <button
+        id="btnCerrarSesion"
+        class="cerrar"
+    >
+        Cerrar sesión
+    </button>
+
+</header>
+
+
+
+<main class="contenedor">
+
+
+    <section class="bienvenida">
+
+        <h2>
+            Panel administrativo
+        </h2>
 
         <p>
-            Panel administrativo de MOTI GO
+            Bienvenido al centro de administración de MOTI GO.
         </p>
 
-        <button id="btnCerrarSesion">
-            Cerrar sesión
-        </button>
+        <div id="estadoAdmin">
+            Verificando cuenta...
+        </div>
 
-    </main>
+    </section>
 
 
-    <script type="module">
+
+    <section class="grid">
+
+
+        <article class="card">
+
+            <h3>
+                🏪 Tiendas
+            </h3>
+
+            <p>
+                Administrar tiendas asociadas y sus comisiones.
+            </p>
+
+            <button
+                id="btnTiendas"
+            >
+                Administrar tiendas
+            </button>
+
+        </article>
+
+
+
+        <article class="card">
+
+            <h3>
+                🛵 Repartidores
+            </h3>
+
+            <p>
+                Consultar y administrar repartidores.
+            </p>
+
+            <button
+                id="btnRepartidores"
+            >
+                Ver repartidores
+            </button>
+
+        </article>
+
+
+
+        <article class="card">
+
+            <h3>
+                👥 Clientes
+            </h3>
+
+            <p>
+                Consultar clientes registrados en MOTI GO.
+            </p>
+
+            <button
+                id="btnClientes"
+            >
+                Ver clientes
+            </button>
+
+        </article>
+
+
+
+        <article class="card">
+
+            <h3>
+                📦 Pedidos
+            </h3>
+
+            <p>
+                Consultar pedidos y su estado.
+            </p>
+
+            <button
+                id="btnPedidos"
+            >
+                Ver pedidos
+            </button>
+
+        </article>
+
+
+
+        <article class="card">
+
+            <h3>
+                💰 Finanzas
+            </h3>
+
+            <p>
+                Comisiones, saldo operativo y movimientos de MOTI GO.
+            </p>
+
+            <button
+                id="btnFinanzas"
+            >
+                Ver finanzas
+            </button>
+
+        </article>
+
+
+
+        <article class="card">
+
+            <h3>
+                👑 Operadores
+            </h3>
+
+            <p>
+                Carteras y movimientos de los operadores fundadores.
+            </p>
+
+            <button
+                id="btnOperadores"
+            >
+                Ver operadores
+            </button>
+
+        </article>
+
+
+    </section>
+
+
+</main>
+
+
+
+<script type="module">
 
     import {
-        auth
+        auth,
+        db
     } from "../js/firebase-config.js";
 
 
     import {
         onAuthStateChanged,
         signOut
-    } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+    } from
+    "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
+
+    import {
+        doc,
+        getDoc
+    } from
+    "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+
+
+    // ==========================================
+    // ELEMENTOS
+    // ==========================================
+
+    const estadoAdmin =
+        document.getElementById(
+            "estadoAdmin"
+        );
+
+
+    const btnCerrarSesion =
+        document.getElementById(
+            "btnCerrarSesion"
+        );
+
+
+
+    // ==========================================
+    // VERIFICAR SESIÓN
+    // ==========================================
 
     onAuthStateChanged(
         auth,
-        (
+        async (
             usuario
         ) => {
+
+            console.log(
+                "🔐 MOTI GO ADMIN: verificando sesión..."
+            );
+
+
+            // ----------------------------------
+            // SIN SESIÓN
+            // ----------------------------------
 
             if (!usuario) {
 
                 console.warn(
-                    "⚠️ MOTI GO: administrador no autenticado."
+                    "⚠️ MOTI GO ADMIN: no hay sesión."
                 );
+
 
                 window.location.href =
                     "../index.html";
+
 
                 return;
 
@@ -72,45 +502,282 @@
 
 
             console.log(
-                "👑 MOTI GO - ADMINISTRADOR:",
+                "👤 MOTI GO ADMIN:",
                 usuario.uid
             );
+
+
+            try {
+
+                // ----------------------------------
+                // OBTENER PERFIL
+                // ----------------------------------
+
+                const referenciaUsuario =
+                    doc(
+                        db,
+                        "usuarios",
+                        usuario.uid
+                    );
+
+
+                const snapshot =
+                    await getDoc(
+                        referenciaUsuario
+                    );
+
+
+                if (
+                    !snapshot.exists()
+                ) {
+
+                    console.error(
+                        "❌ MOTI GO ADMIN: no existe el perfil."
+                    );
+
+
+                    await signOut(
+                        auth
+                    );
+
+
+                    window.location.href =
+                        "../index.html";
+
+
+                    return;
+
+                }
+
+
+                const datosUsuario =
+                    snapshot.data();
+
+
+                console.log(
+                    "👑 MOTI GO ADMIN: perfil:",
+                    datosUsuario
+                );
+
+
+                // ----------------------------------
+                // VERIFICAR TIPO
+                // ----------------------------------
+
+                if (
+                    datosUsuario.tipo !==
+                    "admin"
+                ) {
+
+                    console.warn(
+                        "⛔ MOTI GO ADMIN: usuario no autorizado:",
+                        datosUsuario.tipo
+                    );
+
+
+                    alert(
+                        "No tienes permisos para acceder al panel administrativo."
+                    );
+
+
+                    await signOut(
+                        auth
+                    );
+
+
+                    window.location.href =
+                        "../index.html";
+
+
+                    return;
+
+                }
+
+
+                // ----------------------------------
+                // ADMIN CORRECTO
+                // ----------------------------------
+
+                estadoAdmin.textContent =
+                    "✓ Sesión administrativa activa";
+
+
+                console.log(
+                    "✅ MOTI GO ADMIN: acceso autorizado."
+                );
+
+            }
+            catch (
+                error
+            ) {
+
+                console.error(
+                    "❌ MOTI GO ADMIN: error verificando cuenta:",
+                    error
+                );
+
+
+                alert(
+                    "No se pudo verificar tu cuenta."
+                );
+
+
+                await signOut(
+                    auth
+                );
+
+
+                window.location.href =
+                    "../index.html";
+
+            }
 
         }
     );
 
 
+
+    // ==========================================
+    // CERRAR SESIÓN
+    // ==========================================
+
+    btnCerrarSesion.addEventListener(
+        "click",
+        async () => {
+
+            try {
+
+                await signOut(
+                    auth
+                );
+
+
+                console.log(
+                    "👋 MOTI GO ADMIN: sesión cerrada."
+                );
+
+
+                window.location.href =
+                    "../index.html";
+
+            }
+            catch (
+                error
+            ) {
+
+                console.error(
+                    "❌ MOTI GO ADMIN: error cerrando sesión:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+
+
+    // ==========================================
+    // BOTONES TEMPORALES
+    // ==========================================
+
     document
         .getElementById(
-            "btnCerrarSesion"
+            "btnTiendas"
         )
         .addEventListener(
             "click",
-            async () => {
+            () => {
 
-                try {
+                alert(
+                    "Módulo de tiendas próximamente."
+                );
 
-                    await signOut(auth);
+            }
+        );
 
-                    window.location.href =
-                        "../index.html";
 
-                }
-                catch (
-                    error
-                ) {
+    document
+        .getElementById(
+            "btnRepartidores"
+        )
+        .addEventListener(
+            "click",
+            () => {
 
-                    console.error(
-                        "❌ MOTI GO: error cerrando sesión:",
-                        error
-                    );
+                alert(
+                    "Módulo de repartidores próximamente."
+                );
 
-                }
+            }
+        );
+
+
+    document
+        .getElementById(
+            "btnClientes"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                alert(
+                    "Módulo de clientes próximamente."
+                );
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            "btnPedidos"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                alert(
+                    "Módulo de pedidos próximamente."
+                );
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            "btnFinanzas"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                alert(
+                    "Módulo financiero próximamente."
+                );
+
+            }
+        );
+
+
+    document
+        .getElementById(
+            "btnOperadores"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                alert(
+                    "Módulo de operadores próximamente."
+                );
 
             }
         );
 
 </script>
+
 
 </body>
 
