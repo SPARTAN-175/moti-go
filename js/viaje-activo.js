@@ -208,6 +208,16 @@ async function cargarViaje(id){
 
     );
 
+    console.log(
+    "🔎 MOTI GO VIAJE ACTIVO - buscando pedido:",
+    id
+);
+
+console.log(
+    "🔎 MOTI GO VIAJE ACTIVO - pedido existe:",
+    viajeDoc.exists()
+);
+    
     if(!viajeDoc.exists()) return;
 
     viajeActual =
