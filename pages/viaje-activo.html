@@ -1,186 +1,629 @@
 <!DOCTYPE html>
-
 <html lang="es">
 
 <head>
 
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<title>
+    <meta
+        name="theme-color"
+        content="#111827"
+    >
 
-Viaje Activo
+    <title>
+        MOTI GO · Entrega
+    </title>
 
-</title>
 
-<link rel="stylesheet"
-href="../css/variables.css">
+    <!-- ============================= -->
+    <!-- ESTILOS GENERALES -->
+    <!-- ============================= -->
 
-<link rel="stylesheet"
-href="../css/main.css">
+    <link
+        rel="stylesheet"
+        href="../css/variables.css"
+    >
 
-<link
-rel="stylesheet"
-href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link
-rel="stylesheet"
-href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
-<link rel="stylesheet"
-href="../css/viaje-activo.css">
+    <link
+        rel="stylesheet"
+        href="../css/main.css"
+    >
+
+
+    <!-- ============================= -->
+    <!-- LEAFLET -->
+    <!-- ============================= -->
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"
+    >
+
+
+    <!-- ============================= -->
+    <!-- MOTI GO -->
+    <!-- ============================= -->
+
+    <link
+        rel="stylesheet"
+        href="../css/viaje-activo.css"
+    >
 
 </head>
 
+
 <body>
 
-<div class="container">
 
-<h2>
+<div class="moti-viaje">
 
-Viaje Activo
 
-</h2>
+    <!-- ================================= -->
+    <!-- ENCABEZADO -->
+    <!-- ================================= -->
 
-<div class="status-card">
+    <header class="viaje-header">
 
-<p id="estadoViaje">
+        <div class="viaje-header-top">
 
-En camino al pasajero
+            <button
+                id="btnVolver"
+                class="btn-icon"
+                type="button"
+                aria-label="Volver"
+            >
 
-</p>
+                <span class="material-symbols-outlined">
+                    arrow_back
+                </span>
 
-</div>
+            </button>
 
-<div class="card">
 
-<h3 id="nombrePasajero">
+            <div class="viaje-header-title">
 
-Cargando...
+                <span class="viaje-brand">
+                    MOTI GO
+                </span>
 
-</h3>
+                <h1>
+                    Entrega
+                </h1>
 
-<p>
+            </div>
 
-<strong>
 
-Destino
+            <div class="pedido-indicador">
 
-</strong>
+                <span
+                    id="numeroPedido"
+                >
+                    —
+                </span>
 
-</p>
-
-<p id="destinoViaje">
-
-...
-
-</p>
-
-<p>
-
-<strong>
-
-Referencia
-
-</strong>
-
-</p>
-
-<p id="referenciaViaje">
-
-...
-
-</p>
-
-</div>
-
-   <div class="map-card">
-
-      <div class="navigation-card">
-
-    <div class="navigation-title"
-         id="navigationTitle">
-
-        Recogiendo pasajero
-
-    </div>
-
-    <div class="navigation-info">
-
-        <div>
-
-            <span class="label">
-
-                Distancia
-
-            </span>
-
-            <strong id="distanceText">
-
-                --
-
-            </strong>
+            </div>
 
         </div>
 
-        <div>
 
-            <span class="label">
+        <!-- ESTADO ACTUAL -->
 
-                Tiempo
+        <div
+            id="estadoViaje"
+            class="estado-viaje estado-asignado"
+        >
 
+            <span
+                id="estadoIcono"
+                class="material-symbols-outlined"
+            >
+                shopping_bag
             </span>
 
-            <strong id="timeText">
+            <div>
 
-                --
+                <strong
+                    id="estadoTitulo"
+                >
+                    Pedido asignado
+                </strong>
 
-            </strong>
+                <small
+                    id="estadoDescripcion"
+                >
+                    Revisa el pedido y dirígete a la primera tienda.
+                </small>
+
+            </div>
 
         </div>
 
-    </div>
+    </header>
+
+
+
+    <!-- ================================= -->
+    <!-- CONTENIDO -->
+    <!-- ================================= -->
+
+    <main class="viaje-contenido">
+
+
+        <!-- ================================= -->
+        <!-- MAPA -->
+        <!-- ================================= -->
+
+        <section class="mapa-seccion">
+
+            <div class="mapa-navegacion">
+
+                <div class="navegacion-destino">
+
+                    <span
+                        id="navigationIcon"
+                        class="material-symbols-outlined"
+                    >
+                        store
+                    </span>
+
+                    <div>
+
+                        <span class="navegacion-label">
+                            Próximo destino
+                        </span>
+
+                        <strong
+                            id="navigationTitle"
+                        >
+                            Primera tienda
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="navegacion-metricas">
+
+                    <div>
+
+                        <span>
+                            Distancia
+                        </span>
+
+                        <strong
+                            id="distanceText"
+                        >
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Tiempo
+                        </span>
+
+                        <strong
+                            id="timeText"
+                        >
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="map"
+                class="mapa"
+            >
+            </div>
+
+        </section>
+
+
+
+        <!-- ================================= -->
+        <!-- INFORMACIÓN DEL PEDIDO -->
+        <!-- ================================= -->
+
+        <section class="pedido-panel">
+
+
+            <!-- CLIENTE -->
+
+            <div class="pedido-cliente">
+
+                <div class="pedido-cliente-icon">
+
+                    <span class="material-symbols-outlined">
+                        person
+                    </span>
+
+                </div>
+
+
+                <div class="pedido-cliente-info">
+
+                    <span>
+                        Cliente
+                    </span>
+
+                    <strong
+                        id="nombrePasajero"
+                    >
+                        Cargando...
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- ENTREGA -->
+
+            <div class="pedido-destino">
+
+                <div class="destino-icon">
+
+                    <span class="material-symbols-outlined">
+                        location_on
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Entrega
+                    </span>
+
+                    <strong
+                        id="destinoViaje"
+                    >
+                        Cargando...
+                    </strong>
+
+                    <small
+                        id="referenciaViaje"
+                    >
+                        —
+                    </small>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ================================= -->
+            <!-- RESUMEN DEL PEDIDO -->
+            <!-- ================================= -->
+
+            <div class="pedido-resumen-header">
+
+                <div>
+
+                    <span class="material-symbols-outlined">
+                        shopping_cart
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Pedido
+                        </strong>
+
+                        <small
+                            id="cantidadProductos"
+                        >
+                            Cargando productos...
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <strong
+                    id="totalPedido"
+                    class="pedido-total"
+                >
+                    $0.00
+                </strong>
+
+            </div>
+
+
+
+            <!-- ================================= -->
+            <!-- TIENDAS -->
+            <!-- ================================= -->
+
+            <div
+                id="tiendasPedido"
+                class="tiendas-pedido"
+            >
+
+                <!-- Las tiendas se cargarán dinámicamente -->
+
+                <div class="pedido-cargando">
+
+                    <span class="material-symbols-outlined">
+                        progress_activity
+                    </span>
+
+                    <span>
+                        Cargando pedido...
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ================================= -->
+            <!-- PROGRESO -->
+            <!-- ================================= -->
+
+            <div
+                id="progresoPedido"
+                class="progreso-pedido"
+            >
+
+                <div class="progreso-linea">
+
+                    <div
+                        id="progresoActivo"
+                        class="progreso-activo"
+                    >
+                    </div>
+
+                </div>
+
+
+                <div class="progreso-pasos">
+
+                    <div
+                        id="pasoCompra"
+                        class="progreso-paso activo"
+                    >
+
+                        <span class="material-symbols-outlined">
+                            shopping_cart
+                        </span>
+
+                        <small>
+                            Compra
+                        </small>
+
+                    </div>
+
+
+                    <div
+                        id="pasoVerificacion"
+                        class="progreso-paso"
+                    >
+
+                        <span class="material-symbols-outlined">
+                            fact_check
+                        </span>
+
+                        <small>
+                            Verificar
+                        </small>
+
+                    </div>
+
+
+                    <div
+                        id="pasoEntrega"
+                        class="progreso-paso"
+                    >
+
+                        <span class="material-symbols-outlined">
+                            local_shipping
+                        </span>
+
+                        <small>
+                            Entrega
+                        </small>
+
+                    </div>
+
+
+                    <div
+                        id="pasoFinal"
+                        class="progreso-paso"
+                    >
+
+                        <span class="material-symbols-outlined">
+                            check_circle
+                        </span>
+
+                        <small>
+                            Finalizado
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ================================= -->
+        <!-- CÓDIGO DE ENTREGA -->
+        <!-- ================================= -->
+
+        <section
+            id="confirmacionEntrega"
+            class="confirmacion-entrega oculto"
+        >
+
+            <div class="confirmacion-icono">
+
+                <span class="material-symbols-outlined">
+                    key
+                </span>
+
+            </div>
+
+
+            <div class="confirmacion-contenido">
+
+                <h2>
+                    Confirmar entrega
+                </h2>
+
+                <p>
+                    Solicita al cliente su código de entrega de 6 dígitos.
+                </p>
+
+
+                <div
+                    id="codigoEntregaInputs"
+                    class="codigo-inputs"
+                >
+
+                    <input
+                        type="text"
+                        inputmode="numeric"
+                        maxlength="1"
+                        data-index="0"
+                    >
+
+                    <input
+                        type="text"
+                        inputmode="numeric"
+                        maxlength="1"
+                        data-index="1"
+                    >
+
+                    <input
+                        type="text"
+                        inputmode="numeric"
+                        maxlength="1"
+                        data-index="2"
+                    >
+
+                    <input
+                        type="text"
+                        inputmode="numeric"
+                        maxlength="1"
+                        data-index="3"
+                    >
+
+                    <input
+                        type="text"
+                        inputmode="numeric"
+                        maxlength="1"
+                        data-index="4"
+                    >
+
+                    <input
+                        type="text"
+                        inputmode="numeric"
+                        maxlength="1"
+                        data-index="5"
+                    >
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================================= -->
+        <!-- BOTÓN PRINCIPAL -->
+        <!-- ================================= -->
+
+        <div class="acciones-viaje">
+
+            <button
+                id="btnAccion"
+                class="btn-accion"
+                type="button"
+            >
+
+                <span
+                    id="btnAccionIcono"
+                    class="material-symbols-outlined"
+                >
+                    navigation
+                </span>
+
+                <span
+                    id="btnAccionTexto"
+                >
+                    Iniciar recorrido
+                </span>
+
+            </button>
+
+        </div>
+
+
+    </main>
 
 </div>
-      
-    <div id="map">
 
-    </div>
 
-</div> 
 
-<button
-id="btnAccion"
-class="btn-primary">
+<!-- ================================= -->
+<!-- LEAFLET -->
+<!-- ================================= -->
 
-Iniciar recorrido
-
-</button>
-
-</div>
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
 
 
 <script
-src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js">
 </script>
-    
-<script
-src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js">
-</script>
-   
-<script type="module"
-src="../js/viaje-activo.js">
 
-</script>
+
+<!-- ================================= -->
+<!-- FIREBASE / MOTI GO -->
+<!-- ================================= -->
 
 <script
-type="module"
-src="../js/gps.js">
+    type="module"
+    src="../js/viaje-activo.js">
 </script>
 
 
+<script
+    type="module"
+    src="../js/gps.js">
+</script>
 
-   
+
 </body>
 
 </html>
