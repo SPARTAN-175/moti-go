@@ -7310,17 +7310,24 @@ function abrirPedidoDesdeMisPedidos(
     // PEDIDO ACTIVO
     // =================================================
 
-    const estadosActivos = [
+   const estadosActivos = [
 
-        "pendiente_asignacion",
-        "asignado",
-        "en_compra",
-        "listo_entrega",
-        "en_ruta",
-        "entregando"
+    "pendiente_asignacion",
+    "solicitud_repartidor",
+    "sin_repartidor",
 
-    ];
+    "asignado",
 
+    "en_camino",
+    "esperando_cliente",
+    "en_entrega",
+
+    "en_compra",
+    "listo_entrega",
+    "en_ruta",
+    "entregando"
+
+];
 
     if (
         estadosActivos.includes(
