@@ -82,5 +82,92 @@
 <script src="js/missions.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/game.js"></script>
+
+  <script>
+
+    // ==========================================
+    // 🌐 INTERNET RESTAURADO
+    // ==========================================
+
+    window.addEventListener(
+        "online",
+        () => {
+
+            console.log(
+                "🌐 MOTI GO: conexión restaurada."
+            );
+
+            console.log(
+                "🚀 MOTI GO: regresando a la aplicación..."
+            );
+
+
+            document.body.innerHTML = `
+
+                <div
+                    style="
+                        position:fixed;
+                        inset:0;
+                        z-index:999999;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        background:#ffffff;
+                        font-family:Arial,sans-serif;
+                        text-align:center;
+                    "
+                >
+
+                    <div>
+
+                        <div
+                            style="
+                                font-size:48px;
+                                margin-bottom:15px;
+                            "
+                        >
+                            🌐
+                        </div>
+
+                        <h2
+                            style="
+                                margin:0;
+                                color:#0F172A;
+                            "
+                        >
+                            Conexión restaurada
+                        </h2>
+
+                        <p
+                            style="
+                                color:#64748B;
+                                font-size:14px;
+                            "
+                        >
+                            Regresando a MOTI GO...
+                        </p>
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            setTimeout(
+                () => {
+
+                    window.location.href =
+                        "../index.html";
+
+                },
+                700
+            );
+
+        }
+    );
+
+</script>
+  
 </body>
 </html>
