@@ -1,0 +1,3064 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1,
+               maximum-scale=1,
+               user-scalable=no">
+
+<meta name="theme-color" content="#07130d">
+
+<title>MOTI Mandaditos</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,
+body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#07100b;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+    touch-action:none;
+}
+
+body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+#game{
+    position:relative;
+    width:100%;
+    height:100%;
+    max-width:1000px;
+    overflow:hidden;
+    background:#17251b;
+}
+
+canvas{
+    width:100%;
+    height:100%;
+    display:block;
+}
+
+
+/* =========================
+   HUD
+========================= */
+
+#hud{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    padding:10px;
+    z-index:10;
+
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+
+    pointer-events:none;
+}
+
+.hudLeft{
+    display:flex;
+    gap:7px;
+    flex-wrap:wrap;
+}
+
+.hudBox{
+    background:rgba(5,12,8,.82);
+    color:#fff;
+
+    border:1px solid
+        rgba(255,255,255,.12);
+
+    border-radius:12px;
+
+    padding:8px 11px;
+
+    font-size:12px;
+    font-weight:800;
+
+    backdrop-filter:blur(8px);
+}
+
+.money{
+    color:#ffd447;
+}
+
+.timer{
+    color:#ffb454;
+}
+
+
+/* =========================
+   MISIÓN
+========================= */
+
+#mission{
+    position:absolute;
+
+    top:62px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    z-index:9;
+
+    min-width:230px;
+    max-width:85%;
+
+    padding:9px 13px;
+
+    background:rgba(5,12,8,.86);
+
+    border:1px solid
+        rgba(255,255,255,.1);
+
+    border-radius:13px;
+
+    text-align:center;
+
+    color:white;
+
+    font-size:12px;
+
+    pointer-events:none;
+
+    backdrop-filter:blur(8px);
+}
+
+#mission strong{
+    color:#39db82;
+}
+
+
+/* =========================
+   MINIMAPA
+========================= */
+
+#miniMap{
+    position:absolute;
+
+    right:12px;
+    top:65px;
+
+    width:120px;
+    height:100px;
+
+    background:
+        rgba(4,10,7,.86);
+
+    border:1px solid
+        rgba(255,255,255,.15);
+
+    border-radius:12px;
+
+    z-index:8;
+
+    overflow:hidden;
+}
+
+#miniCanvas{
+    width:100%;
+    height:100%;
+}
+
+
+/* =========================
+   PANTALLAS
+========================= */
+
+.screen{
+    position:absolute;
+
+    inset:0;
+
+    z-index:30;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:
+        linear-gradient(
+            rgba(3,8,5,.55),
+            rgba(3,8,5,.92)
+        );
+}
+
+.panel{
+    width:min(90%,440px);
+
+    padding:30px 24px;
+
+    border-radius:25px;
+
+    text-align:center;
+
+    color:white;
+
+    background:
+        rgba(8,18,12,.94);
+
+    border:
+        1px solid
+        rgba(255,255,255,.12);
+
+    box-shadow:
+        0 25px 70px
+        rgba(0,0,0,.5);
+}
+
+.logo{
+    font-size:52px;
+    font-weight:900;
+    letter-spacing:-4px;
+}
+
+.logo span{
+    color:#29d47d;
+}
+
+.title{
+    margin-top:3px;
+
+    font-size:20px;
+
+    font-weight:900;
+}
+
+.subtitle{
+    margin-top:8px;
+
+    color:#9ba99f;
+
+    line-height:1.5;
+}
+
+.bigButton{
+    width:100%;
+
+    margin-top:22px;
+
+    border:0;
+
+    border-radius:15px;
+
+    padding:16px;
+
+    background:#29d47d;
+
+    color:#04100a;
+
+    font-size:17px;
+
+    font-weight:900;
+}
+
+.bigButton:active{
+    transform:scale(.97);
+}
+
+.infoGrid{
+    margin-top:22px;
+
+    display:grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:9px;
+}
+
+.info{
+    padding:12px;
+
+    border-radius:12px;
+
+    background:
+        rgba(255,255,255,.05);
+
+    color:#b8c3bc;
+
+    font-size:12px;
+}
+
+.hidden{
+    display:none!important;
+}
+
+
+/* =========================
+   CONTROLES
+========================= */
+
+#controls{
+    position:absolute;
+
+    left:0;
+    bottom:15px;
+
+    width:100%;
+
+    z-index:15;
+
+    display:flex;
+
+    justify-content:
+        space-between;
+
+    padding:
+        0 15px;
+
+    pointer-events:none;
+}
+
+.controlGroup{
+    display:flex;
+
+    gap:9px;
+
+    pointer-events:auto;
+}
+
+.control{
+    width:58px;
+    height:58px;
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    border-radius:17px;
+
+    background:
+        rgba(5,12,8,.78);
+
+    border:
+        1px solid
+        rgba(255,255,255,.16);
+
+    color:white;
+
+    font-size:25px;
+
+    user-select:none;
+
+    backdrop-filter:blur(8px);
+}
+
+.control:active{
+    transform:scale(.9);
+
+    background:
+        rgba(41,212,125,.4);
+}
+
+#boostBtn{
+    color:#ffd447;
+}
+
+
+/* =========================
+   MENSAJE
+========================= */
+
+#toast{
+    position:absolute;
+
+    left:50%;
+    bottom:95px;
+
+    transform:
+        translateX(-50%)
+        translateY(20px);
+
+    z-index:25;
+
+    padding:11px 16px;
+
+    border-radius:13px;
+
+    background:
+        rgba(5,12,8,.9);
+
+    color:white;
+
+    font-size:13px;
+
+    font-weight:800;
+
+    opacity:0;
+
+    pointer-events:none;
+
+    transition:.25s;
+}
+
+#toast.show{
+    opacity:1;
+
+    transform:
+        translateX(-50%)
+        translateY(0);
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div id="game">
+
+<canvas id="canvas"></canvas>
+
+
+<!-- HUD -->
+
+<div id="hud" class="hidden">
+
+    <div class="hudLeft">
+
+        <div class="hudBox">
+            💰 <span
+                id="money">
+                $0
+            </span>
+        </div>
+
+        <div class="hudBox">
+            📦 <span
+                id="deliveries">
+                0
+            </span>
+        </div>
+
+        <div class="hudBox timer">
+            ⏱️ <span
+                id="time">
+                0
+            </span>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- MISIÓN -->
+
+<div id="mission"
+     class="hidden">
+
+    <span id="missionText">
+        Busca el pedido
+    </span>
+
+</div>
+
+
+<!-- MINIMAPA -->
+
+<div id="miniMap"
+     class="hidden">
+
+    <canvas id="miniCanvas"></canvas>
+
+</div>
+
+
+<!-- CONTROLES -->
+
+<div id="controls"
+     class="hidden">
+
+    <div class="controlGroup">
+
+        <div class="control"
+             id="upBtn">
+            ▲
+        </div>
+
+        <div class="control"
+             id="downBtn">
+            ▼
+        </div>
+
+    </div>
+
+    <div class="controlGroup">
+
+        <div class="control"
+             id="leftBtn">
+            ◀
+        </div>
+
+        <div class="control"
+             id="rightBtn">
+            ▶
+        </div>
+
+        <div class="control"
+             id="boostBtn">
+            ⚡
+        </div>
+
+    </div>
+
+</div>
+
+
+<div id="toast"></div>
+
+
+<!-- INICIO -->
+
+<div id="startScreen"
+     class="screen">
+
+    <div class="panel">
+
+        <div class="logo">
+            MO<span>TI</span>
+        </div>
+
+        <div class="title">
+            MANDADITOS
+        </div>
+
+        <div class="subtitle">
+
+            Tú eres el repartidor.<br>
+
+            Recoge los pedidos,
+            encuentra las casas
+            y entrégalos a tiempo.
+
+        </div>
+
+
+        <div class="infoGrid">
+
+            <div class="info">
+                🛵<br>
+                Conduce libremente
+            </div>
+
+            <div class="info">
+                📦<br>
+                Recoge pedidos
+            </div>
+
+            <div class="info">
+                🏠<br>
+                Encuentra las casas
+            </div>
+
+            <div class="info">
+                💰<br>
+                Gana por entregar
+            </div>
+
+        </div>
+
+
+        <button
+            class="bigButton"
+            id="startBtn">
+
+            INICIAR REPARTO
+
+        </button>
+
+
+        <div style="
+            margin-top:14px;
+            font-size:11px;
+            color:#68766e;
+        ">
+
+            Récord:
+            <span id="bestStart">
+                $0
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- GAME OVER -->
+
+<div id="gameOver"
+     class="screen hidden">
+
+    <div class="panel">
+
+        <div style="
+            font-size:35px;
+            font-weight:900;
+        ">
+
+            FIN DEL REPARTO
+
+        </div>
+
+        <div class="subtitle">
+
+            Buen trabajo, repartidor 😎
+
+        </div>
+
+
+        <div class="infoGrid">
+
+            <div class="info">
+
+                DINERO<br>
+
+                <strong
+                    id="finalMoney">
+
+                    $0
+
+                </strong>
+
+            </div>
+
+            <div class="info">
+
+                ENTREGAS<br>
+
+                <strong
+                    id="finalDeliveries">
+
+                    0
+
+                </strong>
+
+            </div>
+
+            <div class="info">
+
+                MEJOR RÉCORD<br>
+
+                <strong
+                    id="finalBest">
+
+                    $0
+
+                </strong>
+
+            </div>
+
+            <div class="info">
+
+                PEDIDOS<br>
+
+                <strong
+                    id="finalOrders">
+
+                    0
+
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <button
+            class="bigButton"
+            id="restartBtn">
+
+            VOLVER A REPARTIR
+
+        </button>
+
+    </div>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   MOTI MANDADITOS
+   ===================================================== */
+
+
+/* =========================
+   CANVAS
+========================= */
+
+const canvas =
+    document.getElementById(
+        "canvas"
+    );
+
+const ctx =
+    canvas.getContext("2d");
+
+const miniCanvas =
+    document.getElementById(
+        "miniCanvas"
+    );
+
+const miniCtx =
+    miniCanvas.getContext("2d");
+
+
+let W=0;
+let H=0;
+
+
+function resize(){
+
+    W =
+        canvas.width =
+        canvas.clientWidth;
+
+    H =
+        canvas.height =
+        canvas.clientHeight;
+
+    miniCanvas.width=120;
+    miniCanvas.height=100;
+
+}
+
+window.addEventListener(
+    "resize",
+    resize
+);
+
+resize();
+
+
+/* =========================
+   MAPA
+========================= */
+
+const WORLD_W=2600;
+const WORLD_H=1900;
+
+
+/*
+    Las carreteras están definidas
+    como rectángulos.
+
+    Esto permite construir
+    posteriormente un mapa mucho
+    más grande.
+*/
+
+const roads=[
+
+    {
+        x:0,
+        y:400,
+        w:2600,
+        h:170
+    },
+
+    {
+        x:0,
+        y:980,
+        w:2600,
+        h:170
+    },
+
+    {
+        x:350,
+        y:0,
+        w:170,
+        h:1900
+    },
+
+    {
+        x:1050,
+        y:0,
+        w:170,
+        h:1900
+    },
+
+    {
+        x:1800,
+        y:0,
+        w:170,
+        h:1900
+    },
+
+    {
+        x:520,
+        y:670,
+        w:530,
+        h:130
+    },
+
+    {
+        x:1220,
+        y:1320,
+        w:580,
+        h:130
+    }
+
+];
+
+
+/* =========================
+   EDIFICIOS
+========================= */
+
+const buildings=[];
+
+
+/*
+    Crear edificios
+    automáticamente en
+    las zonas que no sean calle.
+*/
+
+function isRoad(x,y){
+
+    return roads.some(r=>{
+
+        return (
+            x>r.x &&
+            x<r.x+r.w &&
+            y>r.y &&
+            y<r.y+r.h
+        );
+
+    });
+
+}
+
+
+function generateBuildings(){
+
+    buildings.length=0;
+
+    for(
+        let y=70;
+        y<WORLD_H-70;
+        y+=115
+    ){
+
+        for(
+            let x=70;
+            x<WORLD_W-70;
+            x+=125
+        ){
+
+            const bx=
+                x+
+                Math.random()*25;
+
+            const by=
+                y+
+                Math.random()*25;
+
+            const bw=
+                75+
+                Math.random()*35;
+
+            const bh=
+                65+
+                Math.random()*30;
+
+
+            if(
+                !isRoad(
+                    bx+bw/2,
+                    by+bh/2
+                )
+            ){
+
+                buildings.push({
+
+                    x:bx,
+                    y:by,
+                    w:bw,
+                    h:bh,
+
+                    color:
+                        Math.random()>.5
+                        ? "#d9c29a"
+                        : "#b9c7ad"
+
+                });
+
+            }
+
+        }
+
+    }
+
+}
+
+generateBuildings();
+
+
+/* =========================
+   PUNTOS DE NEGOCIO
+========================= */
+
+const stores=[
+
+    {
+        x:260,
+        y:480,
+        name:"TIENDITA"
+    },
+
+    {
+        x:800,
+        y:480,
+        name:"ABARROTES"
+    },
+
+    {
+        x:1500,
+        y:1060,
+        name:"FARMACIA"
+    },
+
+    {
+        x:2200,
+        y:1060,
+        name:"MINISÚPER"
+    }
+
+];
+
+
+/* =========================
+   CASAS
+========================= */
+
+const houses=[
+
+    {
+        x:150,
+        y:260,
+        name:"Casa de Ana"
+    },
+
+    {
+        x:700,
+        y:760,
+        name:"Casa de Luis"
+    },
+
+    {
+        x:1420,
+        y:270,
+        name:"Casa de Carlos"
+    },
+
+    {
+        x:2150,
+        y:720,
+        name:"Casa de María"
+    },
+
+    {
+        x:850,
+        y:1350,
+        name:"Casa de José"
+    },
+
+    {
+        x:2200,
+        y:1600,
+        name:"Casa de Sofía"
+    },
+
+    {
+        x:1450,
+        y:1550,
+        name:"Casa de Pedro"
+    }
+
+];
+
+
+/* =========================
+   JUGADOR
+========================= */
+
+const player={
+
+    x:260,
+    y:480,
+
+    angle:0,
+
+    speed:0,
+
+    maxSpeed:4.8,
+
+    acceleration:.18,
+
+    friction:.08,
+
+    rotation:.075,
+
+    boost:false,
+
+    boostEnergy:100
+
+};
+
+
+/* =========================
+   CÁMARA
+========================= */
+
+const camera={
+
+    x:0,
+    y:0
+
+};
+
+
+/* =========================
+   JUEGO
+========================= */
+
+let running=false;
+
+let money=0;
+
+let deliveries=0;
+
+let orders=0;
+
+let mission=null;
+
+let missionTime=0;
+
+let particles=[];
+
+let traffic=[];
+
+let trafficTimer=0;
+
+let bestMoney=
+    parseInt(
+        localStorage.getItem(
+            "motiMandaditosBest"
+        ) || "0"
+    );
+
+
+document.getElementById(
+    "bestStart"
+).textContent=
+    "$"+bestMoney;
+
+
+/* =========================
+   UTILIDADES
+========================= */
+
+function distance(
+    x1,
+    y1,
+    x2,
+    y2
+){
+
+    return Math.hypot(
+        x1-x2,
+        y1-y2
+    );
+
+}
+
+
+function clamp(
+    value,
+    min,
+    max
+){
+
+    return Math.max(
+        min,
+        Math.min(max,value)
+    );
+
+}
+
+
+/* =========================
+   GENERAR PEDIDO
+========================= */
+
+function createMission(){
+
+    const store=
+        stores[
+            Math.floor(
+                Math.random()*
+                stores.length
+            )
+        ];
+
+    let house;
+
+    do{
+
+        house=
+            houses[
+                Math.floor(
+                    Math.random()*
+                    houses.length
+                )
+            ];
+
+    }while(
+        distance(
+            store.x,
+            store.y,
+            house.x,
+            house.y
+        )<500
+    );
+
+
+    mission={
+
+        store:store,
+
+        house:house,
+
+        state:"pickup",
+
+        reward:
+            25+
+            Math.floor(
+                Math.random()*35
+            )
+
+    };
+
+
+    missionTime=90;
+
+    orders++;
+
+
+    updateMissionText();
+
+}
+
+
+/* =========================
+   TEXTO DE MISIÓN
+========================= */
+
+function updateMissionText(){
+
+    if(!mission)
+        return;
+
+
+    const text=
+        document.getElementById(
+            "missionText"
+        );
+
+
+    if(
+        mission.state==="pickup"
+    ){
+
+        text.innerHTML=
+            "📦 Ve a <strong>"+
+            mission.store.name+
+            "</strong> a recoger el pedido";
+
+    }else{
+
+        text.innerHTML=
+            "🏠 Entrega el pedido en <strong>"+
+            mission.house.name+
+            "</strong>";
+
+    }
+
+}
+
+
+/* =========================
+   TOAST
+========================= */
+
+let toastTimer=null;
+
+
+function showToast(text){
+
+    const toast=
+        document.getElementById(
+            "toast"
+        );
+
+    toast.textContent=text;
+
+    toast.classList.add("show");
+
+    clearTimeout(toastTimer);
+
+    toastTimer=
+        setTimeout(
+            ()=>{
+                toast.classList.remove(
+                    "show"
+                );
+            },
+            1800
+        );
+
+}
+
+
+/* =========================
+   RECIBIR PEDIDO
+========================= */
+
+function checkMission(){
+
+    if(!mission)
+        return;
+
+
+    if(
+        mission.state==="pickup"
+    ){
+
+        const d=
+            distance(
+                player.x,
+                player.y,
+                mission.store.x,
+                mission.store.y
+            );
+
+
+        if(d<65){
+
+            mission.state=
+                "delivery";
+
+            missionTime=90;
+
+            updateMissionText();
+
+            showToast(
+                "📦 ¡Pedido recogido! Ahora llévalo a la casa."
+            );
+
+        }
+
+    }
+
+
+    else{
+
+        const d=
+            distance(
+                player.x,
+                player.y,
+                mission.house.x,
+                mission.house.y
+            );
+
+
+        if(d<75){
+
+            const reward=
+                mission.reward+
+                Math.floor(
+                    missionTime*.4
+                );
+
+
+            money+=reward;
+
+            deliveries++;
+
+            createParticles(
+                player.x,
+                player.y,
+                30
+            );
+
+            showToast(
+                "💰 ¡Pedido entregado! +$"+
+                reward
+            );
+
+
+            mission=null;
+
+            setTimeout(
+                ()=>{
+                    if(running)
+                        createMission();
+                },
+                700
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================
+   MOVIMIENTO
+========================= */
+
+const keys={
+
+    up:false,
+    down:false,
+    left:false,
+    right:false,
+    boost:false
+
+};
+
+
+function updatePlayer(){
+
+    let maxSpeed=
+        player.maxSpeed;
+
+
+    if(
+        keys.boost &&
+        player.boostEnergy>0
+    ){
+
+        player.boost=true;
+
+        maxSpeed=8;
+
+        player.boostEnergy-=.8;
+
+    }else{
+
+        player.boost=false;
+
+        player.boostEnergy+=.25;
+
+    }
+
+
+    player.boostEnergy=
+        clamp(
+            player.boostEnergy,
+            0,
+            100
+        );
+
+
+    if(keys.up){
+
+        player.speed+=
+            player.acceleration;
+
+    }
+
+
+    else if(keys.down){
+
+        player.speed-=
+            player.acceleration*.7;
+
+    }
+
+
+    else{
+
+        if(player.speed>0){
+
+            player.speed=
+                Math.max(
+                    0,
+                    player.speed-
+                    player.friction
+                );
+
+        }
+
+        if(player.speed<0){
+
+            player.speed=
+                Math.min(
+                    0,
+                    player.speed+
+                    player.friction
+                );
+
+        }
+
+    }
+
+
+    player.speed=
+        clamp(
+            player.speed,
+            -2.5,
+            maxSpeed
+        );
+
+
+    if(
+        Math.abs(player.speed)>.1
+    ){
+
+        const turn=
+            player.rotation*
+            Math.min(
+                1,
+                Math.abs(
+                    player.speed
+                )/3
+            );
+
+
+        if(keys.left)
+            player.angle-=turn;
+
+        if(keys.right)
+            player.angle+=turn;
+
+    }
+
+
+    const oldX=
+        player.x;
+
+    const oldY=
+        player.y;
+
+
+    player.x+=
+        Math.cos(
+            player.angle
+        )*
+        player.speed;
+
+    player.y+=
+        Math.sin(
+            player.angle
+        )*
+        player.speed;
+
+
+    player.x=
+        clamp(
+            player.x,
+            25,
+            WORLD_W-25
+        );
+
+    player.y=
+        clamp(
+            player.y,
+            25,
+            WORLD_H-25
+        );
+
+
+    /*
+        Si intenta atravesar
+        un edificio, lo regresamos.
+    */
+
+    if(collidesBuilding()){
+
+        player.x=oldX;
+        player.y=oldY;
+
+        player.speed*=.2;
+
+    }
+
+
+    updateCamera();
+
+}
+
+
+/* =========================
+   COLISIÓN EDIFICIOS
+========================= */
+
+function collidesBuilding(){
+
+    for(
+        const b of buildings
+    ){
+
+        if(
+
+            player.x>
+                b.x-18 &&
+
+            player.x<
+                b.x+b.w+18 &&
+
+            player.y>
+                b.y-18 &&
+
+            player.y<
+                b.y+b.h+18
+
+        ){
+
+            return true;
+
+        }
+
+    }
+
+    return false;
+
+}
+
+
+/* =========================
+   CÁMARA
+========================= */
+
+function updateCamera(){
+
+    camera.x=
+        player.x-W/2;
+
+    camera.y=
+        player.y-H/2;
+
+
+    camera.x=
+        clamp(
+            camera.x,
+            0,
+            WORLD_W-W
+        );
+
+    camera.y=
+        clamp(
+            camera.y,
+            0,
+            WORLD_H-H
+        );
+
+}
+
+
+/* =========================
+   DIBUJAR MAPA
+========================= */
+
+function drawWorld(){
+
+    ctx.fillStyle="#4e754b";
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    ctx.save();
+
+    ctx.translate(
+        -camera.x,
+        -camera.y
+    );
+
+
+    // caminos
+
+    roads.forEach(r=>{
+
+        ctx.fillStyle="#44484a";
+
+        ctx.fillRect(
+            r.x,
+            r.y,
+            r.w,
+            r.h
+        );
+
+
+        ctx.fillStyle="#c8c5a9";
+
+        /*
+            Líneas centrales
+        */
+
+        if(r.w>r.h){
+
+            for(
+                let x=r.x;
+                x<r.x+r.w;
+                x+=70
+            ){
+
+                ctx.fillRect(
+                    x,
+                    r.y+r.h/2-2,
+                    35,
+                    4
+                );
+
+            }
+
+        }else{
+
+            for(
+                let y=r.y;
+                y<r.y+r.h;
+                y+=70
+            ){
+
+                ctx.fillRect(
+                    r.x+r.w/2-2,
+                    y,
+                    4,
+                    35
+                );
+
+            }
+
+        }
+
+    });
+
+
+    // edificios
+
+    buildings.forEach(b=>{
+
+        // sombra
+
+        ctx.fillStyle=
+            "rgba(0,0,0,.18)";
+
+        ctx.fillRect(
+            b.x+5,
+            b.y+6,
+            b.w,
+            b.h
+        );
+
+
+        ctx.fillStyle=b.color;
+
+        ctx.fillRect(
+            b.x,
+            b.y,
+            b.w,
+            b.h
+        );
+
+
+        // techo
+
+        ctx.fillStyle=
+            "#8b5142";
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            b.x-5,
+            b.y
+        );
+
+        ctx.lineTo(
+            b.x+b.w/2,
+            b.y-15
+        );
+
+        ctx.lineTo(
+            b.x+b.w+5,
+            b.y
+        );
+
+        ctx.closePath();
+
+        ctx.fill();
+
+
+        // ventanas
+
+        ctx.fillStyle="#7fa9ad";
+
+        ctx.fillRect(
+            b.x+15,
+            b.y+20,
+            14,
+            14
+        );
+
+        ctx.fillRect(
+            b.x+b.w-29,
+            b.y+20,
+            14,
+            14
+        );
+
+
+        // puerta
+
+        ctx.fillStyle="#684734";
+
+        ctx.fillRect(
+            b.x+b.w/2-7,
+            b.y+b.h-25,
+            14,
+            25
+        );
+
+    });
+
+
+    // tiendas
+
+    stores.forEach(s=>{
+
+        ctx.fillStyle="#f2b84b";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            s.x,
+            s.y,
+            25,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+
+        ctx.fillStyle="#332714";
+
+        ctx.font=
+            "bold 10px Arial";
+
+        ctx.textAlign="center";
+
+        ctx.fillText(
+            "🏪",
+            s.x,
+            s.y+4
+        );
+
+    });
+
+
+    // casas destino
+
+    houses.forEach(h=>{
+
+        ctx.fillStyle="#ffffff";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            h.x,
+            h.y,
+            22,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+
+
+        ctx.fillStyle="#222";
+
+        ctx.font=
+            "bold 11px Arial";
+
+        ctx.textAlign="center";
+
+        ctx.fillText(
+            "🏠",
+            h.x,
+            h.y+4
+        );
+
+    });
+
+
+    // marcador misión
+
+    if(mission){
+
+        let target;
+
+        if(
+            mission.state==="pickup"
+        ){
+
+            target=
+                mission.store;
+
+        }else{
+
+            target=
+                mission.house;
+
+        }
+
+
+        const pulse=
+            30+
+            Math.sin(
+                Date.now()/180
+            )*7;
+
+
+        ctx.strokeStyle=
+            mission.state==="pickup"
+            ? "#ffd447"
+            : "#ff8b42";
+
+        ctx.lineWidth=4;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            target.x,
+            target.y,
+            pulse,
+            0,
+            Math.PI*2
+        );
+
+        ctx.stroke();
+
+
+        ctx.fillStyle=
+            mission.state==="pickup"
+            ? "#ffd447"
+            : "#ff8b42";
+
+        ctx.font=
+            "bold 12px Arial";
+
+        ctx.textAlign="center";
+
+        ctx.fillText(
+            mission.state==="pickup"
+            ? "RECOGER"
+            : "ENTREGAR",
+            target.x,
+            target.y-40
+        );
+
+    }
+
+
+    // tráfico
+
+    traffic.forEach(t=>{
+
+        ctx.save();
+
+        ctx.translate(
+            t.x,
+            t.y
+        );
+
+        ctx.rotate(
+            t.angle
+        );
+
+        ctx.fillStyle=t.color;
+
+        roundRect(
+            -12,
+            -22,
+            24,
+            44,
+            6
+        );
+
+        ctx.fill();
+
+
+        ctx.fillStyle="#202d35";
+
+        ctx.fillRect(
+            -8,
+            -12,
+            16,
+            12
+        );
+
+
+        ctx.restore();
+
+    });
+
+
+    // jugador
+
+    drawMoto();
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   MOTITO
+========================= */
+
+function drawMoto(){
+
+    ctx.save();
+
+    ctx.translate(
+        player.x,
+        player.y
+    );
+
+    ctx.rotate(
+        player.angle
+    );
+
+
+    // sombra
+
+    ctx.fillStyle=
+        "rgba(0,0,0,.3)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        8,
+        20,
+        8,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    // ruedas
+
+    ctx.fillStyle="#111";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        15,
+        0,
+        7,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+        -15,
+        0,
+        7,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    // moto
+
+    ctx.fillStyle=
+        player.boost
+        ? "#ffd447"
+        : "#27d47b";
+
+
+    roundRect(
+        -17,
+        -10,
+        34,
+        20,
+        8
+    );
+
+    ctx.fill();
+
+
+    // asiento
+
+    ctx.fillStyle="#172019";
+
+    roundRect(
+        -5,
+        -8,
+        18,
+        10,
+        4
+    );
+
+    ctx.fill();
+
+
+    // conductor
+
+    ctx.fillStyle="#172019";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        -1,
+        -15,
+        7,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    // caja de mandado
+
+    ctx.fillStyle="#e69a3d";
+
+    ctx.fillRect(
+        -16,
+        -22,
+        14,
+        12
+    );
+
+
+    // faro
+
+    ctx.fillStyle="#fff4a8";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        18,
+        0,
+        3,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    // turbo
+
+    if(player.boost){
+
+        ctx.fillStyle="#ff8a32";
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            -20,
+            0
+        );
+
+        ctx.lineTo(
+            -35,
+            -6
+        );
+
+        ctx.lineTo(
+            -30,
+            0
+        );
+
+        ctx.lineTo(
+            -35,
+            6
+        );
+
+        ctx.closePath();
+
+        ctx.fill();
+
+    }
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   TRÁFICO
+========================= */
+
+function createTraffic(){
+
+    const r=
+        roads[
+            Math.floor(
+                Math.random()*
+                roads.length
+            )
+        ];
+
+
+    let x;
+    let y;
+    let angle;
+
+
+    if(r.w>r.h){
+
+        x=
+            r.x+
+            Math.random()*r.w;
+
+        y=
+            r.y+
+            r.h/2;
+
+        angle=
+            Math.random()>.5
+            ? 0
+            : Math.PI;
+
+    }else{
+
+        x=
+            r.x+
+            r.w/2;
+
+        y=
+            r.y+
+            Math.random()*r.h;
+
+        angle=
+            Math.random()>.5
+            ? Math.PI/2
+            : -Math.PI/2;
+
+    }
+
+
+    traffic.push({
+
+        x:x,
+        y:y,
+
+        angle:angle,
+
+        speed:
+            1+
+            Math.random()*1.5,
+
+        color:[
+            "#e74c3c",
+            "#3498db",
+            "#f1c40f",
+            "#9b59b6"
+        ][
+            Math.floor(
+                Math.random()*4
+            )
+        ]
+
+    });
+
+}
+
+
+function updateTraffic(){
+
+    trafficTimer--;
+
+    if(
+        trafficTimer<=0
+    ){
+
+        createTraffic();
+
+        trafficTimer=90;
+
+    }
+
+
+    traffic.forEach(t=>{
+
+        t.x+=
+            Math.cos(
+                t.angle
+            )*
+            t.speed;
+
+        t.y+=
+            Math.sin(
+                t.angle
+            )*
+            t.speed;
+
+    });
+
+
+    traffic=
+        traffic.filter(t=>
+
+            t.x>-100 &&
+            t.x<WORLD_W+100 &&
+            t.y>-100 &&
+            t.y<WORLD_H+100
+
+        );
+
+}
+
+
+/* =========================
+   PARTÍCULAS
+========================= */
+
+function createParticles(
+    x,
+    y,
+    amount
+){
+
+    for(
+        let i=0;
+        i<amount;
+        i++
+    ){
+
+        particles.push({
+
+            x:x,
+
+            y:y,
+
+            vx:
+                (Math.random()-.5)*4,
+
+            vy:
+                (Math.random()-.5)*4,
+
+            life:
+                30+
+                Math.random()*30
+
+        });
+
+    }
+
+}
+
+
+function updateParticles(){
+
+    particles.forEach(p=>{
+
+        p.x+=p.vx;
+
+        p.y+=p.vy;
+
+        p.vy+=.08;
+
+        p.life--;
+
+    });
+
+
+    particles=
+        particles.filter(
+            p=>p.life>0
+        );
+
+}
+
+
+function drawParticles(){
+
+    ctx.save();
+
+    ctx.translate(
+        -camera.x,
+        -camera.y
+    );
+
+
+    particles.forEach(p=>{
+
+        ctx.globalAlpha=
+            p.life/60;
+
+        ctx.fillStyle="#ffd447";
+
+        ctx.fillRect(
+            p.x,
+            p.y,
+            5,
+            5
+        );
+
+    });
+
+
+    ctx.globalAlpha=1;
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   MINIMAPA
+========================= */
+
+function drawMiniMap(){
+
+    miniCtx.clearRect(
+        0,
+        0,
+        120,
+        100
+    );
+
+
+    const sx=
+        120/WORLD_W;
+
+    const sy=
+        100/WORLD_H;
+
+
+    // terreno
+
+    miniCtx.fillStyle="#315333";
+
+    miniCtx.fillRect(
+        0,
+        0,
+        120,
+        100
+    );
+
+
+    // calles
+
+    miniCtx.fillStyle="#555";
+
+    roads.forEach(r=>{
+
+        miniCtx.fillRect(
+            r.x*sx,
+            r.y*sy,
+            r.w*sx,
+            r.h*sy
+        );
+
+    });
+
+
+    // casas
+
+    miniCtx.fillStyle="#f5c34a";
+
+    houses.forEach(h=>{
+
+        miniCtx.fillRect(
+            h.x*sx-2,
+            h.y*sy-2,
+            4,
+            4
+        );
+
+    });
+
+
+    // misión
+
+    if(mission){
+
+        const target=
+            mission.state==="pickup"
+            ? mission.store
+            : mission.house;
+
+
+        miniCtx.fillStyle=
+            mission.state==="pickup"
+            ? "#ffd447"
+            : "#ff7847";
+
+
+        miniCtx.beginPath();
+
+        miniCtx.arc(
+            target.x*sx,
+            target.y*sy,
+            4,
+            0,
+            Math.PI*2
+        );
+
+        miniCtx.fill();
+
+    }
+
+
+    // jugador
+
+    miniCtx.fillStyle="#29d47d";
+
+    miniCtx.beginPath();
+
+    miniCtx.arc(
+        player.x*sx,
+        player.y*sy,
+        4,
+        0,
+        Math.PI*2
+    );
+
+    miniCtx.fill();
+
+}
+
+
+/* =========================
+   ACTUALIZAR HUD
+========================= */
+
+function updateHUD(){
+
+    document.getElementById(
+        "money"
+    ).textContent=
+        "$"+money;
+
+
+    document.getElementById(
+        "deliveries"
+    ).textContent=
+        deliveries;
+
+
+    document.getElementById(
+        "time"
+    ).textContent=
+        Math.ceil(
+            missionTime
+        );
+
+}
+
+
+/* =========================
+   LOOP
+========================= */
+
+let lastTime=
+    performance.now();
+
+
+function loop(now){
+
+    const delta=
+        Math.min(
+            50,
+            now-lastTime
+        );
+
+    lastTime=now;
+
+
+    if(running){
+
+        updatePlayer();
+
+        updateTraffic();
+
+        updateParticles();
+
+        checkMission();
+
+
+        if(mission){
+
+            missionTime-=
+                delta/1000;
+
+
+            if(
+                missionTime<=0
+            ){
+
+                showToast(
+                    "⏱️ Se acabó el tiempo. Pedido cancelado."
+                );
+
+                mission=null;
+
+                setTimeout(
+                    ()=>{
+                        if(running)
+                            createMission();
+                    },
+                    900
+                );
+
+            }
+
+        }
+
+
+        updateHUD();
+
+    }
+
+
+    drawWorld();
+
+    drawParticles();
+
+    drawMiniMap();
+
+
+    requestAnimationFrame(
+        loop
+    );
+
+}
+
+
+requestAnimationFrame(
+    loop
+);
+
+
+/* =========================
+   INICIAR
+========================= */
+
+function startGame(){
+
+    running=true;
+
+    money=0;
+
+    deliveries=0;
+
+    orders=0;
+
+    particles=[];
+
+    traffic=[];
+
+    trafficTimer=30;
+
+
+    player.x=260;
+
+    player.y=480;
+
+    player.angle=0;
+
+    player.speed=0;
+
+    player.boostEnergy=100;
+
+
+    camera.x=0;
+
+    camera.y=0;
+
+
+    createMission();
+
+
+    document
+        .getElementById(
+            "startScreen"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "gameOver"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "hud"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "mission"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "miniMap"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "controls"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+}
+
+
+/* =========================
+   TERMINAR
+========================= */
+
+function endGame(){
+
+    running=false;
+
+
+    if(
+        money>bestMoney
+    ){
+
+        bestMoney=money;
+
+        localStorage.setItem(
+            "motiMandaditosBest",
+            bestMoney
+        );
+
+    }
+
+
+    document.getElementById(
+        "finalMoney"
+    ).textContent=
+        "$"+money;
+
+
+    document.getElementById(
+        "finalDeliveries"
+    ).textContent=
+        deliveries;
+
+
+    document.getElementById(
+        "finalBest"
+    ).textContent=
+        "$"+bestMoney;
+
+
+    document.getElementById(
+        "finalOrders"
+    ).textContent=
+        orders;
+
+
+    document
+        .getElementById(
+            "hud"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "mission"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "miniMap"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "controls"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "gameOver"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+}
+
+
+/* =========================
+   BOTONES
+========================= */
+
+document
+    .getElementById(
+        "startBtn"
+    )
+    .addEventListener(
+        "click",
+        startGame
+    );
+
+
+document
+    .getElementById(
+        "restartBtn"
+    )
+    .addEventListener(
+        "click",
+        startGame
+    );
+
+
+/* =========================
+   CONTROLES TÁCTILES
+========================= */
+
+function bindButton(
+    id,
+    key
+){
+
+    const el=
+        document.getElementById(
+            id
+        );
+
+
+    el.addEventListener(
+        "pointerdown",
+        e=>{
+
+            e.preventDefault();
+
+            keys[key]=true;
+
+        }
+    );
+
+
+    el.addEventListener(
+        "pointerup",
+        e=>{
+
+            e.preventDefault();
+
+            keys[key]=false;
+
+        }
+    );
+
+
+    el.addEventListener(
+        "pointercancel",
+        ()=>{
+            keys[key]=false;
+        }
+    );
+
+
+    el.addEventListener(
+        "pointerleave",
+        ()=>{
+            keys[key]=false;
+        }
+    );
+
+}
+
+
+bindButton(
+    "upBtn",
+    "up"
+);
+
+bindButton(
+    "downBtn",
+    "down"
+);
+
+bindButton(
+    "leftBtn",
+    "left"
+);
+
+bindButton(
+    "rightBtn",
+    "right"
+);
+
+bindButton(
+    "boostBtn",
+    "boost"
+);
+
+
+/* =========================
+   TECLADO
+========================= */
+
+document.addEventListener(
+    "keydown",
+    e=>{
+
+        if(
+            e.key==="ArrowUp" ||
+            e.key.toLowerCase()==="w"
+        ){
+
+            keys.up=true;
+
+        }
+
+
+        if(
+            e.key==="ArrowDown" ||
+            e.key.toLowerCase()==="s"
+        ){
+
+            keys.down=true;
+
+        }
+
+
+        if(
+            e.key==="ArrowLeft" ||
+            e.key.toLowerCase()==="a"
+        ){
+
+            keys.left=true;
+
+        }
+
+
+        if(
+            e.key==="ArrowRight" ||
+            e.key.toLowerCase()==="d"
+        ){
+
+            keys.right=true;
+
+        }
+
+
+        if(
+            e.code==="Space"
+        ){
+
+            keys.boost=true;
+
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "keyup",
+    e=>{
+
+        if(
+            e.key==="ArrowUp" ||
+            e.key.toLowerCase()==="w"
+        ){
+
+            keys.up=false;
+
+        }
+
+
+        if(
+            e.key==="ArrowDown" ||
+            e.key.toLowerCase()==="s"
+        ){
+
+            keys.down=false;
+
+        }
+
+
+        if(
+            e.key==="ArrowLeft" ||
+            e.key.toLowerCase()==="a"
+        ){
+
+            keys.left=false;
+
+        }
+
+
+        if(
+            e.key==="ArrowRight" ||
+            e.key.toLowerCase()==="d"
+        ){
+
+            keys.right=false;
+
+        }
+
+
+        if(
+            e.code==="Space"
+        ){
+
+            keys.boost=false;
+
+        }
+
+    }
+);
+
+
+/* =========================
+   RECTÁNGULO REDONDEADO
+========================= */
+
+function roundRect(
+    x,
+    y,
+    w,
+    h,
+    r
+){
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        x+r,
+        y
+    );
+
+    ctx.arcTo(
+        x+w,
+        y,
+        x+w,
+        y+h,
+        r
+    );
+
+    ctx.arcTo(
+        x+w,
+        y+h,
+        x,
+        y+h,
+        r
+    );
+
+    ctx.arcTo(
+        x,
+        y+h,
+        x,
+        y,
+        r
+    );
+
+    ctx.arcTo(
+        x,
+        y,
+        x+w,
+        y,
+        r
+    );
+
+    ctx.closePath();
+
+}
+
+
+/* =========================
+   INICIO
+========================= */
+
+</script>
+
+</body>
+</html>
