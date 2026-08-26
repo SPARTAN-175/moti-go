@@ -9327,21 +9327,25 @@ function crearEstilosSeguimientoPedido() {
 
     estilo.textContent = `
 
+        /* ==========================================
+           PANEL
+        ========================================== */
+
         #motiPanelSeguimientoPedido {
 
-            position: fixed;
+            position:fixed;
 
-            inset: 0;
+            inset:0;
 
-            z-index: 100000;
+            z-index:100000;
 
-            background: #f7f7f7;
+            background:#f5f7fa;
 
-            visibility: hidden;
+            visibility:hidden;
 
-            opacity: 0;
+            opacity:0;
 
-            transform: translateX(100%);
+            transform:translateX(100%);
 
             transition:
                 opacity .25s ease,
@@ -9353,357 +9357,1426 @@ function crearEstilosSeguimientoPedido() {
 
         #motiPanelSeguimientoPedido.activo {
 
-            visibility: visible;
+            visibility:visible;
 
-            opacity: 1;
+            opacity:1;
 
-            transform: translateX(0);
+            transform:translateX(0);
 
         }
 
 
         .moti-seguimiento-panel {
 
-            width: 100%;
+            width:100%;
 
-            height: 100%;
+            height:100%;
 
-            display: flex;
+            display:flex;
 
-            flex-direction: column;
+            flex-direction:column;
 
-            background: #f7f7f7;
+            overflow:hidden;
 
         }
 
+
+        /* ==========================================
+           HEADER
+        ========================================== */
 
         .moti-seguimiento-header {
 
-            min-height: 72px;
+            min-height:72px;
 
-            padding: 12px 16px;
+            display:flex;
 
-            display: flex;
+            align-items:center;
 
-            align-items: center;
+            gap:14px;
 
-            gap: 12px;
+            padding:
+                12px 18px;
 
-            background: #ffffff;
+            background:#ffffff;
 
             border-bottom:
-                1px solid
-                #e5e5e5;
+                1px solid #e8ebef;
 
-        }
-
-
-        .moti-seguimiento-header > div {
-
-            display: flex;
-
-            flex-direction: column;
-
-            gap: 2px;
+            flex-shrink:0;
 
         }
 
 
         .moti-seguimiento-header span {
 
-            font-size: 11px;
+            display:block;
 
-            font-weight: 700;
+            font-size:11px;
 
-            color: #777;
+            font-weight:800;
 
-            letter-spacing: .08em;
+            letter-spacing:.08em;
+
+            color:#777;
 
         }
 
 
         .moti-seguimiento-header h2 {
 
-            margin: 0;
+            margin:3px 0 0;
 
-            font-size: 20px;
+            font-size:18px;
 
-            color: #111;
+            color:#111827;
 
         }
 
 
         .moti-seguimiento-regresar {
 
-            width: 44px;
+            width:42px;
 
-            height: 44px;
+            height:42px;
 
-            border: 0;
+            border:0;
 
-            border-radius: 50%;
+            border-radius:50%;
 
-            background: #f0f0f0;
+            background:#f3f4f6;
 
-            display: flex;
+            display:flex;
 
-            align-items: center;
+            align-items:center;
 
-            justify-content: center;
+            justify-content:center;
 
-            cursor: pointer;
+            cursor:pointer;
+
+            flex-shrink:0;
 
         }
 
+
+        .moti-seguimiento-regresar
+        .material-symbols-outlined {
+
+            font-size:22px;
+
+            color:#111827;
+
+        }
+
+
+        /* ==========================================
+           CONTENIDO
+        ========================================== */
 
         .moti-seguimiento-contenido {
 
-            flex: 1;
+            flex:1;
 
-            overflow-y: auto;
+            overflow-y:auto;
 
             padding:
-                24px 16px 40px;
+                20px 16px 40px;
 
         }
 
 
-        .moti-seguimiento-estado {
+        .moti-pedido-contenedor {
 
-            max-width: 560px;
+            width:100%;
 
-            margin: 0 auto;
+            max-width:760px;
 
-            text-align: center;
-
-        }
-
-
-        .moti-seguimiento-icono {
-
-            width: 82px;
-
-            height: 82px;
-
-            margin:
-                20px auto 18px;
-
-            border-radius: 50%;
-
-            background: #eeeeee;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
+            margin:0 auto;
 
         }
 
 
-        .moti-seguimiento-icono
-        .material-symbols-outlined {
+        /* ==========================================
+           CABECERA DEL PEDIDO
+        ========================================== */
 
-            font-size: 42px;
+        .moti-pedido-cabecera {
 
-        }
+            background:#ffffff;
 
+            border-radius:22px;
 
-        .moti-seguimiento-estado h3 {
+            padding:20px;
 
-            margin:
-                0 0 8px;
-
-            font-size: 25px;
-
-            color: #111;
-
-        }
-
-
-        .moti-seguimiento-estado p {
-
-            margin:
-                0 auto 28px;
-
-            max-width: 340px;
-
-            line-height: 1.5;
-
-            font-size: 15px;
-
-            color: #707070;
-
-        }
-
-
-        .moti-seguimiento-barra {
-
-            width: 100%;
-
-            height: 8px;
-
-            overflow: hidden;
-
-            border-radius: 20px;
-
-            background: #e5e5e5;
-
-        }
-
-
-        .moti-seguimiento-progreso {
-
-            height: 100%;
-
-            border-radius: 20px;
-
-            background: #111;
-
-            transition:
-                width .35s ease;
-
-        }
-
-
-        .moti-seguimiento-pasos {
-
-            display: flex;
-
-            justify-content: space-between;
-
-            margin:
-                10px 0 30px;
-
-            font-size: 11px;
-
-            color: #999;
-
-        }
-
-
-        .moti-seguimiento-pasos span.activo {
-
-            color: #111;
-
-            font-weight: 700;
-
-        }
-
-
-        .moti-seguimiento-resumen {
-
-            display: flex;
-
-            flex-direction: column;
-
-            gap: 1px;
-
-            overflow: hidden;
+            margin-bottom:14px;
 
             border:
-                1px solid
-                #e5e5e5;
+                1px solid #e8ebef;
 
-            border-radius: 18px;
-
-            background: #ffffff;
-
-            text-align: left;
+            box-shadow:
+                0 5px 20px rgba(15,23,42,.05);
 
         }
 
 
-        .moti-seguimiento-resumen > div {
+        .moti-pedido-marca {
+
+            display:block;
+
+            font-size:11px;
+
+            font-weight:800;
+
+            letter-spacing:.1em;
+
+            color:#6b7280;
+
+            margin-bottom:5px;
+
+        }
+
+
+        .moti-pedido-cabecera h2 {
+
+            margin:0;
+
+            font-size:25px;
+
+            color:#111827;
+
+        }
+
+
+        .moti-pedido-cabecera p {
+
+            margin:7px 0 14px;
+
+            color:#6b7280;
+
+            font-size:14px;
+
+            line-height:1.45;
+
+        }
+
+
+        .moti-estado-badge {
+
+            display:inline-flex;
+
+            align-items:center;
+
+            gap:7px;
 
             padding:
-                14px 16px;
+                8px 12px;
 
-            display: flex;
+            border-radius:999px;
 
-            align-items: center;
+            background:#eef7f0;
 
-            justify-content: space-between;
+            color:#15803d;
 
-            gap: 15px;
+            font-size:12px;
+
+            font-weight:700;
+
+        }
+
+
+        .moti-estado-badge
+        .material-symbols-outlined {
+
+            font-size:18px;
+
+        }
+
+
+        /* ==========================================
+           PROGRESO HORIZONTAL
+        ========================================== */
+
+        .moti-progreso-card {
+
+            background:#ffffff;
+
+            border-radius:22px;
+
+            padding:
+                22px 16px 18px;
+
+            margin-bottom:14px;
+
+            border:
+                1px solid #e8ebef;
+
+            box-shadow:
+                0 5px 20px rgba(15,23,42,.05);
+
+        }
+
+
+        .moti-progreso-scroll {
+
+            position:relative;
+
+            width:100%;
+
+            overflow-x:auto;
+
+            overflow-y:hidden;
+
+            padding:
+                2px 4px 8px;
+
+            scrollbar-width:none;
+
+        }
+
+
+        .moti-progreso-scroll::-webkit-scrollbar {
+
+            display:none;
+
+        }
+
+
+        .moti-progreso-pasos {
+
+            position:relative;
+
+            z-index:3;
+
+            min-width:690px;
+
+            display:flex;
+
+            justify-content:space-between;
+
+        }
+
+
+        .moti-progreso-linea-fondo {
+
+            position:absolute;
+
+            z-index:1;
+
+            left:36px;
+
+            right:36px;
+
+            top:19px;
+
+            height:5px;
+
+            border-radius:999px;
+
+            background:#e5e7eb;
+
+        }
+
+
+        .moti-progreso-linea-activa {
+
+            position:absolute;
+
+            z-index:2;
+
+            left:36px;
+
+            top:19px;
+
+            height:5px;
+
+            max-width:calc(100% - 72px);
+
+            border-radius:999px;
+
+            background:#16a34a;
+
+            transition:
+                width .4s ease;
+
+        }
+
+
+        .moti-progreso-paso {
+
+            width:88px;
+
+            display:flex;
+
+            flex-direction:column;
+
+            align-items:center;
+
+            text-align:center;
+
+            flex-shrink:0;
+
+        }
+
+
+        .moti-progreso-punto {
+
+            width:38px;
+
+            height:38px;
+
+            border-radius:50%;
+
+            display:flex;
+
+            align-items:center;
+
+            justify-content:center;
+
+            background:#ffffff;
+
+            border:
+                3px solid #d1d5db;
+
+            box-sizing:border-box;
+
+            transition:
+                .25s ease;
+
+        }
+
+
+        .moti-progreso-punto
+        .material-symbols-outlined {
+
+            font-size:19px;
+
+            color:#9ca3af;
+
+        }
+
+
+        .moti-progreso-paso.completado
+        .moti-progreso-punto {
+
+            background:#16a34a;
+
+            border-color:#16a34a;
+
+        }
+
+
+        .moti-progreso-paso.completado
+        .material-symbols-outlined {
+
+            color:#ffffff;
+
+        }
+
+
+        .moti-progreso-paso.activo
+        .moti-progreso-punto {
+
+            background:#ffffff;
+
+            border-color:#16a34a;
+
+            box-shadow:
+                0 0 0 5px rgba(22,163,74,.10);
+
+        }
+
+
+        .moti-progreso-paso.activo
+        .material-symbols-outlined {
+
+            color:#16a34a;
+
+        }
+
+
+        .moti-progreso-label {
+
+            margin-top:9px;
+
+            font-size:10px;
+
+            line-height:1.25;
+
+            color:#9ca3af;
+
+            font-weight:600;
+
+        }
+
+
+        .moti-progreso-paso.activo
+        .moti-progreso-label,
+
+        .moti-progreso-paso.completado
+        .moti-progreso-label {
+
+            color:#111827;
+
+            font-weight:700;
+
+        }
+
+
+        .moti-progreso-estado-texto {
+
+            display:flex;
+
+            flex-direction:column;
+
+            gap:3px;
+
+            margin-top:8px;
+
+            padding:
+                12px 4px 0;
+
+            border-top:
+                1px solid #f0f1f3;
+
+        }
+
+
+        .moti-progreso-estado-texto strong {
+
+            font-size:14px;
+
+            color:#111827;
+
+        }
+
+
+        .moti-progreso-estado-texto span {
+
+            font-size:12px;
+
+            color:#6b7280;
+
+        }
+
+
+        /* ==========================================
+           INFORMACIÓN REPARTIDOR
+        ========================================== */
+
+        .moti-info-card {
+
+            display:flex;
+
+            align-items:center;
+
+            gap:13px;
+
+            background:#ffffff;
+
+            border:
+                1px solid #e8ebef;
+
+            border-radius:18px;
+
+            padding:15px 16px;
+
+            margin-bottom:14px;
+
+            box-shadow:
+                0 5px 20px rgba(15,23,42,.04);
+
+        }
+
+
+        .moti-info-icono {
+
+            width:44px;
+
+            height:44px;
+
+            border-radius:14px;
+
+            background:#eef7f0;
+
+            display:flex;
+
+            align-items:center;
+
+            justify-content:center;
+
+            flex-shrink:0;
+
+        }
+
+
+        .moti-info-icono
+        .material-symbols-outlined {
+
+            color:#15803d;
+
+            font-size:24px;
+
+        }
+
+
+        .moti-info-texto {
+
+            display:flex;
+
+            flex-direction:column;
+
+            gap:2px;
+
+        }
+
+
+        .moti-info-texto span {
+
+            font-size:10px;
+
+            font-weight:800;
+
+            color:#9ca3af;
+
+            letter-spacing:.08em;
+
+        }
+
+
+        .moti-info-texto strong {
+
+            font-size:14px;
+
+            color:#111827;
+
+        }
+
+
+        .moti-info-texto small {
+
+            font-size:12px;
+
+            color:#6b7280;
+
+        }
+
+
+        /* ==========================================
+           TICKET
+        ========================================== */
+
+        .moti-ticket-card {
+
+            background:#ffffff;
+
+            border:
+                1px solid #e8ebef;
+
+            border-radius:22px;
+
+            overflow:hidden;
+
+            margin-bottom:14px;
+
+            box-shadow:
+                0 5px 20px rgba(15,23,42,.05);
+
+        }
+
+
+        .moti-ticket-card-header {
+
+            display:flex;
+
+            align-items:center;
+
+            justify-content:space-between;
+
+            padding:19px 18px;
 
             border-bottom:
-                1px solid
-                #eeeeee;
+                1px solid #eef0f2;
 
         }
 
 
-        .moti-seguimiento-resumen > div:last-child {
+        .moti-ticket-card-header span:first-child {
 
-            border-bottom: 0;
+            display:block;
+
+            font-size:10px;
+
+            font-weight:800;
+
+            letter-spacing:.08em;
+
+            color:#9ca3af;
+
+        }
+
+
+        .moti-ticket-card-header h3 {
+
+            margin:4px 0 0;
+
+            font-size:18px;
+
+            color:#111827;
 
         }
 
 
-        .moti-seguimiento-resumen span {
+        .moti-ticket-card-header >
+        .material-symbols-outlined {
 
-            color: #777;
+            font-size:27px;
 
-            font-size: 13px;
+            color:#6b7280;
+
+        }
+
+
+        .moti-ticket-meta {
+
+            display:grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap:10px;
+
+            padding:15px 18px;
+
+            background:#fafafa;
+
+            border-bottom:
+                1px solid #eef0f2;
 
         }
 
 
-        .moti-seguimiento-resumen strong {
+        .moti-ticket-meta div {
 
-            color: #111;
+            display:flex;
 
-            font-size: 13px;
+            flex-direction:column;
 
-            text-align: right;
+            gap:4px;
 
         }
 
+
+        .moti-ticket-meta span {
+
+            font-size:10px;
+
+            color:#9ca3af;
+
+            font-weight:700;
+
+            text-transform:uppercase;
+
+        }
+
+
+        .moti-ticket-meta strong {
+
+            font-size:12px;
+
+            color:#374151;
+
+            word-break:break-word;
+
+        }
+
+
+        .moti-tienda-bloque {
+
+            border-bottom:
+                1px solid #eef0f2;
+
+        }
+
+
+        .moti-tienda-titulo {
+
+            display:flex;
+
+            align-items:center;
+
+            gap:8px;
+
+            padding:
+                14px 18px 10px;
+
+        }
+
+
+        .moti-tienda-titulo
+        .material-symbols-outlined {
+
+            font-size:20px;
+
+            color:#16a34a;
+
+        }
+
+
+        .moti-tienda-titulo strong {
+
+            font-size:13px;
+
+            color:#111827;
+
+        }
+
+
+        .moti-productos-lista {
+
+            padding:
+                0 18px 8px;
+
+        }
+
+
+        .moti-producto-linea {
+
+            display:flex;
+
+            align-items:center;
+
+            gap:10px;
+
+            padding:
+                11px 0;
+
+            border-bottom:
+                1px dashed #eceff1;
+
+        }
+
+
+        .moti-producto-linea:last-child {
+
+            border-bottom:0;
+
+        }
+
+
+        .moti-producto-cantidad {
+
+            min-width:32px;
+
+            font-size:12px;
+
+            font-weight:800;
+
+            color:#6b7280;
+
+        }
+
+
+        .moti-producto-nombre {
+
+            min-width:0;
+
+            flex:1;
+
+            display:flex;
+
+            flex-direction:column;
+
+            gap:2px;
+
+        }
+
+
+        .moti-producto-nombre strong {
+
+            font-size:13px;
+
+            color:#111827;
+
+            overflow:hidden;
+
+            text-overflow:ellipsis;
+
+            white-space:nowrap;
+
+        }
+
+
+        .moti-producto-nombre small {
+
+            font-size:11px;
+
+            color:#9ca3af;
+
+        }
+
+
+        .moti-producto-importe {
+
+            font-size:13px;
+
+            color:#111827;
+
+            white-space:nowrap;
+
+        }
+
+
+        .moti-producto-vacio {
+
+            padding:22px 18px;
+
+            display:flex;
+
+            align-items:center;
+
+            justify-content:center;
+
+            gap:8px;
+
+            color:#9ca3af;
+
+            font-size:13px;
+
+        }
+
+
+        /* ==========================================
+           TOTALES
+        ========================================== */
+
+        .moti-ticket-totales {
+
+            padding:
+                15px 18px 18px;
+
+        }
+
+
+        .moti-ticket-totales > div {
+
+            display:flex;
+
+            justify-content:space-between;
+
+            align-items:center;
+
+            padding:7px 0;
+
+            gap:15px;
+
+        }
+
+
+        .moti-ticket-totales span {
+
+            color:#6b7280;
+
+            font-size:13px;
+
+        }
+
+
+        .moti-ticket-totales strong {
+
+            color:#111827;
+
+            font-size:13px;
+
+        }
+
+
+        .moti-ticket-total-final {
+
+            margin-top:7px;
+
+            padding-top:13px !important;
+
+            border-top:
+                1px solid #e5e7eb;
+
+        }
+
+
+        .moti-ticket-total-final span {
+
+            color:#111827;
+
+            font-size:14px;
+
+            font-weight:800;
+
+        }
+
+
+        .moti-ticket-total-final strong {
+
+            color:#15803d;
+
+            font-size:21px;
+
+        }
+
+
+        /* ==========================================
+           ENTREGA
+        ========================================== */
+
+        .moti-entrega-card {
+
+            display:flex;
+
+            align-items:flex-start;
+
+            gap:13px;
+
+            padding:16px;
+
+            margin-bottom:14px;
+
+            background:#ffffff;
+
+            border:
+                1px solid #e8ebef;
+
+            border-radius:18px;
+
+        }
+
+
+        .moti-entrega-icono {
+
+            width:42px;
+
+            height:42px;
+
+            border-radius:13px;
+
+            background:#f1f5f9;
+
+            display:flex;
+
+            align-items:center;
+
+            justify-content:center;
+
+            flex-shrink:0;
+
+        }
+
+
+        .moti-entrega-icono
+        .material-symbols-outlined {
+
+            font-size:22px;
+
+            color:#475569;
+
+        }
+
+
+        .moti-entrega-card > div:last-child {
+
+            display:flex;
+
+            flex-direction:column;
+
+            gap:3px;
+
+        }
+
+
+        .moti-entrega-card span {
+
+            font-size:10px;
+
+            font-weight:800;
+
+            color:#9ca3af;
+
+            letter-spacing:.08em;
+
+        }
+
+
+        .moti-entrega-card strong {
+
+            font-size:14px;
+
+            color:#111827;
+
+        }
+
+
+        .moti-entrega-card small {
+
+            font-size:12px;
+
+            color:#6b7280;
+
+        }
+
+
+        /* ==========================================
+           CÓDIGO
+        ========================================== */
+
+        .moti-codigo-entrega-card {
+
+            display:flex;
+
+            align-items:center;
+
+            gap:14px;
+
+            padding:19px;
+
+            margin-bottom:14px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #111827,
+                    #1f2937
+                );
+
+            border-radius:22px;
+
+            color:#ffffff;
+
+            box-shadow:
+                0 8px 24px rgba(17,24,39,.18);
+
+        }
+
+
+        .moti-codigo-icono {
+
+            width:46px;
+
+            height:46px;
+
+            border-radius:14px;
+
+            background:
+                rgba(255,255,255,.10);
+
+            display:flex;
+
+            align-items:center;
+
+            justify-content:center;
+
+            flex-shrink:0;
+
+        }
+
+
+        .moti-codigo-icono
+        .material-symbols-outlined {
+
+            color:#ffffff;
+
+            font-size:24px;
+
+        }
+
+
+        .moti-codigo-contenido {
+
+            min-width:0;
+
+            display:flex;
+
+            flex-direction:column;
+
+            gap:4px;
+
+        }
+
+
+        .moti-codigo-contenido span {
+
+            font-size:10px;
+
+            font-weight:800;
+
+            letter-spacing:.1em;
+
+            color:#cbd5e1;
+
+        }
+
+
+        .moti-codigo-contenido strong {
+
+            font-size:29px;
+
+            letter-spacing:.15em;
+
+            color:#ffffff;
+
+        }
+
+
+        .moti-codigo-contenido small {
+
+            font-size:11px;
+
+            line-height:1.4;
+
+            color:#cbd5e1;
+
+        }
+
+
+        /* ==========================================
+           CANCELAR
+        ========================================== */
 
         .moti-seguimiento-cancelar {
 
-            width: 100%;
+            width:100%;
 
-            margin-top: 18px;
+            min-height:48px;
 
-            padding: 14px;
+            margin-bottom:14px;
+
+            display:flex;
+
+            align-items:center;
+
+            justify-content:center;
+
+            gap:7px;
 
             border:
-                1px solid
-                #dddddd;
+                1px solid #e5e7eb;
 
-            border-radius: 14px;
+            border-radius:15px;
 
-            background: #ffffff;
+            background:#ffffff;
 
-            color: #555;
+            color:#6b7280;
 
-            font-weight: 600;
+            font-weight:700;
 
-            cursor: pointer;
+            cursor:pointer;
 
         }
 
 
+        .moti-seguimiento-cancelar:hover {
+
+            background:#f9fafb;
+
+        }
+
+
+        /* ==========================================
+           PIE
+        ========================================== */
+
+        .moti-pedido-footer {
+
+            text-align:center;
+
+            padding:
+                12px 10px 25px;
+
+        }
+
+
+        .moti-pedido-footer span {
+
+            display:block;
+
+            font-size:12px;
+
+            font-weight:800;
+
+            letter-spacing:.08em;
+
+            color:#9ca3af;
+
+        }
+
+
+        .moti-pedido-footer small {
+
+            display:block;
+
+            margin-top:4px;
+
+            color:#b0b5bc;
+
+            font-size:11px;
+
+        }
+
+
+        /* ==========================================
+           ESTADO CANCELADO
+        ========================================== */
+
+        .moti-estado-cancelado {
+
+            text-align:center;
+
+            padding:50px 20px;
+
+        }
+
+
+        .moti-estado-icono {
+
+            width:72px;
+
+            height:72px;
+
+            margin:0 auto 16px;
+
+            border-radius:50%;
+
+            display:flex;
+
+            align-items:center;
+
+            justify-content:center;
+
+            background:#fef2f2;
+
+            color:#dc2626;
+
+        }
+
+
+        .moti-estado-icono
+        .material-symbols-outlined {
+
+            font-size:36px;
+
+        }
+
+
+        .moti-estado-cancelado h3 {
+
+            margin:0 0 7px;
+
+            color:#111827;
+
+        }
+
+
+        .moti-estado-cancelado p {
+
+            margin:0;
+
+            color:#6b7280;
+
+        }
+
+
+        .moti-pedido-meta {
+
+            display:flex;
+
+            justify-content:space-between;
+
+            gap:15px;
+
+            padding:16px;
+
+            border-radius:16px;
+
+            background:#ffffff;
+
+            border:
+                1px solid #e8ebef;
+
+        }
+
+
+        .moti-pedido-meta span {
+
+            color:#9ca3af;
+
+            font-size:12px;
+
+        }
+
+
+        .moti-pedido-meta strong {
+
+            font-size:12px;
+
+            color:#111827;
+
+        }
+
+
+        /* ==========================================
+           ESCRITORIO
+        ========================================== */
+
         @media (
-            min-width: 700px
+            min-width:700px
         ) {
 
-            .moti-seguimiento-panel {
+            .moti-seguimiento-contenido {
 
-                max-width: 600px;
+                padding:
+                    28px 24px 45px;
 
-                margin-left: auto;
+            }
 
-                box-shadow:
-                    -8px 0 30px
-                    rgba(
-                        0,
-                        0,
-                        0,
-                        .12
-                    );
+        }
+
+
+        /* ==========================================
+           MÓVIL
+        ========================================== */
+
+        @media (
+            max-width:480px
+        ) {
+
+            .moti-pedido-cabecera {
+
+                padding:17px;
+
+            }
+
+
+            .moti-pedido-cabecera h2 {
+
+                font-size:22px;
+
+            }
+
+
+            .moti-progreso-card {
+
+                padding:
+                    18px 10px 15px;
+
+            }
+
+
+            .moti-ticket-meta {
+
+                grid-template-columns:1fr;
+
+            }
+
+
+            .moti-codigo-contenido strong {
+
+                font-size:25px;
 
             }
 
