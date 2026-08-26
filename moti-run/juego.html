@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
 <meta charset="UTF-8">
 
 <meta
@@ -11,11 +12,15 @@
     user-scalable=no"
 >
 
-<meta name="theme-color" content="#07110b">
+<meta name="theme-color" content="#101813">
 
 <title>MOTI CITY</title>
 
 <style>
+
+/* =========================================================
+   BASE
+========================================================= */
 
 *{
     box-sizing:border-box;
@@ -29,31 +34,43 @@ body{
     width:100%;
     height:100%;
     overflow:hidden;
-    background:#07110b;
-    font-family:Arial,Helvetica,sans-serif;
+    background:#101813;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
     touch-action:none;
 }
 
 body{
     display:flex;
-    justify-content:center;
     align-items:center;
+    justify-content:center;
 }
 
 #game{
     position:relative;
+
     width:100%;
     height:100%;
-    max-width:1300px;
+
     overflow:hidden;
-    background:#416c43;
+
+    background:#73a95b;
 }
 
 canvas{
-    display:block;
+    position:absolute;
+
+    inset:0;
+
     width:100%;
     height:100%;
+
+    display:block;
 }
+
 
 /* =========================================================
    HUD
@@ -61,120 +78,274 @@ canvas{
 
 #hud{
     position:absolute;
+
     top:0;
     left:0;
 
     width:100%;
 
-    padding:10px;
-
-    z-index:20;
+    padding:12px;
 
     display:flex;
+
     justify-content:space-between;
+
+    z-index:20;
 
     pointer-events:none;
 }
 
-.hudGroup{
+.hud-left{
     display:flex;
-    gap:7px;
+
+    gap:8px;
 }
 
-.hudBox{
-    background:rgba(4,11,7,.86);
+.hud-box{
+    min-width:92px;
 
-    border:1px solid
-        rgba(255,255,255,.13);
+    padding:9px 12px;
 
-    border-radius:12px;
+    border-radius:13px;
 
-    padding:8px 11px;
+    background:
+        rgba(9,15,11,.88);
+
+    border:
+        1px solid
+        rgba(255,255,255,.15);
 
     color:white;
 
     font-size:12px;
+
     font-weight:800;
 
-    backdrop-filter:blur(8px);
+    box-shadow:
+        0 5px 15px
+        rgba(0,0,0,.25);
 }
 
-.money{
-    color:#ffd447;
+.hud-money{
+    color:#ffd83d;
 }
 
-.timer{
-    color:#ffb24d;
+.hud-delivery{
+    color:#42dc82;
 }
+
+.hud-time{
+    color:#ffbf42;
+}
+
 
 /* =========================================================
-   MISSION
+   MISIÓN
 ========================================================= */
 
 #mission{
     position:absolute;
 
-    top:58px;
-    left:50%;
+    top:76px;
+    right:15px;
 
-    transform:translateX(-50%);
+    width:275px;
 
-    z-index:19;
+    padding:12px 15px;
 
-    min-width:240px;
-    max-width:75%;
+    border-radius:15px;
 
-    padding:9px 13px;
+    background:
+        rgba(9,15,11,.90);
 
-    border-radius:13px;
-
-    background:rgba(4,11,7,.88);
-
-    border:1px solid
-        rgba(255,255,255,.12);
+    border:
+        1px solid
+        rgba(255,255,255,.14);
 
     color:white;
 
-    text-align:center;
+    z-index:21;
+
+    box-shadow:
+        0 8px 20px
+        rgba(0,0,0,.25);
+}
+
+.mission-row{
+    display:flex;
+
+    align-items:center;
+
+    gap:9px;
+
+    margin-bottom:5px;
+
+    font-size:12px;
+}
+
+.mission-row:last-child{
+    margin-bottom:0;
+}
+
+.mission-icon{
+    width:28px;
+    height:28px;
+
+    border-radius:8px;
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    background:#29362c;
+
+    font-size:15px;
+}
+
+.mission-label{
+    color:#98a59b;
+
+    font-size:9px;
+
+    text-transform:uppercase;
+
+    letter-spacing:.6px;
+}
+
+.mission-value{
+    color:#fff;
 
     font-size:12px;
 
-    pointer-events:none;
+    font-weight:900;
 }
 
-#mission strong{
-    color:#36dc80;
-}
 
 /* =========================================================
    MINIMAPA
 ========================================================= */
 
-#miniMap{
+#minimap{
     position:absolute;
 
-    top:60px;
-    right:12px;
+    top:15px;
+    right:15px;
 
-    width:145px;
-    height:110px;
+    width:165px;
+    height:125px;
 
-    z-index:18;
-
-    border-radius:13px;
+    border-radius:17px;
 
     overflow:hidden;
 
-    background:rgba(4,11,7,.9);
+    border:
+        3px solid
+        rgba(255,255,255,.8);
 
-    border:1px solid
-        rgba(255,255,255,.15);
+    background:#456d42;
+
+    z-index:22;
+
+    box-shadow:
+        0 7px 22px
+        rgba(0,0,0,.35);
 }
 
 #miniCanvas{
     width:100%;
     height:100%;
 }
+
+
+/* =========================================================
+   VELOCÍMETRO
+========================================================= */
+
+#speedometer{
+    position:absolute;
+
+    left:50%;
+    bottom:18px;
+
+    transform:
+        translateX(-50%);
+
+    min-width:235px;
+
+    padding:10px 16px;
+
+    border-radius:15px;
+
+    background:
+        rgba(8,14,10,.92);
+
+    border:
+        1px solid
+        rgba(255,255,255,.13);
+
+    z-index:20;
+
+    color:white;
+
+    text-align:center;
+
+    box-shadow:
+        0 8px 20px
+        rgba(0,0,0,.3);
+
+    pointer-events:none;
+}
+
+.speed-number{
+    font-size:22px;
+
+    font-weight:900;
+}
+
+.speed-unit{
+    color:#aab4ac;
+
+    font-size:9px;
+
+    margin-left:3px;
+}
+
+.energy-bar{
+    position:relative;
+
+    height:7px;
+
+    margin-top:7px;
+
+    border-radius:10px;
+
+    overflow:hidden;
+
+    background:#252c27;
+}
+
+#energyFill{
+    position:absolute;
+
+    left:0;
+    top:0;
+
+    height:100%;
+
+    width:100%;
+
+    border-radius:10px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #e94545,
+            #f3b52f,
+            #35d678
+        );
+}
+
 
 /* =========================================================
    JOYSTICK
@@ -183,31 +354,52 @@ canvas{
 #joystick{
     position:absolute;
 
-    left:22px;
-    bottom:22px;
+    left:25px;
+    bottom:24px;
 
-    width:145px;
-    height:145px;
-
-    z-index:30;
+    width:155px;
+    height:155px;
 
     border-radius:50%;
 
-    background:
-        radial-gradient(
-            circle,
-            rgba(255,255,255,.12) 0 36%,
-            rgba(0,0,0,.12) 37% 60%,
-            rgba(0,0,0,.3) 61% 100%
-        );
+    z-index:30;
 
-    border:2px solid
-        rgba(255,255,255,.14);
+    background:
+        rgba(20,27,23,.48);
+
+    border:
+        3px solid
+        rgba(255,255,255,.22);
 
     box-shadow:
-        inset 0 6px 22px rgba(0,0,0,.35);
+        inset 0 10px 25px
+        rgba(0,0,0,.3),
+
+        0 8px 20px
+        rgba(0,0,0,.3);
 
     touch-action:none;
+}
+
+#joystick::before{
+    content:"";
+
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    width:92px;
+    height:92px;
+
+    transform:
+        translate(-50%,-50%);
+
+    border-radius:50%;
+
+    border:
+        2px solid
+        rgba(255,255,255,.10);
 }
 
 #stick{
@@ -216,8 +408,8 @@ canvas{
     left:50%;
     top:50%;
 
-    width:61px;
-    height:61px;
+    width:64px;
+    height:64px;
 
     transform:
         translate(-50%,-50%);
@@ -226,90 +418,124 @@ canvas{
 
     background:
         radial-gradient(
-            circle at 35% 30%,
-            #5c6468,
-            #292f33 55%,
-            #111416
+            circle at 35% 25%,
+            #69716d,
+            #333a36 55%,
+            #151a17 100%
         );
 
-    border:3px solid
-        rgba(255,255,255,.17);
+    border:
+        3px solid
+        rgba(255,255,255,.2);
 
     box-shadow:
-        0 8px 15px rgba(0,0,0,.5);
+        0 8px 14px
+        rgba(0,0,0,.5);
 
     pointer-events:none;
 }
 
+
 /* =========================================================
-   XBOX BUTTONS
+   BOTONES
 ========================================================= */
 
-#xbox{
+#buttons{
     position:absolute;
 
-    right:22px;
+    right:24px;
     bottom:22px;
 
-    width:190px;
-    height:165px;
+    width:205px;
+    height:175px;
 
     z-index:30;
 }
 
-.xbtn{
+.game-button{
     position:absolute;
 
-    width:59px;
-    height:59px;
+    width:61px;
+    height:61px;
 
     border-radius:50%;
 
     display:flex;
+
     align-items:center;
     justify-content:center;
 
     color:white;
 
-    font-size:20px;
+    font-size:21px;
+
     font-weight:900;
 
-    border:2px solid
+    border:
+        3px solid
         rgba(255,255,255,.18);
 
     box-shadow:
-        0 7px 14px rgba(0,0,0,.45);
+        0 7px 14px
+        rgba(0,0,0,.45);
 
     user-select:none;
+
+    touch-action:none;
 }
 
-.xbtn:active{
-    transform:scale(.87);
+.game-button:active{
+    transform:scale(.88);
 }
 
-#btnY{
+.button-label{
+    position:absolute;
+
+    bottom:-18px;
+
+    width:100%;
+
+    color:white;
+
+    text-align:center;
+
+    font-size:9px;
+
+    font-weight:900;
+
+    text-shadow:
+        0 2px 4px
+        rgba(0,0,0,.8);
+}
+
+#buttonY{
+    left:72px;
     top:0;
-    left:65px;
-    background:#d6a929;
+
+    background:#d5aa2e;
 }
 
-#btnX{
-    top:52px;
-    left:5px;
-    background:#2777c9;
+#buttonX{
+    left:8px;
+    top:56px;
+
+    background:#2878c9;
 }
 
-#btnB{
-    top:52px;
-    right:5px;
-    background:#c93c3c;
+#buttonB{
+    right:8px;
+    top:56px;
+
+    background:#c63c42;
 }
 
-#btnA{
+#buttonA{
+    left:72px;
     bottom:0;
-    left:65px;
-    background:#299b5b;
+
+    background:#2b9d5c;
 }
+
 
 /* =========================================================
    TOAST
@@ -319,30 +545,31 @@ canvas{
     position:absolute;
 
     left:50%;
-    bottom:205px;
+    bottom:210px;
 
     transform:
         translate(-50%,20px);
 
-    z-index:40;
+    z-index:45;
 
-    padding:11px 16px;
-
-    background:
-        rgba(4,10,7,.93);
+    padding:11px 18px;
 
     border-radius:13px;
+
+    background:
+        rgba(5,10,7,.94);
 
     color:white;
 
     font-size:13px;
-    font-weight:800;
+
+    font-weight:900;
 
     opacity:0;
 
-    pointer-events:none;
-
     transition:.2s;
+
+    pointer-events:none;
 }
 
 #toast.show{
@@ -351,6 +578,7 @@ canvas{
     transform:
         translate(-50%,0);
 }
+
 
 /* =========================================================
    PANTALLAS
@@ -361,37 +589,40 @@ canvas{
 
     inset:0;
 
-    z-index:50;
+    z-index:100;
 
     display:flex;
 
-    justify-content:center;
     align-items:center;
+    justify-content:center;
 
     background:
         linear-gradient(
-            rgba(2,8,4,.55),
-            rgba(2,8,4,.94)
+            rgba(4,10,6,.45),
+            rgba(4,10,6,.94)
         );
 }
 
 .panel{
-    width:min(91%,450px);
+    width:min(
+        92%,
+        470px
+    );
 
-    padding:30px 25px;
+    padding:32px 27px;
 
     border-radius:25px;
 
-    text-align:center;
-
     background:
-        rgba(8,18,12,.96);
+        rgba(9,18,12,.96);
 
     border:
         1px solid
-        rgba(255,255,255,.12);
+        rgba(255,255,255,.14);
 
     color:white;
+
+    text-align:center;
 
     box-shadow:
         0 25px 70px
@@ -399,58 +630,64 @@ canvas{
 }
 
 .logo{
-    font-size:55px;
+    font-size:61px;
 
-    font-weight:900;
+    line-height:1;
 
-    letter-spacing:-5px;
+    font-weight:1000;
+
+    letter-spacing:-6px;
 }
 
 .logo span{
-    color:#29d47d;
+    color:#2bd57b;
 }
 
-.title{
-    margin-top:2px;
+.game-title{
+    margin-top:7px;
 
     font-size:21px;
 
     font-weight:900;
 }
 
-.subtitle{
-    margin-top:8px;
+.game-description{
+    margin-top:10px;
 
-    color:#9ca99f;
+    color:#9ca9a0;
 
     line-height:1.5;
+
+    font-size:13px;
 }
 
-.infoGrid{
-    margin-top:20px;
-
+.start-grid{
     display:grid;
 
     grid-template-columns:
         1fr 1fr;
 
     gap:9px;
+
+    margin-top:20px;
 }
 
-.info{
+.start-info{
     padding:12px;
+
+    border-radius:12px;
 
     background:
         rgba(255,255,255,.05);
 
-    border-radius:12px;
-
     color:#b7c2ba;
 
-    font-size:12px;
+    font-size:11px;
+
+    line-height:1.5;
 }
 
-.bigButton{
+.start-button{
     width:100%;
 
     margin-top:20px;
@@ -461,16 +698,16 @@ canvas{
 
     border-radius:15px;
 
-    background:#29d47d;
+    background:#2bd57b;
 
-    color:#04100a;
+    color:#031008;
 
-    font-size:17px;
+    font-size:16px;
 
-    font-weight:900;
+    font-weight:1000;
 }
 
-.bigButton:active{
+.start-button:active{
     transform:scale(.97);
 }
 
@@ -478,28 +715,46 @@ canvas{
     display:none!important;
 }
 
+
 /* =========================================================
-   RESPONSIVE
+   MÓVIL
 ========================================================= */
 
-@media(max-width:600px){
+@media(max-width:650px){
+
+    #minimap{
+        width:120px;
+        height:92px;
+
+        top:10px;
+        right:10px;
+    }
+
+    #mission{
+        top:108px;
+        right:10px;
+
+        width:205px;
+
+        padding:8px;
+    }
 
     #joystick{
-        width:125px;
-        height:125px;
-
-        left:14px;
+        left:13px;
         bottom:15px;
+
+        width:128px;
+        height:128px;
     }
 
     #stick{
-        width:54px;
-        height:54px;
+        width:55px;
+        height:55px;
     }
 
-    #xbox{
-        right:7px;
-        bottom:12px;
+    #buttons{
+        right:5px;
+        bottom:13px;
 
         transform:scale(.86);
 
@@ -507,9 +762,12 @@ canvas{
             right bottom;
     }
 
-    #miniMap{
-        width:115px;
-        height:88px;
+    #speedometer{
+        bottom:11px;
+
+        min-width:190px;
+
+        padding:8px 12px;
     }
 
 }
@@ -529,20 +787,20 @@ canvas{
      HUD
 ===================================================== -->
 
-<div id="hud" class="hidden">
+<div id="hud">
 
-    <div class="hudGroup">
+    <div class="hud-left">
 
-        <div class="hudBox money">
-            💰 <span id="money">$0</span>
+        <div class="hud-box hud-money">
+            💵 $<span id="money">0</span>
         </div>
 
-        <div class="hudBox">
-            📦 <span id="deliveries">0</span>
+        <div class="hud-box hud-delivery">
+            📦 <span id="deliveryCount">0</span>/6
         </div>
 
-        <div class="hudBox timer">
-            ⏱ <span id="time">0</span>
+        <div class="hud-box hud-time">
+            ⏱ <span id="time">90</span>
         </div>
 
     </div>
@@ -554,11 +812,52 @@ canvas{
      MISIÓN
 ===================================================== -->
 
-<div id="mission" class="hidden">
+<div id="mission">
 
-    <span id="missionText">
-        Busca un pedido
-    </span>
+    <div class="mission-row">
+
+        <div class="mission-icon">
+            🛒
+        </div>
+
+        <div>
+
+            <div class="mission-label">
+                RECOGE EN
+            </div>
+
+            <div
+                class="mission-value"
+                id="pickupText">
+                Tienda Don Pepe
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="mission-row">
+
+        <div class="mission-icon">
+            🏠
+        </div>
+
+        <div>
+
+            <div class="mission-label">
+                ENTREGA EN
+            </div>
+
+            <div
+                class="mission-value"
+                id="deliveryText">
+                Casa de Ana
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 
@@ -567,9 +866,36 @@ canvas{
      MINIMAPA
 ===================================================== -->
 
-<div id="miniMap" class="hidden">
+<div id="minimap">
 
     <canvas id="miniCanvas"></canvas>
+
+</div>
+
+
+<!-- =====================================================
+     VELOCÍMETRO
+===================================================== -->
+
+<div id="speedometer">
+
+    <span
+        class="speed-number"
+        id="speed">
+        0
+    </span>
+
+    <span class="speed-unit">
+        KM/H
+    </span>
+
+    <div class="energy-bar">
+
+        <div
+            id="energyFill">
+        </div>
+
+    </div>
 
 </div>
 
@@ -578,7 +904,7 @@ canvas{
      JOYSTICK
 ===================================================== -->
 
-<div id="joystick" class="hidden">
+<div id="joystick">
 
     <div id="stick"></div>
 
@@ -586,37 +912,68 @@ canvas{
 
 
 <!-- =====================================================
-     XBOX
+     BOTONES
 ===================================================== -->
 
-<div id="xbox" class="hidden">
+<div id="buttons">
 
     <div
-        class="xbtn"
-        id="btnY">
+        class="game-button"
+        id="buttonY">
+
         Y
+
+        <div class="button-label">
+            TURBO
+        </div>
+
     </div>
 
+
     <div
-        class="xbtn"
-        id="btnX">
+        class="game-button"
+        id="buttonX">
+
         X
+
+        <div class="button-label">
+            BOCINA
+        </div>
+
     </div>
 
+
     <div
-        class="xbtn"
-        id="btnB">
+        class="game-button"
+        id="buttonB">
+
         B
+
+        <div class="button-label">
+            FRENAR
+        </div>
+
     </div>
 
+
     <div
-        class="xbtn"
-        id="btnA">
+        class="game-button"
+        id="buttonA">
+
         A
+
+        <div class="button-label">
+            ACELERAR
+        </div>
+
     </div>
 
 </div>
 
+
+<!-- =====================================================
+     TOAST
+===================================================== -->
 
 <div id="toast"></div>
 
@@ -635,66 +992,60 @@ canvas{
             MO<span>TI</span>
         </div>
 
-        <div class="title">
+        <div class="game-title">
             CITY · OFFLINE
         </div>
 
-        <div class="subtitle">
+        <div class="game-description">
 
-            Conduce por la ciudad,
-            recoge mandados y llévalos
-            hasta las casas.
+            Tu internet se fue...
+            pero tu motito no 😂
+
+            <br>
+
+            Reparte mandados,
+            esquiva el tráfico
+            y gana dinero.
 
         </div>
 
 
-        <div class="infoGrid">
+        <div class="start-grid">
 
-            <div class="info">
+            <div class="start-info">
                 🕹️<br>
-                Joystick
+                Joystick =
+                dirección
             </div>
 
-            <div class="info">
+            <div class="start-info">
+                🅰️<br>
+                A =
+                acelerar
+            </div>
+
+            <div class="start-info">
                 🚗<br>
-                Tráfico
+                Tráfico =
+                cuidado
             </div>
 
-            <div class="info">
-                🏠<br>
-                Casas
-            </div>
-
-            <div class="info">
+            <div class="start-info">
                 📦<br>
-                Mandados
+                Entrega =
+                dinero
             </div>
 
         </div>
 
 
         <button
-            class="bigButton"
-            id="startBtn">
+            class="start-button"
+            id="startButton">
 
-            EMPEZAR A REPARTIR
+            🛵 EMPEZAR A REPARTIR
 
         </button>
-
-
-        <div
-            style="
-                margin-top:13px;
-                color:#68766e;
-                font-size:11px;
-            ">
-
-            Récord:
-            <span id="bestStart">
-                $0
-            </span>
-
-        </div>
 
     </div>
 
@@ -711,59 +1062,43 @@ canvas{
 
     <div class="panel">
 
-        <div style="
-            font-size:35px;
-            font-weight:900;
-        ">
+        <div
+            style="
+                font-size:34px;
+                font-weight:1000;
+            ">
 
             FIN DEL REPARTO
 
         </div>
 
-        <div class="subtitle">
+        <div class="game-description">
 
             La ciudad volverá a esperarte.
 
         </div>
 
 
-        <div class="infoGrid">
+        <div class="start-grid">
 
-            <div class="info">
+            <div class="start-info">
 
                 DINERO<br>
 
-                <strong id="finalMoney">
+                <strong
+                    id="finalMoney">
                     $0
                 </strong>
 
             </div>
 
-            <div class="info">
+
+            <div class="start-info">
 
                 ENTREGAS<br>
 
-                <strong id="finalDeliveries">
-                    0
-                </strong>
-
-            </div>
-
-            <div class="info">
-
-                RÉCORD<br>
-
-                <strong id="finalBest">
-                    $0
-                </strong>
-
-            </div>
-
-            <div class="info">
-
-                PEDIDOS<br>
-
-                <strong id="finalOrders">
+                <strong
+                    id="finalDeliveries">
                     0
                 </strong>
 
@@ -773,8 +1108,8 @@ canvas{
 
 
         <button
-            class="bigButton"
-            id="restartBtn">
+            class="start-button"
+            id="restartButton">
 
             VOLVER A REPARTIR
 
@@ -789,7 +1124,7 @@ canvas{
 
 /* =========================================================
    MOTI CITY
-   V2
+   ISOMETRIC EDITION
 ========================================================= */
 
 
@@ -798,16 +1133,26 @@ canvas{
 ========================================================= */
 
 const canvas =
-    document.getElementById("canvas");
+    document.getElementById(
+        "canvas"
+    );
 
 const ctx =
-    canvas.getContext("2d");
+    canvas.getContext(
+        "2d"
+    );
+
 
 const miniCanvas =
-    document.getElementById("miniCanvas");
+    document.getElementById(
+        "miniCanvas"
+    );
 
 const miniCtx =
-    miniCanvas.getContext("2d");
+    miniCanvas.getContext(
+        "2d"
+    );
+
 
 let W=0;
 let H=0;
@@ -823,8 +1168,8 @@ function resize(){
         canvas.height =
         canvas.clientHeight;
 
-    miniCanvas.width=145;
-    miniCanvas.height=110;
+    miniCanvas.width=165;
+    miniCanvas.height=125;
 
 }
 
@@ -837,109 +1182,109 @@ resize();
 
 
 /* =========================================================
-   ZOOM
+   ISOMETRÍA
 ========================================================= */
 
 /*
-    Menor número = más alejado.
+    Estos valores crean la inclinación
+    tipo juego isométrico.
 
-    0.60 permite ver mucha más ciudad
-    alrededor de la moto.
+    No es una cámara totalmente desde arriba.
 */
 
-const ZOOM=0.60;
+const ISO_X=.72;
+
+const ISO_Y=.38;
+
+
+/*
+    Altura visual de edificios.
+*/
+
+const BUILDING_HEIGHT=42;
 
 
 /* =========================================================
    MUNDO
 ========================================================= */
 
-const WORLD_W=5200;
-const WORLD_H=3900;
+const WORLD_W=4200;
+
+const WORLD_H=3200;
 
 
 /* =========================================================
-   CALLES
+   CÁMARA
 ========================================================= */
 
-const roads=[
+const camera={
+    x:0,
+    y:0
+};
 
-    {
-        x:0,
-        y:500,
-        w:WORLD_W,
-        h:190
-    },
 
-    {
-        x:0,
-        y:1750,
-        w:WORLD_W,
-        h:190
-    },
+/*
+    Qué tan lejos vemos.
 
-    {
-        x:0,
-        y:3000,
-        w:WORLD_W,
-        h:190
-    },
+    0.82 = bastante alejado.
+*/
 
-    {
-        x:500,
-        y:0,
-        w:190,
-        h:WORLD_H
-    },
-
-    {
-        x:1600,
-        y:0,
-        w:190,
-        h:WORLD_H
-    },
-
-    {
-        x:2800,
-        y:0,
-        w:190,
-        h:WORLD_H
-    },
-
-    {
-        x:4000,
-        y:0,
-        w:190,
-        h:WORLD_H
-    },
-
-    {
-        x:690,
-        y:1050,
-        w:910,
-        h:145
-    },
-
-    {
-        x:1790,
-        y:2300,
-        w:1010,
-        h:145
-    },
-
-    {
-        x:2990,
-        y:850,
-        w:1010,
-        h:145
-    }
-
-];
+const CAMERA_ZOOM=.82;
 
 
 /* =========================================================
-   UTILIDADES
+   TRANSFORMACIÓN ISOMÉTRICA
 ========================================================= */
+
+function worldToScreen(
+    x,
+    y
+){
+
+    const dx=
+        x-camera.x;
+
+    const dy=
+        y-camera.y;
+
+
+    return {
+
+        x:
+            W/2+
+            (dx-dy)*
+            ISO_X*
+            CAMERA_ZOOM,
+
+        y:
+            H/2+
+            (dx+dy)*
+            ISO_Y*
+            CAMERA_ZOOM
+
+    };
+
+}
+
+
+/* =========================================================
+   DISTANCIA
+========================================================= */
+
+function distance(
+    x1,
+    y1,
+    x2,
+    y2
+){
+
+    return Math.hypot(
+        x1-x2,
+        y1-y2
+    );
+
+}
+
 
 function clamp(
     value,
@@ -958,20 +1303,68 @@ function clamp(
 }
 
 
-function distance(
-    x1,
-    y1,
-    x2,
-    y2
-){
+/* =========================================================
+   CALLES
+========================================================= */
 
-    return Math.hypot(
-        x1-x2,
-        y1-y2
-    );
+const roads=[
 
-}
+    {
+        x:0,
+        y:450,
+        w:WORLD_W,
+        h:170
+    },
 
+    {
+        x:0,
+        y:1500,
+        w:WORLD_W,
+        h:170
+    },
+
+    {
+        x:0,
+        y:2550,
+        w:WORLD_W,
+        h:170
+    },
+
+
+    {
+        x:500,
+        y:0,
+        w:170,
+        h:WORLD_H
+    },
+
+    {
+        x:1450,
+        y:0,
+        w:170,
+        h:WORLD_H
+    },
+
+    {
+        x:2550,
+        y:0,
+        w:170,
+        h:WORLD_H
+    },
+
+    {
+        x:3550,
+        y:0,
+        w:170,
+        h:WORLD_H
+    }
+
+];
+
+
+/* =========================================================
+   ¿ESTÁ EN CALLE?
+========================================================= */
 
 function pointOnRoad(
     x,
@@ -1002,32 +1395,32 @@ function generateBuildings(){
 
 
     for(
-        let y=70;
-        y<WORLD_H-70;
-        y+=150
+        let y=50;
+        y<WORLD_H-50;
+        y+=210
     ){
 
         for(
-            let x=70;
-            x<WORLD_W-70;
-            x+=160
+            let x=50;
+            x<WORLD_W-50;
+            x+=220
         ){
 
             const bx=
                 x+
-                Math.random()*35;
+                Math.random()*30;
 
             const by=
                 y+
                 Math.random()*30;
 
             const bw=
-                85+
-                Math.random()*45;
+                105+
+                Math.random()*70;
 
             const bh=
-                70+
-                Math.random()*45;
+                90+
+                Math.random()*65;
 
 
             if(
@@ -1045,26 +1438,33 @@ function generateBuildings(){
                     w:bw,
                     h:bh,
 
+                    height:
+                        35+
+                        Math.random()*35,
+
                     wall:[
-                        "#d7c3a1",
-                        "#c6d0b8",
-                        "#d4b39b",
-                        "#bcc7c4",
-                        "#dfcfb1"
+                        "#d97745",
+                        "#e4a24c",
+                        "#5b91b2",
+                        "#cb6c67",
+                        "#9a6bb0",
+                        "#e1c26e",
+                        "#679e65"
                     ][
                         Math.floor(
-                            Math.random()*5
+                            Math.random()*7
                         )
                     ],
 
                     roof:[
-                        "#92594b",
-                        "#754b42",
-                        "#53616a",
-                        "#7c604c"
+                        "#b95d45",
+                        "#596267",
+                        "#7d5144",
+                        "#c37c4d",
+                        "#4d6f7b"
                     ][
                         Math.floor(
-                            Math.random()*4
+                            Math.random()*5
                         )
                     ]
 
@@ -1082,40 +1482,60 @@ generateBuildings();
 
 
 /* =========================================================
-   CASAS DE DESTINO
+   ÁRBOLES
 ========================================================= */
 
-const houses=[
+const trees=[];
 
-    {x:210,y:300,name:"Casa de Ana"},
-    {x:900,y:300,name:"Casa de Luis"},
-    {x:1220,y:820,name:"Casa de María"},
-    {x:2100,y:320,name:"Casa de Carlos"},
-    {x:2400,y:790,name:"Casa de Sofía"},
-    {x:3250,y:330,name:"Casa de José"},
-    {x:4550,y:350,name:"Casa de Pedro"},
 
-    {x:780,y:1400,name:"Casa de Elena"},
-    {x:1240,y:1510,name:"Casa de Diego"},
-    {x:2100,y:1450,name:"Casa de Laura"},
-    {x:3100,y:1450,name:"Casa de Miguel"},
-    {x:3550,y:1500,name:"Casa de Rosa"},
-    {x:4550,y:1450,name:"Casa de Juan"},
+function generateTrees(){
 
-    {x:250,y:2480,name:"Casa de Carlos"},
-    {x:900,y:2480,name:"Casa de Ana"},
-    {x:1350,y:2500,name:"Casa de Luis"},
-    {x:2100,y:2500,name:"Casa de Sofía"},
-    {x:3250,y:2470,name:"Casa de José"},
-    {x:3600,y:2630,name:"Casa de Pedro"},
-    {x:4550,y:2470,name:"Casa de María"},
+    trees.length=0;
 
-    {x:850,y:3400,name:"Casa de Diego"},
-    {x:2150,y:3400,name:"Casa de Laura"},
-    {x:3350,y:3400,name:"Casa de Miguel"},
-    {x:4550,y:3400,name:"Casa de Rosa"}
 
-];
+    for(
+        let i=0;
+        i<80;
+        i++
+    ){
+
+        let x;
+        let y;
+
+
+        do{
+
+            x=
+                70+
+                Math.random()*
+                (WORLD_W-140);
+
+            y=
+                70+
+                Math.random()*
+                (WORLD_H-140);
+
+        }while(
+            pointOnRoad(x,y)
+        );
+
+
+        trees.push({
+
+            x,
+            y,
+
+            size:
+                25+
+                Math.random()*18
+
+        });
+
+    }
+
+}
+
+generateTrees();
 
 
 /* =========================================================
@@ -1125,51 +1545,168 @@ const houses=[
 const stores=[
 
     {
-        x:250,
-        y:595,
-        name:"Abarrotes Don Luis"
+        x:270,
+        y:535,
+        name:"Tienda Don Pepe"
     },
 
     {
-        x:900,
-        y:595,
-        name:"Tienda La Esperanza"
+        x:880,
+        y:535,
+        name:"Abarrotes La Fe"
     },
 
     {
-        x:2100,
-        y:595,
+        x:1950,
+        y:535,
         name:"Farmacia"
     },
 
     {
-        x:3300,
-        y:595,
+        x:3150,
+        y:535,
         name:"Mini Súper"
     },
 
     {
-        x:4550,
-        y:1780,
+        x:3900,
+        y:1580,
         name:"Papelería"
     },
 
     {
-        x:900,
-        y:3090,
+        x:950,
+        y:2630,
         name:"Tienda Central"
     },
 
     {
-        x:3100,
-        y:3090,
+        x:2900,
+        y:2630,
         name:"Supermercado"
+    }
+
+];
+
+
+/* =========================================================
+   CASAS
+========================================================= */
+
+const houses=[
+
+    {
+        x:260,
+        y:260,
+        name:"Casa de Ana"
     },
 
     {
-        x:4550,
-        y:3090,
-        name:"Farmacia MOTI"
+        x:850,
+        y:250,
+        name:"Casa de Luis"
+    },
+
+    {
+        x:1200,
+        y:850,
+        name:"Casa de María"
+    },
+
+    {
+        x:1950,
+        y:270,
+        name:"Casa de Carlos"
+    },
+
+    {
+        x:2350,
+        y:850,
+        name:"Casa de Sofía"
+    },
+
+    {
+        x:3150,
+        y:270,
+        name:"Casa de José"
+    },
+
+    {
+        x:3900,
+        y:280,
+        name:"Casa de Pedro"
+    },
+
+    {
+        x:750,
+        y:1200,
+        name:"Casa de Elena"
+    },
+
+    {
+        x:1900,
+        y:1250,
+        name:"Casa de Laura"
+    },
+
+    {
+        x:3000,
+        y:1250,
+        name:"Casa de Miguel"
+    },
+
+    {
+        x:3850,
+        y:1250,
+        name:"Casa de Rosa"
+    },
+
+    {
+        x:260,
+        y:2200,
+        name:"Casa de Juan"
+    },
+
+    {
+        x:850,
+        y:2200,
+        name:"Casa de Diego"
+    },
+
+    {
+        x:1900,
+        y:2200,
+        name:"Casa de Sofía"
+    },
+
+    {
+        x:3050,
+        y:2200,
+        name:"Casa de Pedro"
+    },
+
+    {
+        x:3900,
+        y:2200,
+        name:"Casa de María"
+    },
+
+    {
+        x:800,
+        y:2950,
+        name:"Casa de Rosa"
+    },
+
+    {
+        x:2000,
+        y:2950,
+        name:"Casa de Ana"
+    },
+
+    {
+        x:3200,
+        y:2950,
+        name:"Casa de Luis"
     }
 
 ];
@@ -1189,7 +1726,7 @@ function generatePeople(){
 
     for(
         let i=0;
-        i<85;
+        i<70;
         i++
     ){
 
@@ -1199,7 +1736,7 @@ function generatePeople(){
 
         let x;
         let y;
-        let angle;
+        let direction;
 
 
         if(horizontal){
@@ -1217,21 +1754,21 @@ function generatePeople(){
 
 
             x=
-                100+
+                50+
                 Math.random()*
-                (WORLD_W-200);
+                (WORLD_W-100);
 
 
             y=
                 r.y+
                 (
                     Math.random()>.5
-                    ? 30
-                    : r.h-30
+                    ? 23
+                    : r.h-23
                 );
 
 
-            angle=
+            direction=
                 Math.random()>.5
                 ? 0
                 : Math.PI;
@@ -1255,18 +1792,18 @@ function generatePeople(){
                 r.x+
                 (
                     Math.random()>.5
-                    ? 30
-                    : r.w-30
+                    ? 23
+                    : r.w-23
                 );
 
 
             y=
-                100+
+                50+
                 Math.random()*
-                (WORLD_H-200);
+                (WORLD_H-100);
 
 
-            angle=
+            direction=
                 Math.random()>.5
                 ? Math.PI/2
                 : -Math.PI/2;
@@ -1276,14 +1813,29 @@ function generatePeople(){
 
         people.push({
 
-            x:x,
-            y:y,
+            x,
+            y,
 
-            angle:angle,
+            angle:direction,
 
             speed:
-                .25+
-                Math.random()*.35
+                .28+
+                Math.random()*.22,
+
+            walk:
+                Math.random()*Math.PI*2,
+
+            shirt:[
+                "#e94f4f",
+                "#3f82c4",
+                "#f2ae3d",
+                "#5db56d",
+                "#a766c4"
+            ][
+                Math.floor(
+                    Math.random()*5
+                )
+            ]
 
         });
 
@@ -1295,25 +1847,27 @@ generatePeople();
 
 
 /* =========================================================
-   JUGADOR
+   PLAYER
 ========================================================= */
 
 const player={
 
     x:300,
-    y:595,
+    y:535,
 
     angle:0,
 
     speed:0,
 
-    maxSpeed:5.8,
+    maxSpeed:5.2,
 
-    acceleration:.18,
+    acceleration:.17,
 
-    friction:.075,
+    brake:.24,
 
-    rotation:.075,
+    friction:.065,
+
+    turnSpeed:.055,
 
     boost:false,
 
@@ -1327,40 +1881,51 @@ const player={
 
 
 /* =========================================================
-   CÁMARA
-========================================================= */
-
-const camera={
-    x:0,
-    y:0
-};
-
-
-/* =========================================================
    TRÁFICO
 ========================================================= */
 
 let traffic=[];
 
-const trafficColors=[
-    "#e74c3c",
-    "#3498db",
-    "#f1c40f",
-    "#9b59b6",
-    "#f4f4f4",
-    "#2ecc71",
-    "#34495e",
-    "#e67e22"
-];
+let trafficSpawnTimer=20;
 
-let trafficTimer=10;
+
+const trafficColors=[
+
+    "#e64c3f",
+    "#3d87c7",
+    "#f0b82e",
+    "#ef7b30",
+    "#53a864",
+    "#eeeeea",
+    "#5a6170"
+
+];
 
 
 /* =========================================================
-   JUEGO
+   CONTROLES
 ========================================================= */
 
-let running=false;
+const input={
+
+    up:false,
+    down:false,
+
+    left:false,
+    right:false,
+
+    turbo:false
+
+};
+
+
+/* =========================================================
+   MISIÓN
+========================================================= */
+
+let mission=null;
+
+let missionTime=90;
 
 let money=0;
 
@@ -1368,46 +1933,20 @@ let deliveries=0;
 
 let orders=0;
 
-let mission=null;
 
-let missionTime=90;
+/* =========================================================
+   ESTADO
+========================================================= */
+
+let running=false;
 
 let particles=[];
 
 let hornCooldown=0;
 
 
-let bestMoney=
-    parseInt(
-        localStorage.getItem(
-            "motiCityBest"
-        ) || "0"
-    );
-
-
-document.getElementById(
-    "bestStart"
-).textContent=
-    "$"+bestMoney;
-
-
 /* =========================================================
-   CONTROLES
-========================================================= */
-
-const keys={
-
-    up:false,
-    down:false,
-    left:false,
-    right:false,
-    boost:false
-
-};
-
-
-/* =========================================================
-   MISIÓN
+   NUEVA MISIÓN
 ========================================================= */
 
 function createMission(){
@@ -1441,23 +1980,22 @@ function createMission(){
             store.y,
             house.x,
             house.y
-        )<600
+        )<700
 
     );
 
 
     mission={
 
-        store:store,
-
-        house:house,
+        store,
+        house,
 
         state:"pickup",
 
         reward:
             25+
             Math.floor(
-                Math.random()*45
+                Math.random()*50
             )
 
     };
@@ -1465,104 +2003,112 @@ function createMission(){
 
     missionTime=90;
 
-    orders++;
 
-    updateMission();
-
-}
-
-
-function updateMission(){
-
-    if(!mission)
-        return;
+    document.getElementById(
+        "pickupText"
+    ).textContent=
+        mission.store.name;
 
 
-    const text=
-        document.getElementById(
-            "missionText"
-        );
-
-
-    if(
-        mission.state==="pickup"
-    ){
-
-        text.innerHTML=
-            "📦 Recoge en <strong>"+
-            mission.store.name+
-            "</strong>";
-
-    }else{
-
-        text.innerHTML=
-            "🏠 Entrega en <strong>"+
-            mission.house.name+
-            "</strong>";
-
-    }
+    document.getElementById(
+        "deliveryText"
+    ).textContent=
+        mission.house.name;
 
 }
 
 
 /* =========================================================
-   TOAST
+   CAMERA
 ========================================================= */
 
-let toastTimeout=null;
+function updateCamera(){
 
+    /*
+        ESTO ES IMPORTANTE:
 
-function showToast(
-    text
-){
+        La cámara sigue SIEMPRE
+        al centro de la moto.
+    */
 
-    const el=
-        document.getElementById(
-            "toast"
-        );
+    camera.x=
+        player.x;
 
-
-    el.textContent=text;
-
-    el.classList.add("show");
-
-
-    clearTimeout(
-        toastTimeout
-    );
-
-
-    toastTimeout=
-        setTimeout(
-            ()=>{
-                el.classList.remove(
-                    "show"
-                );
-            },
-            1700
-        );
+    camera.y=
+        player.y;
 
 }
 
 
 /* =========================================================
-   PLAYER
+   PLAYER UPDATE
 ========================================================= */
 
 function updatePlayer(){
 
-    let maximum=
-        player.maxSpeed;
+    /*
+        Acelerar SOLO con A.
+    */
 
+    if(input.up){
+
+        player.speed+=
+            player.acceleration;
+
+    }else{
+
+        if(
+            player.speed>0
+        ){
+
+            player.speed=
+                Math.max(
+                    0,
+                    player.speed-
+                    player.friction
+                );
+
+        }
+
+    }
+
+
+    /*
+        Frenar
+    */
+
+    if(input.down){
+
+        if(
+            player.speed>0
+        ){
+
+            player.speed-=
+                player.brake;
+
+        }else{
+
+            player.speed-=
+                player.acceleration*.65;
+
+        }
+
+    }
+
+
+    /*
+        Turbo
+    */
 
     if(
-        keys.boost &&
-        player.boostEnergy>0
+        input.turbo &&
+        player.boostEnergy>0 &&
+        player.speed>0
     ){
 
         player.boost=true;
 
-        maximum=9;
+        player.speed+=.16;
 
         player.boostEnergy-=.9;
 
@@ -1570,7 +2116,7 @@ function updatePlayer(){
 
         player.boost=false;
 
-        player.boostEnergy+=.3;
+        player.boostEnergy+=.28;
 
     }
 
@@ -1583,58 +2129,33 @@ function updatePlayer(){
         );
 
 
-    if(keys.up){
+    /*
+        LÍMITE
+    */
 
-        player.speed+=
-            player.acceleration;
-
-    }
-
-    else if(keys.down){
-
-        player.speed-=
-            player.acceleration*.8;
-
-    }
-
-    else{
-
-        if(player.speed>0){
-
-            player.speed=
-                Math.max(
-                    0,
-                    player.speed-
-                    player.friction
-                );
-
-        }
-
-
-        if(player.speed<0){
-
-            player.speed=
-                Math.min(
-                    0,
-                    player.speed+
-                    player.friction
-                );
-
-        }
-
-    }
+    const max=
+        player.boost
+        ? 8.5
+        : player.maxSpeed;
 
 
     player.speed=
         clamp(
             player.speed,
-            -2.5,
-            maximum
+            -2.2,
+            max
         );
 
 
+    /*
+        JOYSTICK = SOLO DIRECCIÓN
+
+        La dirección del joystick
+        NO acelera la moto.
+    */
+
     if(
-        Math.abs(player.speed)>.1
+        Math.abs(player.speed)>.05
     ){
 
         const reverse=
@@ -1643,29 +2164,36 @@ function updatePlayer(){
             : 1;
 
 
-        const turn=
-            player.rotation*
-            Math.min(
-                1,
-                Math.abs(player.speed)/3
-            );
+        if(input.left){
 
-
-        if(keys.left)
             player.angle-=
-                turn*reverse;
+                player.turnSpeed*
+                reverse;
+
+        }
 
 
-        if(keys.right)
+        if(input.right){
+
             player.angle+=
-                turn*reverse;
+                player.turnSpeed*
+                reverse;
+
+        }
 
     }
 
 
-    const oldX=player.x;
-    const oldY=player.y;
+    const oldX=
+        player.x;
 
+    const oldY=
+        player.y;
+
+
+    /*
+        Movimiento
+    */
 
     player.x+=
         Math.cos(
@@ -1697,8 +2225,12 @@ function updatePlayer(){
         );
 
 
+    /*
+        Edificios
+    */
+
     if(
-        collidesBuilding()
+        collisionBuilding()
     ){
 
         player.x=oldX;
@@ -1706,11 +2238,11 @@ function updatePlayer(){
 
         player.speed*=-.25;
 
-        createParticles(
+        particleBurst(
             player.x,
             player.y,
             8,
-            "#cccccc"
+            "#dddddd"
         );
 
     }
@@ -1722,10 +2254,10 @@ function updatePlayer(){
 
 
 /* =========================================================
-   EDIFICIOS COLISIÓN
+   COLISIÓN EDIFICIOS
 ========================================================= */
 
-function collidesBuilding(){
+function collisionBuilding(){
 
     for(
         const b of buildings
@@ -1733,10 +2265,10 @@ function collidesBuilding(){
 
         if(
 
-            player.x>b.x-17 &&
-            player.x<b.x+b.w+17 &&
-            player.y>b.y-17 &&
-            player.y<b.y+b.h+17
+            player.x>b.x-18 &&
+            player.x<b.x+b.w+18 &&
+            player.y>b.y-18 &&
+            player.y<b.y+b.h+18
 
         ){
 
@@ -1746,55 +2278,13 @@ function collidesBuilding(){
 
     }
 
-
     return false;
 
 }
 
 
 /* =========================================================
-   CÁMARA
-========================================================= */
-
-function updateCamera(){
-
-    const viewW=
-        W/ZOOM;
-
-    const viewH=
-        H/ZOOM;
-
-
-    camera.x=
-        player.x-
-        viewW/2;
-
-
-    camera.y=
-        player.y-
-        viewH/2;
-
-
-    camera.x=
-        clamp(
-            camera.x,
-            0,
-            WORLD_W-viewW
-        );
-
-
-    camera.y=
-        clamp(
-            camera.y,
-            0,
-            WORLD_H-viewH
-        );
-
-}
-
-
-/* =========================================================
-   TRÁFICO
+   CREAR TRÁFICO
 ========================================================= */
 
 function spawnTraffic(){
@@ -1805,7 +2295,7 @@ function spawnTraffic(){
 
     if(horizontal){
 
-        const r=
+        const road=
             [
                 roads[0],
                 roads[1],
@@ -1831,11 +2321,11 @@ function spawnTraffic(){
                 : WORLD_W+100,
 
             y:
-                r.y+
+                road.y+
                 (
                     direction>0
-                    ? r.h*.35
-                    : r.h*.65
+                    ? 58
+                    : 112
                 ),
 
             angle:
@@ -1844,8 +2334,8 @@ function spawnTraffic(){
                 : Math.PI,
 
             speed:
-                1.7+
-                Math.random()*2.1,
+                1.6+
+                Math.random()*1.5,
 
             color:
                 trafficColors[
@@ -1853,13 +2343,15 @@ function spawnTraffic(){
                         Math.random()*
                         trafficColors.length
                     )
-                ]
+                ],
+
+            turnTimer:0
 
         });
 
     }else{
 
-        const r=
+        const road=
             [
                 roads[3],
                 roads[4],
@@ -1881,11 +2373,11 @@ function spawnTraffic(){
         traffic.push({
 
             x:
-                r.x+
+                road.x+
                 (
                     direction>0
-                    ? r.w*.35
-                    : r.w*.65
+                    ? 58
+                    : 112
                 ),
 
             y:
@@ -1899,8 +2391,8 @@ function spawnTraffic(){
                 : -Math.PI/2,
 
             speed:
-                1.7+
-                Math.random()*2.1,
+                1.6+
+                Math.random()*1.5,
 
             color:
                 trafficColors[
@@ -1908,7 +2400,9 @@ function spawnTraffic(){
                         Math.random()*
                         trafficColors.length
                     )
-                ]
+                ],
+
+            turnTimer:0
 
         });
 
@@ -1923,24 +2417,30 @@ function spawnTraffic(){
 
 function updateTraffic(){
 
-    trafficTimer--;
+    trafficSpawnTimer--;
 
 
     if(
-        trafficTimer<=0
+        trafficSpawnTimer<=0
     ){
 
         spawnTraffic();
 
-        trafficTimer=
-            40+
-            Math.random()*50;
+        trafficSpawnTimer=
+            45+
+            Math.random()*45;
 
     }
 
 
     traffic.forEach(
         car=>{
+
+            /*
+                Pequeña variación
+                para que no parezcan
+                imágenes pegadas.
+            */
 
             car.x+=
                 Math.cos(
@@ -1969,6 +2469,10 @@ function updateTraffic(){
         );
 
 
+    /*
+        Colisiones
+    */
+
     if(
         player.invincible>0
     ){
@@ -1978,34 +2482,34 @@ function updateTraffic(){
     }
 
 
-    /*
-        COLISIONES
-    */
+    for(
+        const car of traffic
+    ){
 
-    traffic.forEach(
-        car=>{
+        if(
+
+            distance(
+                player.x,
+                player.y,
+                car.x,
+                car.y
+            )<42
+
+        ){
 
             if(
-                distance(
-                    player.x,
-                    player.y,
-                    car.x,
-                    car.y
-                )<38
+                player.invincible<=0
             ){
 
-                if(
-                    player.invincible<=0
-                ){
-
-                    crash(car);
-
-                }
+                hitCar(
+                    car
+                );
 
             }
 
         }
-    );
+
+    }
 
 }
 
@@ -2014,7 +2518,7 @@ function updateTraffic(){
    CHOQUE
 ========================================================= */
 
-function crash(
+function hitCar(
     car
 ){
 
@@ -2025,21 +2529,17 @@ function crash(
     player.speed*=-.55;
 
 
-    const pushAngle=
+    const push=
         car.angle+
         Math.PI/2;
 
 
     player.x+=
-        Math.cos(
-            pushAngle
-        )*20;
+        Math.cos(push)*25;
 
 
     player.y+=
-        Math.sin(
-            pushAngle
-        )*20;
+        Math.sin(push)*25;
 
 
     money=
@@ -2049,11 +2549,11 @@ function crash(
         );
 
 
-    createParticles(
+    particleBurst(
         player.x,
         player.y,
-        28,
-        "#ff6545"
+        25,
+        "#ff674c"
     );
 
 
@@ -2080,30 +2580,33 @@ function crash(
 function updatePeople(){
 
     people.forEach(
-        p=>{
+        person=>{
 
-            p.x+=
+            person.walk+=.18;
+
+
+            person.x+=
                 Math.cos(
-                    p.angle
+                    person.angle
                 )*
-                p.speed;
+                person.speed;
 
 
-            p.y+=
+            person.y+=
                 Math.sin(
-                    p.angle
+                    person.angle
                 )*
-                p.speed;
+                person.speed;
 
 
             if(
-                p.x<20 ||
-                p.x>WORLD_W-20 ||
-                p.y<20 ||
-                p.y>WORLD_H-20
+                person.x<20 ||
+                person.x>WORLD_W-20 ||
+                person.y<20 ||
+                person.y>WORLD_H-20
             ){
 
-                p.angle+=Math.PI;
+                person.angle+=Math.PI;
 
             }
 
@@ -2114,7 +2617,7 @@ function updatePeople(){
 
 
 /* =========================================================
-   CHECK MISIÓN
+   MISIÓN CHECK
 ========================================================= */
 
 function checkMission(){
@@ -2135,7 +2638,7 @@ function checkMission(){
             player.y,
             target.x,
             target.y
-        )<70
+        )<85
     ){
 
         if(
@@ -2147,7 +2650,6 @@ function checkMission(){
 
             missionTime=90;
 
-            updateMission();
 
             showToast(
                 "📦 ¡Pedido recogido!"
@@ -2167,7 +2669,7 @@ function checkMission(){
             deliveries++;
 
 
-            createParticles(
+            particleBurst(
                 player.x,
                 player.y,
                 30,
@@ -2181,6 +2683,17 @@ function checkMission(){
             );
 
 
+            if(
+                deliveries>=6
+            ){
+
+                endGame();
+
+                return;
+
+            }
+
+
             mission=null;
 
 
@@ -2189,7 +2702,7 @@ function checkMission(){
                     if(running)
                         createMission();
                 },
-                650
+                600
             );
 
         }
@@ -2200,12 +2713,13 @@ function checkMission(){
 
 
 /* =========================================================
-   DRAW WORLD
+   DIBUJAR SUELO
 ========================================================= */
 
-function drawWorld(){
+function drawGround(){
 
-    ctx.fillStyle="#477548";
+    ctx.fillStyle=
+        "#74a85c";
 
     ctx.fillRect(
         0,
@@ -2215,98 +2729,65 @@ function drawWorld(){
     );
 
 
+    /*
+        Cuadrícula visual
+        muy suave para dar
+        sensación de mapa.
+    */
+
     ctx.save();
 
+    ctx.globalAlpha=.07;
 
-    /*
-        CENTRAMOS LA CÁMARA
-        Y APLICAMOS ZOOM
-    */
+    ctx.strokeStyle="#fff";
 
-    ctx.translate(
-        W/2,
-        H/2
-    );
+    ctx.lineWidth=1;
 
 
-    ctx.scale(
-        ZOOM,
-        ZOOM
-    );
+    for(
+        let x=0;
+        x<W;
+        x+=55
+    ){
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x,
+            0
+        );
+
+        ctx.lineTo(
+            x,
+            H
+        );
+
+        ctx.stroke();
+
+    }
 
 
-    ctx.translate(
-        -camera.x,
-        -camera.y
-    );
+    for(
+        let y=0;
+        y<H;
+        y+=55
+    ){
 
+        ctx.beginPath();
 
-    /*
-        CALLES
-    */
+        ctx.moveTo(
+            0,
+            y
+        );
 
-    roads.forEach(
-        drawRoad
-    );
+        ctx.lineTo(
+            W,
+            y
+        );
 
+        ctx.stroke();
 
-    /*
-        EDIFICIOS
-    */
-
-    buildings.forEach(
-        drawBuilding
-    );
-
-
-    /*
-        TIENDAS
-    */
-
-    stores.forEach(
-        drawStore
-    );
-
-
-    /*
-        CASAS
-    */
-
-    houses.forEach(
-        drawHouse
-    );
-
-
-    /*
-        PERSONAS
-    */
-
-    people.forEach(
-        drawPerson
-    );
-
-
-    /*
-        TRÁFICO
-    */
-
-    traffic.forEach(
-        drawCar
-    );
-
-
-    /*
-        MISIÓN
-    */
-
-    drawMissionMarker();
-
-
-    /*
-        MOTO
-    */
-
-    drawMotorcycle();
+    }
 
 
     ctx.restore();
@@ -2315,133 +2796,375 @@ function drawWorld(){
 
 
 /* =========================================================
-   CARRETERA
+   DIBUJAR CALLE ISOMÉTRICA
 ========================================================= */
 
-function drawRoad(r){
+function drawRoad(
+    road
+){
 
-    ctx.fillStyle="#44494a";
+    const p1=
+        worldToScreen(
+            road.x,
+            road.y
+        );
 
-    ctx.fillRect(
-        r.x,
-        r.y,
-        r.w,
-        r.h
+    const p2=
+        worldToScreen(
+            road.x+road.w,
+            road.y
+        );
+
+    const p3=
+        worldToScreen(
+            road.x+road.w,
+            road.y+road.h
+        );
+
+    const p4=
+        worldToScreen(
+            road.x,
+            road.y+road.h
+        );
+
+
+    ctx.fillStyle=
+        "#41494b";
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        p1.x,
+        p1.y
     );
 
+    ctx.lineTo(
+        p2.x,
+        p2.y
+    );
 
-    /*
-        banquetas
-    */
+    ctx.lineTo(
+        p3.x,
+        p3.y
+    );
 
-    ctx.fillStyle="#aaa89d";
+    ctx.lineTo(
+        p4.x,
+        p4.y
+    );
 
+    ctx.closePath();
 
-    if(
-        r.w>r.h
-    ){
-
-        ctx.fillRect(
-            r.x,
-            r.y,
-            r.w,
-            10
-        );
-
-        ctx.fillRect(
-            r.x,
-            r.y+r.h-10,
-            r.w,
-            10
-        );
-
-    }else{
-
-        ctx.fillRect(
-            r.x,
-            r.y,
-            10,
-            r.h
-        );
-
-        ctx.fillRect(
-            r.x+r.w-10,
-            r.y,
-            10,
-            r.h
-        );
-
-    }
+    ctx.fill();
 
 
     /*
-        línea central
+        Banquetas
     */
 
-    ctx.fillStyle="#d2cb8f";
+    ctx.strokeStyle=
+        "#d1c3a0";
+
+    ctx.lineWidth=8;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        p1.x,
+        p1.y
+    );
+
+    ctx.lineTo(
+        p2.x,
+        p2.y
+    );
+
+    ctx.moveTo(
+        p4.x,
+        p4.y
+    );
+
+    ctx.lineTo(
+        p3.x,
+        p3.y
+    );
+
+    ctx.stroke();
 
 
-    if(
-        r.w>r.h
-    ){
+    /*
+        Línea central
+    */
 
-        for(
-            let x=r.x;
-            x<r.x+r.w;
-            x+=75
-        ){
+    ctx.strokeStyle=
+        "#eee4b5";
 
-            ctx.fillRect(
-                x,
-                r.y+r.h/2-2,
-                38,
-                4
-            );
+    ctx.lineWidth=2;
 
-        }
+    ctx.setLineDash([
+        14,
+        15
+    ]);
 
-    }else{
 
-        for(
-            let y=r.y;
-            y<r.y+r.h;
-            y+=75
-        ){
+    ctx.beginPath();
 
-            ctx.fillRect(
-                r.x+r.w/2-2,
-                y,
-                4,
-                38
-            );
+    const center1=
+        worldToScreen(
+            road.x,
+            road.y+
+            road.h/2
+        );
 
-        }
 
-    }
+    const center2=
+        worldToScreen(
+            road.x+
+            road.w,
+            road.y+
+            road.h/2
+        );
+
+
+    ctx.moveTo(
+        center1.x,
+        center1.y
+    );
+
+    ctx.lineTo(
+        center2.x,
+        center2.y
+    );
+
+    ctx.stroke();
+
+
+    ctx.setLineDash([]);
 
 }
 
 
 /* =========================================================
-   CASA / EDIFICIO VISTA SUPERIOR
+   DIBUJAR EDIFICIO
 ========================================================= */
 
 function drawBuilding(
     b
 ){
 
+    const top1=
+        worldToScreen(
+            b.x,
+            b.y
+        );
+
+    const top2=
+        worldToScreen(
+            b.x+b.w,
+            b.y
+        );
+
+    const top3=
+        worldToScreen(
+            b.x+b.w,
+            b.y+b.h
+        );
+
+    const top4=
+        worldToScreen(
+            b.x,
+            b.y+b.h
+        );
+
+
+    const h=
+        b.height*
+        CAMERA_ZOOM;
+
+
     /*
-        patio
+        Pared izquierda
     */
 
-    ctx.fillStyle="#708e61";
+    ctx.fillStyle=
+        shade(
+            b.wall,
+            -.20
+        );
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        top1.x,
+        top1.y
+    );
+
+    ctx.lineTo(
+        top4.x,
+        top4.y
+    );
+
+    ctx.lineTo(
+        top4.x,
+        top4.y+h
+    );
+
+    ctx.lineTo(
+        top1.x,
+        top1.y+h
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    /*
+        Pared derecha
+    */
+
+    ctx.fillStyle=
+        shade(
+            b.wall,
+            -.30
+        );
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        top2.x,
+        top2.y
+    );
+
+    ctx.lineTo(
+        top3.x,
+        top3.y
+    );
+
+    ctx.lineTo(
+        top3.x,
+        top3.y+h
+    );
+
+    ctx.lineTo(
+        top2.x,
+        top2.y+h
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    /*
+        Techo
+    */
+
+    ctx.fillStyle=
+        b.roof;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        top1.x,
+        top1.y
+    );
+
+    ctx.lineTo(
+        top2.x,
+        top2.y
+    );
+
+    ctx.lineTo(
+        top3.x,
+        top3.y
+    );
+
+    ctx.lineTo(
+        top4.x,
+        top4.y
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    /*
+        Borde del techo
+    */
+
+    ctx.strokeStyle=
+        "rgba(255,255,255,.25)";
+
+    ctx.lineWidth=2;
+
+    ctx.stroke();
+
+
+    /*
+        Aire acondicionado
+    */
+
+    const ac=
+        worldToScreen(
+            b.x+b.w*.55,
+            b.y+b.h*.48
+        );
+
+
+    ctx.fillStyle=
+        "#c9ceca";
 
     ctx.fillRect(
-        b.x-10,
-        b.y-10,
-        b.w+20,
-        b.h+20
+        ac.x-6,
+        ac.y-5,
+        12,
+        10
     );
+
+
+    /*
+        Ventana lateral
+    */
+
+    const win=
+        worldToScreen(
+            b.x+b.w*.25,
+            b.y+b.h
+        );
+
+
+    ctx.fillStyle=
+        "#a8d6dd";
+
+    ctx.fillRect(
+        win.x-7,
+        win.y-4,
+        14,
+        8
+    );
+
+}
+
+
+/* =========================================================
+   ÁRBOL
+========================================================= */
+
+function drawTree(
+    tree
+){
+
+    const p=
+        worldToScreen(
+            tree.x,
+            tree.y
+        );
 
 
     /*
@@ -2451,110 +3174,14 @@ function drawBuilding(
     ctx.fillStyle=
         "rgba(0,0,0,.22)";
 
-    ctx.fillRect(
-        b.x+7,
-        b.y+7,
-        b.w,
-        b.h
-    );
-
-
-    /*
-        estructura
-    */
-
-    ctx.fillStyle=b.wall;
-
-    ctx.fillRect(
-        b.x,
-        b.y,
-        b.w,
-        b.h
-    );
-
-
-    /*
-        losa / techo
-    */
-
-    ctx.fillStyle=b.roof;
-
-    ctx.fillRect(
-        b.x+4,
-        b.y+4,
-        b.w-8,
-        b.h-8
-    );
-
-
-    /*
-        detalles de la losa
-    */
-
-    ctx.strokeStyle=
-        "rgba(255,255,255,.14)";
-
-    ctx.lineWidth=2;
-
-    ctx.strokeRect(
-        b.x+8,
-        b.y+8,
-        b.w-16,
-        b.h-16
-    );
-
-
-    /*
-        tinaco
-    */
-
-    ctx.fillStyle="#222";
-
-    ctx.fillRect(
-        b.x+14,
-        b.y+14,
-        14,
-        14
-    );
-
-
-    /*
-        pequeño tanque
-    */
-
-    ctx.fillStyle="#4c5558";
-
-    ctx.fillRect(
-        b.x+b.w-30,
-        b.y+b.h-28,
-        14,
-        14
-    );
-
-}
-
-
-/* =========================================================
-   CASA DE DESTINO
-========================================================= */
-
-function drawHouse(
-    h
-){
-
-    /*
-        círculo de referencia
-    */
-
-    ctx.fillStyle=
-        "rgba(255,255,255,.13)";
-
     ctx.beginPath();
 
-    ctx.arc(
-        h.x,
-        h.y,
-        29,
+    ctx.ellipse(
+        p.x,
+        p.y+8,
+        tree.size*.7,
+        tree.size*.3,
+        0,
         0,
         Math.PI*2
     );
@@ -2563,43 +3190,68 @@ function drawHouse(
 
 
     /*
-        casa
+        tronco
     */
 
-    ctx.fillStyle="#d9d0b9";
+    ctx.fillStyle=
+        "#76513a";
 
     ctx.fillRect(
-        h.x-17,
-        h.y-13,
-        34,
-        26
+        p.x-5,
+        p.y-20,
+        10,
+        28
     );
 
 
     /*
-        techo
+        copa
     */
 
-    ctx.fillStyle="#8b5446";
+    ctx.fillStyle=
+        "#3c8a4d";
 
     ctx.beginPath();
 
-    ctx.moveTo(
-        h.x-20,
-        h.y-13
+    ctx.arc(
+        p.x,
+        p.y-27,
+        tree.size,
+        0,
+        Math.PI*2
     );
 
-    ctx.lineTo(
-        h.x,
-        h.y-29
+    ctx.fill();
+
+
+    ctx.fillStyle=
+        "#62ad52";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        p.x-8,
+        p.y-34,
+        tree.size*.55,
+        0,
+        Math.PI*2
     );
 
-    ctx.lineTo(
-        h.x+20,
-        h.y-13
-    );
+    ctx.fill();
 
-    ctx.closePath();
+
+    ctx.fillStyle=
+        "#2f7342";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        p.x+10,
+        p.y-18,
+        tree.size*.55,
+        0,
+        Math.PI*2
+    );
 
     ctx.fill();
 
@@ -2611,58 +3263,14 @@ function drawHouse(
 ========================================================= */
 
 function drawStore(
-    s
+    store
 ){
 
-    ctx.fillStyle="#efb844";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        s.x,
-        s.y,
-        31,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    ctx.fillStyle="#553c19";
-
-    ctx.font=
-        "bold 11px Arial";
-
-    ctx.textAlign="center";
-
-    ctx.fillText(
-        "TIENDA",
-        s.x,
-        s.y+4
-    );
-
-}
-
-
-/* =========================================================
-   PERSONA VISTA DESDE ARRIBA
-========================================================= */
-
-function drawPerson(
-    p
-){
-
-    ctx.save();
-
-    ctx.translate(
-        p.x,
-        p.y
-    );
-
-    ctx.rotate(
-        p.angle
-    );
+    const p=
+        worldToScreen(
+            store.x,
+            store.y
+        );
 
 
     /*
@@ -2670,14 +3278,233 @@ function drawPerson(
     */
 
     ctx.fillStyle=
-        "rgba(0,0,0,.25)";
+        "rgba(0,0,0,.2)";
+
+    ctx.fillRect(
+        p.x-30,
+        p.y-20,
+        60,
+        35
+    );
+
+
+    /*
+        local
+    */
+
+    ctx.fillStyle=
+        "#d98c42";
+
+    ctx.fillRect(
+        p.x-28,
+        p.y-30,
+        56,
+        38
+    );
+
+
+    /*
+        techo
+    */
+
+    ctx.fillStyle=
+        "#4c5559";
+
+    ctx.fillRect(
+        p.x-31,
+        p.y-35,
+        62,
+        8
+    );
+
+
+    /*
+        letrero
+    */
+
+    ctx.fillStyle=
+        "#f6c43f";
+
+    ctx.fillRect(
+        p.x-27,
+        p.y-25,
+        54,
+        10
+    );
+
+
+    ctx.fillStyle=
+        "#4a351a";
+
+    ctx.font=
+        "bold 8px Arial";
+
+    ctx.textAlign="center";
+
+    ctx.fillText(
+        "ABARROTES",
+        p.x,
+        p.y-17
+    );
+
+
+    /*
+        puerta
+    */
+
+    ctx.fillStyle=
+        "#4b3a32";
+
+    ctx.fillRect(
+        p.x-7,
+        p.y+1,
+        14,
+        14
+    );
+
+}
+
+
+/* =========================================================
+   CASA DESTINO
+========================================================= */
+
+function drawHouse(
+    house
+){
+
+    const p=
+        worldToScreen(
+            house.x,
+            house.y
+        );
+
+
+    /*
+        jardín
+    */
+
+    ctx.fillStyle=
+        "#6da85b";
+
+    ctx.fillRect(
+        p.x-28,
+        p.y-22,
+        56,
+        40
+    );
+
+
+    /*
+        casa
+    */
+
+    ctx.fillStyle=
+        "#d7c5a4";
+
+    ctx.fillRect(
+        p.x-22,
+        p.y-18,
+        44,
+        32
+    );
+
+
+    /*
+        techo
+    */
+
+    ctx.fillStyle=
+        "#9d5949";
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        p.x-27,
+        p.y-18
+    );
+
+    ctx.lineTo(
+        p.x,
+        p.y-37
+    );
+
+    ctx.lineTo(
+        p.x+27,
+        p.y-18
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    /*
+        puerta
+    */
+
+    ctx.fillStyle=
+        "#62412f";
+
+    ctx.fillRect(
+        p.x-5,
+        p.y-2,
+        10,
+        16
+    );
+
+
+    /*
+        ventana
+    */
+
+    ctx.fillStyle=
+        "#8acbd1";
+
+    ctx.fillRect(
+        p.x+8,
+        p.y-7,
+        9,
+        9
+    );
+
+}
+
+
+/* =========================================================
+   PERSONA CAMINANDO
+========================================================= */
+
+function drawPerson(
+    person
+){
+
+    const p=
+        worldToScreen(
+            person.x,
+            person.y
+        );
+
+
+    const walk=
+        Math.sin(
+            person.walk
+        );
+
+
+    /*
+        sombra
+    */
+
+    ctx.fillStyle=
+        "rgba(0,0,0,.22)";
 
     ctx.beginPath();
 
     ctx.ellipse(
-        0,
-        4,
-        5,
+        p.x,
+        p.y+5,
+        7,
         3,
         0,
         0,
@@ -2688,72 +3515,135 @@ function drawPerson(
 
 
     /*
-        cabeza
+        piernas animadas
     */
 
-    ctx.fillStyle="#dfad7d";
+    ctx.strokeStyle=
+        "#29312d";
+
+    ctx.lineWidth=3;
 
     ctx.beginPath();
 
-    ctx.arc(
-        0,
-        -5,
-        4,
-        0,
-        Math.PI*2
+    ctx.moveTo(
+        p.x-2,
+        p.y+5
     );
 
-    ctx.fill();
+    ctx.lineTo(
+        p.x-3+
+        walk*3,
+        p.y+14
+    );
+
+
+    ctx.moveTo(
+        p.x+2,
+        p.y+5
+    );
+
+    ctx.lineTo(
+        p.x+3-
+        walk*3,
+        p.y+14
+    );
+
+    ctx.stroke();
 
 
     /*
         cuerpo
     */
 
-    ctx.fillStyle="#3d79b4";
+    ctx.fillStyle=
+        person.shirt;
 
     ctx.fillRect(
-        -4,
-        0,
-        8,
-        9
+        p.x-5,
+        p.y-4,
+        10,
+        12
     );
 
 
     /*
-        piernas
+        brazos animados
+
+        Esto hace que parezca
+        que realmente está caminando.
     */
 
-    ctx.strokeStyle="#20252a";
+    ctx.strokeStyle=
+        person.shirt;
 
-    ctx.lineWidth=2;
+    ctx.lineWidth=3;
 
     ctx.beginPath();
 
     ctx.moveTo(
-        -2,
-        9
+        p.x-5,
+        p.y-2
     );
 
     ctx.lineTo(
-        -3,
-        14
+        p.x-9+
+        walk*4,
+        p.y+5
     );
+
 
     ctx.moveTo(
-        2,
-        9
+        p.x+5,
+        p.y-2
     );
 
     ctx.lineTo(
-        3,
-        14
+        p.x+9-
+        walk*4,
+        p.y+5
     );
 
     ctx.stroke();
 
 
-    ctx.restore();
+    /*
+        cabeza
+    */
+
+    ctx.fillStyle=
+        "#dca77b";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        p.x,
+        p.y-9,
+        5,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /*
+        cabello
+    */
+
+    ctx.fillStyle=
+        "#4b3027";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        p.x,
+        p.y-11,
+        4,
+        Math.PI,
+        Math.PI*2
+    );
+
+    ctx.fill();
 
 }
 
@@ -2766,15 +3656,38 @@ function drawCar(
     car
 ){
 
+    const p=
+        worldToScreen(
+            car.x,
+            car.y
+        );
+
+
     ctx.save();
 
     ctx.translate(
-        car.x,
-        car.y
+        p.x,
+        p.y
     );
 
+
+    /*
+        La orientación del auto
+        cambia visualmente con
+        su dirección.
+    */
+
+    let angle=
+        car.angle;
+
+
+    /*
+        Convertimos orientación
+        del mundo a la perspectiva.
+    */
+
     ctx.rotate(
-        car.angle
+        angle
     );
 
 
@@ -2783,98 +3696,83 @@ function drawCar(
     */
 
     ctx.fillStyle=
-        "rgba(0,0,0,.32)";
+        "rgba(0,0,0,.30)";
 
     roundRect(
         -18,
-        -29,
+        -30,
         36,
-        58,
-        7
+        60,
+        8
     );
 
     ctx.fill();
 
 
     /*
-        carrocería
+        cuerpo
     */
 
     ctx.fillStyle=
         car.color;
 
     roundRect(
-        -15,
+        -16,
         -28,
-        30,
+        32,
         56,
-        7
+        8
     );
 
     ctx.fill();
 
 
     /*
-        cofre
+        techo
     */
 
     ctx.fillStyle=
-        "rgba(255,255,255,.13)";
-
-    ctx.fillRect(
-        -10,
-        -23,
-        20,
-        9
-    );
-
-
-    /*
-        cabina
-    */
-
-    ctx.fillStyle="#182c38";
+        "#202c32";
 
     roundRect(
-        -10,
-        -9,
-        20,
-        20,
-        4
+        -11,
+        -12,
+        22,
+        23,
+        5
     );
 
     ctx.fill();
 
 
     /*
-        división
+        ventanas
     */
 
-    ctx.strokeStyle=
-        "rgba(255,255,255,.23)";
+    ctx.fillStyle=
+        "#8fc3d0";
 
-    ctx.lineWidth=2;
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-        0,
-        -9
+    ctx.fillRect(
+        -8,
+        -9,
+        16,
+        8
     );
 
-    ctx.lineTo(
-        0,
-        11
+    ctx.fillRect(
+        -8,
+        2,
+        16,
+        8
     );
-
-    ctx.stroke();
 
 
     /*
         faros
     */
 
-    ctx.fillStyle="#fff3a0";
+    ctx.fillStyle=
+        "#fff0a1";
 
     ctx.fillRect(
         -11,
@@ -2895,7 +3793,8 @@ function drawCar(
         calaveras
     */
 
-    ctx.fillStyle="#e83f3f";
+    ctx.fillStyle=
+        "#ed4545";
 
     ctx.fillRect(
         -11,
@@ -2913,37 +3812,37 @@ function drawCar(
 
 
     /*
-        llantas laterales
+        ruedas
     */
 
-    ctx.fillStyle="#111";
+    ctx.fillStyle="#151515";
 
     ctx.fillRect(
-        -17,
+        -19,
         -20,
         5,
-        11
+        12
     );
 
     ctx.fillRect(
-        12,
+        14,
         -20,
         5,
-        11
+        12
     );
 
     ctx.fillRect(
-        -17,
-        9,
+        -19,
+        8,
         5,
-        11
+        12
     );
 
     ctx.fillRect(
-        12,
-        9,
+        14,
+        8,
         5,
-        11
+        12
     );
 
 
@@ -2953,17 +3852,29 @@ function drawCar(
 
 
 /* =========================================================
-   MOTOCICLETA
+   MOTO
 ========================================================= */
 
 function drawMotorcycle(){
 
+    const p=
+        worldToScreen(
+            player.x,
+            player.y
+        );
+
+
     ctx.save();
 
     ctx.translate(
-        player.x,
-        player.y
+        p.x,
+        p.y
     );
+
+
+    /*
+        Orientación
+    */
 
     ctx.rotate(
         player.angle
@@ -2971,7 +3882,7 @@ function drawMotorcycle(){
 
 
     /*
-        parpadeo
+        Parpadeo tras choque
     */
 
     if(
@@ -2991,14 +3902,14 @@ function drawMotorcycle(){
     */
 
     ctx.fillStyle=
-        "rgba(0,0,0,.36)";
+        "rgba(0,0,0,.32)";
 
     ctx.beginPath();
 
     ctx.ellipse(
         0,
-        5,
-        21,
+        7,
+        22,
         8,
         0,
         0,
@@ -3012,15 +3923,16 @@ function drawMotorcycle(){
         ruedas
     */
 
-    ctx.fillStyle="#101112";
+    ctx.fillStyle=
+        "#111";
 
     ctx.beginPath();
 
     ctx.ellipse(
-        -16,
+        -17,
         0,
         6,
-        11,
+        12,
         0,
         0,
         Math.PI*2
@@ -3032,10 +3944,10 @@ function drawMotorcycle(){
     ctx.beginPath();
 
     ctx.ellipse(
-        17,
+        18,
         0,
         6,
-        11,
+        12,
         0,
         0,
         Math.PI*2
@@ -3050,14 +3962,14 @@ function drawMotorcycle(){
 
     ctx.fillStyle=
         player.boost
-        ? "#ffd447"
-        : "#25d579";
+        ? "#ffd53e"
+        : "#24d878";
 
     roundRect(
-        -15,
+        -16,
         -8,
-        31,
-        16,
+        32,
+        17,
         7
     );
 
@@ -3065,32 +3977,45 @@ function drawMotorcycle(){
 
 
     /*
-        asiento
+        caja MOTI
     */
 
-    ctx.fillStyle="#171b1c";
+    ctx.fillStyle=
+        "#dc8e36";
 
     roundRect(
-        -9,
-        -6,
-        18,
-        8,
-        4
+        -12,
+        -23,
+        20,
+        13,
+        3
     );
 
     ctx.fill();
+
+
+    ctx.fillStyle=
+        "#ffe18a";
+
+    ctx.fillRect(
+        -9,
+        -21,
+        14,
+        2
+    );
 
 
     /*
         conductor
     */
 
-    ctx.fillStyle="#202528";
+    ctx.fillStyle=
+        "#26302b";
 
     ctx.beginPath();
 
     ctx.arc(
-        -2,
+        -3,
         -11,
         7,
         0,
@@ -3104,12 +4029,13 @@ function drawMotorcycle(){
         casco
     */
 
-    ctx.fillStyle="#28d47d";
+    ctx.fillStyle=
+        "#2bd87d";
 
     ctx.beginPath();
 
     ctx.arc(
-        -2,
+        -3,
         -13,
         6,
         0,
@@ -3120,34 +4046,11 @@ function drawMotorcycle(){
 
 
     /*
-        caja
-    */
-
-    ctx.fillStyle="#d98d35";
-
-    ctx.fillRect(
-        -11,
-        -22,
-        18,
-        12
-    );
-
-
-    ctx.fillStyle="#f3bd67";
-
-    ctx.fillRect(
-        -9,
-        -20,
-        14,
-        2
-    );
-
-
-    /*
         manubrio
     */
 
-    ctx.strokeStyle="#202426";
+    ctx.strokeStyle=
+        "#202725";
 
     ctx.lineWidth=3;
 
@@ -3159,7 +4062,7 @@ function drawMotorcycle(){
     );
 
     ctx.lineTo(
-        23,
+        24,
         -11
     );
 
@@ -3169,7 +4072,7 @@ function drawMotorcycle(){
     );
 
     ctx.lineTo(
-        23,
+        24,
         11
     );
 
@@ -3180,12 +4083,13 @@ function drawMotorcycle(){
         faro
     */
 
-    ctx.fillStyle="#fff5aa";
+    ctx.fillStyle=
+        "#fff3a0";
 
     ctx.beginPath();
 
     ctx.arc(
-        20,
+        21,
         0,
         4,
         0,
@@ -3201,7 +4105,8 @@ function drawMotorcycle(){
 
     if(player.boost){
 
-        ctx.fillStyle="#ff8035";
+        ctx.fillStyle=
+            "#ff7b36";
 
         ctx.beginPath();
 
@@ -3211,18 +4116,18 @@ function drawMotorcycle(){
         );
 
         ctx.lineTo(
-            -40,
-            -8
+            -43,
+            -9
         );
 
         ctx.lineTo(
-            -32,
+            -34,
             0
         );
 
         ctx.lineTo(
-            -40,
-            8
+            -43,
+            9
         );
 
         ctx.closePath();
@@ -3238,7 +4143,7 @@ function drawMotorcycle(){
 
 
 /* =========================================================
-   MARCADOR DE MISIÓN
+   MARCADOR MISIÓN
 ========================================================= */
 
 function drawMissionMarker(){
@@ -3253,8 +4158,15 @@ function drawMissionMarker(){
         : mission.house;
 
 
+    const p=
+        worldToScreen(
+            target.x,
+            target.y
+        );
+
+
     const pulse=
-        40+
+        35+
         Math.sin(
             Date.now()/180
         )*7;
@@ -3262,8 +4174,8 @@ function drawMissionMarker(){
 
     ctx.strokeStyle=
         mission.state==="pickup"
-        ? "#ffd447"
-        : "#ff8147";
+        ? "#ffd53e"
+        : "#ff7147";
 
 
     ctx.lineWidth=4;
@@ -3272,8 +4184,8 @@ function drawMissionMarker(){
     ctx.beginPath();
 
     ctx.arc(
-        target.x,
-        target.y,
+        p.x,
+        p.y,
         pulse,
         0,
         Math.PI*2
@@ -3284,12 +4196,12 @@ function drawMissionMarker(){
 
     ctx.fillStyle=
         mission.state==="pickup"
-        ? "#ffd447"
-        : "#ff8147";
+        ? "#ffd53e"
+        : "#ff7147";
 
 
     ctx.font=
-        "bold 12px Arial";
+        "bold 11px Arial";
 
     ctx.textAlign="center";
 
@@ -3298,8 +4210,8 @@ function drawMissionMarker(){
         mission.state==="pickup"
         ? "RECOGER"
         : "ENTREGAR",
-        target.x,
-        target.y-48
+        p.x,
+        p.y-45
     );
 
 }
@@ -3309,7 +4221,7 @@ function drawMissionMarker(){
    PARTÍCULAS
 ========================================================= */
 
-function createParticles(
+function particleBurst(
     x,
     y,
     amount,
@@ -3324,8 +4236,8 @@ function createParticles(
 
         particles.push({
 
-            x:x,
-            y:y,
+            x,
+            y,
 
             vx:
                 (Math.random()-.5)*5,
@@ -3337,7 +4249,7 @@ function createParticles(
                 25+
                 Math.random()*30,
 
-            color:color
+            color
 
         });
 
@@ -3355,8 +4267,6 @@ function updateParticles(){
 
             p.y+=p.vy;
 
-            p.vy+=.08;
-
             p.life--;
 
         }
@@ -3373,38 +4283,29 @@ function updateParticles(){
 
 function drawParticles(){
 
-    ctx.save();
-
-    ctx.translate(
-        W/2,
-        H/2
-    );
-
-    ctx.scale(
-        ZOOM,
-        ZOOM
-    );
-
-    ctx.translate(
-        -camera.x,
-        -camera.y
-    );
-
-
     particles.forEach(
-        p=>{
+        particle=>{
+
+            const p=
+                worldToScreen(
+                    particle.x,
+                    particle.y
+                );
+
 
             ctx.globalAlpha=
-                p.life/55;
+                particle.life/50;
+
 
             ctx.fillStyle=
-                p.color;
+                particle.color;
+
 
             ctx.fillRect(
-                p.x,
-                p.y,
-                5,
-                5
+                p.x-3,
+                p.y-3,
+                6,
+                6
             );
 
         }
@@ -3413,7 +4314,110 @@ function drawParticles(){
 
     ctx.globalAlpha=1;
 
-    ctx.restore();
+}
+
+
+/* =========================================================
+   DRAW WORLD
+========================================================= */
+
+function drawWorld(){
+
+    drawGround();
+
+
+    /*
+        Primero calles
+    */
+
+    roads.forEach(
+        drawRoad
+    );
+
+
+    /*
+        Edificios
+
+        Los ordenamos por Y
+        para que parezca que
+        están detrás/delante.
+    */
+
+    const sortedBuildings=
+        [...buildings].sort(
+            (a,b)=>
+                (a.y+a.h)-
+                (b.y+b.h)
+        );
+
+
+    sortedBuildings.forEach(
+        drawBuilding
+    );
+
+
+    /*
+        Árboles
+    */
+
+    trees.forEach(
+        drawTree
+    );
+
+
+    /*
+        Tiendas
+    */
+
+    stores.forEach(
+        drawStore
+    );
+
+
+    /*
+        Casas
+    */
+
+    houses.forEach(
+        drawHouse
+    );
+
+
+    /*
+        Personas
+    */
+
+    people.forEach(
+        drawPerson
+    );
+
+
+    /*
+        Autos
+    */
+
+    traffic.forEach(
+        drawCar
+    );
+
+
+    /*
+        Misión
+    */
+
+    drawMissionMarker();
+
+
+    /*
+        Moto
+
+        SIEMPRE encima
+    */
+
+    drawMotorcycle();
+
+
+    drawParticles();
 
 }
 
@@ -3424,45 +4428,52 @@ function drawParticles(){
 
 function drawMiniMap(){
 
+    const w=165;
+    const h=125;
+
+
     miniCtx.clearRect(
         0,
         0,
-        145,
-        110
+        w,
+        h
     );
 
 
-    const sx=
-        145/WORLD_W;
-
-    const sy=
-        110/WORLD_H;
-
-
-    miniCtx.fillStyle="#416c43";
+    miniCtx.fillStyle=
+        "#61964f";
 
     miniCtx.fillRect(
         0,
         0,
-        145,
-        110
+        w,
+        h
     );
+
+
+    const sx=
+        w/WORLD_W;
+
+    const sy=
+        h/WORLD_H;
 
 
     /*
         calles
     */
 
-    miniCtx.fillStyle="#555";
+    miniCtx.fillStyle=
+        "#454c4d";
+
 
     roads.forEach(
-        r=>{
+        road=>{
 
             miniCtx.fillRect(
-                r.x*sx,
-                r.y*sy,
-                r.w*sx,
-                r.h*sy
+                road.x*sx,
+                road.y*sy,
+                road.w*sx,
+                road.h*sy
             );
 
         }
@@ -3473,14 +4484,16 @@ function drawMiniMap(){
         casas
     */
 
-    miniCtx.fillStyle="#d4bc83";
+    miniCtx.fillStyle=
+        "#d6b878";
+
 
     houses.forEach(
-        h=>{
+        house=>{
 
             miniCtx.fillRect(
-                h.x*sx-2,
-                h.y*sy-2,
+                house.x*sx-2,
+                house.y*sy-2,
                 4,
                 4
             );
@@ -3490,10 +4503,12 @@ function drawMiniMap(){
 
 
     /*
-        tráfico
+        autos
     */
 
-    miniCtx.fillStyle="#e74c3c";
+    miniCtx.fillStyle=
+        "#e74c3c";
+
 
     traffic.forEach(
         car=>{
@@ -3522,9 +4537,7 @@ function drawMiniMap(){
 
 
         miniCtx.fillStyle=
-            mission.state==="pickup"
-            ? "#ffd447"
-            : "#ff7c47";
+            "#ffd53e";
 
 
         miniCtx.beginPath();
@@ -3546,14 +4559,16 @@ function drawMiniMap(){
         jugador
     */
 
-    miniCtx.fillStyle="#29d47d";
+    miniCtx.fillStyle=
+        "#2bd87d";
+
 
     miniCtx.beginPath();
 
     miniCtx.arc(
         player.x*sx,
         player.y*sy,
-        4,
+        5,
         0,
         Math.PI*2
     );
@@ -3572,11 +4587,11 @@ function updateHUD(){
     document.getElementById(
         "money"
     ).textContent=
-        "$"+money;
+        money;
 
 
     document.getElementById(
-        "deliveries"
+        "deliveryCount"
     ).textContent=
         deliveries;
 
@@ -3591,6 +4606,71 @@ function updateHUD(){
             )
         );
 
+
+    const kmh=
+        Math.round(
+            Math.abs(
+                player.speed
+            )*10
+        );
+
+
+    document.getElementById(
+        "speed"
+    ).textContent=
+        kmh;
+
+
+    document.getElementById(
+        "energyFill"
+    ).style.width=
+        player.boostEnergy+
+        "%";
+
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+let toastTimer=null;
+
+
+function showToast(
+    text
+){
+
+    const toast=
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent=
+        text;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer=
+        setTimeout(
+            ()=>{
+                toast.classList.remove(
+                    "show"
+                );
+            },
+            1700
+        );
+
 }
 
 
@@ -3598,24 +4678,22 @@ function updateHUD(){
    GAME LOOP
 ========================================================= */
 
-let previousTime=
+let previous=
     performance.now();
 
 
-function gameLoop(
-    currentTime
+function loop(
+    now
 ){
 
     const delta=
         Math.min(
             50,
-            currentTime-
-            previousTime
+            now-previous
         );
 
 
-    previousTime=
-        currentTime;
+    previous=now;
 
 
     if(running){
@@ -3642,7 +4720,7 @@ function gameLoop(
             ){
 
                 showToast(
-                    "⏱️ Se acabó el tiempo"
+                    "⏱️ ¡Se acabó el tiempo!"
                 );
 
 
@@ -3678,25 +4756,23 @@ function gameLoop(
 
     drawWorld();
 
-    drawParticles();
-
     drawMiniMap();
 
 
     requestAnimationFrame(
-        gameLoop
+        loop
     );
 
 }
 
 
 requestAnimationFrame(
-    gameLoop
+    loop
 );
 
 
 /* =========================================================
-   START GAME
+   START
 ========================================================= */
 
 function startGame(){
@@ -3715,12 +4791,16 @@ function startGame(){
 
     traffic=[];
 
-    trafficTimer=10;
+    trafficSpawnTimer=20;
 
+
+    /*
+        Posición inicial
+    */
 
     player.x=300;
 
-    player.y=595;
+    player.y=535;
 
     player.angle=0;
 
@@ -3728,14 +4808,20 @@ function startGame(){
 
     player.health=100;
 
-    player.invincible=0;
-
     player.boostEnergy=100;
 
+    player.invincible=0;
 
-    camera.x=0;
 
-    camera.y=0;
+    /*
+        Cámara centrada
+    */
+
+    camera.x=
+        player.x;
+
+    camera.y=
+        player.y;
 
 
     createMission();
@@ -3760,56 +4846,6 @@ function startGame(){
             "hidden"
         );
 
-
-    document
-        .getElementById(
-            "hud"
-        )
-        .classList
-        .remove(
-            "hidden"
-        );
-
-
-    document
-        .getElementById(
-            "mission"
-        )
-        .classList
-        .remove(
-            "hidden"
-        );
-
-
-    document
-        .getElementById(
-            "miniMap"
-        )
-        .classList
-        .remove(
-            "hidden"
-        );
-
-
-    document
-        .getElementById(
-            "joystick"
-        )
-        .classList
-        .remove(
-            "hidden"
-        );
-
-
-    document
-        .getElementById(
-            "xbox"
-        )
-        .classList
-        .remove(
-            "hidden"
-        );
-
 }
 
 
@@ -3822,21 +4858,6 @@ function endGame(){
     running=false;
 
 
-    if(
-        money>bestMoney
-    ){
-
-        bestMoney=money;
-
-
-        localStorage.setItem(
-            "motiCityBest",
-            bestMoney
-        );
-
-    }
-
-
     document.getElementById(
         "finalMoney"
     ).textContent=
@@ -3847,38 +4868,6 @@ function endGame(){
         "finalDeliveries"
     ).textContent=
         deliveries;
-
-
-    document.getElementById(
-        "finalBest"
-    ).textContent=
-        "$"+bestMoney;
-
-
-    document.getElementById(
-        "finalOrders"
-    ).textContent=
-        orders;
-
-
-    [
-        "hud",
-        "mission",
-        "miniMap",
-        "joystick",
-        "xbox"
-    ].forEach(
-        id=>{
-
-            document
-                .getElementById(id)
-                .classList
-                .add(
-                    "hidden"
-                );
-
-        }
-    );
 
 
     document
@@ -3907,10 +4896,11 @@ const stick=
         "stick"
     );
 
+
 let joystickActive=false;
 
 
-function updateJoystick(
+function moveJoystick(
     event
 ){
 
@@ -3918,31 +4908,31 @@ function updateJoystick(
         joystick.getBoundingClientRect();
 
 
-    const centerX=
+    const cx=
         rect.left+
         rect.width/2;
 
 
-    const centerY=
+    const cy=
         rect.top+
         rect.height/2;
 
 
     let dx=
         event.clientX-
-        centerX;
+        cx;
 
 
     let dy=
         event.clientY-
-        centerY;
+        cy;
 
 
     const max=
         rect.width*.32;
 
 
-    const length=
+    const len=
         Math.hypot(
             dx,
             dy
@@ -3950,15 +4940,15 @@ function updateJoystick(
 
 
     if(
-        length>max
+        len>max
     ){
 
         dx=
-            dx/length*
+            dx/len*
             max;
 
         dy=
-            dy/length*
+            dy/len*
             max;
 
     }
@@ -3974,25 +4964,31 @@ function updateJoystick(
     const nx=
         dx/max;
 
-
     const ny=
         dy/max;
 
 
-    keys.left=
+    /*
+        IMPORTANTE:
+
+        Arriba = arriba.
+
+        No invertimos Y.
+    */
+
+    input.left=
         nx<-.25;
 
-
-    keys.right=
+    input.right=
         nx>.25;
 
 
-    keys.up=
-        ny<-.25;
+    /*
+        El joystick NO acelera.
 
-
-    keys.down=
-        ny>.35;
+        Solo determina
+        dirección.
+    */
 
 }
 
@@ -4009,7 +5005,7 @@ joystick.addEventListener(
             event.pointerId
         );
 
-        updateJoystick(
+        moveJoystick(
             event
         );
 
@@ -4025,7 +5021,7 @@ joystick.addEventListener(
             joystickActive
         ){
 
-            updateJoystick(
+            moveJoystick(
                 event
             );
 
@@ -4035,14 +5031,12 @@ joystick.addEventListener(
 );
 
 
-function endJoystick(){
+function releaseJoystick(){
 
     joystickActive=false;
 
-    keys.left=false;
-    keys.right=false;
-    keys.up=false;
-    keys.down=false;
+    input.left=false;
+    input.right=false;
 
 
     stick.style.transform=
@@ -4053,28 +5047,19 @@ function endJoystick(){
 
 joystick.addEventListener(
     "pointerup",
-    endJoystick
+    releaseJoystick
 );
 
 
 joystick.addEventListener(
     "pointercancel",
-    endJoystick
+    releaseJoystick
 );
 
 
 /* =========================================================
-   XBOX BUTTONS
+   BOTONES
 ========================================================= */
-
-
-/*
-    A = acelerar
-    B = frenar/reversa
-    X = bocina
-    Y = turbo
-*/
-
 
 function holdButton(
     id,
@@ -4126,46 +5111,67 @@ function holdButton(
 }
 
 
+/*
+    A = acelerar
+*/
+
 holdButton(
-    "btnA",
+    "buttonA",
+
     ()=>{
-        keys.up=true;
+        input.up=true;
     },
+
     ()=>{
-        keys.up=false;
+        input.up=false;
     }
+
 );
 
 
+/*
+    B = frenar
+*/
+
 holdButton(
-    "btnB",
+    "buttonB",
+
     ()=>{
-        keys.down=true;
+        input.down=true;
     },
+
     ()=>{
-        keys.down=false;
+        input.down=false;
     }
+
 );
 
 
+/*
+    Y = turbo
+*/
+
 holdButton(
-    "btnY",
+    "buttonY",
+
     ()=>{
-        keys.boost=true;
+        input.turbo=true;
     },
+
     ()=>{
-        keys.boost=false;
+        input.turbo=false;
     }
+
 );
 
 
-/* =========================================================
-   BOCINA
-========================================================= */
+/*
+    X = bocina
+*/
 
 document
     .getElementById(
-        "btnX"
+        "buttonX"
     )
     .addEventListener(
         "pointerdown",
@@ -4187,65 +5193,85 @@ function horn(){
 
 
     showToast(
-        "📣 ¡PÍÍÍÍ!"
+        "📣 ¡PÍÍÍÍÍ!"
     );
 
 }
 
 
 /* =========================================================
-   TECLADO
+   TECLADO PC
 ========================================================= */
 
 document.addEventListener(
     "keydown",
     event=>{
 
+        const key=
+            event.key.toLowerCase();
+
+
+        /*
+            Acelerar
+        */
+
         if(
-            event.key==="ArrowUp" ||
-            event.key.toLowerCase()==="w"
+            key==="w" ||
+            event.key==="ArrowUp"
         ){
 
-            keys.up=true;
+            input.up=true;
+
+        }
+
+
+        /*
+            Frenar
+        */
+
+        if(
+            key==="s" ||
+            event.key==="ArrowDown"
+        ){
+
+            input.down=true;
+
+        }
+
+
+        /*
+            Dirección
+        */
+
+        if(
+            key==="a" ||
+            event.key==="ArrowLeft"
+        ){
+
+            input.left=true;
 
         }
 
 
         if(
-            event.key==="ArrowDown" ||
-            event.key.toLowerCase()==="s"
+            key==="d" ||
+            event.key==="ArrowRight"
         ){
 
-            keys.down=true;
+            input.right=true;
 
         }
 
 
-        if(
-            event.key==="ArrowLeft" ||
-            event.key.toLowerCase()==="a"
-        ){
-
-            keys.left=true;
-
-        }
-
-
-        if(
-            event.key==="ArrowRight" ||
-            event.key.toLowerCase()==="d"
-        ){
-
-            keys.right=true;
-
-        }
-
+        /*
+            Turbo
+        */
 
         if(
             event.code==="Space"
         ){
 
-            keys.boost=true;
+            input.turbo=true;
 
         }
 
@@ -4257,42 +5283,46 @@ document.addEventListener(
     "keyup",
     event=>{
 
+        const key=
+            event.key.toLowerCase();
+
+
         if(
-            event.key==="ArrowUp" ||
-            event.key.toLowerCase()==="w"
+            key==="w" ||
+            event.key==="ArrowUp"
         ){
 
-            keys.up=false;
+            input.up=false;
 
         }
 
 
         if(
-            event.key==="ArrowDown" ||
-            event.key.toLowerCase()==="s"
+            key==="s" ||
+            event.key==="ArrowDown"
         ){
 
-            keys.down=false;
+            input.down=false;
 
         }
 
 
         if(
-            event.key==="ArrowLeft" ||
-            event.key.toLowerCase()==="a"
+            key==="a" ||
+            event.key==="ArrowLeft"
         ){
 
-            keys.left=false;
+            input.left=false;
 
         }
 
 
         if(
-            event.key==="ArrowRight" ||
-            event.key.toLowerCase()==="d"
+            key==="d" ||
+            event.key==="ArrowRight"
         ){
 
-            keys.right=false;
+            input.right=false;
 
         }
 
@@ -4301,7 +5331,7 @@ document.addEventListener(
             event.code==="Space"
         ){
 
-            keys.boost=false;
+            input.turbo=false;
 
         }
 
@@ -4315,7 +5345,7 @@ document.addEventListener(
 
 document
     .getElementById(
-        "startBtn"
+        "startButton"
     )
     .addEventListener(
         "click",
@@ -4325,12 +5355,87 @@ document
 
 document
     .getElementById(
-        "restartBtn"
+        "restartButton"
     )
     .addEventListener(
         "click",
         startGame
     );
+
+
+/* =========================================================
+   COLOR
+========================================================= */
+
+function shade(
+    hex,
+    amount
+){
+
+    let color=
+        hex.replace(
+            "#",
+            ""
+        );
+
+
+    const num=
+        parseInt(
+            color,
+            16
+        );
+
+
+    let r=
+        (num>>16)+
+        amount*255;
+
+    let g=
+        ((num>>8)&255)+
+        amount*255;
+
+    let b=
+        (num&255)+
+        amount*255;
+
+
+    r=
+        Math.max(
+            0,
+            Math.min(
+                255,
+                r
+            )
+        );
+
+
+    g=
+        Math.max(
+            0,
+            Math.min(
+                255,
+                g
+            )
+        );
+
+
+    b=
+        Math.max(
+            0,
+            Math.min(
+                255,
+                b
+            )
+        );
+
+
+    return `rgb(
+        ${r},
+        ${g},
+        ${b}
+    )`;
+
+}
 
 
 /* =========================================================
@@ -4346,6 +5451,7 @@ function roundRect(
 ){
 
     ctx.beginPath();
+
 
     ctx.moveTo(
         x+r,
