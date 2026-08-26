@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0b1220">
+<title>MOTI RUN</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#080d16;
+    font-family:Arial,Helvetica,sans-serif;
+    touch-action:none;
+}
+
+body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+#game{
+    position:relative;
+    width:100%;
+    height:100%;
+    max-width:900px;
+    overflow:hidden;
+    background:#111;
+}
+
+canvas{
+    width:100%;
+    height:100%;
+    display:block;
+}
+
+/* HUD */
+
+#hud{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    padding:14px;
+    display:flex;
+    justify-content:space-between;
+    pointer-events:none;
+    z-index:5;
+}
+
+.hudBox{
+    background:rgba(5,10,18,.72);
+    border:1px solid rgba(255,255,255,.12);
+    backdrop-filter:blur(8px);
+    color:white;
+    padding:8px 12px;
+    border-radius:12px;
+    font-weight:bold;
+    font-size:14px;
+}
+
+#score{
+    color:#fff;
+}
+
+#coins{
+    color:#ffd84d;
+}
+
+#lives{
+    color:#ff5964;
+}
+
+/* PANTALLAS */
+
+.screen{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(
+        rgba(5,10,18,.55),
+        rgba(5,10,18,.88)
+    );
+    z-index:20;
+}
+
+.panel{
+    width:min(90%,420px);
+    text-align:center;
+    color:white;
+    padding:30px 24px;
+    border-radius:24px;
+    background:rgba(10,18,30,.9);
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:0 20px 60px rgba(0,0,0,.4);
+}
+
+.logo{
+    font-size:48px;
+    font-weight:900;
+    letter-spacing:-3px;
+    margin-bottom:4px;
+}
+
+.logo span{
+    color:#28d17c;
+}
+
+.subtitle{
+    color:#aab5c5;
+    margin-bottom:25px;
+}
+
+.bigButton{
+    width:100%;
+    border:0;
+    padding:15px;
+    border-radius:14px;
+    font-size:18px;
+    font-weight:800;
+    background:#28d17c;
+    color:#06120c;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+.bigButton:active{
+    transform:scale(.97);
+}
+
+.instructions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin:20px 0;
+}
+
+.info{
+    background:rgba(255,255,255,.06);
+    border-radius:12px;
+    padding:12px;
+    font-size:13px;
+    color:#cbd4df;
+}
+
+.hidden{
+    display:none!important;
+}
+
+/* CONTROLES */
+
+#controls{
+    position:absolute;
+    bottom:20px;
+    left:0;
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    padding:0 20px;
+    z-index:10;
+    pointer-events:none;
+}
+
+.controlGroup{
+    display:flex;
+    gap:12px;
+    pointer-events:auto;
+}
+
+.control{
+    width:62px;
+    height:62px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.18);
+    background:rgba(8,14,24,.75);
+    color:white;
+    font-size:25px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    user-select:none;
+    backdrop-filter:blur(8px);
+}
+
+.control:active{
+    transform:scale(.9);
+    background:rgba(40,209,124,.4);
+}
+
+#turboBtn{
+    width:72px;
+    color:#ffd84d;
+}
+
+@media(max-width:500px){
+    .logo{
+        font-size:42px;
+    }
+
+    .control{
+        width:58px;
+        height:58px;
+    }
+
+    #hud{
+        padding:10px;
+    }
+
+    .hudBox{
+        font-size:12px;
+        padding:7px 9px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+<canvas id="canvas"></canvas>
+
+<div id="hud" class="hidden">
+
+    <div class="hudBox">
+        PUNTOS: <span id="score">0</span>
+    </div>
+
+    <div class="hudBox">
+        🪙 <span id="coins">0</span>
+    </div>
+
+    <div class="hudBox">
+        ❤️ <span id="lives">3</span>
+    </div>
+
+</div>
+
+
+<!-- INICIO -->
+
+<div id="startScreen" class="screen">
+
+<div class="panel">
+
+    <div class="logo">
+        MO<span>TI</span>
+    </div>
+
+    <div style="
+        font-size:22px;
+        font-weight:800;
+        margin-bottom:5px;
+    ">
+        RUN
+    </div>
+
+    <div class="subtitle">
+        Lleva el viaje hasta el destino
+    </div>
+
+    <div class="instructions">
+
+        <div class="info">
+            🛵<br>
+            Esquiva el tráfico
+        </div>
+
+        <div class="info">
+            🪙<br>
+            Recoge monedas
+        </div>
+
+        <div class="info">
+            📦<br>
+            Recoge pedidos
+        </div>
+
+        <div class="info">
+            ⚡<br>
+            Usa el turbo
+        </div>
+
+    </div>
+
+    <button class="bigButton" id="startBtn">
+        INICIAR VIAJE
+    </button>
+
+    <div style="
+        margin-top:15px;
+        font-size:12px;
+        color:#748093;
+    ">
+        Récord: <span id="bestStart">0</span>
+    </div>
+
+</div>
+
+</div>
+
+
+<!-- GAME OVER -->
+
+<div id="gameOverScreen" class="screen hidden">
+
+<div class="panel">
+
+    <div style="
+        font-size:38px;
+        font-weight:900;
+        margin-bottom:8px;
+    ">
+        ¡VIAJE TERMINADO!
+    </div>
+
+    <div style="
+        color:#aab5c5;
+        margin-bottom:22px;
+    ">
+        El mototaxi llegó al límite 😅
+    </div>
+
+    <div class="instructions">
+
+        <div class="info">
+            PUNTOS<br>
+            <strong id="finalScore">0</strong>
+        </div>
+
+        <div class="info">
+            MONEDAS<br>
+            <strong id="finalCoins">0</strong>
+        </div>
+
+        <div class="info">
+            RÉCORD<br>
+            <strong id="finalBest">0</strong>
+        </div>
+
+        <div class="info">
+            DISTANCIA<br>
+            <strong id="finalDistance">0 m</strong>
+        </div>
+
+    </div>
+
+    <button class="bigButton" id="restartBtn">
+        VOLVER A MANEJAR
+    </button>
+
+</div>
+
+</div>
+
+
+<!-- CONTROLES -->
+
+<div id="controls" class="hidden">
+
+    <div class="controlGroup">
+
+        <div class="control" id="leftBtn">
+            ◀
+        </div>
+
+        <div class="control" id="rightBtn">
+            ▶
+        </div>
+
+    </div>
+
+    <div class="controlGroup">
+
+        <div class="control" id="turboBtn">
+            ⚡
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+
+<script>
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+let W,H;
+
+function resize(){
+
+    W = canvas.width = canvas.clientWidth * devicePixelRatio;
+    H = canvas.height = canvas.clientHeight * devicePixelRatio;
+
+    ctx.setTransform(
+        devicePixelRatio,
+        0,
+        0,
+        devicePixelRatio,
+        0,
+        0
+    );
+
+    W = canvas.clientWidth;
+    H = canvas.clientHeight;
+}
+
+window.addEventListener("resize",resize);
+resize();
+
+
+/* =========================
+   ESTADO
+========================= */
+
+let gameRunning=false;
+
+let score=0;
+let coins=0;
+let lives=3;
+let distance=0;
+
+let speed=5;
+let roadOffset=0;
+
+let turbo=false;
+let turboEnergy=100;
+
+let spawnTimer=0;
+let coinTimer=0;
+let pickupTimer=0;
+
+let objects=[];
+
+let best=parseInt(
+    localStorage.getItem("motiRunBest") || "0"
+);
+
+document.getElementById("bestStart").textContent=best;
+
+
+/* =========================
+   JUGADOR
+========================= */
+
+const player={
+
+    lane:1,
+
+    x:0,
+
+    targetX:0,
+
+    y:0,
+
+    width:42,
+
+    height:68,
+
+    hitCooldown:0
+
+};
+
+
+/* =========================
+   CARRETERA
+========================= */
+
+function road(){
+
+    const roadWidth=Math.min(W*0.72,620);
+
+    const left=(W-roadWidth)/2;
+
+    return {
+        width:roadWidth,
+        left:left,
+        right:left+roadWidth
+    };
+}
+
+
+function laneX(lane){
+
+    const r=road();
+
+    const laneWidth=r.width/3;
+
+    return r.left+
+           laneWidth*lane+
+           laneWidth/2;
+}
+
+
+/* =========================
+   DIBUJAR FONDO
+========================= */
+
+function drawBackground(){
+
+    // cielo
+
+    const gradient=ctx.createLinearGradient(
+        0,0,0,H
+    );
+
+    gradient.addColorStop(0,"#0b1525");
+    gradient.addColorStop(.55,"#17324a");
+    gradient.addColorStop(1,"#24462e");
+
+    ctx.fillStyle=gradient;
+    ctx.fillRect(0,0,W,H);
+
+
+    // montañas
+
+    ctx.fillStyle="#152d2c";
+
+    ctx.beginPath();
+
+    ctx.moveTo(0,H*.42);
+
+    for(let x=0;x<=W;x+=80){
+
+        const y=
+            H*.34+
+            Math.sin(x*.018)*35+
+            Math.sin(x*.05)*15;
+
+        ctx.lineTo(x,y);
+    }
+
+    ctx.lineTo(W,H*.55);
+    ctx.lineTo(0,H*.55);
+
+    ctx.fill();
+
+
+    // árboles laterales
+
+    for(let i=0;i<12;i++){
+
+        const y=(i*150+roadOffset*0.4)%H;
+
+        drawTree(35,y);
+        drawTree(W-35,y+70);
+    }
+
+}
+
+
+/* =========================
+   ÁRBOLES
+========================= */
+
+function drawTree(x,y){
+
+    ctx.fillStyle="#593b28";
+
+    ctx.fillRect(
+        x-4,
+        y,
+        8,
+        25
+    );
+
+    ctx.fillStyle="#1c6a42";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x,
+        y-5,
+        18,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+}
+
+
+/* =========================
+   CARRETERA
+========================= */
+
+function drawRoad(){
+
+    const r=road();
+
+    // tierra
+
+    ctx.fillStyle="#365b35";
+
+    ctx.fillRect(
+        r.left-35,
+        0,
+        35,
+        H
+    );
+
+    ctx.fillRect(
+        r.right,
+        0,
+        35,
+        H
+    );
+
+
+    // carretera
+
+    ctx.fillStyle="#252a31";
+
+    ctx.fillRect(
+        r.left,
+        0,
+        r.width,
+        H
+    );
+
+
+    // bordes
+
+    ctx.fillStyle="#d8d8d8";
+
+    ctx.fillRect(
+        r.left,
+        0,
+        5,
+        H
+    );
+
+    ctx.fillRect(
+        r.right-5,
+        0,
+        5,
+        H
+    );
+
+
+    // líneas centrales
+
+    const laneWidth=r.width/3;
+
+    ctx.fillStyle="#d8d8d8";
+
+    for(let lane=1;lane<3;lane++){
+
+        const x=r.left+
+                laneWidth*lane;
+
+        for(
+            let y=-80+roadOffset;
+            y<H;
+            y+=100
+        ){
+
+            ctx.fillRect(
+                x-3,
+                y,
+                6,
+                55
+            );
+        }
+    }
+}
+
+
+/* =========================
+   MOTOTAXI
+========================= */
+
+function drawPlayer(){
+
+    const x=player.x;
+    const y=player.y;
+
+    ctx.save();
+
+    if(player.hitCooldown>0){
+
+        if(
+            Math.floor(player.hitCooldown/5)%2===0
+        ){
+            ctx.globalAlpha=.35;
+        }
+    }
+
+
+    // sombra
+
+    ctx.fillStyle="rgba(0,0,0,.35)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        x,
+        y+30,
+        25,
+        9,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    // ruedas
+
+    ctx.fillStyle="#101010";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x-14,
+        y+18,
+        7,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x+14,
+        y+18,
+        7,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    // carrocería
+
+    ctx.fillStyle="#22c875";
+
+    roundRect(
+        x-20,
+        y-25,
+        40,
+        48,
+        10
+    );
+
+    ctx.fill();
+
+
+    // techo
+
+    ctx.fillStyle="#18a963";
+
+    roundRect(
+        x-17,
+        y-35,
+        34,
+        20,
+        8
+    );
+
+    ctx.fill();
+
+
+    // ventana
+
+    ctx.fillStyle="#152838";
+
+    roundRect(
+        x-12,
+        y-31,
+        24,
+        12,
+        4
+    );
+
+    ctx.fill();
+
+
+    // faro
+
+    ctx.fillStyle="#fff3a1";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x,
+        y-27,
+        4,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    // placa MOTI
+
+    ctx.fillStyle="#ffffff";
+
+    ctx.font="bold 8px Arial";
+
+    ctx.textAlign="center";
+
+    ctx.fillText(
+        "MOTI",
+        x,
+        y+10
+    );
+
+
+    ctx.restore();
+}
+
+
+/* =========================
+   VEHÍCULOS
+========================= */
+
+function drawCar(o){
+
+    ctx.save();
+
+    ctx.translate(o.x,o.y);
+
+    // sombra
+
+    ctx.fillStyle="rgba(0,0,0,.3)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        25,
+        23,
+        8,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    ctx.fillStyle=o.color;
+
+    roundRect(
+        -18,
+        -30,
+        36,
+        58,
+        8
+    );
+
+    ctx.fill();
+
+
+    // ventanas
+
+    ctx.fillStyle="#182a38";
+
+    roundRect(
+        -12,
+        -22,
+        24,
+        16,
+        4
+    );
+
+    ctx.fill();
+
+
+    // luces
+
+    ctx.fillStyle="#ffefb0";
+
+    ctx.fillRect(
+        -12,
+        -28,
+        6,
+        4
+    );
+
+    ctx.fillRect(
+        6,
+        -28,
+        6,
+        4
+    );
+
+    ctx.restore();
+}
+
+
+/* =========================
+   MONEDA
+========================= */
+
+function drawCoin(o){
+
+    ctx.save();
+
+    ctx.translate(o.x,o.y);
+
+    ctx.rotate(
+        Math.sin(o.spin)*.3
+    );
+
+    ctx.fillStyle="#ffd43b";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        0,
+        12,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    ctx.strokeStyle="#fff1a2";
+
+    ctx.lineWidth=3;
+
+    ctx.stroke();
+
+
+    ctx.fillStyle="#9b6d00";
+
+    ctx.font="bold 13px Arial";
+
+    ctx.textAlign="center";
+
+    ctx.textBaseline="middle";
+
+    ctx.fillText(
+        "$",
+        0,
+        1
+    );
+
+    ctx.restore();
+}
+
+
+/* =========================
+   PEDIDO
+========================= */
+
+function drawPickup(o){
+
+    ctx.save();
+
+    ctx.translate(o.x,o.y);
+
+    ctx.fillStyle="#f39c3d";
+
+    roundRect(
+        -15,
+        -15,
+        30,
+        30,
+        6
+    );
+
+    ctx.fill();
+
+
+    ctx.fillStyle="#fff";
+
+    ctx.font="bold 17px Arial";
+
+    ctx.textAlign="center";
+
+    ctx.textBaseline="middle";
+
+    ctx.fillText(
+        "📦",
+        0,
+        1
+    );
+
+    ctx.restore();
+}
+
+
+/* =========================
+   CREAR OBJETOS
+========================= */
+
+function spawnCar(){
+
+    const lane=
+        Math.floor(Math.random()*3);
+
+    const colors=[
+        "#e74c3c",
+        "#3498db",
+        "#9b59b6",
+        "#f1c40f",
+        "#ecf0f1"
+    ];
+
+    objects.push({
+
+        type:"car",
+
+        lane:lane,
+
+        x:laneX(lane),
+
+        y:-80,
+
+        speed:
+            speed*(.65+Math.random()*.3),
+
+        color:
+            colors[
+                Math.floor(
+                    Math.random()*colors.length
+                )
+            ],
+
+        width:40,
+        height:65
+    });
+}
+
+
+function spawnCoin(){
+
+    const lane=
+        Math.floor(Math.random()*3);
+
+    objects.push({
+
+        type:"coin",
+
+        lane:lane,
+
+        x:laneX(lane),
+
+        y:-30,
+
+        speed:speed,
+
+        spin:Math.random()*10
+    });
+}
+
+
+function spawnPickup(){
+
+    const lane=
+        Math.floor(Math.random()*3);
+
+    objects.push({
+
+        type:"pickup",
+
+        lane:lane,
+
+        x:laneX(lane),
+
+        y:-30,
+
+        speed:speed
+    });
+}
+
+
+/* =========================
+   COLISIÓN
+========================= */
+
+function collision(o){
+
+    return Math.abs(o.x-player.x)<30 &&
+           Math.abs(o.y-player.y)<45;
+}
+
+
+/* =========================
+   PARTÍCULAS
+========================= */
+
+let particles=[];
+
+function createParticles(
+    x,
+    y,
+    amount=12,
+    type="coin"
+){
+
+    for(let i=0;i<amount;i++){
+
+        particles.push({
+
+            x:x,
+            y:y,
+
+            vx:
+                (Math.random()-.5)*5,
+
+            vy:
+                (Math.random()-.5)*5,
+
+            life:30+
+                Math.random()*20,
+
+            type:type
+        });
+    }
+}
+
+
+function updateParticles(){
+
+    particles.forEach(p=>{
+
+        p.x+=p.vx;
+        p.y+=p.vy;
+
+        p.vy+=.12;
+
+        p.life--;
+
+    });
+
+    particles=
+        particles.filter(
+            p=>p.life>0
+        );
+}
+
+
+function drawParticles(){
+
+    particles.forEach(p=>{
+
+        ctx.globalAlpha=
+            Math.max(0,p.life/50);
+
+        ctx.fillStyle=
+            p.type==="coin"
+            ? "#ffd43b"
+            : "#28d17c";
+
+        ctx.fillRect(
+            p.x,
+            p.y,
+            5,
+            5
+        );
+
+    });
+
+    ctx.globalAlpha=1;
+}
+
+
+/* =========================
+   ACTUALIZAR JUEGO
+========================= */
+
+function update(){
+
+    if(!gameRunning)return;
+
+
+    // velocidad
+
+    let currentSpeed=speed;
+
+    if(turbo && turboEnergy>0){
+
+        currentSpeed=
+            speed*1.8;
+
+        turboEnergy-=.8;
+
+    }else{
+
+        turboEnergy+=.25;
+    }
+
+    turboEnergy=
+        Math.max(
+            0,
+            Math.min(100,turboEnergy)
+        );
+
+
+    // carretera
+
+    roadOffset+=currentSpeed;
+
+    if(roadOffset>100)
+        roadOffset-=100;
+
+
+    // distancia
+
+    distance+=currentSpeed*.08;
+
+    score+=Math.floor(
+        currentSpeed*.08
+    );
+
+
+    // dificultad
+
+    speed+=0.0015;
+
+
+    // jugador
+
+    player.targetX=
+        laneX(player.lane);
+
+    player.x +=
+        (player.targetX-player.x)*.22;
+
+
+    player.y=
+        H-125;
+
+
+    if(player.hitCooldown>0)
+        player.hitCooldown--;
+
+
+    // spawn carros
+
+    spawnTimer--;
+
+    if(spawnTimer<=0){
+
+        spawnCar();
+
+        spawnTimer=
+            Math.max(
+                28,
+                75-speed*5
+            );
+    }
+
+
+    // monedas
+
+    coinTimer--;
+
+    if(coinTimer<=0){
+
+        spawnCoin();
+
+        coinTimer=
+            55+
+            Math.random()*70;
+    }
+
+
+    // pedidos
+
+    pickupTimer--;
+
+    if(pickupTimer<=0){
+
+        spawnPickup();
+
+        pickupTimer=
+            180+
+            Math.random()*180;
+    }
+
+
+    // objetos
+
+    objects.forEach(o=>{
+
+        o.y+=
+            o.speed*
+            (turbo?1.25:1);
+
+        if(o.type==="coin")
+            o.spin+=.15;
+
+
+        if(collision(o)){
+
+            if(o.type==="coin"){
+
+                coins++;
+
+                score+=100;
+
+                createParticles(
+                    o.x,
+                    o.y,
+                    15,
+                    "coin"
+                );
+
+                o.y=H+200;
+            }
+
+
+            else if(o.type==="pickup"){
+
+                score+=250;
+
+                createParticles(
+                    o.x,
+                    o.y,
+                    20,
+                    "pickup"
+                );
+
+                o.y=H+200;
+            }
+
+
+            else if(
+                o.type==="car" &&
+                player.hitCooldown<=0
+            ){
+
+                lives--;
+
+                player.hitCooldown=100;
+
+                createParticles(
+                    player.x,
+                    player.y,
+                    25,
+                    "pickup"
+                );
+
+                o.y=H+200;
+
+                if(lives<=0){
+
+                    endGame();
+                }
+            }
+        }
+
+    });
+
+
+    objects=
+        objects.filter(
+            o=>o.y<H+120
+        );
+
+
+    updateParticles();
+
+
+    // HUD
+
+    document.getElementById(
+        "score"
+    ).textContent=score;
+
+    document.getElementById(
+        "coins"
+    ).textContent=coins;
+
+    document.getElementById(
+        "lives"
+    ).textContent="❤️".repeat(lives);
+
+}
+
+
+/* =========================
+   DIBUJAR
+========================= */
+
+function draw(){
+
+    ctx.clearRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+    drawBackground();
+
+    drawRoad();
+
+
+    objects.forEach(o=>{
+
+        if(o.type==="car")
+            drawCar(o);
+
+        if(o.type==="coin")
+            drawCoin(o);
+
+        if(o.type==="pickup")
+            drawPickup(o);
+
+    });
+
+
+    drawParticles();
+
+    if(gameRunning)
+        drawPlayer();
+
+
+    // Turbo meter
+
+    if(gameRunning){
+
+        const barW=100;
+        const barH=7;
+
+        const x=
+            W-barW-15;
+
+        const y=
+            70;
+
+        ctx.fillStyle=
+            "rgba(0,0,0,.5)";
+
+        ctx.fillRect(
+            x,
+            y,
+            barW,
+            barH
+        );
+
+        ctx.fillStyle="#ffd43b";
+
+        ctx.fillRect(
+            x,
+            y,
+            barW*(turboEnergy/100),
+            barH
+        );
+
+        ctx.fillStyle="#fff";
+
+        ctx.font="9px Arial";
+
+        ctx.textAlign="right";
+
+        ctx.fillText(
+            "TURBO",
+            x+barW,
+            y-4
+        );
+    }
+
+}
+
+
+/* =========================
+   LOOP
+========================= */
+
+function loop(){
+
+    update();
+
+    draw();
+
+    requestAnimationFrame(loop);
+}
+
+loop();
+
+
+/* =========================
+   INICIAR
+========================= */
+
+function startGame(){
+
+    score=0;
+
+    coins=0;
+
+    lives=3;
+
+    distance=0;
+
+    speed=5;
+
+    roadOffset=0;
+
+    turbo=false;
+
+    turboEnergy=100;
+
+    objects=[];
+
+    particles=[];
+
+    spawnTimer=30;
+
+    coinTimer=30;
+
+    pickupTimer=120;
+
+    player.lane=1;
+
+    player.x=
+        laneX(1);
+
+    gameRunning=true;
+
+
+    document
+        .getElementById("startScreen")
+        .classList.add("hidden");
+
+    document
+        .getElementById("gameOverScreen")
+        .classList.add("hidden");
+
+    document
+        .getElementById("hud")
+        .classList.remove("hidden");
+
+    document
+        .getElementById("controls")
+        .classList.remove("hidden");
+}
+
+
+/* =========================
+   GAME OVER
+========================= */
+
+function endGame(){
+
+    gameRunning=false;
+
+    turbo=false;
+
+    if(score>best){
+
+        best=score;
+
+        localStorage.setItem(
+            "motiRunBest",
+            best
+        );
+    }
+
+
+    document.getElementById(
+        "finalScore"
+    ).textContent=score;
+
+    document.getElementById(
+        "finalCoins"
+    ).textContent=coins;
+
+    document.getElementById(
+        "finalBest"
+    ).textContent=best;
+
+    document.getElementById(
+        "finalDistance"
+    ).textContent=
+        Math.floor(distance)+" m";
+
+
+    document
+        .getElementById("hud")
+        .classList.add("hidden");
+
+    document
+        .getElementById("controls")
+        .classList.add("hidden");
+
+    document
+        .getElementById("gameOverScreen")
+        .classList.remove("hidden");
+}
+
+
+/* =========================
+   BOTONES
+========================= */
+
+document
+    .getElementById("startBtn")
+    .addEventListener(
+        "click",
+        startGame
+    );
+
+document
+    .getElementById("restartBtn")
+    .addEventListener(
+        "click",
+        startGame
+    );
+
+
+function moveLeft(){
+
+    if(!gameRunning)return;
+
+    player.lane=
+        Math.max(
+            0,
+            player.lane-1
+        );
+}
+
+
+function moveRight(){
+
+    if(!gameRunning)return;
+
+    player.lane=
+        Math.min(
+            2,
+            player.lane+1
+        );
+}
+
+
+function turboDown(){
+
+    if(!gameRunning)return;
+
+    turbo=true;
+}
+
+
+function turboUp(){
+
+    turbo=false;
+}
+
+
+/* =========================
+   TOUCH
+========================= */
+
+const leftBtn=
+    document.getElementById(
+        "leftBtn"
+    );
+
+const rightBtn=
+    document.getElementById(
+        "rightBtn"
+    );
+
+const turboBtn=
+    document.getElementById(
+        "turboBtn"
+    );
+
+
+leftBtn.addEventListener(
+    "touchstart",
+    e=>{
+        e.preventDefault();
+        moveLeft();
+    }
+);
+
+
+rightBtn.addEventListener(
+    "touchstart",
+    e=>{
+        e.preventDefault();
+        moveRight();
+    }
+);
+
+
+turboBtn.addEventListener(
+    "touchstart",
+    e=>{
+        e.preventDefault();
+        turboDown();
+    }
+);
+
+
+turboBtn.addEventListener(
+    "touchend",
+    e=>{
+        e.preventDefault();
+        turboUp();
+    }
+);
+
+
+/* =========================
+   TECLADO
+========================= */
+
+document.addEventListener(
+    "keydown",
+    e=>{
+
+        if(
+            e.key==="ArrowLeft" ||
+            e.key.toLowerCase()==="a"
+        ){
+
+            moveLeft();
+        }
+
+
+        if(
+            e.key==="ArrowRight" ||
+            e.key.toLowerCase()==="d"
+        ){
+
+            moveRight();
+        }
+
+
+        if(
+            e.code==="Space" ||
+            e.key.toLowerCase()==="w"
+        ){
+
+            turboDown();
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "keyup",
+    e=>{
+
+        if(
+            e.code==="Space" ||
+            e.key.toLowerCase()==="w"
+        ){
+
+            turboUp();
+        }
+
+    }
+);
+
+
+/* =========================
+   UTILIDAD
+========================= */
+
+function roundRect(
+    x,
+    y,
+    w,
+    h,
+    r
+){
+
+    ctx.beginPath();
+
+    ctx.moveTo(x+r,y);
+
+    ctx.arcTo(
+        x+w,
+        y,
+        x+w,
+        y+h,
+        r
+    );
+
+    ctx.arcTo(
+        x+w,
+        y+h,
+        x,
+        y+h,
+        r
+    );
+
+    ctx.arcTo(
+        x,
+        y+h,
+        x,
+        y,
+        r
+    );
+
+    ctx.arcTo(
+        x,
+        y,
+        x+w,
+        y,
+        r
+    );
+
+    ctx.closePath();
+}
+
+</script>
+
+</body>
+</html>
