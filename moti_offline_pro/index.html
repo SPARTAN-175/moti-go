@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#111914">
+<title>MOTI GO — Offline City</title>
+<link rel="stylesheet" href="css/game.css">
+</head>
+<body>
+<div id="game">
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="hud">
+    <div class="hud-card money"><small>Dinero</small>$<span id="money">0</span></div>
+    <div class="hud-card deliveries"><small>Entregas</small><span id="deliveries">0</span>/10</div>
+    <div class="hud-card speed"><small>Velocidad</small><span id="speed">0</span> km/h</div>
+    <div class="hud-card vehicle">
+      <small>Moto</small><span id="health">100</span>% <span id="healthIcon">🟢</span>
+      <div class="meter"><div id="healthBar"></div></div>
+      <small>Turbo <span id="energy">100</span>%</small>
+      <div class="meter"><div id="energyBar"></div></div>
+    </div>
+  </div>
+
+  <div id="mission">
+    <strong>📦 PEDIDO ACTIVO</strong>
+    <div><span id="missionType">RECOGER</span> → <b id="missionTarget">Cargando...</b></div>
+    <div class="mission-meta">Recompensa <b id="reward">$0</b> · Tiempo <b id="time">90 s</b></div>
+  </div>
+
+  <div id="minimap"><canvas id="miniCanvas"></canvas></div>
+
+  <div id="controls">
+    <div class="control-group left">
+      <button id="forward" class="control">▲</button>
+      <button id="reverse" class="control">▼</button>
+      <span>AVANZAR<br>REVERSA</span>
+    </div>
+    <div class="control-group right">
+      <button id="turnLeft" class="control">◀</button>
+      <button id="turnRight" class="control">▶</button>
+      <span>GIRAR<br>DIRECCIÓN</span>
+    </div>
+    <div id="actions">
+      <button id="horn" class="action blue">X</button>
+      <button id="turbo" class="action gold">Y</button>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <section id="startScreen" class="screen">
+    <div class="panel">
+      <div class="logo">MO<span>TI</span></div>
+      <h1>OFFLINE CITY</h1>
+      <p>Tu ciudad, tus mandaditos. Recoge pedidos, conduce por la ciudad y entrégalos a tiempo.</p>
+      <div class="features">
+        <div>🛵 Moto de reparto</div><div>🚗 Tráfico</div>
+        <div>🚶 Peatones</div><div>📦 Misiones</div>
+      </div>
+      <button id="startButton" class="start-button">EMPEZAR A REPARTIR</button>
+    </div>
+  </section>
+
+  <section id="gameOverScreen" class="screen hidden">
+    <div class="panel">
+      <div class="logo">MO<span>TI</span></div>
+      <h1>JORNADA TERMINADA</h1>
+      <p id="gameOverText"></p>
+      <div class="results"><div>DINERO<br><b id="finalMoney">$0</b></div><div>ENTREGAS<br><b id="finalDeliveries">0</b></div></div>
+      <button id="restartButton" class="start-button">VOLVER A JUGAR</button>
+    </div>
+  </section>
+</div>
+
+<script src="js/audio.js"></script>
+<script src="js/world.js"></script>
+<script src="js/player.js"></script>
+<script src="js/traffic.js"></script>
+<script src="js/pedestrians.js"></script>
+<script src="js/missions.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

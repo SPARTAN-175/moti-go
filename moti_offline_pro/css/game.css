@@ -1,0 +1,37 @@
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#78a95d;font-family:Arial,Helvetica,sans-serif;touch-action:none}
+#game{position:fixed;inset:0;overflow:hidden}
+#gameCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#hud{position:absolute;top:10px;left:10px;z-index:20;display:flex;gap:7px;pointer-events:none}
+.hud-card{background:rgba(16,23,19,.95);border:1px solid #fff2;border-radius:11px;color:#fff;padding:7px 10px;font-weight:900;font-size:12px;box-shadow:0 5px 16px #0005}
+.hud-card small{display:block;color:#8f9a92;font-size:8px;text-transform:uppercase;margin-bottom:2px}
+.money{color:#ffd34b}.deliveries{color:#4fe08a}.speed{color:#75c6ff}
+.meter{width:90px;height:5px;background:#29302c;border-radius:9px;overflow:hidden;margin:4px 0 3px}
+.meter div{height:100%;width:100%;border-radius:9px;background:#35d579}
+#energyBar{background:#4da8e8}
+#mission{position:absolute;right:10px;top:10px;width:245px;z-index:20;padding:10px;background:rgba(16,23,19,.95);border:1px solid #fff2;border-radius:12px;color:#fff;font-size:11px;box-shadow:0 5px 16px #0005;pointer-events:none}
+#mission strong{font-size:12px}.mission-meta{color:#9ba59f;margin-top:5px}
+#minimap{position:absolute;right:10px;top:105px;width:155px;height:108px;z-index:20;border:2px solid #fff9;border-radius:12px;overflow:hidden;background:#709a53;pointer-events:none}
+#miniCanvas{width:100%;height:100%}
+#controls{position:absolute;left:0;right:0;bottom:0;height:160px;z-index:30;pointer-events:none}
+.control-group{position:absolute;bottom:13px;width:150px;height:125px;pointer-events:auto}
+.control-group.left{left:12px}.control-group.right{right:12px}
+.control{position:absolute;width:61px;height:55px;border:2px solid #fff2;border-radius:14px;background:#18221c;color:#fff;font-size:23px;font-weight:1000;box-shadow:0 7px 16px #0007;touch-action:none}
+.control:active,.action:active{transform:scale(.92)}
+#forward{left:0;top:0}#reverse{left:0;bottom:0}#turnLeft{left:0;top:35px}#turnRight{right:0;top:35px}
+.control-group span{position:absolute;top:49px;color:#aab4ad;font-size:8px;font-weight:900;line-height:1.35}
+.control-group.left span{left:69px}.control-group.right span{right:69px;text-align:right}
+#actions{position:absolute;left:50%;bottom:17px;transform:translateX(-50%);display:flex;gap:10px;pointer-events:auto}
+.action{width:49px;height:49px;border-radius:50%;border:2px solid #fff2;color:#fff;font-weight:1000;box-shadow:0 7px 15px #0007;touch-action:none}
+.blue{background:#2d78bd}.gold{background:#c39f2c}
+#toast{position:absolute;left:50%;bottom:173px;z-index:40;transform:translate(-50%,12px);opacity:0;background:#101712;color:#fff;border:1px solid #fff2;border-radius:10px;padding:9px 14px;font-weight:900;font-size:12px;transition:.16s;pointer-events:none}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+.screen{position:absolute;inset:0;z-index:100;background:#07100bbd;display:flex;align-items:center;justify-content:center;padding:18px}
+.hidden{display:none!important}
+.panel{width:min(460px,94vw);background:#111914;color:#fff;border:1px solid #fff2;border-radius:23px;padding:28px;text-align:center;box-shadow:0 25px 70px #0009}
+.logo{font-size:60px;font-weight:1000;letter-spacing:-6px}.logo span{color:#31d77c}
+.panel h1{font-size:21px;margin:7px 0}.panel p{color:#a5afa8;font-size:13px;line-height:1.5}
+.features{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}.features div,.results div{background:#ffffff08;border-radius:10px;padding:11px;font-size:10px;color:#c6cec8}
+.start-button{width:100%;height:52px;margin-top:17px;border:0;border-radius:12px;background:#31d77c;color:#06140b;font-weight:1000;font-size:14px}
+.results{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:15px}
+@media(max-width:650px){#hud{max-width:66%}.hud-card:nth-child(3){display:none}#mission{top:78px;width:205px}#minimap{top:9px;width:105px;height:74px}.control-group{transform:scale(.84);transform-origin:bottom}.control-group.left{left:4px}.control-group.right{right:4px}#actions{transform:translateX(-50%) scale(.84);transform-origin:bottom}}
