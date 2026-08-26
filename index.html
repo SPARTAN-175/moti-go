@@ -304,43 +304,36 @@
 
    <script>
 
+    <script>
+
     // ==========================================
     // SERVICE WORKER MOTI GO
     // ==========================================
 
     if ("serviceWorker" in navigator) {
 
-        window.addEventListener(
-            "load",
-            () => {
+        window.addEventListener("load", () => {
 
-                navigator.serviceWorker
-                    .register(
-                        "./service-worker.js"
-                    )
-                    .then(
-                        (registration) => {
+            navigator.serviceWorker
+                .register("./service-worker.js")
+                .then((registration) => {
 
-                            console.log(
-                                "✅ Service Worker MOTI GO registrado:",
-                                registration.scope
-                            );
-
-                        }
-                    )
-                    .catch(
-                        (error) => {
-
-                            console.error(
-                                "❌ Error registrando Service Worker MOTI GO:",
-                                error
-                            );
-
-                        }
+                    console.log(
+                        "✅ Service Worker MOTI GO registrado:",
+                        registration.scope
                     );
 
-            }
-        );
+                })
+                .catch((error) => {
+
+                    console.error(
+                        "❌ Error registrando Service Worker MOTI GO:",
+                        error
+                    );
+
+                });
+
+        });
 
     }
 
@@ -349,48 +342,20 @@
     // 🎮 MOTI OFFLINE
     // ==========================================
 
-    let motiOfflineAbierto =
-        false;
-
-
     function abrirMotiOffline() {
-
-        // Evitar abrirlo dos veces
-
-        if (
-            motiOfflineAbierto
-        ) {
-
-            return;
-
-        }
-
-
-        motiOfflineAbierto =
-            true;
-
 
         console.log(
             "📡 MOTI GO: conexión perdida."
         );
-
 
         console.log(
             "🎮 MOTI GO: entrando en MOTI Offline..."
         );
 
 
-        /*
-         * Pequeña pantalla de transición.
-         * No utilizamos alert() porque queremos
-         * que se sienta como una función propia
-         * de la PWA.
-         */
-
         document.body.innerHTML = `
 
             <div
-                id="motiOfflineTransition"
                 style="
                     position:fixed;
                     inset:0;
@@ -416,7 +381,6 @@
                         🎮
                     </div>
 
-
                     <h2
                         style="
                             margin:0;
@@ -427,12 +391,12 @@
                         MOTI Offline
                     </h2>
 
-
                     <p
                         style="
                             margin:8px 0 0;
                             color:#64748B;
                             font-size:14px;
+                            line-height:1.6;
                         "
                     >
                         No hay conexión.
@@ -447,52 +411,31 @@
         `;
 
 
-        /*
-         * Dejamos que el navegador termine
-         * de mostrar la pantalla y después
-         * abrimos el juego.
-         */
+        setTimeout(() => {
 
-        setTimeout(
-            () => {
+            window.location.href =
+                "moti_offline/index.html";
 
-                window.location.href =
-                    "moti_offline/index.html";
-
-            },
-            700
-        );
+        }, 700);
 
     }
 
 
     // ==========================================
-    // CONEXIÓN PERDIDA
+    // 📡 INTERNET PERDIDO
     // ==========================================
 
     window.addEventListener(
         "offline",
-        () => {
-
-            abrirMotiOffline();
-
-        }
+        abrirMotiOffline
     );
 
 
     // ==========================================
-    // COMPROBACIÓN INICIAL
+    // 📡 ABRIR MOTI SIN INTERNET
     // ==========================================
 
-    /*
-     * Esto también cubre el caso de que
-     * el usuario abra MOTI directamente
-     * sin conexión.
-     */
-
-    if (
-        !navigator.onLine
-    ) {
+    if (!navigator.onLine) {
 
         abrirMotiOffline();
 
