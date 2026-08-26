@@ -1,4 +1,4 @@
-const CACHE_NAME = "moti-go-v2";
+const CACHE_NAME = "moti-go-v3";
 
 const FILES_TO_CACHE = [
 
@@ -49,19 +49,17 @@ self.addEventListener(
 
             caches
                 .open(CACHE_NAME)
-                .then(
-                    (cache) => {
+                .then((cache) => {
 
-                        console.log(
-                            "🎮 MOTI GO: preparando archivos offline..."
-                        );
+                    console.log(
+                        "📦 MOTI GO: guardando archivos offline..."
+                    );
 
-                        return cache.addAll(
-                            FILES_TO_CACHE
-                        );
+                    return cache.addAll(
+                        FILES_TO_CACHE
+                    );
 
-                    }
-                )
+                })
 
         );
 
@@ -83,28 +81,25 @@ self.addEventListener(
 
             caches
                 .keys()
-                .then(
-                    (cacheNames) => {
+                .then((cacheNames) => {
 
-                        return Promise.all(
+                    return Promise.all(
 
-                            cacheNames
-                                .filter(
-                                    (cacheName) =>
-                                        cacheName !==
-                                        CACHE_NAME
-                                )
-                                .map(
-                                    (cacheName) =>
-                                        caches.delete(
-                                            cacheName
-                                        )
-                                )
+                        cacheNames
+                            .filter(
+                                (cacheName) =>
+                                    cacheName !== CACHE_NAME
+                            )
+                            .map(
+                                (cacheName) =>
+                                    caches.delete(
+                                        cacheName
+                                    )
+                            )
 
-                        );
+                    );
 
-                    }
-                )
+                })
 
         );
 
@@ -122,27 +117,60 @@ self.addEventListener(
     "fetch",
     (event) => {
 
+        /*
+         * Primero buscamos el recurso en caché.
+         * Si existe, lo devolvemos inmediatamente.
+         */
+
         event.respondWith(
 
             caches
-                .match(
-                    event.request
-                )
-                .then(
-                    (response) => {
+                .match(event.request)
+                .then((response) => {
 
-                        if (response) {
+                    if (response) {
 
-                            return response;
-
-                        }
-
-                        return fetch(
-                            event.request
-                        );
+                        return response;
 
                     }
-                )
+
+
+                    /*
+                     * Si no está en caché,
+                     * intentamos Internet.
+                     */
+
+                    return fetch(
+                        event.request
+                    )
+
+                    .catch(() => {
+
+                        /*
+                         * Si tampoco hay Internet,
+                         * devolvemos una respuesta válida
+                         * en lugar de dejar que el FetchEvent
+                         * falle.
+                         */
+
+                        console.warn(
+                            "📡 MOTI GO: recurso no disponible offline:",
+                            event.request.url
+                        );
+
+
+                        return new Response(
+                            "",
+                            {
+                                status: 503,
+                                statusText:
+                                    "Offline"
+                            }
+                        );
+
+                    });
+
+                })
 
         );
 
