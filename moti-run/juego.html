@@ -8,12 +8,11 @@
                maximum-scale=1,
                user-scalable=no">
 
-<meta name="theme-color" content="#07130d">
+<meta name="theme-color" content="#07100b">
 
-<title>MOTI Mandaditos</title>
+<title>MOTI CITY</title>
 
 <style>
-
 *{
     box-sizing:border-box;
     margin:0;
@@ -21,32 +20,28 @@
     -webkit-tap-highlight-color:transparent;
 }
 
-html,
-body{
+html,body{
     width:100%;
     height:100%;
     overflow:hidden;
     background:#07100b;
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
+    font-family:Arial,Helvetica,sans-serif;
     touch-action:none;
 }
 
 body{
     display:flex;
-    justify-content:center;
     align-items:center;
+    justify-content:center;
 }
 
 #game{
     position:relative;
     width:100%;
     height:100%;
-    max-width:1000px;
+    max-width:1200px;
     overflow:hidden;
-    background:#17251b;
+    background:#304d32;
 }
 
 canvas{
@@ -54,7 +49,6 @@ canvas{
     height:100%;
     display:block;
 }
-
 
 /* =========================
    HUD
@@ -66,36 +60,26 @@ canvas{
     left:0;
     width:100%;
     padding:10px;
-    z-index:10;
-
+    z-index:20;
     display:flex;
-    align-items:flex-start;
     justify-content:space-between;
-
     pointer-events:none;
 }
 
 .hudLeft{
     display:flex;
     gap:7px;
-    flex-wrap:wrap;
 }
 
 .hudBox{
-    background:rgba(5,12,8,.82);
-    color:#fff;
-
-    border:1px solid
-        rgba(255,255,255,.12);
-
-    border-radius:12px;
-
     padding:8px 11px;
-
+    border-radius:12px;
+    background:rgba(5,12,8,.82);
+    color:white;
+    border:1px solid rgba(255,255,255,.12);
     font-size:12px;
     font-weight:800;
-
-    backdrop-filter:blur(8px);
+    backdrop-filter:blur(7px);
 }
 
 .money{
@@ -106,48 +90,33 @@ canvas{
     color:#ffb454;
 }
 
-
-/* =========================
-   MISIÓN
-========================= */
-
 #mission{
     position:absolute;
-
-    top:62px;
+    top:61px;
     left:50%;
-
     transform:translateX(-50%);
+    z-index:19;
 
-    z-index:9;
-
-    min-width:230px;
-    max-width:85%;
+    min-width:250px;
+    max-width:80%;
 
     padding:9px 13px;
 
-    background:rgba(5,12,8,.86);
-
-    border:1px solid
-        rgba(255,255,255,.1);
-
-    border-radius:13px;
-
     text-align:center;
 
-    color:white;
+    background:rgba(5,12,8,.88);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:13px;
 
+    color:#fff;
     font-size:12px;
 
     pointer-events:none;
-
-    backdrop-filter:blur(8px);
 }
 
 #mission strong{
-    color:#39db82;
+    color:#37db80;
 }
-
 
 /* =========================
    MINIMAPA
@@ -155,24 +124,19 @@ canvas{
 
 #miniMap{
     position:absolute;
-
     right:12px;
-    top:65px;
+    top:62px;
 
-    width:120px;
-    height:100px;
+    width:145px;
+    height:110px;
 
-    background:
-        rgba(4,10,7,.86);
-
-    border:1px solid
-        rgba(255,255,255,.15);
-
-    border-radius:12px;
-
-    z-index:8;
+    z-index:18;
 
     overflow:hidden;
+
+    border-radius:13px;
+    background:rgba(5,12,8,.9);
+    border:1px solid rgba(255,255,255,.15);
 }
 
 #miniCanvas{
@@ -180,6 +144,139 @@ canvas{
     height:100%;
 }
 
+/* =========================
+   JOYSTICK
+========================= */
+
+#joystick{
+    position:absolute;
+    left:22px;
+    bottom:25px;
+
+    width:145px;
+    height:145px;
+
+    z-index:30;
+
+    border-radius:50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,255,255,.13) 0%,
+            rgba(255,255,255,.07) 42%,
+            rgba(0,0,0,.22) 43%,
+            rgba(0,0,0,.22) 100%
+        );
+
+    border:2px solid
+        rgba(255,255,255,.13);
+
+    box-shadow:
+        inset 0 5px 20px rgba(0,0,0,.35);
+
+    touch-action:none;
+}
+
+#stick{
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    width:62px;
+    height:62px;
+
+    transform:
+        translate(-50%,-50%);
+
+    border-radius:50%;
+
+    background:
+        radial-gradient(
+            circle at 35% 30%,
+            #50585d,
+            #252b2f 55%,
+            #111518 100%
+        );
+
+    border:3px solid
+        rgba(255,255,255,.18);
+
+    box-shadow:
+        0 8px 15px rgba(0,0,0,.45);
+
+    pointer-events:none;
+}
+
+/* =========================
+   BOTONES XBOX
+========================= */
+
+#xbox{
+    position:absolute;
+    right:24px;
+    bottom:25px;
+
+    width:190px;
+    height:160px;
+
+    z-index:30;
+}
+
+.xbtn{
+    position:absolute;
+
+    width:58px;
+    height:58px;
+
+    border-radius:50%;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:20px;
+    font-weight:900;
+
+    color:white;
+
+    border:2px solid
+        rgba(255,255,255,.17);
+
+    box-shadow:
+        0 7px 12px rgba(0,0,0,.4);
+
+    user-select:none;
+}
+
+.xbtn:active{
+    transform:scale(.88);
+}
+
+#btnY{
+    top:0;
+    left:66px;
+    background:#d8a928;
+}
+
+#btnX{
+    top:50px;
+    left:10px;
+    background:#2475c9;
+}
+
+#btnB{
+    top:50px;
+    right:10px;
+    background:#c93939;
+}
+
+#btnA{
+    bottom:0;
+    left:66px;
+    background:#279b59;
+}
 
 /* =========================
    PANTALLAS
@@ -187,49 +284,48 @@ canvas{
 
 .screen{
     position:absolute;
-
     inset:0;
 
-    z-index:30;
+    z-index:50;
 
     display:flex;
-    align-items:center;
     justify-content:center;
+    align-items:center;
 
     background:
         linear-gradient(
-            rgba(3,8,5,.55),
-            rgba(3,8,5,.92)
+            rgba(2,8,4,.55),
+            rgba(2,8,4,.94)
         );
 }
 
 .panel{
-    width:min(90%,440px);
+    width:min(91%,450px);
 
-    padding:30px 24px;
+    padding:30px 25px;
 
     border-radius:25px;
 
     text-align:center;
 
-    color:white;
-
     background:
-        rgba(8,18,12,.94);
+        rgba(8,18,12,.95);
 
     border:
         1px solid
         rgba(255,255,255,.12);
 
+    color:white;
+
     box-shadow:
         0 25px 70px
-        rgba(0,0,0,.5);
+        rgba(0,0,0,.55);
 }
 
 .logo{
-    font-size:52px;
+    font-size:55px;
     font-weight:900;
-    letter-spacing:-4px;
+    letter-spacing:-5px;
 }
 
 .logo span{
@@ -237,52 +333,21 @@ canvas{
 }
 
 .title{
-    margin-top:3px;
-
-    font-size:20px;
-
+    font-size:21px;
     font-weight:900;
 }
 
 .subtitle{
     margin-top:8px;
-
-    color:#9ba99f;
-
+    color:#9ca99f;
     line-height:1.5;
 }
 
-.bigButton{
-    width:100%;
-
-    margin-top:22px;
-
-    border:0;
-
-    border-radius:15px;
-
-    padding:16px;
-
-    background:#29d47d;
-
-    color:#04100a;
-
-    font-size:17px;
-
-    font-weight:900;
-}
-
-.bigButton:active{
-    transform:scale(.97);
-}
-
 .infoGrid{
-    margin-top:22px;
+    margin-top:20px;
 
     display:grid;
-
-    grid-template-columns:
-        1fr 1fr;
+    grid-template-columns:1fr 1fr;
 
     gap:9px;
 }
@@ -290,140 +355,115 @@ canvas{
 .info{
     padding:12px;
 
-    border-radius:12px;
-
     background:
         rgba(255,255,255,.05);
 
-    color:#b8c3bc;
+    border-radius:12px;
+
+    color:#b7c2ba;
 
     font-size:12px;
+}
+
+.bigButton{
+    width:100%;
+
+    margin-top:20px;
+
+    padding:16px;
+
+    border:0;
+    border-radius:15px;
+
+    background:#29d47d;
+    color:#04100a;
+
+    font-size:17px;
+    font-weight:900;
+}
+
+.bigButton:active{
+    transform:scale(.97);
 }
 
 .hidden{
     display:none!important;
 }
 
-
 /* =========================
-   CONTROLES
-========================= */
-
-#controls{
-    position:absolute;
-
-    left:0;
-    bottom:15px;
-
-    width:100%;
-
-    z-index:15;
-
-    display:flex;
-
-    justify-content:
-        space-between;
-
-    padding:
-        0 15px;
-
-    pointer-events:none;
-}
-
-.controlGroup{
-    display:flex;
-
-    gap:9px;
-
-    pointer-events:auto;
-}
-
-.control{
-    width:58px;
-    height:58px;
-
-    display:flex;
-
-    justify-content:center;
-    align-items:center;
-
-    border-radius:17px;
-
-    background:
-        rgba(5,12,8,.78);
-
-    border:
-        1px solid
-        rgba(255,255,255,.16);
-
-    color:white;
-
-    font-size:25px;
-
-    user-select:none;
-
-    backdrop-filter:blur(8px);
-}
-
-.control:active{
-    transform:scale(.9);
-
-    background:
-        rgba(41,212,125,.4);
-}
-
-#boostBtn{
-    color:#ffd447;
-}
-
-
-/* =========================
-   MENSAJE
+   TOAST
 ========================= */
 
 #toast{
     position:absolute;
 
     left:50%;
-    bottom:95px;
+    bottom:205px;
 
     transform:
-        translateX(-50%)
-        translateY(20px);
+        translate(-50%,20px);
 
-    z-index:25;
+    z-index:45;
 
-    padding:11px 16px;
-
-    border-radius:13px;
+    padding:11px 17px;
 
     background:
-        rgba(5,12,8,.9);
+        rgba(4,10,7,.92);
+
+    border-radius:13px;
 
     color:white;
 
     font-size:13px;
-
     font-weight:800;
 
     opacity:0;
 
     pointer-events:none;
 
-    transition:.25s;
+    transition:.2s;
 }
 
 #toast.show{
     opacity:1;
 
     transform:
-        translateX(-50%)
-        translateY(0);
+        translate(-50%,0);
 }
 
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:600px){
+
+    #joystick{
+        width:125px;
+        height:125px;
+        left:15px;
+        bottom:17px;
+    }
+
+    #stick{
+        width:55px;
+        height:55px;
+    }
+
+    #xbox{
+        right:12px;
+        bottom:17px;
+        transform:scale(.88);
+        transform-origin:right bottom;
+    }
+
+    #miniMap{
+        width:115px;
+        height:90px;
+    }
+
+}
 </style>
 </head>
-
 
 <body>
 
@@ -431,32 +471,22 @@ canvas{
 
 <canvas id="canvas"></canvas>
 
-
 <!-- HUD -->
 
 <div id="hud" class="hidden">
 
     <div class="hudLeft">
 
-        <div class="hudBox">
-            💰 <span
-                id="money">
-                $0
-            </span>
+        <div class="hudBox money">
+            💰 <span id="money">$0</span>
         </div>
 
         <div class="hudBox">
-            📦 <span
-                id="deliveries">
-                0
-            </span>
+            📦 <span id="deliveries">0</span>
         </div>
 
         <div class="hudBox timer">
-            ⏱️ <span
-                id="time">
-                0
-            </span>
+            ⏱ <span id="time">0</span>
         </div>
 
     </div>
@@ -466,62 +496,47 @@ canvas{
 
 <!-- MISIÓN -->
 
-<div id="mission"
-     class="hidden">
-
-    <span id="missionText">
-        Busca el pedido
-    </span>
-
+<div id="mission" class="hidden">
+    <span id="missionText"></span>
 </div>
 
 
 <!-- MINIMAPA -->
 
-<div id="miniMap"
-     class="hidden">
-
+<div id="miniMap" class="hidden">
     <canvas id="miniCanvas"></canvas>
-
 </div>
 
 
-<!-- CONTROLES -->
+<!-- JOYSTICK -->
 
-<div id="controls"
-     class="hidden">
+<div id="joystick" class="hidden">
+    <div id="stick"></div>
+</div>
 
-    <div class="controlGroup">
 
-        <div class="control"
-             id="upBtn">
-            ▲
-        </div>
+<!-- XBOX -->
 
-        <div class="control"
-             id="downBtn">
-            ▼
-        </div>
+<div id="xbox" class="hidden">
 
+    <div class="xbtn"
+         id="btnY">
+        Y
     </div>
 
-    <div class="controlGroup">
+    <div class="xbtn"
+         id="btnX">
+        X
+    </div>
 
-        <div class="control"
-             id="leftBtn">
-            ◀
-        </div>
+    <div class="xbtn"
+         id="btnB">
+        B
+    </div>
 
-        <div class="control"
-             id="rightBtn">
-            ▶
-        </div>
-
-        <div class="control"
-             id="boostBtn">
-            ⚡
-        </div>
-
+    <div class="xbtn"
+         id="btnA">
+        A
     </div>
 
 </div>
@@ -532,78 +547,68 @@ canvas{
 
 <!-- INICIO -->
 
-<div id="startScreen"
-     class="screen">
+<div id="startScreen" class="screen">
 
-    <div class="panel">
+<div class="panel">
 
-        <div class="logo">
-            MO<span>TI</span>
+    <div class="logo">
+        MO<span>TI</span>
+    </div>
+
+    <div class="title">
+        CITY · OFFLINE
+    </div>
+
+    <div class="subtitle">
+        Conduce tu motito por la ciudad,
+        recoge mandados y llévalos
+        hasta las casas.
+    </div>
+
+    <div class="infoGrid">
+
+        <div class="info">
+            🕹️<br>
+            Joystick para conducir
         </div>
 
-        <div class="title">
-            MANDADITOS
+        <div class="info">
+            🚗<br>
+            Tráfico real
         </div>
 
-        <div class="subtitle">
-
-            Tú eres el repartidor.<br>
-
-            Recoge los pedidos,
-            encuentra las casas
-            y entrégalos a tiempo.
-
+        <div class="info">
+            📦<br>
+            Mandaditos
         </div>
 
-
-        <div class="infoGrid">
-
-            <div class="info">
-                🛵<br>
-                Conduce libremente
-            </div>
-
-            <div class="info">
-                📦<br>
-                Recoge pedidos
-            </div>
-
-            <div class="info">
-                🏠<br>
-                Encuentra las casas
-            </div>
-
-            <div class="info">
-                💰<br>
-                Gana por entregar
-            </div>
-
-        </div>
-
-
-        <button
-            class="bigButton"
-            id="startBtn">
-
-            INICIAR REPARTO
-
-        </button>
-
-
-        <div style="
-            margin-top:14px;
-            font-size:11px;
-            color:#68766e;
-        ">
-
-            Récord:
-            <span id="bestStart">
-                $0
-            </span>
-
+        <div class="info">
+            🏠<br>
+            Casas y personas
         </div>
 
     </div>
+
+    <button
+        class="bigButton"
+        id="startBtn">
+
+        EMPEZAR A REPARTIR
+
+    </button>
+
+    <div style="
+        margin-top:13px;
+        color:#68766e;
+        font-size:11px;
+    ">
+
+        Récord:
+        <span id="bestStart">$0</span>
+
+    </div>
+
+</div>
 
 </div>
 
@@ -613,90 +618,58 @@ canvas{
 <div id="gameOver"
      class="screen hidden">
 
-    <div class="panel">
+<div class="panel">
 
-        <div style="
-            font-size:35px;
-            font-weight:900;
-        ">
+    <div style="
+        font-size:35px;
+        font-weight:900;
+    ">
+        FIN DEL REPARTO
+    </div>
 
-            FIN DEL REPARTO
+    <div class="subtitle">
+        La ciudad volverá a esperarte 😎
+    </div>
 
+    <div class="infoGrid">
+
+        <div class="info">
+            DINERO<br>
+            <strong id="finalMoney">
+                $0
+            </strong>
         </div>
 
-        <div class="subtitle">
-
-            Buen trabajo, repartidor 😎
-
+        <div class="info">
+            ENTREGAS<br>
+            <strong id="finalDeliveries">
+                0
+            </strong>
         </div>
 
-
-        <div class="infoGrid">
-
-            <div class="info">
-
-                DINERO<br>
-
-                <strong
-                    id="finalMoney">
-
-                    $0
-
-                </strong>
-
-            </div>
-
-            <div class="info">
-
-                ENTREGAS<br>
-
-                <strong
-                    id="finalDeliveries">
-
-                    0
-
-                </strong>
-
-            </div>
-
-            <div class="info">
-
-                MEJOR RÉCORD<br>
-
-                <strong
-                    id="finalBest">
-
-                    $0
-
-                </strong>
-
-            </div>
-
-            <div class="info">
-
-                PEDIDOS<br>
-
-                <strong
-                    id="finalOrders">
-
-                    0
-
-                </strong>
-
-            </div>
-
+        <div class="info">
+            RÉCORD<br>
+            <strong id="finalBest">
+                $0
+            </strong>
         </div>
 
-
-        <button
-            class="bigButton"
-            id="restartBtn">
-
-            VOLVER A REPARTIR
-
-        </button>
+        <div class="info">
+            PEDIDOS<br>
+            <strong id="finalOrders">
+                0
+            </strong>
+        </div>
 
     </div>
+
+    <button
+        class="bigButton"
+        id="restartBtn">
+
+        VOLVER A REPARTIR
+
+    </button>
 
 </div>
 
@@ -705,9 +678,9 @@ canvas{
 
 <script>
 
-/* =====================================================
-   MOTI MANDADITOS
-   ===================================================== */
+/* =========================================================
+   MOTI CITY
+   ========================================================= */
 
 
 /* =========================
@@ -715,38 +688,30 @@ canvas{
 ========================= */
 
 const canvas =
-    document.getElementById(
-        "canvas"
-    );
+    document.getElementById("canvas");
 
 const ctx =
     canvas.getContext("2d");
 
 const miniCanvas =
-    document.getElementById(
-        "miniCanvas"
-    );
+    document.getElementById("miniCanvas");
 
 const miniCtx =
     miniCanvas.getContext("2d");
 
-
 let W=0;
 let H=0;
 
-
 function resize(){
 
-    W =
-        canvas.width =
+    W=canvas.width=
         canvas.clientWidth;
 
-    H =
-        canvas.height =
+    H=canvas.height=
         canvas.clientHeight;
 
-    miniCanvas.width=120;
-    miniCanvas.height=100;
+    miniCanvas.width=145;
+    miniCanvas.height=110;
 
 }
 
@@ -759,72 +724,38 @@ resize();
 
 
 /* =========================
-   MAPA
+   MUNDO
 ========================= */
 
-const WORLD_W=2600;
-const WORLD_H=1900;
+const WORLD_W=4800;
+const WORLD_H=3600;
 
 
-/*
-    Las carreteras están definidas
-    como rectángulos.
-
-    Esto permite construir
-    posteriormente un mapa mucho
-    más grande.
-*/
+/* =========================
+   CALLES
+========================= */
 
 const roads=[
 
-    {
-        x:0,
-        y:400,
-        w:2600,
-        h:170
-    },
+    {x:0,y:500,w:4800,h:190},
 
-    {
-        x:0,
-        y:980,
-        w:2600,
-        h:170
-    },
+    {x:0,y:1700,w:4800,h:190},
 
-    {
-        x:350,
-        y:0,
-        w:170,
-        h:1900
-    },
+    {x:0,y:2900,w:4800,h:190},
 
-    {
-        x:1050,
-        y:0,
-        w:170,
-        h:1900
-    },
+    {x:480,y:0,w:190,h:3600},
 
-    {
-        x:1800,
-        y:0,
-        w:170,
-        h:1900
-    },
+    {x:1550,y:0,w:190,h:3600},
 
-    {
-        x:520,
-        y:670,
-        w:530,
-        h:130
-    },
+    {x:2700,y:0,w:190,h:3600},
 
-    {
-        x:1220,
-        y:1320,
-        w:580,
-        h:130
-    }
+    {x:3850,y:0,w:190,h:3600},
+
+    {x:670,y:1050,w:880,h:150},
+
+    {x:1740,y:2300,w:960,h:150},
+
+    {x:2990,y:850,w:860,h:150}
 
 ];
 
@@ -835,25 +766,14 @@ const roads=[
 
 const buildings=[];
 
+function pointOnRoad(x,y){
 
-/*
-    Crear edificios
-    automáticamente en
-    las zonas que no sean calle.
-*/
-
-function isRoad(x,y){
-
-    return roads.some(r=>{
-
-        return (
-            x>r.x &&
-            x<r.x+r.w &&
-            y>r.y &&
-            y<r.y+r.h
-        );
-
-    });
+    return roads.some(r=>
+        x>r.x &&
+        x<r.x+r.w &&
+        y>r.y &&
+        y<r.y+r.h
+    );
 
 }
 
@@ -865,36 +785,43 @@ function generateBuildings(){
     for(
         let y=70;
         y<WORLD_H-70;
-        y+=115
+        y+=145
     ){
 
         for(
             let x=70;
             x<WORLD_W-70;
-            x+=125
+            x+=155
         ){
 
-            const bx=
+            let bx=
                 x+
-                Math.random()*25;
-
-            const by=
-                y+
-                Math.random()*25;
-
-            const bw=
-                75+
                 Math.random()*35;
 
-            const bh=
-                65+
+            let by=
+                y+
                 Math.random()*30;
+
+            let bw=
+                85+
+                Math.random()*45;
+
+            let bh=
+                70+
+                Math.random()*45;
+
+
+            const centerX=
+                bx+bw/2;
+
+            const centerY=
+                by+bh/2;
 
 
             if(
-                !isRoad(
-                    bx+bw/2,
-                    by+bh/2
+                !pointOnRoad(
+                    centerX,
+                    centerY
                 )
             ){
 
@@ -905,10 +832,30 @@ function generateBuildings(){
                     w:bw,
                     h:bh,
 
-                    color:
-                        Math.random()>.5
-                        ? "#d9c29a"
-                        : "#b9c7ad"
+                    wall:
+                        [
+                            "#d9c7a5",
+                            "#c9d2b9",
+                            "#d5b79e",
+                            "#bfc9c5",
+                            "#dfcfb4"
+                        ][
+                            Math.floor(
+                                Math.random()*5
+                            )
+                        ],
+
+                    roof:
+                        [
+                            "#985b4b",
+                            "#754d43",
+                            "#53636a",
+                            "#7b624d"
+                        ][
+                            Math.floor(
+                                Math.random()*4
+                            )
+                        ]
 
                 });
 
@@ -924,86 +871,177 @@ generateBuildings();
 
 
 /* =========================
-   PUNTOS DE NEGOCIO
-========================= */
-
-const stores=[
-
-    {
-        x:260,
-        y:480,
-        name:"TIENDITA"
-    },
-
-    {
-        x:800,
-        y:480,
-        name:"ABARROTES"
-    },
-
-    {
-        x:1500,
-        y:1060,
-        name:"FARMACIA"
-    },
-
-    {
-        x:2200,
-        y:1060,
-        name:"MINISÚPER"
-    }
-
-];
-
-
-/* =========================
    CASAS
 ========================= */
 
 const houses=[
+    {x:210,y:300,name:"Casa de Ana"},
+    {x:890,y:300,name:"Casa de Luis"},
+    {x:1210,y:820,name:"Casa de María"},
+    {x:2050,y:330,name:"Casa de Carlos"},
+    {x:2380,y:780,name:"Casa de Sofía"},
+    {x:3200,y:350,name:"Casa de José"},
+    {x:4300,y:350,name:"Casa de Pedro"},
+    {x:760,y:1420,name:"Casa de Elena"},
+    {x:1200,y:1500,name:"Casa de Diego"},
+    {x:2080,y:1450,name:"Casa de Laura"},
+    {x:3000,y:1450,name:"Casa de Miguel"},
+    {x:3500,y:1450,name:"Casa de Rosa"},
+    {x:4300,y:1450,name:"Casa de Juan"},
+    {x:260,y:2450,name:"Casa de Carlos"},
+    {x:900,y:2450,name:"Casa de Ana"},
+    {x:1300,y:2500,name:"Casa de Luis"},
+    {x:2000,y:2500,name:"Casa de Sofía"},
+    {x:3200,y:2450,name:"Casa de José"},
+    {x:3500,y:2600,name:"Casa de Pedro"},
+    {x:4300,y:2450,name:"Casa de María"},
+    {x:850,y:3300,name:"Casa de Diego"},
+    {x:2100,y:3300,name:"Casa de Laura"},
+    {x:3300,y:3300,name:"Casa de Miguel"},
+    {x:4300,y:3300,name:"Casa de Rosa"}
+];
 
-    {
-        x:150,
-        y:260,
-        name:"Casa de Ana"
-    },
 
-    {
-        x:700,
-        y:760,
-        name:"Casa de Luis"
-    },
+/* =========================
+   COMERCIOS
+========================= */
 
-    {
-        x:1420,
-        y:270,
-        name:"Casa de Carlos"
-    },
+const stores=[
+    {x:250,y:595,name:"Abarrotes Don Luis"},
+    {x:900,y:595,name:"Tienda La Esperanza"},
+    {x:2100,y:595,name:"Farmacia"},
+    {x:3300,y:595,name:"Mini Súper"},
+    {x:4300,y:1780,name:"Papelería"},
+    {x:900,y:2980,name:"Tienda Central"},
+    {x:3000,y:2980,name:"Supermercado"},
+    {x:4300,y:2980,name:"Farmacia MOTI"}
+];
 
-    {
-        x:2150,
-        y:720,
-        name:"Casa de María"
-    },
 
-    {
-        x:850,
-        y:1350,
-        name:"Casa de José"
-    },
+/* =========================
+   PERSONAS
+========================= */
 
-    {
-        x:2200,
-        y:1600,
-        name:"Casa de Sofía"
-    },
+const people=[];
 
-    {
-        x:1450,
-        y:1550,
-        name:"Casa de Pedro"
+function generatePeople(){
+
+    people.length=0;
+
+    for(let i=0;i<65;i++){
+
+        const horizontal=
+            Math.random()>.5;
+
+        let x;
+        let y;
+        let angle;
+
+
+        if(horizontal){
+
+            const r=
+                roads[
+                    [
+                        0,
+                        1,
+                        2
+                    ][
+                        Math.floor(
+                            Math.random()*3
+                        )
+                    ]
+                ];
+
+            x=
+                r.x+
+                100+
+                Math.random()*
+                (r.w-200);
+
+            y=
+                r.y+
+                (
+                    Math.random()>.5
+                    ? 35
+                    : r.h-35
+                );
+
+            angle=
+                Math.random()>.5
+                ? 0
+                : Math.PI;
+
+        }else{
+
+            const r=
+                [
+                    roads[3],
+                    roads[4],
+                    roads[5],
+                    roads[6]
+                ][
+                    Math.floor(
+                        Math.random()*4
+                    )
+                ];
+
+            x=
+                r.x+
+                (
+                    Math.random()>.5
+                    ? 35
+                    : r.w-35
+                );
+
+            y=
+                Math.random()*
+                WORLD_H;
+
+            angle=
+                Math.random()>.5
+                ? Math.PI/2
+                : -Math.PI/2;
+
+        }
+
+
+        people.push({
+
+            x,
+            y,
+            angle,
+
+            speed:
+                .25+
+                Math.random()*.35,
+
+            phase:
+                Math.random()*10
+
+        });
+
     }
 
+}
+
+generatePeople();
+
+
+/* =========================
+   TRÁFICO
+========================= */
+
+const traffic=[];
+
+const trafficColors=[
+    "#e74c3c",
+    "#3498db",
+    "#f1c40f",
+    "#9b59b6",
+    "#f4f4f4",
+    "#2ecc71",
+    "#34495e"
 ];
 
 
@@ -1013,24 +1051,28 @@ const houses=[
 
 const player={
 
-    x:260,
-    y:480,
+    x:300,
+    y:595,
 
     angle:0,
 
     speed:0,
 
-    maxSpeed:4.8,
+    maxSpeed:5.5,
 
-    acceleration:.18,
+    acceleration:.19,
 
-    friction:.08,
+    friction:.07,
 
     rotation:.075,
 
     boost:false,
 
-    boostEnergy:100
+    boostEnergy:100,
+
+    health:100,
+
+    invincible:0
 
 };
 
@@ -1040,15 +1082,13 @@ const player={
 ========================= */
 
 const camera={
-
     x:0,
     y:0
-
 };
 
 
 /* =========================
-   JUEGO
+   ESTADO
 ========================= */
 
 let running=false;
@@ -1061,21 +1101,20 @@ let orders=0;
 
 let mission=null;
 
-let missionTime=0;
+let missionTime=90;
 
 let particles=[];
 
-let traffic=[];
-
 let trafficTimer=0;
+
+let hornTimer=0;
 
 let bestMoney=
     parseInt(
         localStorage.getItem(
-            "motiMandaditosBest"
+            "motiCityBest"
         ) || "0"
     );
-
 
 document.getElementById(
     "bestStart"
@@ -1084,14 +1123,34 @@ document.getElementById(
 
 
 /* =========================
+   CONTROLES
+========================= */
+
+const keys={
+    up:false,
+    down:false,
+    left:false,
+    right:false,
+    boost:false
+};
+
+
+/* =========================
    UTILIDADES
 ========================= */
 
-function distance(
-    x1,
-    y1,
-    x2,
-    y2
+function clamp(v,min,max){
+
+    return Math.max(
+        min,
+        Math.min(max,v)
+    );
+
+}
+
+
+function dist(
+    x1,y1,x2,y2
 ){
 
     return Math.hypot(
@@ -1102,25 +1161,11 @@ function distance(
 }
 
 
-function clamp(
-    value,
-    min,
-    max
-){
-
-    return Math.max(
-        min,
-        Math.min(max,value)
-    );
-
-}
-
-
 /* =========================
-   GENERAR PEDIDO
+   MISIÓN
 ========================= */
 
-function createMission(){
+function newMission(){
 
     const store=
         stores[
@@ -1129,6 +1174,7 @@ function createMission(){
                 stores.length
             )
         ];
+
 
     let house;
 
@@ -1143,27 +1189,26 @@ function createMission(){
             ];
 
     }while(
-        distance(
+        dist(
             store.x,
             store.y,
             house.x,
             house.y
-        )<500
+        )<650
     );
 
 
     mission={
 
-        store:store,
-
-        house:house,
+        store,
+        house,
 
         state:"pickup",
 
         reward:
             25+
             Math.floor(
-                Math.random()*35
+                Math.random()*45
             )
 
     };
@@ -1173,17 +1218,12 @@ function createMission(){
 
     orders++;
 
-
-    updateMissionText();
+    updateMission();
 
 }
 
 
-/* =========================
-   TEXTO DE MISIÓN
-========================= */
-
-function updateMissionText(){
+function updateMission(){
 
     if(!mission)
         return;
@@ -1200,14 +1240,14 @@ function updateMissionText(){
     ){
 
         text.innerHTML=
-            "📦 Ve a <strong>"+
+            "📦 Recoge en <strong>"+
             mission.store.name+
-            "</strong> a recoger el pedido";
+            "</strong>";
 
     }else{
 
         text.innerHTML=
-            "🏠 Entrega el pedido en <strong>"+
+            "🏠 Entrega en <strong>"+
             mission.house.name+
             "</strong>";
 
@@ -1220,125 +1260,33 @@ function updateMissionText(){
    TOAST
 ========================= */
 
-let toastTimer=null;
+let toastTimeout;
 
 
-function showToast(text){
+function toast(text){
 
-    const toast=
+    const el=
         document.getElementById(
             "toast"
         );
 
-    toast.textContent=text;
+    el.textContent=text;
 
-    toast.classList.add("show");
+    el.classList.add("show");
 
-    clearTimeout(toastTimer);
+    clearTimeout(
+        toastTimeout
+    );
 
-    toastTimer=
+    toastTimeout=
         setTimeout(
             ()=>{
-                toast.classList.remove(
+                el.classList.remove(
                     "show"
                 );
             },
-            1800
+            1600
         );
-
-}
-
-
-/* =========================
-   RECIBIR PEDIDO
-========================= */
-
-function checkMission(){
-
-    if(!mission)
-        return;
-
-
-    if(
-        mission.state==="pickup"
-    ){
-
-        const d=
-            distance(
-                player.x,
-                player.y,
-                mission.store.x,
-                mission.store.y
-            );
-
-
-        if(d<65){
-
-            mission.state=
-                "delivery";
-
-            missionTime=90;
-
-            updateMissionText();
-
-            showToast(
-                "📦 ¡Pedido recogido! Ahora llévalo a la casa."
-            );
-
-        }
-
-    }
-
-
-    else{
-
-        const d=
-            distance(
-                player.x,
-                player.y,
-                mission.house.x,
-                mission.house.y
-            );
-
-
-        if(d<75){
-
-            const reward=
-                mission.reward+
-                Math.floor(
-                    missionTime*.4
-                );
-
-
-            money+=reward;
-
-            deliveries++;
-
-            createParticles(
-                player.x,
-                player.y,
-                30
-            );
-
-            showToast(
-                "💰 ¡Pedido entregado! +$"+
-                reward
-            );
-
-
-            mission=null;
-
-            setTimeout(
-                ()=>{
-                    if(running)
-                        createMission();
-                },
-                700
-            );
-
-        }
-
-    }
 
 }
 
@@ -1347,20 +1295,9 @@ function checkMission(){
    MOVIMIENTO
 ========================= */
 
-const keys={
-
-    up:false,
-    down:false,
-    left:false,
-    right:false,
-    boost:false
-
-};
-
-
 function updatePlayer(){
 
-    let maxSpeed=
+    let max=
         player.maxSpeed;
 
 
@@ -1371,15 +1308,15 @@ function updatePlayer(){
 
         player.boost=true;
 
-        maxSpeed=8;
+        max=9;
 
-        player.boostEnergy-=.8;
+        player.boostEnergy-=.9;
 
     }else{
 
         player.boost=false;
 
-        player.boostEnergy+=.25;
+        player.boostEnergy+=.3;
 
     }
 
@@ -1392,26 +1329,19 @@ function updatePlayer(){
         );
 
 
-    if(keys.up){
-
+    if(keys.up)
         player.speed+=
             player.acceleration;
 
-    }
 
-
-    else if(keys.down){
-
+    else if(keys.down)
         player.speed-=
-            player.acceleration*.7;
-
-    }
+            player.acceleration*.8;
 
 
     else{
 
-        if(player.speed>0){
-
+        if(player.speed>0)
             player.speed=
                 Math.max(
                     0,
@@ -1419,18 +1349,13 @@ function updatePlayer(){
                     player.friction
                 );
 
-        }
-
-        if(player.speed<0){
-
+        if(player.speed<0)
             player.speed=
                 Math.min(
                     0,
                     player.speed+
                     player.friction
                 );
-
-        }
 
     }
 
@@ -1439,38 +1364,39 @@ function updatePlayer(){
         clamp(
             player.speed,
             -2.5,
-            maxSpeed
+            max
         );
 
 
     if(
-        Math.abs(player.speed)>.1
+        Math.abs(player.speed)>.15
     ){
+
+        const direction=
+            player.speed>=0
+            ? 1
+            : -1;
 
         const turn=
             player.rotation*
             Math.min(
                 1,
-                Math.abs(
-                    player.speed
-                )/3
+                Math.abs(player.speed)/3
             );
 
-
         if(keys.left)
-            player.angle-=turn;
+            player.angle-=
+                turn*direction;
 
         if(keys.right)
-            player.angle+=turn;
+            player.angle+=
+                turn*direction;
 
     }
 
 
-    const oldX=
-        player.x;
-
-    const oldY=
-        player.y;
+    const oldX=player.x;
+    const oldY=player.y;
 
 
     player.x+=
@@ -1501,17 +1427,14 @@ function updatePlayer(){
         );
 
 
-    /*
-        Si intenta atravesar
-        un edificio, lo regresamos.
-    */
-
     if(collidesBuilding()){
 
         player.x=oldX;
         player.y=oldY;
 
-        player.speed*=.2;
+        player.speed*=-.25;
+
+        crashEffect();
 
     }
 
@@ -1532,19 +1455,10 @@ function collidesBuilding(){
     ){
 
         if(
-
-            player.x>
-                b.x-18 &&
-
-            player.x<
-                b.x+b.w+18 &&
-
-            player.y>
-                b.y-18 &&
-
-            player.y<
-                b.y+b.h+18
-
+            player.x>b.x-18 &&
+            player.x<b.x+b.w+18 &&
+            player.y>b.y-18 &&
+            player.y<b.y+b.h+18
         ){
 
             return true;
@@ -1559,664 +1473,138 @@ function collidesBuilding(){
 
 
 /* =========================
-   CÁMARA
-========================= */
-
-function updateCamera(){
-
-    camera.x=
-        player.x-W/2;
-
-    camera.y=
-        player.y-H/2;
-
-
-    camera.x=
-        clamp(
-            camera.x,
-            0,
-            WORLD_W-W
-        );
-
-    camera.y=
-        clamp(
-            camera.y,
-            0,
-            WORLD_H-H
-        );
-
-}
-
-
-/* =========================
-   DIBUJAR MAPA
-========================= */
-
-function drawWorld(){
-
-    ctx.fillStyle="#4e754b";
-
-    ctx.fillRect(
-        0,
-        0,
-        W,
-        H
-    );
-
-
-    ctx.save();
-
-    ctx.translate(
-        -camera.x,
-        -camera.y
-    );
-
-
-    // caminos
-
-    roads.forEach(r=>{
-
-        ctx.fillStyle="#44484a";
-
-        ctx.fillRect(
-            r.x,
-            r.y,
-            r.w,
-            r.h
-        );
-
-
-        ctx.fillStyle="#c8c5a9";
-
-        /*
-            Líneas centrales
-        */
-
-        if(r.w>r.h){
-
-            for(
-                let x=r.x;
-                x<r.x+r.w;
-                x+=70
-            ){
-
-                ctx.fillRect(
-                    x,
-                    r.y+r.h/2-2,
-                    35,
-                    4
-                );
-
-            }
-
-        }else{
-
-            for(
-                let y=r.y;
-                y<r.y+r.h;
-                y+=70
-            ){
-
-                ctx.fillRect(
-                    r.x+r.w/2-2,
-                    y,
-                    4,
-                    35
-                );
-
-            }
-
-        }
-
-    });
-
-
-    // edificios
-
-    buildings.forEach(b=>{
-
-        // sombra
-
-        ctx.fillStyle=
-            "rgba(0,0,0,.18)";
-
-        ctx.fillRect(
-            b.x+5,
-            b.y+6,
-            b.w,
-            b.h
-        );
-
-
-        ctx.fillStyle=b.color;
-
-        ctx.fillRect(
-            b.x,
-            b.y,
-            b.w,
-            b.h
-        );
-
-
-        // techo
-
-        ctx.fillStyle=
-            "#8b5142";
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            b.x-5,
-            b.y
-        );
-
-        ctx.lineTo(
-            b.x+b.w/2,
-            b.y-15
-        );
-
-        ctx.lineTo(
-            b.x+b.w+5,
-            b.y
-        );
-
-        ctx.closePath();
-
-        ctx.fill();
-
-
-        // ventanas
-
-        ctx.fillStyle="#7fa9ad";
-
-        ctx.fillRect(
-            b.x+15,
-            b.y+20,
-            14,
-            14
-        );
-
-        ctx.fillRect(
-            b.x+b.w-29,
-            b.y+20,
-            14,
-            14
-        );
-
-
-        // puerta
-
-        ctx.fillStyle="#684734";
-
-        ctx.fillRect(
-            b.x+b.w/2-7,
-            b.y+b.h-25,
-            14,
-            25
-        );
-
-    });
-
-
-    // tiendas
-
-    stores.forEach(s=>{
-
-        ctx.fillStyle="#f2b84b";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            s.x,
-            s.y,
-            25,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-
-        ctx.fillStyle="#332714";
-
-        ctx.font=
-            "bold 10px Arial";
-
-        ctx.textAlign="center";
-
-        ctx.fillText(
-            "🏪",
-            s.x,
-            s.y+4
-        );
-
-    });
-
-
-    // casas destino
-
-    houses.forEach(h=>{
-
-        ctx.fillStyle="#ffffff";
-
-        ctx.beginPath();
-
-        ctx.arc(
-            h.x,
-            h.y,
-            22,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-
-        ctx.fillStyle="#222";
-
-        ctx.font=
-            "bold 11px Arial";
-
-        ctx.textAlign="center";
-
-        ctx.fillText(
-            "🏠",
-            h.x,
-            h.y+4
-        );
-
-    });
-
-
-    // marcador misión
-
-    if(mission){
-
-        let target;
-
-        if(
-            mission.state==="pickup"
-        ){
-
-            target=
-                mission.store;
-
-        }else{
-
-            target=
-                mission.house;
-
-        }
-
-
-        const pulse=
-            30+
-            Math.sin(
-                Date.now()/180
-            )*7;
-
-
-        ctx.strokeStyle=
-            mission.state==="pickup"
-            ? "#ffd447"
-            : "#ff8b42";
-
-        ctx.lineWidth=4;
-
-        ctx.beginPath();
-
-        ctx.arc(
-            target.x,
-            target.y,
-            pulse,
-            0,
-            Math.PI*2
-        );
-
-        ctx.stroke();
-
-
-        ctx.fillStyle=
-            mission.state==="pickup"
-            ? "#ffd447"
-            : "#ff8b42";
-
-        ctx.font=
-            "bold 12px Arial";
-
-        ctx.textAlign="center";
-
-        ctx.fillText(
-            mission.state==="pickup"
-            ? "RECOGER"
-            : "ENTREGAR",
-            target.x,
-            target.y-40
-        );
-
-    }
-
-
-    // tráfico
-
-    traffic.forEach(t=>{
-
-        ctx.save();
-
-        ctx.translate(
-            t.x,
-            t.y
-        );
-
-        ctx.rotate(
-            t.angle
-        );
-
-        ctx.fillStyle=t.color;
-
-        roundRect(
-            -12,
-            -22,
-            24,
-            44,
-            6
-        );
-
-        ctx.fill();
-
-
-        ctx.fillStyle="#202d35";
-
-        ctx.fillRect(
-            -8,
-            -12,
-            16,
-            12
-        );
-
-
-        ctx.restore();
-
-    });
-
-
-    // jugador
-
-    drawMoto();
-
-
-    ctx.restore();
-
-}
-
-
-/* =========================
-   MOTITO
-========================= */
-
-function drawMoto(){
-
-    ctx.save();
-
-    ctx.translate(
-        player.x,
-        player.y
-    );
-
-    ctx.rotate(
-        player.angle
-    );
-
-
-    // sombra
-
-    ctx.fillStyle=
-        "rgba(0,0,0,.3)";
-
-    ctx.beginPath();
-
-    ctx.ellipse(
-        0,
-        8,
-        20,
-        8,
-        0,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    // ruedas
-
-    ctx.fillStyle="#111";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        15,
-        0,
-        7,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    ctx.beginPath();
-
-    ctx.arc(
-        -15,
-        0,
-        7,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    // moto
-
-    ctx.fillStyle=
-        player.boost
-        ? "#ffd447"
-        : "#27d47b";
-
-
-    roundRect(
-        -17,
-        -10,
-        34,
-        20,
-        8
-    );
-
-    ctx.fill();
-
-
-    // asiento
-
-    ctx.fillStyle="#172019";
-
-    roundRect(
-        -5,
-        -8,
-        18,
-        10,
-        4
-    );
-
-    ctx.fill();
-
-
-    // conductor
-
-    ctx.fillStyle="#172019";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        -1,
-        -15,
-        7,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    // caja de mandado
-
-    ctx.fillStyle="#e69a3d";
-
-    ctx.fillRect(
-        -16,
-        -22,
-        14,
-        12
-    );
-
-
-    // faro
-
-    ctx.fillStyle="#fff4a8";
-
-    ctx.beginPath();
-
-    ctx.arc(
-        18,
-        0,
-        3,
-        0,
-        Math.PI*2
-    );
-
-    ctx.fill();
-
-
-    // turbo
-
-    if(player.boost){
-
-        ctx.fillStyle="#ff8a32";
-
-        ctx.beginPath();
-
-        ctx.moveTo(
-            -20,
-            0
-        );
-
-        ctx.lineTo(
-            -35,
-            -6
-        );
-
-        ctx.lineTo(
-            -30,
-            0
-        );
-
-        ctx.lineTo(
-            -35,
-            6
-        );
-
-        ctx.closePath();
-
-        ctx.fill();
-
-    }
-
-
-    ctx.restore();
-
-}
-
-
-/* =========================
    TRÁFICO
 ========================= */
 
-function createTraffic(){
+function spawnTraffic(){
 
-    const r=
-        roads[
-            Math.floor(
-                Math.random()*
-                roads.length
-            )
-        ];
+    const horizontal=
+        Math.random()>.5;
 
 
-    let x;
-    let y;
-    let angle;
+    if(horizontal){
+
+        const road=
+            [
+                roads[0],
+                roads[1],
+                roads[2]
+            ][
+                Math.floor(
+                    Math.random()*3
+                )
+            ];
 
 
-    if(r.w>r.h){
-
-        x=
-            r.x+
-            Math.random()*r.w;
-
-        y=
-            r.y+
-            r.h/2;
-
-        angle=
+        const direction=
             Math.random()>.5
-            ? 0
-            : Math.PI;
+            ? 1
+            : -1;
+
+
+        traffic.push({
+
+            x:
+                direction>0
+                ? -100
+                : WORLD_W+100,
+
+            y:
+                road.y+
+                (
+                    direction>0
+                    ? road.h*.35
+                    : road.h*.65
+                ),
+
+            angle:
+                direction>0
+                ? 0
+                : Math.PI,
+
+            speed:
+                1.7+
+                Math.random()*2.2,
+
+            color:
+                trafficColors[
+                    Math.floor(
+                        Math.random()*
+                        trafficColors.length
+                    )
+                ],
+
+            width:30,
+            height:55
+
+        });
 
     }else{
 
-        x=
-            r.x+
-            r.w/2;
+        const road=
+            [
+                roads[3],
+                roads[4],
+                roads[5],
+                roads[6]
+            ][
+                Math.floor(
+                    Math.random()*4
+                )
+            ];
 
-        y=
-            r.y+
-            Math.random()*r.h;
 
-        angle=
+        const direction=
             Math.random()>.5
-            ? Math.PI/2
-            : -Math.PI/2;
+            ? 1
+            : -1;
+
+
+        traffic.push({
+
+            x:
+                road.x+
+                (
+                    direction>0
+                    ? road.w*.35
+                    : road.w*.65
+                ),
+
+            y:
+                direction>0
+                ? -100
+                : WORLD_H+100,
+
+            angle:
+                direction>0
+                ? Math.PI/2
+                : -Math.PI/2,
+
+            speed:
+                1.7+
+                Math.random()*2.2,
+
+            color:
+                trafficColors[
+                    Math.floor(
+                        Math.random()*
+                        trafficColors.length
+                    )
+                ],
+
+            width:30,
+            height:55
+
+        });
 
     }
 
-
-    traffic.push({
-
-        x:x,
-        y:y,
-
-        angle:angle,
-
-        speed:
-            1+
-            Math.random()*1.5,
-
-        color:[
-            "#e74c3c",
-            "#3498db",
-            "#f1c40f",
-            "#9b59b6"
-        ][
-            Math.floor(
-                Math.random()*4
-            )
-        ]
-
-    });
-
 }
 
+
+/* =========================
+   ACTUALIZAR TRÁFICO
+========================= */
 
 function updateTraffic(){
 
@@ -2226,9 +1614,11 @@ function updateTraffic(){
         trafficTimer<=0
     ){
 
-        createTraffic();
+        spawnTraffic();
 
-        trafficTimer=90;
+        trafficTimer=
+            45+
+            Math.random()*45;
 
     }
 
@@ -2251,14 +1641,1308 @@ function updateTraffic(){
 
 
     traffic=
-        traffic.filter(t=>
-
-            t.x>-100 &&
-            t.x<WORLD_W+100 &&
-            t.y>-100 &&
-            t.y<WORLD_H+100
-
+        traffic.filter(
+            t=>
+                t.x>-150 &&
+                t.x<WORLD_W+150 &&
+                t.y>-150 &&
+                t.y<WORLD_H+150
         );
+
+
+    if(
+        player.invincible>0
+    ){
+
+        player.invincible--;
+
+    }
+
+
+    /*
+        CHOQUE
+    */
+
+    for(
+        const t of traffic
+    ){
+
+        if(
+            dist(
+                player.x,
+                player.y,
+                t.x,
+                t.y
+            )<38
+        ){
+
+            if(
+                player.invincible<=0
+            ){
+
+                crashWithCar(t);
+
+            }
+
+        }
+
+    }
+
+}
+
+
+/* =========================
+   CHOQUE
+========================= */
+
+function crashWithCar(car){
+
+    player.invincible=70;
+
+    player.health-=35;
+
+    player.speed*=-.55;
+
+    player.x+=
+        Math.cos(
+            car.angle+
+            Math.PI/2
+        )*20;
+
+    player.y+=
+        Math.sin(
+            car.angle+
+            Math.PI/2
+        )*20;
+
+
+    money=
+        Math.max(
+            0,
+            money-5
+        );
+
+
+    createParticles(
+        player.x,
+        player.y,
+        25,
+        "#ff6347"
+    );
+
+
+    toast(
+        "💥 ¡CHOCASTE! -$5"
+    );
+
+
+    if(
+        player.health<=0
+    ){
+
+        endGame();
+
+    }
+
+}
+
+
+/* =========================
+   EFECTO DE CHOQUE
+========================= */
+
+function crashEffect(){
+
+    createParticles(
+        player.x,
+        player.y,
+        8,
+        "#c9c9c9"
+    );
+
+}
+
+
+/* =========================
+   PERSONAS
+========================= */
+
+function updatePeople(){
+
+    people.forEach(p=>{
+
+        p.phase+=.04;
+
+        p.x+=
+            Math.cos(
+                p.angle
+            )*
+            p.speed;
+
+        p.y+=
+            Math.sin(
+                p.angle
+            )*
+            p.speed;
+
+
+        if(
+            p.x<20 ||
+            p.x>WORLD_W-20 ||
+            p.y<20 ||
+            p.y>WORLD_H-20
+        ){
+
+            p.angle+=Math.PI;
+
+        }
+
+    });
+
+}
+
+
+/* =========================
+   MISIÓN
+========================= */
+
+function checkMission(){
+
+    if(!mission)
+        return;
+
+
+    const target=
+        mission.state==="pickup"
+        ? mission.store
+        : mission.house;
+
+
+    if(
+        dist(
+            player.x,
+            player.y,
+            target.x,
+            target.y
+        )<70
+    ){
+
+        if(
+            mission.state==="pickup"
+        ){
+
+            mission.state=
+                "delivery";
+
+            missionTime=90;
+
+            updateMission();
+
+            toast(
+                "📦 Pedido recogido"
+            );
+
+        }else{
+
+            const reward=
+                mission.reward+
+                Math.floor(
+                    missionTime*.45
+                );
+
+
+            money+=reward;
+
+            deliveries++;
+
+
+            createParticles(
+                player.x,
+                player.y,
+                30,
+                "#ffd447"
+            );
+
+
+            toast(
+                "💰 Entrega completada +$"+
+                reward
+            );
+
+
+            mission=null;
+
+
+            setTimeout(
+                ()=>{
+                    if(running)
+                        newMission();
+                },
+                650
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================
+   CÁMARA
+========================= */
+
+function updateCamera(){
+
+    camera.x=
+        player.x-
+        W/2;
+
+    camera.y=
+        player.y-
+        H/2;
+
+
+    camera.x=
+        clamp(
+            camera.x,
+            0,
+            WORLD_W-W
+        );
+
+    camera.y=
+        clamp(
+            camera.y,
+            0,
+            WORLD_H-H
+        );
+
+}
+
+
+/* =========================
+   DIBUJAR TERRENO
+========================= */
+
+function drawWorld(){
+
+    ctx.fillStyle="#477247";
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    ctx.save();
+
+    ctx.translate(
+        -camera.x,
+        -camera.y
+    );
+
+
+    /*
+        calles
+    */
+
+    roads.forEach(r=>{
+
+        ctx.fillStyle="#44484a";
+
+        ctx.fillRect(
+            r.x,
+            r.y,
+            r.w,
+            r.h
+        );
+
+
+        /*
+            Banquetas
+        */
+
+        ctx.fillStyle="#aaa89d";
+
+        if(r.w>r.h){
+
+            ctx.fillRect(
+                r.x,
+                r.y,
+                r.w,
+                10
+            );
+
+            ctx.fillRect(
+                r.x,
+                r.y+r.h-10,
+                r.w,
+                10
+            );
+
+        }else{
+
+            ctx.fillRect(
+                r.x,
+                r.y,
+                10,
+                r.h
+            );
+
+            ctx.fillRect(
+                r.x+r.w-10,
+                r.y,
+                10,
+                r.h
+            );
+
+        }
+
+
+        /*
+            línea central
+        */
+
+        ctx.fillStyle="#d0c98e";
+
+
+        if(r.w>r.h){
+
+            for(
+                let x=r.x;
+                x<r.x+r.w;
+                x+=75
+            ){
+
+                ctx.fillRect(
+                    x,
+                    r.y+r.h/2-2,
+                    38,
+                    4
+                );
+
+            }
+
+        }else{
+
+            for(
+                let y=r.y;
+                y<r.y+r.h;
+                y+=75
+            ){
+
+                ctx.fillRect(
+                    r.x+r.w/2-2,
+                    y,
+                    4,
+                    38
+                );
+
+            }
+
+        }
+
+    });
+
+
+    /*
+        CASAS
+    */
+
+    buildings.forEach(
+        drawHouse
+    );
+
+
+    /*
+        NEGOCIOS
+    */
+
+    stores.forEach(
+        drawStore
+    );
+
+
+    /*
+        CASAS DESTINO
+    */
+
+    houses.forEach(
+        drawDestinationHouse
+    );
+
+
+    /*
+        PERSONAS
+    */
+
+    people.forEach(
+        drawPerson
+    );
+
+
+    /*
+        TRÁFICO
+    */
+
+    traffic.forEach(
+        drawCar
+    );
+
+
+    /*
+        DESTINO
+    */
+
+    drawMissionMarker();
+
+
+    /*
+        MOTO
+    */
+
+    drawMotorcycle();
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   CASA VISTA SUPERIOR
+========================= */
+
+function drawHouse(b){
+
+    /*
+        patio
+    */
+
+    ctx.fillStyle="#739064";
+
+    ctx.fillRect(
+        b.x-10,
+        b.y-10,
+        b.w+20,
+        b.h+20
+    );
+
+
+    /*
+        sombra
+    */
+
+    ctx.fillStyle=
+        "rgba(0,0,0,.22)";
+
+    ctx.fillRect(
+        b.x+6,
+        b.y+7,
+        b.w,
+        b.h
+    );
+
+
+    /*
+        losa
+    */
+
+    ctx.fillStyle=b.wall;
+
+    ctx.fillRect(
+        b.x,
+        b.y,
+        b.w,
+        b.h
+    );
+
+
+    /*
+        techo
+    */
+
+    ctx.fillStyle=b.roof;
+
+    ctx.fillRect(
+        b.x+4,
+        b.y+4,
+        b.w-8,
+        b.h-8
+    );
+
+
+    /*
+        división del techo
+    */
+
+    ctx.strokeStyle=
+        "rgba(255,255,255,.15)";
+
+    ctx.lineWidth=2;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        b.x+b.w/2,
+        b.y+8
+    );
+
+    ctx.lineTo(
+        b.x+b.w/2,
+        b.y+b.h-8
+    );
+
+    ctx.stroke();
+
+
+    /*
+        tinaco
+    */
+
+    if(
+        Math.random()<.02
+    ){
+        ctx.fillStyle="#222";
+
+        ctx.fillRect(
+            b.x+12,
+            b.y+12,
+            14,
+            14
+        );
+    }
+
+
+    /*
+        puerta
+    */
+
+    ctx.fillStyle="#5b402e";
+
+    ctx.fillRect(
+        b.x+b.w/2-6,
+        b.y+b.h-4,
+        12,
+        7
+    );
+
+}
+
+
+/* =========================
+   TIENDA
+========================= */
+
+function drawStore(s){
+
+    ctx.fillStyle="#f1b63f";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        s.x,
+        s.y,
+        31,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    ctx.fillStyle="#563d1a";
+
+    ctx.font=
+        "bold 10px Arial";
+
+    ctx.textAlign="center";
+
+    ctx.fillText(
+        "TIENDA",
+        s.x,
+        s.y+4
+    );
+
+}
+
+
+/* =========================
+   CASA DESTINO
+========================= */
+
+function drawDestinationHouse(h){
+
+    ctx.fillStyle=
+        "rgba(255,255,255,.18)";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        h.x,
+        h.y,
+        27,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    ctx.fillStyle="#e6e1cf";
+
+    ctx.fillRect(
+        h.x-16,
+        h.y-13,
+        32,
+        26
+    );
+
+
+    ctx.fillStyle="#8e5546";
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        h.x-19,
+        h.y-13
+    );
+
+    ctx.lineTo(
+        h.x,
+        h.y-28
+    );
+
+    ctx.lineTo(
+        h.x+19,
+        h.y-13
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+}
+
+
+/* =========================
+   PERSONA VISTA SUPERIOR
+========================= */
+
+function drawPerson(p){
+
+    ctx.save();
+
+    ctx.translate(
+        p.x,
+        p.y
+    );
+
+    ctx.rotate(
+        p.angle
+    );
+
+
+    /*
+        sombra
+    */
+
+    ctx.fillStyle=
+        "rgba(0,0,0,.25)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        3,
+        5,
+        3,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /*
+        cabeza
+    */
+
+    ctx.fillStyle="#e4b083";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        -5,
+        4,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /*
+        cuerpo
+    */
+
+    ctx.fillStyle="#3f78b5";
+
+    ctx.fillRect(
+        -4,
+        0,
+        8,
+        9
+    );
+
+
+    /*
+        piernas
+    */
+
+    ctx.strokeStyle="#20252b";
+
+    ctx.lineWidth=2;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        -2,
+        9
+    );
+
+    ctx.lineTo(
+        -3,
+        14
+    );
+
+    ctx.moveTo(
+        2,
+        9
+    );
+
+    ctx.lineTo(
+        3,
+        14
+    );
+
+    ctx.stroke();
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   AUTO VISTA SUPERIOR
+========================= */
+
+function drawCar(c){
+
+    ctx.save();
+
+    ctx.translate(
+        c.x,
+        c.y
+    );
+
+    ctx.rotate(
+        c.angle
+    );
+
+
+    /*
+        sombra
+    */
+
+    ctx.fillStyle=
+        "rgba(0,0,0,.32)";
+
+    roundRect(
+        -18,
+        -29,
+        36,
+        58,
+        7
+    );
+
+    ctx.fill();
+
+
+    /*
+        carrocería
+    */
+
+    ctx.fillStyle=c.color;
+
+    roundRect(
+        -15,
+        -28,
+        30,
+        56,
+        7
+    );
+
+    ctx.fill();
+
+
+    /*
+        cofre
+    */
+
+    ctx.fillStyle=
+        "rgba(255,255,255,.13)";
+
+    ctx.fillRect(
+        -10,
+        -23,
+        20,
+        10
+    );
+
+
+    /*
+        ventanas
+    */
+
+    ctx.fillStyle="#172a35";
+
+    roundRect(
+        -10,
+        -9,
+        20,
+        20,
+        4
+    );
+
+    ctx.fill();
+
+
+    /*
+        separación ventanas
+    */
+
+    ctx.strokeStyle=
+        "rgba(255,255,255,.25)";
+
+    ctx.lineWidth=2;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        0,
+        -9
+    );
+
+    ctx.lineTo(
+        0,
+        11
+    );
+
+    ctx.stroke();
+
+
+    /*
+        faros
+    */
+
+    ctx.fillStyle="#fff3a0";
+
+    ctx.fillRect(
+        -11,
+        -27,
+        7,
+        4
+    );
+
+    ctx.fillRect(
+        4,
+        -27,
+        7,
+        4
+    );
+
+
+    /*
+        calaveras
+    */
+
+    ctx.fillStyle="#e83f3f";
+
+    ctx.fillRect(
+        -11,
+        23,
+        7,
+        4
+    );
+
+    ctx.fillRect(
+        4,
+        23,
+        7,
+        4
+    );
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   MOTOCICLETA
+========================= */
+
+function drawMotorcycle(){
+
+    ctx.save();
+
+    ctx.translate(
+        player.x,
+        player.y
+    );
+
+    ctx.rotate(
+        player.angle
+    );
+
+
+    /*
+        invulnerabilidad
+    */
+
+    if(
+        player.invincible>0 &&
+        Math.floor(
+            player.invincible/5
+        )%2===0
+    ){
+
+        ctx.globalAlpha=.45;
+
+    }
+
+
+    /*
+        sombra
+    */
+
+    ctx.fillStyle=
+        "rgba(0,0,0,.35)";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        4,
+        22,
+        9,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /*
+        rueda trasera
+    */
+
+    ctx.fillStyle="#111";
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        -16,
+        0,
+        6,
+        11,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /*
+        rueda delantera
+    */
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        17,
+        0,
+        6,
+        11,
+        0,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /*
+        cuerpo
+    */
+
+    ctx.fillStyle=
+        player.boost
+        ? "#ffd447"
+        : "#25d579";
+
+    roundRect(
+        -15,
+        -8,
+        31,
+        16,
+        7
+    );
+
+    ctx.fill();
+
+
+    /*
+        asiento
+    */
+
+    ctx.fillStyle="#171b1c";
+
+    roundRect(
+        -9,
+        -6,
+        18,
+        8,
+        4
+    );
+
+    ctx.fill();
+
+
+    /*
+        conductor
+    */
+
+    ctx.fillStyle="#1c2225";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        -2,
+        -10,
+        7,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /*
+        casco
+    */
+
+    ctx.fillStyle="#28d47d";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        -2,
+        -12,
+        6,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /*
+        caja de reparto
+    */
+
+    ctx.fillStyle="#d98d35";
+
+    ctx.fillRect(
+        -11,
+        -21,
+        18,
+        12
+    );
+
+
+    ctx.fillStyle="#f4bd68";
+
+    ctx.fillRect(
+        -9,
+        -19,
+        14,
+        2
+    );
+
+
+    /*
+        manubrio
+    */
+
+    ctx.strokeStyle="#202426";
+
+    ctx.lineWidth=3;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        12,
+        -8
+    );
+
+    ctx.lineTo(
+        23,
+        -11
+    );
+
+    ctx.moveTo(
+        12,
+        8
+    );
+
+    ctx.lineTo(
+        23,
+        11
+    );
+
+    ctx.stroke();
+
+
+    /*
+        faro
+    */
+
+    ctx.fillStyle="#fff5aa";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        20,
+        0,
+        4,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    /*
+        turbo
+    */
+
+    if(player.boost){
+
+        ctx.fillStyle="#ff8035";
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            -20,
+            0
+        );
+
+        ctx.lineTo(
+            -40,
+            -8
+        );
+
+        ctx.lineTo(
+            -33,
+            0
+        );
+
+        ctx.lineTo(
+            -40,
+            8
+        );
+
+        ctx.closePath();
+
+        ctx.fill();
+
+    }
+
+
+    ctx.restore();
+
+}
+
+
+/* =========================
+   MARCADOR
+========================= */
+
+function drawMissionMarker(){
+
+    if(!mission)
+        return;
+
+
+    const target=
+        mission.state==="pickup"
+        ? mission.store
+        : mission.house;
+
+
+    const pulse=
+        38+
+        Math.sin(
+            Date.now()/180
+        )*7;
+
+
+    ctx.strokeStyle=
+        mission.state==="pickup"
+        ? "#ffd447"
+        : "#ff8248";
+
+    ctx.lineWidth=4;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        target.x,
+        target.y,
+        pulse,
+        0,
+        Math.PI*2
+    );
+
+    ctx.stroke();
+
+
+    ctx.fillStyle=
+        mission.state==="pickup"
+        ? "#ffd447"
+        : "#ff8248";
+
+    ctx.font=
+        "bold 12px Arial";
+
+    ctx.textAlign="center";
+
+    ctx.fillText(
+        mission.state==="pickup"
+        ? "RECOGER"
+        : "ENTREGAR",
+        target.x,
+        target.y-45
+    );
 
 }
 
@@ -2270,7 +2954,8 @@ function updateTraffic(){
 function createParticles(
     x,
     y,
-    amount
+    amount,
+    color="#ffd447"
 ){
 
     for(
@@ -2281,19 +2966,20 @@ function createParticles(
 
         particles.push({
 
-            x:x,
-
-            y:y,
+            x,
+            y,
 
             vx:
-                (Math.random()-.5)*4,
+                (Math.random()-.5)*5,
 
             vy:
-                (Math.random()-.5)*4,
+                (Math.random()-.5)*5,
 
             life:
-                30+
-                Math.random()*30
+                25+
+                Math.random()*30,
+
+            color
 
         });
 
@@ -2338,9 +3024,9 @@ function drawParticles(){
     particles.forEach(p=>{
 
         ctx.globalAlpha=
-            p.life/60;
+            p.life/55;
 
-        ctx.fillStyle="#ffd447";
+        ctx.fillStyle=p.color;
 
         ctx.fillRect(
             p.x,
@@ -2368,31 +3054,27 @@ function drawMiniMap(){
     miniCtx.clearRect(
         0,
         0,
-        120,
-        100
+        145,
+        110
     );
 
 
     const sx=
-        120/WORLD_W;
+        145/WORLD_W;
 
     const sy=
-        100/WORLD_H;
+        110/WORLD_H;
 
 
-    // terreno
-
-    miniCtx.fillStyle="#315333";
+    miniCtx.fillStyle="#416b42";
 
     miniCtx.fillRect(
         0,
         0,
-        120,
-        100
+        145,
+        110
     );
 
-
-    // calles
 
     miniCtx.fillStyle="#555";
 
@@ -2408,9 +3090,11 @@ function drawMiniMap(){
     });
 
 
-    // casas
+    /*
+        casas
+    */
 
-    miniCtx.fillStyle="#f5c34a";
+    miniCtx.fillStyle="#d6c08b";
 
     houses.forEach(h=>{
 
@@ -2424,7 +3108,27 @@ function drawMiniMap(){
     });
 
 
-    // misión
+    /*
+        tráfico
+    */
+
+    miniCtx.fillStyle="#e84b43";
+
+    traffic.forEach(t=>{
+
+        miniCtx.fillRect(
+            t.x*sx-1,
+            t.y*sy-1,
+            3,
+            3
+        );
+
+    });
+
+
+    /*
+        misión
+    */
 
     if(mission){
 
@@ -2437,7 +3141,7 @@ function drawMiniMap(){
         miniCtx.fillStyle=
             mission.state==="pickup"
             ? "#ffd447"
-            : "#ff7847";
+            : "#ff7546";
 
 
         miniCtx.beginPath();
@@ -2455,7 +3159,9 @@ function drawMiniMap(){
     }
 
 
-    // jugador
+    /*
+        jugador
+    */
 
     miniCtx.fillStyle="#29d47d";
 
@@ -2475,7 +3181,7 @@ function drawMiniMap(){
 
 
 /* =========================
-   ACTUALIZAR HUD
+   HUD
 ========================= */
 
 function updateHUD(){
@@ -2495,8 +3201,11 @@ function updateHUD(){
     document.getElementById(
         "time"
     ).textContent=
-        Math.ceil(
-            missionTime
+        Math.max(
+            0,
+            Math.ceil(
+                missionTime
+            )
         );
 
 }
@@ -2506,7 +3215,7 @@ function updateHUD(){
    LOOP
 ========================= */
 
-let lastTime=
+let previous=
     performance.now();
 
 
@@ -2515,10 +3224,10 @@ function loop(now){
     const delta=
         Math.min(
             50,
-            now-lastTime
+            now-previous
         );
 
-    lastTime=now;
+    previous=now;
 
 
     if(running){
@@ -2526,6 +3235,8 @@ function loop(now){
         updatePlayer();
 
         updateTraffic();
+
+        updatePeople();
 
         updateParticles();
 
@@ -2542,8 +3253,8 @@ function loop(now){
                 missionTime<=0
             ){
 
-                showToast(
-                    "⏱️ Se acabó el tiempo. Pedido cancelado."
+                toast(
+                    "⏱️ Se acabó el tiempo"
                 );
 
                 mission=null;
@@ -2551,9 +3262,9 @@ function loop(now){
                 setTimeout(
                     ()=>{
                         if(running)
-                            createMission();
+                            newMission();
                     },
-                    900
+                    700
                 );
 
             }
@@ -2599,90 +3310,74 @@ function startGame(){
 
     orders=0;
 
+    mission=null;
+
     particles=[];
 
     traffic=[];
 
-    trafficTimer=30;
+    player.x=300;
 
-
-    player.x=260;
-
-    player.y=480;
+    player.y=595;
 
     player.angle=0;
 
     player.speed=0;
 
+    player.health=100;
+
     player.boostEnergy=100;
 
+    player.invincible=0;
 
     camera.x=0;
 
     camera.y=0;
 
+    trafficTimer=20;
 
-    createMission();
-
-
-    document
-        .getElementById(
-            "startScreen"
-        )
-        .classList.add(
-            "hidden"
-        );
+    newMission();
 
 
     document
-        .getElementById(
-            "gameOver"
-        )
-        .classList.add(
-            "hidden"
-        );
+        .getElementById("startScreen")
+        .classList.add("hidden");
 
 
     document
-        .getElementById(
-            "hud"
-        )
-        .classList.remove(
-            "hidden"
-        );
+        .getElementById("gameOver")
+        .classList.add("hidden");
 
 
     document
-        .getElementById(
-            "mission"
-        )
-        .classList.remove(
-            "hidden"
-        );
+        .getElementById("hud")
+        .classList.remove("hidden");
 
 
     document
-        .getElementById(
-            "miniMap"
-        )
-        .classList.remove(
-            "hidden"
-        );
+        .getElementById("mission")
+        .classList.remove("hidden");
 
 
     document
-        .getElementById(
-            "controls"
-        )
-        .classList.remove(
-            "hidden"
-        );
+        .getElementById("miniMap")
+        .classList.remove("hidden");
+
+
+    document
+        .getElementById("joystick")
+        .classList.remove("hidden");
+
+
+    document
+        .getElementById("xbox")
+        .classList.remove("hidden");
 
 }
 
 
 /* =========================
-   TERMINAR
+   GAME OVER
 ========================= */
 
 function endGame(){
@@ -2697,7 +3392,7 @@ function endGame(){
         bestMoney=money;
 
         localStorage.setItem(
-            "motiMandaditosBest",
+            "motiCityBest",
             bestMoney
         );
 
@@ -2728,158 +3423,303 @@ function endGame(){
         orders;
 
 
-    document
-        .getElementById(
-            "hud"
-        )
-        .classList.add(
-            "hidden"
-        );
+    [
+        "hud",
+        "mission",
+        "miniMap",
+        "joystick",
+        "xbox"
+    ].forEach(id=>{
+
+        document
+            .getElementById(id)
+            .classList
+            .add("hidden");
+
+    });
 
 
     document
-        .getElementById(
-            "mission"
-        )
-        .classList.add(
-            "hidden"
-        );
-
-
-    document
-        .getElementById(
-            "miniMap"
-        )
-        .classList.add(
-            "hidden"
-        );
-
-
-    document
-        .getElementById(
-            "controls"
-        )
-        .classList.add(
-            "hidden"
-        );
-
-
-    document
-        .getElementById(
-            "gameOver"
-        )
-        .classList.remove(
-            "hidden"
-        );
+        .getElementById("gameOver")
+        .classList
+        .remove("hidden");
 
 }
 
 
 /* =========================
-   BOTONES
+   JOYSTICK
 ========================= */
 
-document
-    .getElementById(
-        "startBtn"
-    )
-    .addEventListener(
-        "click",
-        startGame
+const joystick=
+    document.getElementById(
+        "joystick"
     );
 
-
-document
-    .getElementById(
-        "restartBtn"
-    )
-    .addEventListener(
-        "click",
-        startGame
+const stick=
+    document.getElementById(
+        "stick"
     );
+
+let joystickActive=false;
+
+
+function joystickMove(
+    e
+){
+
+    const rect=
+        joystick.getBoundingClientRect();
+
+
+    const cx=
+        rect.left+
+        rect.width/2;
+
+    const cy=
+        rect.top+
+        rect.height/2;
+
+
+    let dx=
+        e.clientX-cx;
+
+    let dy=
+        e.clientY-cy;
+
+
+    const max=
+        rect.width*.32;
+
+
+    const length=
+        Math.hypot(dx,dy);
+
+
+    if(length>max){
+
+        dx=
+            dx/length*max;
+
+        dy=
+            dy/length*max;
+
+    }
+
+
+    stick.style.transform=
+        `translate(
+            calc(-50% + ${dx}px),
+            calc(-50% + ${dy}px)
+        )`;
+
+
+    const nx=
+        dx/max;
+
+    const ny=
+        dy/max;
+
+
+    keys.left=
+        nx<-.25;
+
+    keys.right=
+        nx>.25;
+
+    keys.up=
+        ny<-.25;
+
+    keys.down=
+        ny>.35;
+
+}
+
+
+joystick.addEventListener(
+    "pointerdown",
+    e=>{
+
+        e.preventDefault();
+
+        joystickActive=true;
+
+        joystick.setPointerCapture(
+            e.pointerId
+        );
+
+        joystickMove(e);
+
+    }
+);
+
+
+joystick.addEventListener(
+    "pointermove",
+    e=>{
+
+        if(joystickActive)
+            joystickMove(e);
+
+    }
+);
+
+
+function joystickEnd(){
+
+    joystickActive=false;
+
+    keys.left=false;
+    keys.right=false;
+    keys.up=false;
+    keys.down=false;
+
+    stick.style.transform=
+        "translate(-50%,-50%)";
+
+}
+
+
+joystick.addEventListener(
+    "pointerup",
+    joystickEnd
+);
+
+joystick.addEventListener(
+    "pointercancel",
+    joystickEnd
+);
 
 
 /* =========================
-   CONTROLES TÁCTILES
+   BOTONES XBOX
 ========================= */
 
-function bindButton(
+
+/*
+    A = acelerar
+    B = frenar
+    X = bocina
+    Y = turbo
+*/
+
+
+function buttonHold(
     id,
-    key
+    down,
+    up
 ){
 
-    const el=
+    const btn=
         document.getElementById(
             id
         );
 
 
-    el.addEventListener(
+    btn.addEventListener(
         "pointerdown",
         e=>{
 
             e.preventDefault();
 
-            keys[key]=true;
+            down();
 
         }
     );
 
 
-    el.addEventListener(
+    btn.addEventListener(
         "pointerup",
         e=>{
 
             e.preventDefault();
 
-            keys[key]=false;
+            up();
 
         }
     );
 
 
-    el.addEventListener(
+    btn.addEventListener(
         "pointercancel",
-        ()=>{
-            keys[key]=false;
-        }
+        up
     );
 
 
-    el.addEventListener(
+    btn.addEventListener(
         "pointerleave",
-        ()=>{
-            keys[key]=false;
-        }
+        up
     );
 
 }
 
 
-bindButton(
-    "upBtn",
-    "up"
+buttonHold(
+    "btnA",
+    ()=>{
+        keys.up=true;
+    },
+    ()=>{
+        keys.up=false;
+    }
 );
 
-bindButton(
-    "downBtn",
-    "down"
+
+buttonHold(
+    "btnB",
+    ()=>{
+        keys.down=true;
+    },
+    ()=>{
+        keys.down=false;
+    }
 );
 
-bindButton(
-    "leftBtn",
-    "left"
+
+buttonHold(
+    "btnY",
+    ()=>{
+        keys.boost=true;
+    },
+    ()=>{
+        keys.boost=false;
+    }
 );
 
-bindButton(
-    "rightBtn",
-    "right"
-);
 
-bindButton(
-    "boostBtn",
-    "boost"
-);
+/*
+    BOCINA
+*/
+
+document
+    .getElementById("btnX")
+    .addEventListener(
+        "pointerdown",
+        ()=>{
+            horn();
+        }
+    );
+
+
+function horn(){
+
+    if(
+        Date.now()-
+        hornTimer<
+        500
+    )
+        return;
+
+
+    hornTimer=
+        Date.now();
+
+
+    toast(
+        "📣 ¡PÍÍÍÍ!"
+    );
+
+}
 
 
 /* =========================
@@ -2893,50 +3733,35 @@ document.addEventListener(
         if(
             e.key==="ArrowUp" ||
             e.key.toLowerCase()==="w"
-        ){
-
+        )
             keys.up=true;
-
-        }
 
 
         if(
             e.key==="ArrowDown" ||
             e.key.toLowerCase()==="s"
-        ){
-
+        )
             keys.down=true;
-
-        }
 
 
         if(
             e.key==="ArrowLeft" ||
             e.key.toLowerCase()==="a"
-        ){
-
+        )
             keys.left=true;
-
-        }
 
 
         if(
             e.key==="ArrowRight" ||
             e.key.toLowerCase()==="d"
-        ){
-
+        )
             keys.right=true;
-
-        }
 
 
         if(
             e.code==="Space"
-        ){
-
+        )
             keys.boost=true;
-
-        }
 
     }
 );
@@ -2949,57 +3774,62 @@ document.addEventListener(
         if(
             e.key==="ArrowUp" ||
             e.key.toLowerCase()==="w"
-        ){
-
+        )
             keys.up=false;
-
-        }
 
 
         if(
             e.key==="ArrowDown" ||
             e.key.toLowerCase()==="s"
-        ){
-
+        )
             keys.down=false;
-
-        }
 
 
         if(
             e.key==="ArrowLeft" ||
             e.key.toLowerCase()==="a"
-        ){
-
+        )
             keys.left=false;
-
-        }
 
 
         if(
             e.key==="ArrowRight" ||
             e.key.toLowerCase()==="d"
-        ){
-
+        )
             keys.right=false;
-
-        }
 
 
         if(
             e.code==="Space"
-        ){
-
+        )
             keys.boost=false;
-
-        }
 
     }
 );
 
 
 /* =========================
-   RECTÁNGULO REDONDEADO
+   BOTONES PRINCIPALES
+========================= */
+
+document
+    .getElementById("startBtn")
+    .addEventListener(
+        "click",
+        startGame
+    );
+
+
+document
+    .getElementById("restartBtn")
+    .addEventListener(
+        "click",
+        startGame
+    );
+
+
+/* =========================
+   ROUND RECT
 ========================= */
 
 function roundRect(
@@ -3052,11 +3882,6 @@ function roundRect(
     ctx.closePath();
 
 }
-
-
-/* =========================
-   INICIO
-========================= */
 
 </script>
 
