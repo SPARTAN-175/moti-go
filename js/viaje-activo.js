@@ -272,7 +272,7 @@ function escucharPedidoActivo(
 
 
                 // =====================================
-                // CARGAR ESTRUCTURA DEL PEDIDO
+                // CARGAR ESTRUCTURA
                 // =====================================
 
                 prepararDatosPedido();
@@ -341,7 +341,7 @@ function prepararDatosPedido() {
 
     /*
      * Si las tiendas vienen como objeto,
-     * intentamos convertirlas en arreglo.
+     * las convertimos a arreglo.
      */
 
     if (
@@ -370,10 +370,7 @@ function prepararDatosPedido() {
 
 
     /*
-     * Orden de tiendas.
-     *
-     * Si alguna tiene orden/ordenCompra,
-     * respetamos ese valor.
+     * Orden de las tiendas.
      */
 
     tiendasPedido.sort(
@@ -406,26 +403,37 @@ function prepararDatosPedido() {
 
 
     /*
-     * Intentamos conservar la tienda que ya
-     * estaba activa.
+     * Conservamos la tienda actual
+     * durante el proceso de compra.
      */
 
-    const estado =
-        viajeActual.estado;
+    const estadosCompra = [
+
+        "asignado",
+
+        "en_camino_tienda",
+
+        "en_compra"
+
+    ];
 
 
     if (
-        estado === "asignado" ||
-        estado === "en_camino"
+        estadosCompra.includes(
+            viajeActual.estado
+        )
     ) {
 
         indiceTiendaActual =
             Math.min(
+
                 indiceTiendaActual,
+
                 Math.max(
                     tiendasPedido.length - 1,
                     0
                 )
+
             );
 
     }
@@ -548,7 +556,7 @@ async function actualizarDatosVisuales() {
 
 
     // =====================================
-    // PRODUCTOS / TIENDAS
+    // PEDIDO
     // =====================================
 
     renderizarPedido();
@@ -621,18 +629,6 @@ function actualizarInterfaz() {
         );
 
 
-    const botonTexto =
-        document.getElementById(
-            "btnAccionTexto"
-        );
-
-
-    const botonIcono =
-        document.getElementById(
-            "btnAccionIcono"
-        );
-
-
     if (boton) {
 
         boton.disabled =
@@ -650,16 +646,16 @@ function actualizarInterfaz() {
 
 
         // =====================================
-        // ASIGNADO
+        // REPARTIDOR ASIGNADO
         // =====================================
 
         case "asignado":
 
             setEstadoVisual(
 
-                "Pedido asignado",
+                "Repartidor asignado",
 
-                "Revisa los productos y dirígete a la primera tienda.",
+                "Dirígete a la primera tienda para realizar la compra.",
 
                 "shopping_bag",
 
@@ -687,10 +683,10 @@ function actualizarInterfaz() {
 
 
         // =====================================
-        // EN CAMINO
+        // EN CAMINO A TIENDA
         // =====================================
 
-        case "en_camino":
+        case "en_camino_tienda":
 
             setEstadoVisual(
 
@@ -717,23 +713,23 @@ function actualizarInterfaz() {
 
 
             actualizarProgreso(
-                15
+                20
             );
 
             break;
 
 
         // =====================================
-        // ESPERANDO CLIENTE
+        // COMPRANDO
         // =====================================
 
-        case "esperando_cliente":
+        case "en_compra":
 
             setEstadoVisual(
 
-                "En la tienda",
+                "Comprando productos",
 
-                "Verifica los productos antes de continuar.",
+                `Verifica los productos en ${obtenerNombreTiendaActual()}.`,
 
                 "shopping_cart",
 
@@ -754,17 +750,54 @@ function actualizarInterfaz() {
 
 
             actualizarProgreso(
-                35
+                40
             );
 
             break;
 
 
         // =====================================
-        // EN ENTREGA
+        // PEDIDO LISTO
         // =====================================
 
-        case "en_entrega":
+        case "listo_entrega":
+
+            setEstadoVisual(
+
+                "Pedido listo",
+
+                "Todas las compras fueron verificadas. Ya puedes dirigirte al cliente.",
+
+                "inventory_2",
+
+                "estado-entrega"
+
+            );
+
+
+            setBoton(
+
+                "Ir al cliente",
+
+                "navigation",
+
+                "estado-entrega"
+
+            );
+
+
+            actualizarProgreso(
+                60
+            );
+
+            break;
+
+
+        // =====================================
+        // EN CAMINO AL CLIENTE
+        // =====================================
+
+        case "en_camino_cliente":
 
             setEstadoVisual(
 
@@ -791,8 +824,53 @@ function actualizarInterfaz() {
 
 
             actualizarProgreso(
-                75
+                80
             );
+
+            break;
+
+
+        // =====================================
+        // ENTREGANDO
+        // =====================================
+
+        case "entregando":
+
+            setEstadoVisual(
+
+                "Confirmando entrega",
+
+                "Solicita al cliente su código de entrega.",
+
+                "verified_user",
+
+                "estado-confirmacion"
+
+            );
+
+
+            setBoton(
+
+                "Confirmar entrega",
+
+                "verified",
+
+                "estado-confirmacion"
+
+            );
+
+
+            actualizarProgreso(
+                90
+            );
+
+
+            /*
+             * Mostramos automáticamente
+             * el panel del código.
+             */
+
+            mostrarConfirmacionEntrega();
 
             break;
 
@@ -882,7 +960,17 @@ function actualizarInterfaz() {
             break;
 
 
+        // =====================================
+        // DESCONOCIDO
+        // =====================================
+
         default:
+
+            console.warn(
+                "⚠️ MOTI GO: estado desconocido:",
+                estado
+            );
+
 
             setEstadoVisual(
 
@@ -1029,9 +1117,13 @@ function setBoton(
     if (boton) {
 
         boton.classList.remove(
+
             "estado-compra",
+
             "estado-entrega",
+
             "estado-confirmacion"
+
         );
 
 
@@ -1069,6 +1161,8 @@ function limpiarClasesEstado(
 
         "estado-entrega",
 
+        "estado-confirmacion",
+
         "estado-finalizado"
 
     );
@@ -1077,7 +1171,7 @@ function limpiarClasesEstado(
 
 
 // =====================================================
-// PROGRESO
+// PROGRESO VISUAL DEL REPARTIDOR
 // =====================================================
 
 function actualizarProgreso(
@@ -1125,8 +1219,11 @@ function actualizarProgreso(
             if (paso) {
 
                 paso.classList.remove(
+
                     "activo",
+
                     "completado"
+
                 );
 
             }
@@ -1156,7 +1253,7 @@ function actualizarProgreso(
     }
 
 
-    if (porcentaje >= 75) {
+    if (porcentaje >= 80) {
 
         marcarPaso(
             pasos,
@@ -1181,7 +1278,7 @@ function actualizarProgreso(
     }
 
 
-    if (porcentaje >= 35) {
+    if (porcentaje >= 40) {
 
         marcarPaso(
             pasos,
@@ -1363,18 +1460,28 @@ function renderizarPedido() {
 
                         ${
                             productos.length
+
                                 ? productos.map(
+
                                     (
                                         producto,
                                         productoIndice
                                     ) =>
+
                                         renderizarProducto(
+
                                             producto,
+
                                             tienda,
+
                                             indice,
+
                                             productoIndice
+
                                         )
+
                                 ).join("")
+
                                 : `
 
                                     <div class="pedido-cargando">
@@ -1419,10 +1526,6 @@ function obtenerProductosTienda(
     tienda,
     tiendaId
 ) {
-
-    /*
-     * Primero intentamos por referencia de tienda.
-     */
 
     const candidatos =
         productosPedido.filter(
@@ -1481,12 +1584,6 @@ function obtenerProductosTienda(
 
         );
 
-
-    /*
-     * Si el producto no trae tiendaId,
-     * pero la tienda contiene un arreglo de productos,
-     * lo utilizamos.
-     */
 
     if (
         candidatos.length === 0 &&
@@ -1608,11 +1705,13 @@ function renderizarProducto(
 
                 ${
                     precio > 0
+
                         ? "$" +
                           (
                               precio *
                               cantidad
                           ).toFixed(2)
+
                         : ""
                 }
 
@@ -1756,11 +1855,6 @@ async function cambiarDisponibilidadProducto(
             ? "no_disponible"
             : "disponible";
 
-
-    /*
-     * Buscamos el producto real dentro
-     * del arreglo original.
-     */
 
     const productoOriginalIndex =
         productosPedido.findIndex(
@@ -1983,17 +2077,51 @@ function actualizarResumenPedido() {
 
 
 // =====================================================
-// ACCIÓN PRINCIPAL
+// BOTÓN PRINCIPAL
 // =====================================================
 
-document
-    .getElementById(
+const botonAccion =
+    document.getElementById(
         "btnAccion"
-    )
-    .addEventListener(
-        "click",
-        ejecutarAccion
     );
+
+
+if (botonAccion) {
+
+    botonAccion.addEventListener(
+
+        "click",
+
+        async (event) => {
+
+            /*
+             * Cuando estamos en ENTREGANDO,
+             * el botón valida el código.
+             */
+
+            if (
+                viajeActual?.estado ===
+                "entregando"
+            ) {
+
+                event.stopImmediatePropagation();
+
+                await validarCodigoEntrega();
+
+                return;
+
+            }
+
+
+            await ejecutarAccion();
+
+        },
+
+        true
+
+    );
+
+}
 
 
 // =====================================================
@@ -2045,7 +2173,7 @@ async function ejecutarAccion() {
 
 
         // =====================================
-        // EN COMPRA → TERMINÓ DE REVISAR
+        // EN COMPRA
         // =====================================
 
         case "en_compra":
@@ -2071,7 +2199,7 @@ async function ejecutarAccion() {
 
             /*
              * Si hay otra tienda,
-             * avanzamos a ella.
+             * avanzamos hacia ella.
              */
 
             if (
@@ -2100,8 +2228,6 @@ async function ejecutarAccion() {
 
             /*
              * Ya terminamos todas las tiendas.
-             * Ahora el pedido está listo
-             * para dirigirse al cliente.
              */
 
             await cambiarEstado(
@@ -2138,7 +2264,7 @@ async function ejecutarAccion() {
 
 
         // =====================================
-        // ENTREGANDO → CONFIRMAR CÓDIGO
+        // ENTREGANDO
         // =====================================
 
         case "entregando":
@@ -2156,10 +2282,6 @@ async function ejecutarAccion() {
 
             return;
 
-
-        // =====================================
-        // ESTADO DESCONOCIDO
-        // =====================================
 
         default:
 
@@ -2562,7 +2684,7 @@ async function cargarMapa() {
 
 
     // =====================================
-    // DETERMINAR DESTINO
+    // DESTINO
     // =====================================
 
     let destinoPos =
@@ -2582,14 +2704,25 @@ async function cargarMapa() {
 
 
     /*
-     * Mientras estamos comprando,
-     * vamos a la tienda actual.
+     * Estos estados significan que
+     * el destino actual es una tienda.
      */
 
+    const estadosTienda = [
+
+        "asignado",
+
+        "en_camino_tienda",
+
+        "en_compra"
+
+    ];
+
+
     if (
-        viajeActual.estado === "asignado" ||
-        viajeActual.estado === "en_camino" ||
-        viajeActual.estado === "esperando_cliente"
+        estadosTienda.includes(
+            viajeActual.estado
+        )
     ) {
 
         const tienda =
@@ -2613,12 +2746,25 @@ async function cargarMapa() {
 
 
     /*
-     * Cuando terminamos las tiendas,
+     * Desde que terminamos las tiendas,
      * el destino pasa a ser el cliente.
      */
 
+    const estadosCliente = [
+
+        "listo_entrega",
+
+        "en_camino_cliente",
+
+        "entregando"
+
+    ];
+
+
     if (
-        viajeActual.estado === "en_entrega"
+        estadosCliente.includes(
+            viajeActual.estado
+        )
     ) {
 
         const ubicacion =
@@ -2642,12 +2788,15 @@ async function cargarMapa() {
 
             ];
 
+
             destinoIconActual =
                 clienteIcon;
+
 
             destinoTexto =
                 viajeActual.clienteNombre ||
                 "Cliente";
+
 
             tituloNavegacion =
                 "Entrega al cliente";
@@ -2664,7 +2813,7 @@ async function cargarMapa() {
 
 
     // =====================================
-    // SI NO HAY COORDENADAS
+    // SIN COORDENADAS
     // =====================================
 
     if (!destinoPos) {
@@ -2675,10 +2824,15 @@ async function cargarMapa() {
 
 
         actualizarNavegacion(
+
             tituloNavegacion,
+
             "navigation",
+
             "—",
+
             "—"
+
         );
 
 
@@ -2740,8 +2894,9 @@ async function cargarMapa() {
 
         tituloNavegacion,
 
-        viajeActual.estado ===
-            "en_entrega"
+        estadosCliente.includes(
+            viajeActual.estado
+        )
             ? "home"
             : "store",
 
@@ -2950,9 +3105,21 @@ function escucharMovimientoConductor() {
                     null;
 
 
+                const estadosCliente = [
+
+                    "listo_entrega",
+
+                    "en_camino_cliente",
+
+                    "entregando"
+
+                ];
+
+
                 if (
-                    viajeActual.estado ===
-                    "en_entrega"
+                    estadosCliente.includes(
+                        viajeActual.estado
+                    )
                 ) {
 
                     const ubicacion =
@@ -3148,9 +3315,11 @@ function dibujarRuta(
                         "navigation",
 
                     distanciaKm < 1
+
                         ? `${Math.round(
                             ruta.summary.totalDistance
                         )} m`
+
                         : `${distanciaKm.toFixed(
                             1
                         )} km`,
@@ -3235,8 +3404,11 @@ function mostrarConfirmacionEntrega() {
     if (boton) {
 
         boton.classList.remove(
+
             "estado-compra",
+
             "estado-entrega"
+
         );
 
         boton.classList.add(
@@ -3275,7 +3447,9 @@ function mostrarConfirmacionEntrega() {
 
         setTimeout(
             () => {
+
                 primerInput.focus();
+
             },
             100
         );
@@ -3371,7 +3545,7 @@ function prepararInputsCodigo() {
 
 
 // =====================================================
-// OBTENER CÓDIGO INGRESADO
+// OBTENER CÓDIGO
 // =====================================================
 
 function obtenerCodigoIngresado() {
@@ -3477,7 +3651,9 @@ function limpiarCodigo() {
 
     inputs.forEach(
         input => {
+
             input.value = "";
+
         }
     );
 
@@ -3770,62 +3946,6 @@ if (btnVolver) {
             }
 
         }
-
-    );
-
-}
-
-
-// =====================================================
-// BOTÓN PRINCIPAL — VALIDACIÓN ESPECIAL
-// =====================================================
-
-/*
- * Reemplazamos la función normal del botón
- * para que en estado en_entrega aparezca
- * el código de confirmación.
- */
-
-const botonAccion =
-    document.getElementById(
-        "btnAccion"
-    );
-
-
-if (botonAccion) {
-
-    botonAccion.addEventListener(
-
-        "click",
-
-        async (event) => {
-
-            /*
-             * Si el botón está en confirmación,
-             * validamos el código.
-             */
-
-            if (
-                viajeActual?.estado ===
-                "en_entrega" &&
-                !document
-                    .getElementById(
-                        "confirmacionEntrega"
-                    )
-                    ?.classList.contains(
-                        "oculto"
-                    )
-            ) {
-
-                event.stopImmediatePropagation();
-
-                await validarCodigoEntrega();
-
-            }
-
-        },
-
-        true
 
     );
 
