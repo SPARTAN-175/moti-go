@@ -7715,106 +7715,106 @@ function actualizarPanelSeguimientoPedido(
 
     const pasos = [
 
-        {
-            estados: [
-                "pendiente_asignacion",
-                "solicitud_repartidor",
-                "sin_repartidor"
-            ],
+    {
+        estados: [
 
-            titulo:
-                "Pedido recibido",
+            "pendiente_asignacion",
+            "solicitud_repartidor",
+            "sin_repartidor"
 
-            icono:
-                "receipt_long"
+        ],
 
-        },
+        titulo:
+            "Pedido recibido",
 
-        {
+        icono:
+            "receipt_long"
 
-            estados: [
-                "asignado"
-            ],
+    },
 
-            titulo:
-                "Repartidor asignado",
 
-            icono:
-                "two_wheeler"
+    {
+        estados: [
 
-        },
+            "asignado"
 
-        {
+        ],
 
-            estados: [
-                "en_compra"
-            ],
+        titulo:
+            "Repartidor asignado",
 
-            titulo:
-                "Comprando",
+        icono:
+            "two_wheeler"
 
-            icono:
-                "shopping_basket"
+    },
 
-        },
 
-        {
+    {
+        estados: [
 
-            estados: [
-                "listo_entrega"
-            ],
+            "en_camino_tienda",
+            "en_compra"
 
-            titulo:
-                "Pedido listo",
+        ],
 
-            icono:
-                "inventory_2"
+        titulo:
+            "Comprando",
 
-        },
+        icono:
+            "shopping_basket"
 
-        {
+    },
 
-            estados: [
-                "en_ruta"
-            ],
 
-            titulo:
-                "En camino",
+    {
+        estados: [
 
-            icono:
-                "delivery_dining"
+            "listo_entrega"
 
-        },
+        ],
 
-        {
+        titulo:
+            "Pedido listo",
 
-            estados: [
-                "entregando"
-            ],
+        icono:
+            "inventory_2"
 
-            titulo:
-                "Entregando",
+    },
 
-            icono:
-                "location_on"
 
-        },
+    {
+        estados: [
 
-        {
+            "en_camino_cliente",
+            "entregando"
 
-            estados: [
-                "entregado"
-            ],
+        ],
 
-            titulo:
-                "Entregado",
+        titulo:
+            "En camino",
 
-            icono:
-                "check_circle"
+        icono:
+            "delivery_dining"
 
-        }
+    },
 
-    ];
+
+    {
+        estados: [
+
+            "entregado"
+
+        ],
+
+        titulo:
+            "Entregado",
+
+        icono:
+            "check_circle"
+
+    }
+
+];
 
 
     let pasoActual =
