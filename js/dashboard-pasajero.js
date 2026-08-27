@@ -7322,15 +7322,15 @@ function abrirPedidoDesdeMisPedidos(
 
     "asignado",
 
-    "en_camino",
-    "esperando_cliente",
-    "en_entrega",
+    "en_camino_tienda",
 
-    "en_compra",
-    "listo_entrega",
-    "en_ruta",
-    "entregando"
+"en_compra",
 
+"listo_entrega",
+
+"en_camino_cliente",
+
+"entregando"
 ];
 
     if (
