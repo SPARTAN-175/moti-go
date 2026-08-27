@@ -6716,18 +6716,15 @@ const estadosPedidoActivo = [
 
     "asignado",
 
-    "en_camino",
+   "en_camino_tienda",
 
-    "esperando_cliente",
-    "en_entrega",
+"en_compra",
 
-    "en_compra",
+"listo_entrega",
 
-    "listo_entrega",
+"en_camino_cliente",
 
-    "en_ruta",
-
-    "entregando"
+"entregando"
 
 ];
 
