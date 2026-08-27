@@ -2025,30 +2025,30 @@ async function ejecutarAccion() {
         case "asignado":
 
             await cambiarEstado(
-                "en_camino"
+                "en_camino_tienda"
             );
 
             break;
 
 
         // =====================================
-        // EN CAMINO → LLEGÓ A TIENDA
+        // EN CAMINO A TIENDA → LLEGÓ
         // =====================================
 
-        case "en_camino":
+        case "en_camino_tienda":
 
             await cambiarEstado(
-                "esperando_cliente"
+                "en_compra"
             );
 
             break;
 
 
         // =====================================
-        // EN TIENDA → VERIFICAR
+        // EN COMPRA → TERMINÓ DE REVISAR
         // =====================================
 
-        case "esperando_cliente":
+        case "en_compra":
 
             if (
                 !todosLosProductosVerificados()
@@ -2089,7 +2089,7 @@ async function ejecutarAccion() {
 
 
                 await cambiarEstado(
-                    "en_camino"
+                    "en_camino_tienda"
                 );
 
 
@@ -2100,21 +2100,48 @@ async function ejecutarAccion() {
 
             /*
              * Ya terminamos todas las tiendas.
-             * Ahora vamos al cliente.
+             * Ahora el pedido está listo
+             * para dirigirse al cliente.
              */
 
             await cambiarEstado(
-                "en_entrega"
+                "listo_entrega"
             );
 
             break;
 
 
         // =====================================
-        // EN ENTREGA → LLEGÓ AL CLIENTE
+        // PEDIDO LISTO → IR AL CLIENTE
         // =====================================
 
-        case "en_entrega":
+        case "listo_entrega":
+
+            await cambiarEstado(
+                "en_camino_cliente"
+            );
+
+            break;
+
+
+        // =====================================
+        // EN CAMINO AL CLIENTE → LLEGÓ
+        // =====================================
+
+        case "en_camino_cliente":
+
+            await cambiarEstado(
+                "entregando"
+            );
+
+            break;
+
+
+        // =====================================
+        // ENTREGANDO → CONFIRMAR CÓDIGO
+        // =====================================
+
+        case "entregando":
 
             mostrarConfirmacionEntrega();
 
@@ -2129,6 +2156,10 @@ async function ejecutarAccion() {
 
             return;
 
+
+        // =====================================
+        // ESTADO DESCONOCIDO
+        // =====================================
 
         default:
 
