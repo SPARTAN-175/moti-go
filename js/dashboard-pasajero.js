@@ -9618,42 +9618,33 @@ function crearEstilosSeguimientoPedido() {
 
         .moti-progreso-scroll {
 
-            position:relative;
+    position:relative;
 
-            width:100%;
+    width:100%;
 
-            overflow-x:auto;
+    overflow:hidden;
 
-            overflow-y:hidden;
+    padding:
+        2px 0 8px;
 
-            padding:
-                2px 4px 8px;
-
-            scrollbar-width:none;
-
-        }
+}
 
 
-        .moti-progreso-scroll::-webkit-scrollbar {
+.moti-progreso-pasos {
 
-            display:none;
+    position:relative;
 
-        }
+    z-index:3;
 
+    width:100%;
 
-        .moti-progreso-pasos {
+    display:flex;
 
-            position:relative;
+    justify-content:space-between;
 
-            z-index:3;
+    align-items:flex-start;
 
-            min-width:690px;
-
-            display:flex;
-
-            justify-content:space-between;
-
-        }
+}
 
 
         .moti-progreso-linea-fondo {
@@ -9701,21 +9692,21 @@ function crearEstilosSeguimientoPedido() {
         }
 
 
-        .moti-progreso-paso {
+       .moti-progreso-paso {
 
-            width:88px;
+    flex:1;
 
-            display:flex;
+    min-width:0;
 
-            flex-direction:column;
+    display:flex;
 
-            align-items:center;
+    flex-direction:column;
 
-            text-align:center;
+    align-items:center;
 
-            flex-shrink:0;
+    text-align:center;
 
-        }
+}
 
 
         .moti-progreso-punto {
