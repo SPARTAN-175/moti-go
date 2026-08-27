@@ -5735,17 +5735,15 @@ async function iniciarEscuchaPedidoActivoCliente(
 
     "asignado",
 
-    "en_camino",
-    "esperando_cliente",
-    "en_entrega",
+    "en_camino_tienda",
 
-    "en_compra",
+"en_compra",
 
-    "listo_entrega",
+"listo_entrega",
 
-    "en_ruta",
+"en_camino_cliente",
 
-    "entregando"
+"entregando"
 
 ];
 
