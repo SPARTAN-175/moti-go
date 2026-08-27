@@ -9685,20 +9685,21 @@ function crearEstilosSeguimientoPedido() {
 
        .moti-progreso-paso {
 
-    flex:1;
+    flex: 1;
 
-    min-width:0;
+    min-width: 0;
 
-    display:flex;
+    display: flex;
 
-    flex-direction:column;
+    flex-direction: column;
 
-    align-items:center;
+    align-items: center;
 
-    text-align:center;
+    text-align: center;
+
+    padding: 0 2px;
 
 }
-
 
         .moti-progreso-punto {
 
