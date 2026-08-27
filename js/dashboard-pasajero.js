@@ -9701,6 +9701,30 @@ function crearEstilosSeguimientoPedido() {
 
 }
 
+.moti-progreso-paso > span {
+
+    display:block;
+
+    width:100%;
+
+    max-width:72px;
+
+    min-height:25px;
+
+    margin-top:7px;
+
+    font-size:10px;
+
+    line-height:1.25;
+
+    text-align:center;
+
+    white-space:normal;
+
+    overflow-wrap:break-word;
+
+}
+
         .moti-progreso-punto {
 
             width:38px;
