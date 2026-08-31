@@ -2876,6 +2876,22 @@ async function finalizarCompraTiendaActual() {
 
                         }
 
+                        if (
+    producto.inventarioProcesado === true
+) {
+
+    console.warn(
+        "⚠️ MOTI GO: producto ya procesado, no se volverá a descontar:",
+        producto.nombre ||
+        producto.productoNombre ||
+        producto.productoId
+    );
+
+
+    return producto;
+
+}
+
 
                         return {
 
