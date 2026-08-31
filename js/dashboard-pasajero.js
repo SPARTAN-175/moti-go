@@ -335,21 +335,90 @@ async function cargarContextoCliente() {
 
 }
 
+// =====================================================
+// DISTANCIA ENTRE DOS PUNTOS
+// =====================================================
+
+function calcularDistanciaKm(
+    lat1,
+    lon1,
+    lat2,
+    lon2
+) {
+
+    const R = 6371;
+
+    const dLat =
+        (
+            Number(lat2) -
+            Number(lat1)
+        ) *
+        Math.PI /
+        180;
+
+    const dLon =
+        (
+            Number(lon2) -
+            Number(lon1)
+        ) *
+        Math.PI /
+        180;
+
+
+    const a =
+        Math.sin(
+            dLat / 2
+        ) *
+        Math.sin(
+            dLat / 2
+        ) +
+
+        Math.cos(
+            Number(lat1) *
+            Math.PI /
+            180
+        ) *
+
+        Math.cos(
+            Number(lat2) *
+            Math.PI /
+            180
+        ) *
+
+        Math.sin(
+            dLon / 2
+        ) *
+        Math.sin(
+            dLon / 2
+        );
+
+
+    const c =
+        2 *
+        Math.atan2(
+            Math.sqrt(a),
+            Math.sqrt(
+                1 - a
+            )
+        );
+
+
+    return R * c;
+
+}
+
 
 // =====================================================
-// OBTENER TIENDAS DE LA ZONA DEL CLIENTE
+// CARGAR TIENDAS DISPONIBLES
 // =====================================================
 //
-// PRIORIDAD:
+// Las tiendas se ordenan por distancia al cliente.
 //
-// 1. localidadId
-// 2. compatibilidad temporal con municipio/localidad
-//
-// NO utilizamos las coordenadas del catálogo de
-// localidades para determinar la posición física.
-//
-// Las coordenadas reales del cliente continúan viniendo
-// del GPS.
+// IMPORTANTE:
+// - No se excluyen tiendas lejanas.
+// - La más cercana queda primero.
+// - El cliente puede elegir cualquier tienda.
+// - La distancia queda guardada en cada objeto.
 //
 // =====================================================
 
@@ -357,33 +426,22 @@ async function cargarTiendasDeLaZona(
     usuario
 ) {
 
-    let tiendasEncontradas = [];
-
-
-    // =================================================
-    // OPCIÓN PRINCIPAL: localidadId
-    // =================================================
-
-    if (
-        usuario.localidadId
-    ) {
+    try {
 
         console.log(
-            "📍 Buscando tiendas por localidadId:",
-            usuario.localidadId
+            "🏪 MOTI GO: buscando tiendas disponibles..."
         );
 
+
+        // =================================================
+        // OBTENER TODAS LAS TIENDAS
+        // =================================================
 
         const tiendasQuery =
             query(
                 collection(
                     db,
                     "tiendas"
-                ),
-                where(
-                    "localidadId",
-                    "==",
-                    usuario.localidadId
                 )
             );
 
@@ -392,6 +450,9 @@ async function cargarTiendasDeLaZona(
             await getDocs(
                 tiendasQuery
             );
+
+
+        let tiendasEncontradas = [];
 
 
         tiendasSnapshot.forEach(
@@ -407,166 +468,252 @@ async function cargarTiendasDeLaZona(
                 };
 
 
+                // =========================================
+                // SOLO TIENDAS ACTIVAS
+                // =========================================
+
                 if (
-                    tienda.activa !== false
+                    tienda.activa === false
                 ) {
 
-                    tiendasEncontradas.push(
-                        tienda
-                    );
+                    return;
 
                 }
 
-            }
-        );
-
-
-        console.log(
-            "🏪 Tiendas encontradas por localidadId:",
-            tiendasEncontradas.length
-        );
-
-
-        return tiendasEncontradas;
-
-    }
-
-
-    // =================================================
-    // COMPATIBILIDAD TEMPORAL
-    // =================================================
-    //
-    // Los registros antiguos todavía pueden no tener
-    // localidadId.
-    //
-    // En ese caso utilizamos municipio/localidad.
-    //
-    // Esta parte desaparecerá cuando todos los usuarios
-    // y tiendas nuevos utilicen localidadId.
-    //
-    // =================================================
-
-    console.warn(
-        "⚠️ El usuario todavía no tiene localidadId. Usando compatibilidad por municipio/localidad."
-    );
-
-
-    const municipioUsuario =
-        normalizarTexto(
-            usuario.municipio ||
-            ""
-        );
-
-
-    const localidadUsuario =
-        normalizarTexto(
-            usuario.localidad ||
-            ""
-        );
-
-
-    if (
-        !municipioUsuario
-    ) {
-
-        return [];
-
-    }
-
-
-    const tiendasQuery =
-        query(
-            collection(
-                db,
-                "tiendas"
-            ),
-            where(
-                "municipio",
-                "==",
-                usuario.municipio
-            )
-        );
-
-
-    const tiendasSnapshot =
-        await getDocs(
-            tiendasQuery
-        );
-
-
-    tiendasSnapshot.forEach(
-        docSnap => {
-
-            const tienda = {
-
-                id:
-                    docSnap.id,
-
-                ...docSnap.data()
-
-            };
-
-
-            if (
-                tienda.activa === false
-            ) {
-
-                return;
-
-            }
-
-
-            const municipioTienda =
-                normalizarTexto(
-                    tienda.municipio ||
-                    ""
-                );
-
-
-            const localidadTienda =
-                normalizarTexto(
-                    tienda.localidad ||
-                    ""
-                );
-
-
-            const mismoMunicipio =
-                municipioTienda ===
-                municipioUsuario;
-
-
-            const mismaLocalidad =
-                !localidadUsuario ||
-                !localidadTienda ||
-                localidadTienda ===
-                localidadUsuario;
-
-
-            if (
-                mismoMunicipio &&
-                mismaLocalidad
-            ) {
 
                 tiendasEncontradas.push(
                     tienda
                 );
 
             }
+        );
+
+
+        console.log(
+            "🏪 MOTI GO: tiendas activas encontradas:",
+            tiendasEncontradas.length
+        );
+
+
+        // =================================================
+        // ¿TENEMOS UBICACIÓN DEL CLIENTE?
+        // =================================================
+
+        const latCliente =
+            Number(
+                userLat
+            );
+
+
+        const lngCliente =
+            Number(
+                userLng
+            );
+
+
+        const ubicacionValida =
+            Number.isFinite(
+                latCliente
+            ) &&
+            Number.isFinite(
+                lngCliente
+            );
+
+
+        // =================================================
+        // CALCULAR DISTANCIA
+        // =================================================
+
+        tiendasEncontradas =
+            tiendasEncontradas.map(
+                tienda => {
+
+                    const latTienda =
+                        Number(
+                            tienda.latitud
+                        );
+
+
+                    const lngTienda =
+                        Number(
+                            tienda.longitud
+                        );
+
+
+                    const coordenadasValidas =
+                        Number.isFinite(
+                            latTienda
+                        ) &&
+                        Number.isFinite(
+                            lngTienda
+                        );
+
+
+                    let distanciaKm =
+                        null;
+
+
+                    if (
+                        ubicacionValida &&
+                        coordenadasValidas
+                    ) {
+
+                        distanciaKm =
+                            calcularDistanciaKm(
+                                latCliente,
+                                lngCliente,
+                                latTienda,
+                                lngTienda
+                            );
+
+                    }
+
+
+                    return {
+
+                        ...tienda,
+
+                        distanciaClienteKm:
+                            distanciaKm
+
+                    };
+
+                }
+            );
+
+
+        // =================================================
+        // ORDENAR POR DISTANCIA
+        // =================================================
+        //
+        // Las tiendas con coordenadas válidas
+        // aparecen primero.
+        //
+        // Después las que no tienen coordenadas.
+        //
+        // =================================================
+
+        tiendasEncontradas.sort(
+            (
+                tiendaA,
+                tiendaB
+            ) => {
+
+                const distanciaA =
+                    tiendaA.distanciaClienteKm;
+
+
+                const distanciaB =
+                    tiendaB.distanciaClienteKm;
+
+
+                // Ambas tienen distancia
+
+                if (
+                    distanciaA !== null &&
+                    distanciaB !== null
+                ) {
+
+                    return (
+                        distanciaA -
+                        distanciaB
+                    );
+
+                }
+
+
+                // A tiene distancia,
+                // B no
+
+                if (
+                    distanciaA !== null
+                ) {
+
+                    return -1;
+
+                }
+
+
+                // B tiene distancia,
+                // A no
+
+                if (
+                    distanciaB !== null
+                ) {
+
+                    return 1;
+
+                }
+
+
+                // Ninguna tiene distancia
+
+                return 0;
+
+            }
+        );
+
+
+        // =================================================
+        // MOSTRAR INFORMACIÓN
+        // =================================================
+
+        if (
+            ubicacionValida
+        ) {
+
+            console.log(
+                "📍 MOTI GO: ubicación del cliente:",
+                latCliente,
+                lngCliente
+            );
+
+
+            console.table(
+
+                tiendasEncontradas.map(
+                    tienda => ({
+
+                        tienda:
+                            tienda.nombre,
+
+                        distanciaKm:
+                            tienda.distanciaClienteKm
+
+                    })
+                )
+
+            );
 
         }
-    );
+        else {
+
+            console.warn(
+                "⚠️ MOTI GO: no hay ubicación GPS válida. Las tiendas se mostrarán sin ordenar por distancia."
+            );
+
+        }
 
 
-    console.log(
-        "🏪 Tiendas encontradas por compatibilidad:",
-        tiendasEncontradas.length
-    );
+        return tiendasEncontradas;
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "❌ MOTI GO: error cargando tiendas:",
+            error
+        );
 
 
-    return tiendasEncontradas;
+        return [];
+
+    }
 
 }
-
 
 // =====================================================
 // CARGAR CONTEXTO DE TIENDAS
@@ -712,9 +859,53 @@ async function cargarContextoTiendas() {
                     tienda.id;
 
 
-                option.textContent =
-                    tienda.nombre ||
-                    "Tienda";
+               const nombreTienda =
+    tienda.nombre ||
+    "Tienda";
+
+
+if (
+    tienda.distanciaClienteKm !== null &&
+    tienda.distanciaClienteKm !== undefined
+) {
+
+    const distancia =
+        tienda.distanciaClienteKm;
+
+
+    let textoDistancia;
+
+
+    if (
+        distancia < 1
+    ) {
+
+        textoDistancia =
+            `${Math.round(
+                distancia * 1000
+            )} m`;
+
+    }
+    else {
+
+        textoDistancia =
+            `${distancia.toFixed(
+                1
+            )} km`;
+
+    }
+
+
+    option.textContent =
+        `${nombreTienda} — ${textoDistancia}`;
+
+}
+else {
+
+    option.textContent =
+        nombreTienda;
+
+}
 
 
                 if (
