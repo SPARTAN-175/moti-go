@@ -2636,6 +2636,30 @@ console.log(
 );
 
 
+// =====================================================
+// LIMPIAR CARRITO
+// =====================================================
+//
+// El pedido ya fue creado correctamente y las
+// existencias ya quedaron reservadas.
+//
+// Ahora podemos vaciar el carrito local.
+// =====================================================
+
+localStorage.removeItem(
+    "motiCarrito"
+);
+
+
+pedidoCarrito =
+    {};
+
+
+console.log(
+    "🧹 MOTI GO: carrito limpiado después de crear el pedido."
+);
+    
+    
 console.log(
     "✅ MOTI GO: PEDIDO CREADO EN FIREBASE:",
     referenciaPedido.id
