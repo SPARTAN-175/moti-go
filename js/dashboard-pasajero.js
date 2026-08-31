@@ -2387,7 +2387,86 @@ function actualizarCantidadesVisibles() {
 
 }
 
+// =====================================================
+// LIMPIAR CARRITO MOTI GO
+// =====================================================
+//
+// Esta función puede ser llamada desde
+// moti-go-pedido.js después de crear correctamente
+// el pedido.
+//
+// Limpia:
+// - memoria
+// - localStorage
+// - barra "Mi mandado"
+// - cantidades visibles
+//
+// =====================================================
 
+window.limpiarCarritoMotiGo = function () {
+
+    console.log(
+        "🧹 MOTI GO: limpiando carrito después de confirmar pedido..."
+    );
+
+
+    // -----------------------------------------
+    // LIMPIAR MEMORIA
+    // -----------------------------------------
+
+    carrito =
+        {};
+
+
+    // -----------------------------------------
+    // LIMPIAR STORAGE
+    // -----------------------------------------
+
+    localStorage.removeItem(
+        "motiCarrito"
+    );
+
+
+    // -----------------------------------------
+    // ACTUALIZAR CONTROLES DE PRODUCTOS
+    // -----------------------------------------
+
+    actualizarCantidadesVisibles();
+
+
+    // -----------------------------------------
+    // ACTUALIZAR BARRA
+    // -----------------------------------------
+
+    actualizarCarrito();
+
+
+    // -----------------------------------------
+    // CERRAR PANEL DEL CARRITO
+    // -----------------------------------------
+
+    cerrarPanelCarrito();
+
+
+    // -----------------------------------------
+    // ACTUALIZAR PANEL SI EXISTE
+    // -----------------------------------------
+
+    if (
+        typeof actualizarPanelCarrito ===
+        "function"
+    ) {
+
+        actualizarPanelCarrito();
+
+    }
+
+
+    console.log(
+        "✅ MOTI GO: carrito completamente limpiado."
+    );
+
+};
 // =====================================================
 // ACTUALIZAR BARRA DEL CARRITO
 // =====================================================
@@ -4593,7 +4672,7 @@ function crearPanelCarrito() {
     );
 
 
-    // =================================================
+// =================================================
 // BOTÓN REVISAR PEDIDO
 // =================================================
 
@@ -4614,7 +4693,52 @@ if (confirmButton) {
                 carrito
             );
 
+const cantidadCarrito =
+    Object.values(
+        carrito
+    ).reduce(
+        (
+            total,
+            item
+        ) => {
 
+            if (
+                !item ||
+                !item.cantidad
+            ) {
+
+                return total;
+
+            }
+
+
+            return (
+                total +
+                Number(
+                    item.cantidad
+                )
+            );
+
+        },
+        0
+    );
+
+
+if (
+    cantidadCarrito <= 0
+) {
+
+    console.warn(
+        "🛒 MOTI GO: intento de enviar un carrito vacío."
+    );
+
+
+    window.limpiarCarritoMotiGo();
+
+
+    return;
+
+}
             // =================================================
             // ABRIR EL NUEVO MÓDULO DE PEDIDOS
             // =================================================
