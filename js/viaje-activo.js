@@ -2326,8 +2326,33 @@ async function ejecutarAccion() {
 
 function todosLosProductosVerificados() {
 
+    const tienda =
+        obtenerTiendaActual();
+
+
+    if (!tienda) {
+
+        return false;
+
+    }
+
+
+    const tiendaId =
+        tienda.id ||
+        tienda.tiendaId ||
+        tienda.idTienda ||
+        "";
+
+
+    const productos =
+        obtenerProductosTienda(
+            tienda,
+            tiendaId
+        );
+
+
     if (
-        productosPedido.length === 0
+        productos.length === 0
     ) {
 
         return true;
@@ -2335,7 +2360,7 @@ function todosLosProductosVerificados() {
     }
 
 
-    return productosPedido.every(
+    return productos.every(
 
         producto => {
 
@@ -2345,8 +2370,15 @@ function todosLosProductosVerificados() {
 
 
             return (
-                estado === "disponible" ||
-                estado === "no_disponible"
+
+                estado ===
+                    "disponible"
+
+                ||
+
+                estado ===
+                    "no_disponible"
+
             );
 
         }
@@ -2354,22 +2386,6 @@ function todosLosProductosVerificados() {
     );
 
 }
-
-// =====================================================
-// FINALIZAR COMPRA DE LA TIENDA ACTUAL
-// =====================================================
-//
-// Convierte la reserva en una salida real de inventario.
-//
-// disponible:
-//     existencia disminuye
-//     reservado disminuye
-//
-// no_disponible:
-//     existencia NO disminuye
-//     reservado disminuye
-//
-// Todo ocurre dentro de una transacción.
 // =====================================================
 
 async function finalizarCompraTiendaActual() {
@@ -2437,9 +2453,14 @@ async function finalizarCompraTiendaActual() {
     // =================================================
 
     const productosParaProcesar =
-        productos.map(
+    productos.filter(
 
-            producto => {
+        producto =>
+            producto.inventarioProcesado !== true
+
+    ).map(
+
+        producto => {
 
                 const productoId =
                     producto.productoId ||
@@ -2642,22 +2663,27 @@ async function finalizarCompraTiendaActual() {
 
                         return {
 
-                            ...productoPedido,
+    ...productoPedido,
 
-                            estado:
-                                productoProcesado
-                                    .cantidadComprada > 0
-                                    ? "comprado"
-                                    : "no_disponible",
+    estado:
+        productoProcesado
+            .cantidadComprada > 0
+            ? "comprado"
+            : "no_disponible",
 
-                            cantidadComprada:
-                                productoProcesado
-                                    .cantidadComprada,
+    estadoCompra:
+        productoProcesado.estado,
 
-                            actualizadoEn:
-                                new Date()
+    cantidadComprada:
+        productoProcesado.cantidadComprada,
 
-                        };
+    inventarioProcesado:
+        true,
+
+    actualizadoEn:
+        new Date()
+
+};
 
                     }
 
