@@ -2635,6 +2635,25 @@ console.log(
     referenciaPedido.id
 );
 
+    // =====================================================
+// LIMPIAR CARRITO DEL DASHBOARD
+// =====================================================
+
+if (
+    typeof window.limpiarCarritoMotiGo ===
+    "function"
+) {
+
+    window.limpiarCarritoMotiGo();
+
+}
+else {
+
+    console.warn(
+        "⚠️ MOTI GO: no se encontró la función para limpiar el carrito del dashboard."
+    );
+
+}
 
 // =====================================================
 // LIMPIAR CARRITO
