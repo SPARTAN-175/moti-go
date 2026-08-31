@@ -7,7 +7,9 @@ import {
     collection,
     addDoc,
     serverTimestamp,
-    getDocs
+    getDocs,
+    doc,
+    runTransaction
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 // =====================================================
@@ -1895,6 +1897,308 @@ async function ejecutarAsignacionInicialMotiGo(
 //
 // =====================================================
 
+
+
+// =====================================================
+// RESERVAR INVENTARIO DEL PEDIDO
+// =====================================================
+//
+// Reserva las unidades solicitadas utilizando una
+// transacción de Firestore.
+//
+// IMPORTANTE:
+//
+// existencia = inventario físico
+// reservado  = unidades apartadas para pedidos activos
+//
+// Disponible real:
+//
+// existencia - reservado
+//
+// Ejemplo:
+//
+// existencia: 20
+// reservado:  3
+// disponible: 17
+//
+// =====================================================
+
+async function reservarInventarioPedido(
+    transaction,
+    productosPedido
+) {
+
+    console.log(
+        "📦 MOTI GO: verificando inventario real..."
+    );
+
+
+    const inventarios = [];
+
+
+    // =================================================
+    // OBTENER REFERENCIAS
+    // =================================================
+
+    productosPedido.forEach(
+        producto => {
+
+            const inventarioId =
+                `${producto.tiendaId}_${producto.productoId}`;
+
+
+            const referencia =
+                doc(
+                    db,
+                    "inventarios",
+                    inventarioId
+                );
+
+
+            inventarios.push({
+
+                producto,
+
+                referencia
+
+            });
+
+        }
+    );
+
+
+    // =================================================
+    // LEER INVENTARIOS
+    // =================================================
+
+    const snapshots = [];
+
+
+    for (
+        const item
+        of inventarios
+    ) {
+
+        const snapshot =
+            await transaction.get(
+                item.referencia
+            );
+
+
+        snapshots.push({
+
+            ...item,
+
+            snapshot
+
+        });
+
+    }
+
+
+    // =================================================
+    // VALIDAR TODOS LOS PRODUCTOS
+    // =================================================
+
+    const problemas = [];
+
+
+    snapshots.forEach(
+        item => {
+
+            if (
+                !item.snapshot.exists()
+            ) {
+
+                problemas.push({
+
+                    producto:
+                        item.producto.nombre,
+
+                    solicitado:
+                        item.producto.cantidad,
+
+                    disponible:
+                        0,
+
+                    motivo:
+                        "Producto sin inventario."
+
+                });
+
+                return;
+
+            }
+
+
+            const datos =
+                item.snapshot.data();
+
+
+            const existencia =
+                Number(
+                    datos.existencia || 0
+                );
+
+
+            const reservado =
+                Number(
+                    datos.reservado || 0
+                );
+
+
+            const disponible =
+                Math.max(
+                    0,
+                    existencia -
+                    reservado
+                );
+
+
+            const solicitado =
+                Number(
+                    item.producto.cantidad
+                );
+
+
+            console.log(
+                "📦 Inventario:",
+                item.producto.nombre,
+                {
+                    existencia,
+                    reservado,
+                    disponible,
+                    solicitado
+                }
+            );
+
+
+            if (
+                datos.disponible === false ||
+                disponible <
+                solicitado
+            ) {
+
+                problemas.push({
+
+                    producto:
+                        item.producto.nombre,
+
+                    solicitado:
+                        solicitado,
+
+                    disponible:
+                        disponible,
+
+                    motivo:
+                        datos.disponible === false
+                            ? "Producto marcado como no disponible."
+                            : "Existencia insuficiente."
+
+                });
+
+            }
+
+        }
+    );
+
+
+    // =================================================
+    // SI HAY PROBLEMAS → CANCELAR TODO
+    // =================================================
+
+    if (
+        problemas.length > 0
+    ) {
+
+        console.warn(
+            "⚠️ MOTI GO: no se pudo reservar el pedido:",
+            problemas
+        );
+
+
+        const detalle =
+            problemas
+                .map(
+                    problema =>
+                        `• ${problema.producto}: ` +
+                        `solicitaste ${problema.solicitado}, ` +
+                        `disponibles ${problema.disponible}`
+                )
+                .join("\n");
+
+
+        throw new Error(
+            "INVENTARIO_INSUFICIENTE:" +
+            detalle
+        );
+
+    }
+
+
+    // =================================================
+    // RESERVAR
+    // =================================================
+
+    snapshots.forEach(
+        item => {
+
+            const datos =
+                item.snapshot.data();
+
+
+            const reservadoActual =
+                Number(
+                    datos.reservado || 0
+                );
+
+
+            const cantidadSolicitada =
+                Number(
+                    item.producto.cantidad
+                );
+
+
+            const nuevoReservado =
+                reservadoActual +
+                cantidadSolicitada;
+
+
+            transaction.update(
+
+                item.referencia,
+
+                {
+
+                    reservado:
+                        nuevoReservado,
+
+                    actualizadoEn:
+                        serverTimestamp()
+
+                }
+
+            );
+
+
+            console.log(
+                "🔒 MOTI GO: reservado:",
+                item.producto.nombre,
+                cantidadSolicitada,
+                "→ reservado total:",
+                nuevoReservado
+            );
+
+        }
+    );
+
+
+    console.log(
+        "✅ MOTI GO: inventario reservado correctamente."
+    );
+
+}
+
 async function prepararConfirmacionPedido() {
 
     cargarCarritoPedido();
@@ -2249,27 +2553,87 @@ try {
     );
 
 
-    const pedidoParaFirebase = {
+    // =====================================================
+// CREAR PEDIDO + RESERVAR INVENTARIO
+// =====================================================
+//
+// Todo ocurre dentro de una transacción.
+//
+// Si falla la reserva:
+//     NO se crea el pedido.
+//
+// Si falla la creación:
+//     NO queda la reserva aplicada.
+//
+// =====================================================
 
-        ...pedido,
-
-        creadoEn:
-            serverTimestamp(),
-
-        actualizadoEn:
-            serverTimestamp()
-
-    };
-
-
-    const referenciaPedido =
-    await addDoc(
+const referenciaPedido =
+    doc(
         collection(
             db,
             "pedidos"
-        ),
-        pedidoParaFirebase
+        )
     );
+
+
+const pedidoParaFirebase = {
+
+    ...pedido,
+
+    creadoEn:
+        serverTimestamp(),
+
+    actualizadoEn:
+        serverTimestamp(),
+
+    // =================================================
+    // INFORMACIÓN DE INVENTARIO
+    // =================================================
+
+    inventario: {
+
+        estado:
+            "reservado",
+
+        reservadoEn:
+            serverTimestamp()
+
+    }
+
+};
+
+
+await runTransaction(
+    db,
+    async transaction => {
+
+        // =============================================
+        // RESERVAR PRODUCTOS
+        // =============================================
+
+        await reservarInventarioPedido(
+            transaction,
+            productosPedido
+        );
+
+
+        // =============================================
+        // CREAR PEDIDO
+        // =============================================
+
+        transaction.set(
+            referenciaPedido,
+            pedidoParaFirebase
+        );
+
+    }
+);
+
+
+console.log(
+    "✅ MOTI GO: pedido creado y productos reservados:",
+    referenciaPedido.id
+);
 
 
 console.log(
@@ -2463,9 +2827,47 @@ catch (
     );
 
 
+    // =================================================
+    // INVENTARIO INSUFICIENTE
+    // =================================================
+
+    if (
+        String(
+            error?.message || ""
+        ).startsWith(
+            "INVENTARIO_INSUFICIENTE:"
+        )
+    ) {
+
+        const detalle =
+            String(
+                error.message
+            ).replace(
+                "INVENTARIO_INSUFICIENTE:",
+                ""
+            );
+
+
+        alert(
+            "Algunos productos ya no tienen suficiente existencia.\n\n" +
+            detalle +
+            "\n\nActualiza tu carrito e intenta nuevamente."
+        );
+
+
+        return;
+
+    }
+
+
+    // =================================================
+    // ERROR GENERAL
+    // =================================================
+
     alert(
         "No pudimos crear tu pedido. Intenta nuevamente."
     );
+
 
     return;
 
