@@ -2387,6 +2387,22 @@ function todosLosProductosVerificados() {
 
 }
 // =====================================================
+// FINALIZAR COMPRA DE LA TIENDA ACTUAL
+// =====================================================
+//
+// REGLA MOTI GO:
+//
+// ✅ Disponible:
+//    existencia -= cantidad solicitada
+//    reservado  -= cantidad solicitada
+//
+// ❌ No disponible:
+//    existencia no cambia
+//    reservado -= cantidad solicitada
+//
+// NO existen compras parciales.
+//
+// =====================================================
 
 async function finalizarCompraTiendaActual() {
 
@@ -2428,7 +2444,7 @@ async function finalizarCompraTiendaActual() {
     }
 
 
-    const productos =
+    const productosTienda =
         obtenerProductosTienda(
             tienda,
             tiendaId
@@ -2436,11 +2452,11 @@ async function finalizarCompraTiendaActual() {
 
 
     if (
-        productos.length === 0
+        productosTienda.length === 0
     ) {
 
-        console.warn(
-            "⚠️ MOTI GO: no hay productos para procesar en esta tienda."
+        console.log(
+            "ℹ️ MOTI GO: no hay productos para procesar en esta tienda."
         );
 
         return;
@@ -2452,121 +2468,86 @@ async function finalizarCompraTiendaActual() {
     // PREPARAR PRODUCTOS
     // =================================================
 
-    const productosParaProcesar =
-    productos.filter(
+    const productosProcesados =
+        productosTienda
+            .filter(
+                producto =>
+                    producto.inventarioProcesado !== true
+            )
+            .map(
+                producto => {
 
-        producto =>
-            producto.inventarioProcesado !== true
-
-    ).map(
-
-        producto => {
-
-                const productoId =
-                    producto.productoId ||
-                    producto.id;
-
-
-                const cantidadSolicitada =
-                    Number(
-                        producto.cantidad ??
-                        producto.qty ??
-                        producto.cantidadSolicitada ??
-                        1
-                    );
+                    const productoId =
+                        producto.productoId ||
+                        producto.id;
 
 
-                const estado =
-                    producto.estadoCompra ||
-                    producto.estado ||
-                    "pendiente";
+                    const cantidadSolicitada =
+                        Number(
+                            producto.cantidad ??
+                            producto.qty ??
+                            producto.cantidadSolicitada ??
+                            1
+                        );
 
 
-                const cantidadComprada =
-                    estado === "disponible"
-                        ? cantidadSolicitada
-                        : 0;
+                    const estado =
+                        producto.estadoCompra ||
+                        producto.estado ||
+                        "pendiente";
 
 
-                return {
+                    return {
 
-                    producto,
+                        productoId,
 
-                    productoId,
+                        cantidadSolicitada,
 
-                    cantidadSolicitada,
+                        estado,
 
-                    cantidadComprada,
+                        nombre:
+                            producto.nombre ||
+                            "Producto"
 
-                    estado
+                    };
 
-                };
-
-            }
-
-        );
+                }
+            );
 
 
     // =================================================
     // VALIDAR PRODUCTOS
     // =================================================
 
-    for (
-        const item
-        of productosParaProcesar
-    ) {
+    productosProcesados.forEach(
+        producto => {
 
-        if (
-            !item.productoId
-        ) {
+            if (
+                !producto.productoId
+            ) {
 
-            throw new Error(
-                `El producto "${item.producto.nombre || "Producto"}" no tiene productoId.`
-            );
+                throw new Error(
+                    `El producto "${producto.nombre}" no tiene productoId.`
+                );
+
+            }
+
+
+            if (
+                producto.estado !==
+                    "disponible" &&
+
+                producto.estado !==
+                    "no_disponible"
+            ) {
+
+                throw new Error(
+                    `El producto "${producto.nombre}" todavía no ha sido verificado.`
+                );
+
+            }
 
         }
-
-
-        if (
-            item.estado !== "disponible" &&
-            item.estado !== "no_disponible"
-        ) {
-
-            throw new Error(
-                `El producto "${item.producto.nombre || "Producto"}" todavía no está verificado.`
-            );
-
-        }
-
-    }
-
-
-    console.log(
-        "🛒 MOTI GO: finalizando compra de:",
-        obtenerNombreTiendaActual()
-    );
-
-
-    console.table(
-
-        productosParaProcesar.map(
-            item => ({
-
-                producto:
-                    item.producto.nombre,
-
-                solicitado:
-                    item.cantidadSolicitada,
-
-                comprado:
-                    item.cantidadComprada,
-
-                estado:
-                    item.estado
-
-            })
-        )
-
     );
 
 
@@ -2580,10 +2561,6 @@ async function finalizarCompraTiendaActual() {
 
         async transaction => {
 
-            // =========================================
-            // REFERENCIA DEL PEDIDO
-            // =========================================
-
             const pedidoRef =
                 doc(
                     db,
@@ -2591,10 +2568,6 @@ async function finalizarCompraTiendaActual() {
                     viajeId
                 );
 
-
-            // =========================================
-            // LEER PEDIDO ACTUAL
-            // =========================================
 
             const pedidoSnapshot =
                 await transaction.get(
@@ -2613,85 +2586,30 @@ async function finalizarCompraTiendaActual() {
             }
 
 
-            const pedidoActual =
+            const pedido =
                 pedidoSnapshot.data();
 
 
-            const productosActuales =
+            const productosPedido =
                 Array.isArray(
-                    pedidoActual.productos
+                    pedido.productos
                 )
-                    ? pedidoActual.productos
+                    ? pedido.productos
                     : [];
 
 
-            const productosActualizados =
-                productosActuales.map(
-
-                    productoPedido => {
-
-                        const productoProcesado =
-                            productosParaProcesar.find(
-
-                                item =>
-
-                                    String(
-                                        item.productoId
-                                    ) ===
-                                    String(
-                                        productoPedido.productoId
-                                    ) &&
-
-                                    String(
-                                        productoPedido.tiendaId
-                                    ) ===
-                                    String(
-                                        tiendaId
-                                    )
-
-                            );
-
-
-                        if (
-                            !productoProcesado
-                        ) {
-
-                            return productoPedido;
-
-                        }
-
-
-                        return {
-
-    ...productoPedido,
-
-    estado:
-        productoProcesado
-            .cantidadComprada > 0
-            ? "comprado"
-            : "no_disponible",
-
-    estadoCompra:
-        productoProcesado.estado,
-
-    cantidadComprada:
-        productoProcesado.cantidadComprada,
-
-    inventarioProcesado:
-        true,
-
-    actualizadoEn:
-        new Date()
-
-};
-
-                    }
-
-                );
-
-
             // =========================================
-            // LEER INVENTARIOS
+            // BUSCAR INVENTARIOS
+            // =========================================
+            //
+            // IMPORTANTE:
+            // Los documentos de inventarios NO se
+            // buscan por un ID compuesto.
+            //
+            // Se buscan mediante:
+            //
+            // tiendaId + productoId
+            //
             // =========================================
 
             const inventarios =
@@ -2700,7 +2618,7 @@ async function finalizarCompraTiendaActual() {
 
             for (
                 const item
-                of productosParaProcesar
+                of productosProcesados
             ) {
 
                 const inventarioId =
@@ -2726,7 +2644,7 @@ async function finalizarCompraTiendaActual() {
                 ) {
 
                     throw new Error(
-                        `No existe inventario para "${item.producto.nombre || "Producto"}".`
+                        `No se encontró el inventario de "${item.nombre}".`
                     );
 
                 }
@@ -2748,7 +2666,7 @@ async function finalizarCompraTiendaActual() {
 
 
             // =========================================
-            // ACTUALIZAR INVENTARIOS
+            // ACTUALIZAR INVENTARIO
             // =========================================
 
             inventarios.forEach(
@@ -2770,17 +2688,9 @@ async function finalizarCompraTiendaActual() {
                         );
 
 
-                    const cantidadComprada =
-                        item.cantidadComprada;
-
-
-                    // ---------------------------------
+                    // =================================
                     // SEGURIDAD
-                    // ---------------------------------
-                    //
-                    // La cantidad reservada debe cubrir
-                    // la cantidad solicitada.
-                    //
+                    // =================================
 
                     if (
                         reservado <
@@ -2788,101 +2698,200 @@ async function finalizarCompraTiendaActual() {
                     ) {
 
                         throw new Error(
-
-                            `La reserva de "${item.producto.nombre || "Producto"}" no coincide con la cantidad solicitada.`
-
+                            `La reserva de "${item.nombre}" no coincide con la cantidad solicitada.`
                         );
 
                     }
 
 
-                    // ---------------------------------
-                    // SEGURIDAD DE EXISTENCIA
-                    // ---------------------------------
+                    // =================================
+                    // PRODUCTO DISPONIBLE
+                    // =================================
 
                     if (
-                        existencia <
-                        cantidadComprada
+                        item.estado ===
+                        "disponible"
                     ) {
 
-                        throw new Error(
+                        if (
+                            existencia <
+                            item.cantidadSolicitada
+                        ) {
 
-                            `La existencia actual de "${item.producto.nombre || "Producto"}" no alcanza para registrar la compra.`
+                            throw new Error(
+                                `La existencia actual de "${item.nombre}" ya no es suficiente.`
+                            );
 
+                        }
+
+
+                        const nuevaExistencia =
+                            existencia -
+                            item.cantidadSolicitada;
+
+
+                        const nuevoReservado =
+                            reservado -
+                            item.cantidadSolicitada;
+
+
+                        transaction.update(
+
+                            item.referencia,
+
+                            {
+
+                                existencia:
+                                    nuevaExistencia,
+
+                                reservado:
+                                    nuevoReservado,
+
+                                disponible:
+                                    nuevaExistencia > 0,
+
+                                actualizadoEn:
+                                    serverTimestamp()
+
+                            }
+
+                        );
+
+
+                        console.log(
+                            "📦 MOTI GO: compra registrada:",
+                            item.nombre,
+                            {
+                                existenciaAntes:
+                                    existencia,
+
+                                cantidadComprada:
+                                    item.cantidadSolicitada,
+
+                                existenciaNueva:
+                                    nuevaExistencia,
+
+                                reservadoAntes:
+                                    reservado,
+
+                                reservadoNuevo:
+                                    nuevoReservado
+
+                            }
                         );
 
                     }
 
 
-                    const nuevaExistencia =
-                        existencia -
-                        cantidadComprada;
+                    // =================================
+                    // PRODUCTO NO DISPONIBLE
+                    // =================================
+
+                    else {
+
+                        const nuevoReservado =
+                            Math.max(
+                                0,
+
+                                reservado -
+                                item.cantidadSolicitada
+                            );
 
 
-                    const nuevoReservado =
-                        Math.max(
+                        transaction.update(
 
-                            0,
+                            item.referencia,
 
-                            reservado -
-                            item.cantidadSolicitada
+                            {
+
+                                reservado:
+                                    nuevoReservado,
+
+                                disponible:
+                                    existencia > 0,
+
+                                actualizadoEn:
+                                    serverTimestamp()
+
+                            }
 
                         );
 
 
-                    transaction.update(
+                        console.log(
+                            "📦 MOTI GO: reserva liberada:",
+                            item.nombre,
+                            {
+                                existencia:
+                                    existencia,
 
-                        item.referencia,
+                                reservadoAntes:
+                                    reservado,
 
-                        {
+                                reservadoNuevo:
+                                    nuevoReservado
 
-                            existencia:
-                                nuevaExistencia,
+                            }
+                        );
 
-                            reservado:
-                                nuevoReservado,
-
-                            disponible:
-                                nuevaExistencia > 0,
-
-                            actualizadoEn:
-                                serverTimestamp()
-
-                        }
-
-                    );
-
-
-                    console.log(
-                        "📦 MOTI GO: inventario actualizado:",
-                        item.producto.nombre,
-                        {
-                            existenciaAntes:
-                                existencia,
-
-                            comprado:
-                                cantidadComprada,
-
-                            existenciaNueva:
-                                nuevaExistencia,
-
-                            reservadoAntes:
-                                reservado,
-
-                            reservadoNuevo:
-                                nuevoReservado
-
-                        }
-                    );
+                    }
 
                 }
-
             );
 
 
             // =========================================
-            // ACTUALIZAR PEDIDO
+            // MARCAR PRODUCTOS COMO PROCESADOS
             // =========================================
+
+            const productosActualizados =
+                productosPedido.map(
+                    producto => {
+
+                        const procesado =
+                            productosProcesados.find(
+                                item =>
+
+                                    String(
+                                        item.productoId
+                                    ) ===
+                                    String(
+                                        producto.productoId
+                                    ) &&
+
+                                    String(
+                                        producto.tiendaId
+                                    ) ===
+                                    String(
+                                        tiendaId
+                                    )
+                            );
+
+
+                        if (
+                            !procesado
+                        ) {
+
+                            return producto;
+
+                        }
+
+
+                        return {
+
+                            ...producto,
+
+                            estadoCompra:
+                                procesado.estado,
+
+                            inventarioProcesado:
+                                true
+
+                        };
+
+                    }
+                );
+
 
             transaction.update(
 
@@ -2906,7 +2915,7 @@ async function finalizarCompraTiendaActual() {
 
 
     console.log(
-        "✅ MOTI GO: compra de la tienda finalizada correctamente."
+        "✅ MOTI GO: inventario actualizado correctamente."
     );
 
 }
