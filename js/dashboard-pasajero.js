@@ -859,53 +859,13 @@ async function cargarContextoTiendas() {
                     tienda.id;
 
 
-               const nombreTienda =
+              const nombreTienda =
     tienda.nombre ||
     "Tienda";
 
 
-if (
-    tienda.distanciaClienteKm !== null &&
-    tienda.distanciaClienteKm !== undefined
-) {
-
-    const distancia =
-        tienda.distanciaClienteKm;
-
-
-    let textoDistancia;
-
-
-    if (
-        distancia < 1
-    ) {
-
-        textoDistancia =
-            `${Math.round(
-                distancia * 1000
-            )} m`;
-
-    }
-    else {
-
-        textoDistancia =
-            `${distancia.toFixed(
-                1
-            )} km`;
-
-    }
-
-
-    option.textContent =
-        `${nombreTienda} — ${textoDistancia}`;
-
-}
-else {
-
-    option.textContent =
-        nombreTienda;
-
-}
+option.textContent =
+    nombreTienda;
 
 
                 if (
