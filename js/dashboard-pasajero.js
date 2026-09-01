@@ -7825,11 +7825,7 @@ function pedidoPuedeSerCancelado(
 
         "sin_repartidor",
 
-        "asignado",
-
-        "en_compra",
-
-        "listo_entrega"
+        "asignado"
 
     ].includes(
         estado
