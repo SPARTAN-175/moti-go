@@ -10,7 +10,8 @@ import {
     where,
     documentId,
     onSnapshot,
-    serverTimestamp
+    serverTimestamp,
+    runTransaction
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 import {
@@ -9226,6 +9227,232 @@ function actualizarPanelSeguimientoPedido(
 
 }
 
+
+// =====================================================
+// MOTI GO - LIBERAR RESERVAS AL CANCELAR
+// =====================================================
+
+async function liberarReservasPedido(
+    pedido
+) {
+
+    const productos =
+        Array.isArray(
+            pedido.productos
+        )
+            ? pedido.productos
+            : [];
+
+
+    if (
+        productos.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    await runTransaction(
+
+        db,
+
+        async transaction => {
+
+            const inventarios =
+                [];
+
+
+            // =============================================
+            // LEER INVENTARIOS
+            // =============================================
+
+            for (
+                const producto
+                of productos
+            ) {
+
+                const productoId =
+                    producto.productoId ||
+                    producto.id;
+
+
+                const tiendaId =
+                    producto.tiendaId ||
+                    producto.tienda?.id;
+
+
+                const cantidad =
+                    Number(
+                        producto.cantidad ||
+                        0
+                    );
+
+
+                if (
+                    !productoId ||
+                    !tiendaId ||
+                    cantidad <= 0
+                ) {
+
+                    continue;
+
+                }
+
+
+                // -----------------------------------------
+                // Si ya fue procesado, NO liberar reserva
+                // -----------------------------------------
+
+                if (
+                    producto.inventarioProcesado ===
+                    true
+                ) {
+
+                    console.log(
+                        "ℹ️ MOTI GO: producto ya procesado, no se libera reserva:",
+                        productoId
+                    );
+
+                    continue;
+
+                }
+
+
+                const inventarioId =
+                    `${tiendaId}_${productoId}`;
+
+
+                const inventarioRef =
+                    doc(
+                        db,
+                        "inventarios",
+                        inventarioId
+                    );
+
+
+                const inventarioSnapshot =
+                    await transaction.get(
+                        inventarioRef
+                    );
+
+
+                if (
+                    !inventarioSnapshot.exists()
+                ) {
+
+                    console.warn(
+                        "⚠️ MOTI GO: no se encontró inventario para liberar:",
+                        inventarioId
+                    );
+
+                    continue;
+
+                }
+
+
+                inventarios.push({
+
+                    referencia:
+                        inventarioRef,
+
+                    snapshot:
+                        inventarioSnapshot,
+
+                    cantidad
+
+                });
+
+            }
+
+
+            // =============================================
+            // LIBERAR RESERVAS
+            // =============================================
+
+            inventarios.forEach(
+                item => {
+
+                    const datos =
+                        item.snapshot.data();
+
+
+                    const reservadoActual =
+                        Number(
+                            datos.reservado ||
+                            0
+                        );
+
+
+                    const nuevoReservado =
+                        Math.max(
+                            0,
+                            reservadoActual -
+                            item.cantidad
+                        );
+
+
+                    const existencia =
+                        Number(
+                            datos.existencia ||
+                            0
+                        );
+
+
+                    transaction.update(
+
+                        item.referencia,
+
+                        {
+
+                            reservado:
+                                nuevoReservado,
+
+                            disponible:
+                                existencia >
+                                nuevoReservado,
+
+                            actualizadoEn:
+                                serverTimestamp()
+
+                        }
+
+                    );
+
+
+                    console.log(
+                        "🔓 MOTI GO: reserva liberada:",
+                        {
+                            inventario:
+                                item.referencia.id,
+
+                            cantidad:
+                                item.cantidad,
+
+                            reservadoAntes:
+                                reservadoActual,
+
+                            reservadoNuevo:
+                                nuevoReservado
+
+                        }
+                    );
+
+                }
+
+            );
+
+        }
+
+    );
+
+
+    console.log(
+        "✅ MOTI GO: reservas liberadas correctamente."
+    );
+
+}
+
 // =====================================================
 // MOTI GO - CONFIGURAR BOTÓN CANCELAR PEDIDO
 // =====================================================
@@ -9385,7 +9612,7 @@ function configurarBotonCancelarPedido(
                 }
 
 
-               // =====================================================
+// =====================================================
 // LIBERAR REPARTIDOR SI EL PEDIDO YA ESTABA ASIGNADO
 // =====================================================
 
@@ -9491,7 +9718,14 @@ if (
 
 }
 
+// =====================================================
+// LIBERAR RESERVAS DEL PEDIDO
+// =====================================================
 
+await liberarReservasPedido(
+    datosActuales
+);
+                
 // =====================================================
 // CANCELAR PEDIDO
 // =====================================================
