@@ -34,6 +34,7 @@ let userLng = null;
 
 let productos = [];
 let inventarios = [];
+let cancelarEscuchaInventarios = null;
 
 let categoriaActual = "todos";
 let textoBusqueda = "";
@@ -1097,45 +1098,247 @@ async function cargarCatalogoDeTienda() {
             );
 
 
-        const inventariosSnapshot =
-            await getDocs(
-                inventariosQuery
+        // =================================================
+// ESCUCHAR INVENTARIOS EN TIEMPO REAL
+// =================================================
+
+// Cerrar escucha anterior si existía
+
+if (
+    cancelarEscuchaInventarios
+) {
+
+    cancelarEscuchaInventarios();
+
+    cancelarEscuchaInventarios =
+        null;
+
+}
+
+
+// Crear nueva escucha para la tienda actual
+
+cancelarEscuchaInventarios =
+    onSnapshot(
+
+        inventariosQuery,
+
+        async snapshot => {
+
+            console.log(
+                "🔄 MOTI GO: inventario actualizado en tiempo real."
             );
 
 
-        inventariosSnapshot.forEach(
-            docSnap => {
+            // =============================================
+            // RECONSTRUIR INVENTARIOS DISPONIBLES
+            // =============================================
 
-                const inventario = {
-
-                    id:
-                        docSnap.id,
-
-                    ...docSnap.data()
-
-                };
+            inventarios = [];
 
 
-                const existencia =
-                    Number(
-                        inventario.existencia ??
-                        0
-                    );
+            snapshot.forEach(
+                docSnap => {
+
+                    const inventario = {
+
+                        id:
+                            docSnap.id,
+
+                        ...docSnap.data()
+
+                    };
 
 
-                if (
-                    inventario.disponible !== false &&
-                    existencia > 0
-                ) {
+                    const existencia =
+                        Number(
+                            inventario.existencia ??
+                            0
+                        );
 
-                    inventarios.push(
-                        inventario
-                    );
+
+                    const reservado =
+                        Number(
+                            inventario.reservado ??
+                            0
+                        );
+
+
+                    const disponibleReal =
+                        existencia -
+                        reservado;
+
+
+                    // =========================================
+                    // SOLO MOSTRAR EXISTENCIA REAL DISPONIBLE
+                    // =========================================
+
+                    if (
+
+                        inventario.disponible !==
+                            false
+
+                        &&
+
+                        disponibleReal > 0
+
+                    ) {
+
+                        inventarios.push(
+                            inventario
+                        );
+
+                    }
 
                 }
+            );
+
+
+            console.log(
+                "🏪 Inventarios realmente disponibles:",
+                inventarios.length
+            );
+
+
+            // =============================================
+            // IDS DE PRODUCTOS
+            // =============================================
+
+            const productoIds = [
+                ...new Set(
+                    inventarios
+                        .map(
+                            inventario =>
+                                inventario.productoId
+                        )
+                        .filter(Boolean)
+                )
+            ];
+
+
+            productos = [];
+
+
+            // =============================================
+            // NO HAY PRODUCTOS DISPONIBLES
+            // =============================================
+
+            if (
+                productoIds.length ===
+                0
+            ) {
+
+                console.log(
+                    "📦 MOTI GO: no hay productos disponibles actualmente."
+                );
+
+
+                renderizarProductos();
+
+
+                actualizarCarrito();
+
+
+                return;
 
             }
-        );
+
+
+            // =============================================
+            // CONSULTAR PRODUCTOS POR LOTES
+            // =============================================
+
+            const loteProductos =
+                30;
+
+
+            for (
+
+                let inicio = 0;
+
+                inicio <
+                productoIds.length;
+
+                inicio +=
+                    loteProductos
+
+            ) {
+
+                const lote =
+                    productoIds.slice(
+                        inicio,
+                        inicio +
+                        loteProductos
+                    );
+
+
+                const productosQuery =
+                    query(
+
+                        collection(
+                            db,
+                            "productos"
+                        ),
+
+                        where(
+                            documentId(),
+                            "in",
+                            lote
+                        )
+
+                    );
+
+
+                const productosSnapshot =
+                    await getDocs(
+                        productosQuery
+                    );
+
+
+                productosSnapshot.forEach(
+                    docSnap => {
+
+                        productos.push({
+
+                            id:
+                                docSnap.id,
+
+                            ...docSnap.data()
+
+                        });
+
+                    }
+                );
+
+            }
+
+
+            console.log(
+                "📦 Productos disponibles cargados:",
+                productos.length
+            );
+
+
+            // =============================================
+            // ACTUALIZAR PANTALLA
+            // =============================================
+
+            renderizarProductos();
+
+            actualizarCarrito();
+
+        },
+
+        error => {
+
+            console.error(
+                "❌ MOTI GO: error escuchando inventario:",
+                error
+            );
+
+        }
+
+    );
 
 
         console.log(
@@ -1426,19 +1629,32 @@ function obtenerInventarioProducto(
         inventario => {
 
             const disponible =
-                inventario.disponible;
+    inventario.disponible;
 
 
-            const existencia =
-                Number(
-                    inventario.existencia ?? 0
-                );
+const existencia =
+    Number(
+        inventario.existencia ??
+        0
+    );
 
 
-            return (
-                disponible !== false &&
-                existencia > 0
-            );
+const reservado =
+    Number(
+        inventario.reservado ??
+        0
+    );
+
+
+const disponibleReal =
+    existencia -
+    reservado;
+
+
+return (
+    disponible !== false &&
+    disponibleReal > 0
+);
 
         }
     );
