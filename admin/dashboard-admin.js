@@ -3,16 +3,23 @@
    dashboard-admin.js
 ========================================================= */
 
+
+/* =========================================================
+   FIREBASE
+========================================================= */
+
 import {
     auth,
     db
 } from "../js/firebase-config.js";
+
 
 import {
     onAuthStateChanged,
     signOut
 } from
 "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
 
 import {
     doc,
@@ -22,32 +29,87 @@ import {
 
 
 /* =========================================================
-   ELEMENTOS
+   ELEMENTOS PRINCIPALES
 ========================================================= */
 
 const estadoAdmin =
-    document.getElementById("estadoAdmin");
+    document.getElementById(
+        "estadoAdmin"
+    );
+
 
 const nombreAdmin =
-    document.getElementById("nombreAdmin");
+    document.getElementById(
+        "nombreAdmin"
+    );
+
 
 const btnCerrarSesion =
-    document.getElementById("btnCerrarSesion");
+    document.getElementById(
+        "btnCerrarSesion"
+    );
+
 
 const tituloVista =
-    document.getElementById("tituloVista");
+    document.getElementById(
+        "tituloVista"
+    );
+
 
 const subtituloVista =
-    document.getElementById("subtituloVista");
+    document.getElementById(
+        "subtituloVista"
+    );
+
+
+/* =========================================================
+   ELEMENTOS DEL MENÚ
+========================================================= */
+
+const btnMenu =
+    document.getElementById(
+        "btnMenu"
+    );
+
+
+const btnCerrarMenu =
+    document.getElementById(
+        "btnCerrarMenu"
+    );
+
+
+const sidebar =
+    document.getElementById(
+        "sidebar"
+    );
+
+
+const sidebarOverlay =
+    document.getElementById(
+        "sidebarOverlay"
+    );
+
 
 const btnMarketplace =
-    document.getElementById("btnMarketplace");
+    document.getElementById(
+        "btnMarketplace"
+    );
+
+
+/* =========================================================
+   ELEMENTOS DE CONFIGURACIÓN
+========================================================= */
 
 const btnGuardarTarifas =
-    document.getElementById("btnGuardarTarifas");
+    document.getElementById(
+        "btnGuardarTarifas"
+    );
+
 
 const estadoConfiguracion =
-    document.getElementById("estadoConfiguracion");
+    document.getElementById(
+        "estadoConfiguracion"
+    );
 
 
 /* =========================================================
@@ -57,57 +119,101 @@ const estadoConfiguracion =
 const informacionVistas = {
 
     inicio: {
-        titulo: "Resumen",
+
+        titulo:
+            "Resumen",
+
         subtitulo:
             "Centro de operaciones de MOTI GO"
+
     },
+
 
     tiendas: {
-        titulo: "Tiendas",
+
+        titulo:
+            "Tiendas",
+
         subtitulo:
             "Administración de tiendas"
+
     },
+
 
     repartidores: {
-        titulo: "Repartidores",
+
+        titulo:
+            "Repartidores",
+
         subtitulo:
             "Gestión de repartidores"
+
     },
+
 
     clientes: {
-        titulo: "Clientes",
+
+        titulo:
+            "Clientes",
+
         subtitulo:
             "Clientes registrados"
+
     },
+
 
     pedidos: {
-        titulo: "Pedidos",
+
+        titulo:
+            "Pedidos",
+
         subtitulo:
             "Operación y seguimiento"
+
     },
+
 
     finanzas: {
-        titulo: "Finanzas",
+
+        titulo:
+            "Finanzas",
+
         subtitulo:
             "Movimientos e ingresos"
+
     },
+
 
     carteras: {
-        titulo: "Carteras",
+
+        titulo:
+            "Carteras",
+
         subtitulo:
             "Saldos y movimientos"
+
     },
+
 
     configuracion: {
-        titulo: "Configuración",
+
+        titulo:
+            "Configuración",
+
         subtitulo:
             "Reglas generales de MOTI GO"
+
     },
 
+
     operadores: {
-        titulo: "Operadores",
+
+        titulo:
+            "Operadores",
+
         subtitulo:
             "Cuentas administrativas"
+
     }
 
 };
@@ -122,6 +228,7 @@ const botonesMenu =
         ".menu-button[data-view]"
     );
 
+
 const vistas =
     document.querySelectorAll(
         ".view"
@@ -129,29 +236,193 @@ const vistas =
 
 
 /* =========================================================
-   CAMBIAR DE VISTA
+   ABRIR MENÚ
 ========================================================= */
 
-function mostrarVista(nombreVista) {
+function abrirMenu() {
 
-    const informacion =
-        informacionVistas[nombreVista];
-
-    if (!informacion) {
+    if (!sidebar) {
         return;
     }
 
 
-    /* Ocultar todas las vistas */
-
-    vistas.forEach(vista => {
-
-        vista.classList.remove("active");
-
-    });
+    sidebar.classList.add(
+        "open"
+    );
 
 
-    /* Mostrar la vista seleccionada */
+    if (sidebarOverlay) {
+
+        sidebarOverlay.classList.add(
+            "active"
+        );
+
+    }
+
+
+    if (btnMenu) {
+
+        btnMenu.setAttribute(
+            "aria-expanded",
+            "true"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   CERRAR MENÚ
+========================================================= */
+
+function cerrarMenu() {
+
+    if (!sidebar) {
+        return;
+    }
+
+
+    sidebar.classList.remove(
+        "open"
+    );
+
+
+    if (sidebarOverlay) {
+
+        sidebarOverlay.classList.remove(
+            "active"
+        );
+
+    }
+
+
+    if (btnMenu) {
+
+        btnMenu.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   EVENTO BOTÓN HAMBURGUESA
+========================================================= */
+
+if (btnMenu) {
+
+    btnMenu.addEventListener(
+        "click",
+        () => {
+
+            const menuAbierto =
+                sidebar &&
+                sidebar.classList.contains(
+                    "open"
+                );
+
+
+            if (menuAbierto) {
+
+                cerrarMenu();
+
+            }
+            else {
+
+                abrirMenu();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   EVENTO BOTÓN CERRAR
+========================================================= */
+
+if (btnCerrarMenu) {
+
+    btnCerrarMenu.addEventListener(
+        "click",
+        () => {
+
+            cerrarMenu();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   EVENTO OVERLAY
+========================================================= */
+
+if (sidebarOverlay) {
+
+    sidebarOverlay.addEventListener(
+        "click",
+        () => {
+
+            cerrarMenu();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CAMBIAR DE VISTA
+========================================================= */
+
+function mostrarVista(
+    nombreVista
+) {
+
+    const informacion =
+        informacionVistas[
+            nombreVista
+        ];
+
+
+    if (!informacion) {
+
+        console.warn(
+            "Vista no encontrada:",
+            nombreVista
+        );
+
+        return;
+
+    }
+
+
+    /* -----------------------------------------------------
+       OCULTAR TODAS LAS VISTAS
+    ----------------------------------------------------- */
+
+    vistas.forEach(
+        vista => {
+
+            vista.classList.remove(
+                "active"
+            );
+
+        }
+    );
+
+
+    /* -----------------------------------------------------
+       MOSTRAR VISTA SELECCIONADA
+    ----------------------------------------------------- */
 
     const vistaSeleccionada =
         document.getElementById(
@@ -168,55 +439,89 @@ function mostrarVista(nombreVista) {
     }
 
 
-    /* Actualizar botón activo */
+    /* -----------------------------------------------------
+       ACTUALIZAR BOTÓN ACTIVO
+    ----------------------------------------------------- */
 
-    botonesMenu.forEach(boton => {
+    botonesMenu.forEach(
+        boton => {
 
-        boton.classList.toggle(
-            "active",
-            boton.dataset.view === nombreVista
-        );
+            boton.classList.toggle(
+                "active",
+                boton.dataset.view ===
+                nombreVista
+            );
 
-    });
-
-
-    /* Actualizar encabezado */
-
-    tituloVista.textContent =
-        informacion.titulo;
-
-    subtituloVista.textContent =
-        informacion.subtitulo;
+        }
+    );
 
 
-    /* Regresar arriba */
+    /* -----------------------------------------------------
+       ACTUALIZAR ENCABEZADO
+    ----------------------------------------------------- */
+
+    if (tituloVista) {
+
+        tituloVista.textContent =
+            informacion.titulo;
+
+    }
+
+
+    if (subtituloVista) {
+
+        subtituloVista.textContent =
+            informacion.subtitulo;
+
+    }
+
+
+    /* -----------------------------------------------------
+       CERRAR MENÚ
+    ----------------------------------------------------- */
+
+    cerrarMenu();
+
+
+    /* -----------------------------------------------------
+       VOLVER AL INICIO DEL CONTENIDO
+    ----------------------------------------------------- */
 
     window.scrollTo({
+
         top: 0,
+
         behavior: "smooth"
+
     });
 
 }
 
 
 /* =========================================================
-   EVENTOS DEL MENÚ
+   EVENTOS DE LAS OPCIONES DEL MENÚ
 ========================================================= */
 
-botonesMenu.forEach(boton => {
+botonesMenu.forEach(
+    boton => {
 
-    boton.addEventListener(
-        "click",
-        () => {
+        boton.addEventListener(
+            "click",
+            () => {
 
-            mostrarVista(
-                boton.dataset.view
-            );
+                const nombreVista =
+                    boton.dataset.view;
 
-        }
-    );
 
-});
+                mostrarVista(
+                    nombreVista
+                );
+
+            }
+        );
+
+    }
+);
 
 
 /* =========================================================
@@ -233,7 +538,7 @@ if (btnMarketplace) {
              * Marketplace tendrá su propio
              * panel administrativo.
              *
-             * No mezclamos sus funciones
+             * No mezclamos su funcionamiento
              * con este dashboard.
              */
 
@@ -247,7 +552,7 @@ if (btnMarketplace) {
 
 
 /* =========================================================
-   VERIFICAR ADMINISTRADOR
+   VERIFICACIÓN DEL ADMINISTRADOR
 ========================================================= */
 
 onAuthStateChanged(
@@ -260,7 +565,7 @@ onAuthStateChanged(
 
 
         /* -------------------------------------------------
-           SIN SESIÓN
+           NO HAY SESIÓN
         ------------------------------------------------- */
 
         if (!usuario) {
@@ -275,7 +580,9 @@ onAuthStateChanged(
 
         try {
 
-            /* Buscar usuario */
+            /* -------------------------------------------------
+               OBTENER DOCUMENTO DEL USUARIO
+            ------------------------------------------------- */
 
             const referenciaUsuario =
                 doc(
@@ -292,7 +599,7 @@ onAuthStateChanged(
 
 
             /* -------------------------------------------------
-               USUARIO NO EXISTE
+               EL DOCUMENTO NO EXISTE
             ------------------------------------------------- */
 
             if (!snapshot.exists()) {
@@ -301,7 +608,11 @@ onAuthStateChanged(
                     "❌ El documento del usuario no existe."
                 );
 
-                await signOut(auth);
+
+                await signOut(
+                    auth
+                );
+
 
                 window.location.href =
                     "../index.html";
@@ -316,11 +627,12 @@ onAuthStateChanged(
 
 
             /* -------------------------------------------------
-               COMPROBAR TIPO
+               COMPROBAR TIPO DE USUARIO
             ------------------------------------------------- */
 
             if (
-                datosUsuario.tipo !== "admin"
+                datosUsuario.tipo !==
+                "admin"
             ) {
 
                 alert(
@@ -328,7 +640,10 @@ onAuthStateChanged(
                 );
 
 
-                await signOut(auth);
+                await signOut(
+                    auth
+                );
+
 
                 window.location.href =
                     "../index.html";
@@ -339,7 +654,7 @@ onAuthStateChanged(
 
 
             /* -------------------------------------------------
-               ADMINISTRADOR AUTORIZADO
+               ACCESO AUTORIZADO
             ------------------------------------------------- */
 
             console.log(
@@ -347,39 +662,36 @@ onAuthStateChanged(
             );
 
 
-            estadoAdmin.textContent =
-                "Sesión administrativa activa";
+            if (estadoAdmin) {
 
-
-            /* Nombre */
-
-            if (
-                datosUsuario.nombre
-            ) {
-
-                nombreAdmin.textContent =
-                    datosUsuario.nombre;
-
-            }
-            else if (
-                usuario.displayName
-            ) {
-
-                nombreAdmin.textContent =
-                    usuario.displayName;
-
-            }
-            else if (
-                usuario.email
-            ) {
-
-                nombreAdmin.textContent =
-                    usuario.email;
+                estadoAdmin.textContent =
+                    "Sesión administrativa activa";
 
             }
 
 
-            /* Avatar */
+            /* -------------------------------------------------
+               NOMBRE DEL ADMINISTRADOR
+            ------------------------------------------------- */
+
+            const nombre =
+                datosUsuario.nombre ||
+                usuario.displayName ||
+                usuario.email ||
+                "Administrador";
+
+
+            if (nombreAdmin) {
+
+                nombreAdmin.textContent =
+                    nombre;
+
+            }
+
+
+            /* -------------------------------------------------
+               AVATAR
+            ------------------------------------------------- */
 
             const avatar =
                 document.querySelector(
@@ -388,13 +700,6 @@ onAuthStateChanged(
 
 
             if (avatar) {
-
-                const nombre =
-                    datosUsuario.nombre ||
-                    usuario.displayName ||
-                    usuario.email ||
-                    "A";
-
 
                 avatar.textContent =
                     nombre
@@ -420,13 +725,15 @@ onAuthStateChanged(
 
             try {
 
-                await signOut(auth);
+                await signOut(
+                    auth
+                );
 
             }
             catch (errorLogout) {
 
                 console.error(
-                    "Error cerrando sesión:",
+                    "❌ Error cerrando sesión:",
                     errorLogout
                 );
 
@@ -457,11 +764,14 @@ if (btnCerrarSesion) {
                 btnCerrarSesion.disabled =
                     true;
 
+
                 btnCerrarSesion.textContent =
                     "Cerrando sesión...";
 
 
-                await signOut(auth);
+                await signOut(
+                    auth
+                );
 
 
                 window.location.href =
@@ -479,6 +789,7 @@ if (btnCerrarSesion) {
                 btnCerrarSesion.disabled =
                     false;
 
+
                 btnCerrarSesion.textContent =
                     "Cerrar sesión";
 
@@ -492,8 +803,9 @@ if (btnCerrarSesion) {
 
 /* =========================================================
    CONFIGURACIÓN DE TARIFAS
-   POR AHORA SOLO VALIDAMOS LOS DATOS.
-   FIRESTORE LO CONECTAREMOS EN EL SIGUIENTE PASO.
+   -----------------------------------------------
+   TODAVÍA NO GUARDA EN FIREBASE.
+   SOLAMENTE VALIDAMOS LOS VALORES.
 ========================================================= */
 
 if (btnGuardarTarifas) {
@@ -543,41 +855,40 @@ if (btnGuardarTarifas) {
 
 
             /* -------------------------------------------------
-               VALIDACIONES
+               VALIDAR VALORES
             ------------------------------------------------- */
 
             const valores = [
+
                 tarifaBase,
+
                 precioKm,
+
                 tiendaAdicional,
+
                 minimoRepartidor,
+
                 maximoRepartidor
+
             ];
 
 
-            if (
+            const valoresInvalidos =
                 valores.some(
                     valor =>
                         !Number.isFinite(valor) ||
                         valor < 0
-                )
-            ) {
-
-                estadoConfiguracion.textContent =
-                    "Revisa los valores ingresados.";
-
-                return;
-
-            }
+                );
 
 
-            if (
-                maximoRepartidor <
-                minimoRepartidor
-            ) {
+            if (valoresInvalidos) {
 
-                estadoConfiguracion.textContent =
-                    "La comisión máxima no puede ser menor que la mínima.";
+                if (estadoConfiguracion) {
+
+                    estadoConfiguracion.textContent =
+                        "Revisa los valores ingresados.";
+
+                }
 
                 return;
 
@@ -585,7 +896,28 @@ if (btnGuardarTarifas) {
 
 
             /* -------------------------------------------------
-               DATOS PREPARADOS
+               VALIDAR MÍNIMO / MÁXIMO
+            ------------------------------------------------- */
+
+            if (
+                maximoRepartidor <
+                minimoRepartidor
+            ) {
+
+                if (estadoConfiguracion) {
+
+                    estadoConfiguracion.textContent =
+                        "La comisión máxima no puede ser menor que la mínima.";
+
+                }
+
+                return;
+
+            }
+
+
+            /* -------------------------------------------------
+               PREPARAR CONFIGURACIÓN
             ------------------------------------------------- */
 
             const configuracion = {
@@ -609,8 +941,12 @@ if (btnGuardarTarifas) {
             );
 
 
-            estadoConfiguracion.textContent =
-                "Valores válidos. Listos para guardar en Firebase.";
+            if (estadoConfiguracion) {
+
+                estadoConfiguracion.textContent =
+                    "Valores válidos. Listos para guardar en Firebase.";
+
+            }
 
         }
     );
@@ -619,10 +955,13 @@ if (btnGuardarTarifas) {
 
 
 /* =========================================================
-   INICIO
+   INICIO DEL PANEL
 ========================================================= */
 
-mostrarVista("inicio");
+mostrarVista(
+    "inicio"
+);
+
 
 console.log(
     "🚀 MOTI GO ADMIN: panel iniciado."
