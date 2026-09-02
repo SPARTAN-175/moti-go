@@ -2,6 +2,7 @@
 <html lang="es">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -25,11 +26,13 @@
 
 
         :root {
+
             --verde: #16a34a;
             --verde-oscuro: #15803d;
+            --verde-suave: #f0fdf4;
 
             --fondo: #f5f7f8;
-            --panel: #ffffff;
+            --blanco: #ffffff;
 
             --texto: #17202a;
             --texto-secundario: #6b7280;
@@ -37,9 +40,8 @@
             --borde: #e5e7eb;
 
             --sidebar: #101827;
-
-            --sidebar-texto: #cbd5e1;
             --sidebar-hover: #1b2738;
+            --sidebar-texto: #cbd5e1;
 
             --rojo: #dc2626;
 
@@ -53,7 +55,17 @@
         }
 
 
+        html,
         body {
+
+            width: 100%;
+            min-height: 100%;
+
+        }
+
+
+        body {
+
             font-family:
                 Inter,
                 system-ui,
@@ -70,19 +82,27 @@
 
             min-height:
                 100vh;
+
+            overflow-x:
+                hidden;
+
         }
 
 
         button,
         input {
+
             font:
                 inherit;
+
         }
 
 
         button {
+
             cursor:
                 pointer;
+
         }
 
 
@@ -91,11 +111,135 @@
         ===================================================== */
 
         .app {
-            display:
-                flex;
 
             min-height:
                 100vh;
+
+            width:
+                100%;
+
+        }
+
+
+        /* =====================================================
+           BOTÓN HAMBURGUESA
+        ===================================================== */
+
+        .menu-toggle {
+
+            position:
+                fixed;
+
+            top:
+                17px;
+
+            left:
+                18px;
+
+            width:
+                42px;
+
+            height:
+                42px;
+
+            border:
+                1px solid var(--borde);
+
+            background:
+                var(--blanco);
+
+            color:
+                var(--texto);
+
+            border-radius:
+                10px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            font-size:
+                21px;
+
+            line-height:
+                1;
+
+            z-index:
+                300;
+
+            box-shadow:
+                0 4px 15px rgba(
+                    15,
+                    23,
+                    42,
+                    .08
+                );
+
+            transition:
+                .18s ease;
+
+        }
+
+
+        .menu-toggle:hover {
+
+            background:
+                #f8fafc;
+
+            transform:
+                translateY(-1px);
+
+        }
+
+
+        /* =====================================================
+           OVERLAY
+        ===================================================== */
+
+        .sidebar-overlay {
+
+            position:
+                fixed;
+
+            inset:
+                0;
+
+            background:
+                rgba(
+                    15,
+                    23,
+                    42,
+                    .38
+                );
+
+            opacity:
+                0;
+
+            visibility:
+                hidden;
+
+            transition:
+                .22s ease;
+
+            z-index:
+                150;
+
+        }
+
+
+        .sidebar-overlay.active {
+
+            opacity:
+                1;
+
+            visibility:
+                visible;
+
         }
 
 
@@ -104,8 +248,21 @@
         ===================================================== */
 
         .sidebar {
+
+            position:
+                fixed;
+
+            top:
+                0;
+
+            left:
+                0;
+
+            bottom:
+                0;
+
             width:
-                250px;
+                270px;
 
             background:
                 var(--sidebar);
@@ -113,17 +270,14 @@
             color:
                 white;
 
-            position:
-                fixed;
+            transform:
+                translateX(-100%);
 
-            left:
-                0;
+            transition:
+                transform .23s ease;
 
-            top:
-                0;
-
-            bottom:
-                0;
+            z-index:
+                200;
 
             display:
                 flex;
@@ -131,12 +285,31 @@
             flex-direction:
                 column;
 
-            z-index:
-                100;
+            box-shadow:
+                12px 0 35px rgba(
+                    15,
+                    23,
+                    42,
+                    .18
+                );
+
         }
 
 
+        .sidebar.open {
+
+            transform:
+                translateX(0);
+
+        }
+
+
+        /* =====================================================
+           LOGO
+        ===================================================== */
+
         .logo-area {
+
             height:
                 76px;
 
@@ -159,21 +332,29 @@
                     255,
                     .07
                 );
+
+            flex-shrink:
+                0;
+
         }
 
 
         .logo-mark {
+
             width:
-                38px;
+                39px;
 
             height:
-                38px;
+                39px;
 
             border-radius:
                 11px;
 
             background:
                 var(--verde);
+
+            color:
+                white;
 
             display:
                 flex;
@@ -185,14 +366,16 @@
                 center;
 
             font-size:
-                19px;
+                18px;
 
             font-weight:
                 800;
+
         }
 
 
         .logo-text strong {
+
             display:
                 block;
 
@@ -201,10 +384,12 @@
 
             letter-spacing:
                 .2px;
+
         }
 
 
         .logo-text span {
+
             display:
                 block;
 
@@ -216,24 +401,88 @@
 
             font-size:
                 11px;
+
         }
 
 
+        /* =====================================================
+           CERRAR SIDEBAR
+        ===================================================== */
+
+        .sidebar-close {
+
+            margin-left:
+                auto;
+
+            width:
+                31px;
+
+            height:
+                31px;
+
+            border:
+                none;
+
+            background:
+                transparent;
+
+            color:
+                #94a3b8;
+
+            border-radius:
+                7px;
+
+            font-size:
+                18px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+        }
+
+
+        .sidebar-close:hover {
+
+            background:
+                var(--sidebar-hover);
+
+            color:
+                white;
+
+        }
+
+
+        /* =====================================================
+           MENÚ
+        ===================================================== */
+
         .menu {
+
             padding:
-                20px 12px;
+                18px 12px;
 
             overflow-y:
                 auto;
+
+            flex:
+                1;
+
         }
 
 
         .menu-label {
+
             padding:
                 0 11px;
 
             margin:
-                12px 0 7px;
+                13px 0 7px;
 
             color:
                 #64748b;
@@ -249,10 +498,12 @@
 
             letter-spacing:
                 .12em;
+
         }
 
 
         .menu-button {
+
             width:
                 100%;
 
@@ -288,19 +539,23 @@
 
             transition:
                 .18s ease;
+
         }
 
 
         .menu-button:hover {
+
             background:
                 var(--sidebar-hover);
 
             color:
                 white;
+
         }
 
 
         .menu-button.active {
+
             background:
                 rgba(
                     22,
@@ -311,24 +566,32 @@
 
             color:
                 #86efac;
+
         }
 
 
         .menu-icon {
+
             width:
-                20px;
+                21px;
+
+            min-width:
+                21px;
 
             text-align:
                 center;
 
             font-size:
                 16px;
+
         }
 
 
+        /* =====================================================
+           USUARIO
+        ===================================================== */
+
         .sidebar-bottom {
-            margin-top:
-                auto;
 
             padding:
                 14px;
@@ -340,10 +603,15 @@
                     255,
                     .07
                 );
+
+            flex-shrink:
+                0;
+
         }
 
 
         .admin-user {
+
             display:
                 flex;
 
@@ -354,16 +622,21 @@
                 10px;
 
             padding:
-                9px;
+                8px;
+
         }
 
 
         .admin-avatar {
+
             width:
-                34px;
+                35px;
 
             height:
-                34px;
+                35px;
+
+            min-width:
+                35px;
 
             border-radius:
                 50%;
@@ -380,18 +653,28 @@
             justify-content:
                 center;
 
+            color:
+                white;
+
             font-size:
-                14px;
+                13px;
+
+            font-weight:
+                700;
+
         }
 
 
         .admin-user-info {
+
             min-width:
                 0;
+
         }
 
 
         .admin-user-info strong {
+
             display:
                 block;
 
@@ -409,10 +692,12 @@
 
             white-space:
                 nowrap;
+
         }
 
 
         .admin-user-info span {
+
             display:
                 block;
 
@@ -424,10 +709,12 @@
 
             margin-top:
                 2px;
+
         }
 
 
         .btn-logout {
+
             width:
                 100%;
 
@@ -456,10 +743,12 @@
 
             font-size:
                 12px;
+
         }
 
 
         .btn-logout:hover {
+
             color:
                 #fca5a5;
 
@@ -470,24 +759,22 @@
                     38,
                     .3
                 );
+
         }
 
 
         /* =====================================================
-           CONTENIDO
+           CONTENIDO PRINCIPAL
         ===================================================== */
 
         .main {
-            margin-left:
-                250px;
 
             width:
-                calc(
-                    100% - 250px
-                );
+                100%;
 
-            min-width:
-                0;
+            min-height:
+                100vh;
+
         }
 
 
@@ -496,8 +783,12 @@
         ===================================================== */
 
         .topbar {
+
             height:
                 76px;
+
+            width:
+                100%;
 
             background:
                 rgba(
@@ -520,7 +811,7 @@
                 space-between;
 
             padding:
-                0 30px;
+                0 30px 0 76px;
 
             position:
                 sticky;
@@ -533,19 +824,26 @@
 
             backdrop-filter:
                 blur(12px);
+
         }
 
 
         .topbar-title h1 {
+
             font-size:
                 20px;
 
             font-weight:
                 700;
+
+            letter-spacing:
+                -.2px;
+
         }
 
 
         .topbar-title p {
+
             margin-top:
                 3px;
 
@@ -554,10 +852,12 @@
 
             font-size:
                 12px;
+
         }
 
 
         .status {
+
             display:
                 flex;
 
@@ -572,10 +872,12 @@
 
             font-size:
                 12px;
+
         }
 
 
         .status-dot {
+
             width:
                 8px;
 
@@ -587,34 +889,72 @@
 
             background:
                 #22c55e;
+
         }
 
 
         /* =====================================================
-           ÁREA DE CONTENIDO
+           CONTENIDO
         ===================================================== */
 
         .content {
-            padding:
-                30px;
+
+            width:
+                100%;
 
             max-width:
                 1500px;
 
             margin:
                 0 auto;
+
+            padding:
+                30px;
+
         }
 
 
         .view {
+
             display:
                 none;
+
         }
 
 
         .view.active {
+
             display:
                 block;
+
+            animation:
+                aparecer .16s ease;
+
+        }
+
+
+        @keyframes aparecer {
+
+            from {
+
+                opacity:
+                    0;
+
+                transform:
+                    translateY(4px);
+
+            }
+
+            to {
+
+                opacity:
+                    1;
+
+                transform:
+                    translateY(0);
+
+            }
+
         }
 
 
@@ -623,21 +963,26 @@
         ===================================================== */
 
         .welcome {
+
             margin-bottom:
                 28px;
+
         }
 
 
         .welcome h2 {
+
             font-size:
                 25px;
 
             letter-spacing:
                 -.4px;
+
         }
 
 
         .welcome p {
+
             margin-top:
                 7px;
 
@@ -646,14 +991,16 @@
 
             font-size:
                 14px;
+
         }
 
 
         /* =====================================================
-           RESUMEN
+           ESTADÍSTICAS
         ===================================================== */
 
         .stats {
+
             display:
                 grid;
 
@@ -671,12 +1018,14 @@
 
             margin-bottom:
                 28px;
+
         }
 
 
         .stat {
+
             background:
-                var(--panel);
+                var(--blanco);
 
             border:
                 1px solid var(--borde);
@@ -689,10 +1038,12 @@
 
             box-shadow:
                 var(--sombra);
+
         }
 
 
         .stat-top {
+
             display:
                 flex;
 
@@ -701,19 +1052,23 @@
 
             align-items:
                 center;
+
         }
 
 
         .stat-label {
+
             color:
                 var(--texto-secundario);
 
             font-size:
                 12px;
+
         }
 
 
         .stat-icon {
+
             width:
                 34px;
 
@@ -724,7 +1079,7 @@
                 9px;
 
             background:
-                #f0fdf4;
+                var(--verde-suave);
 
             display:
                 flex;
@@ -734,10 +1089,12 @@
 
             justify-content:
                 center;
+
         }
 
 
         .stat-value {
+
             margin-top:
                 13px;
 
@@ -746,16 +1103,18 @@
 
             font-weight:
                 750;
+
         }
 
 
         /* =====================================================
-           PANEL
+           PANELES
         ===================================================== */
 
         .panel {
+
             background:
-                var(--panel);
+                var(--blanco);
 
             border:
                 1px solid var(--borde);
@@ -768,10 +1127,12 @@
 
             overflow:
                 hidden;
+
         }
 
 
         .panel-header {
+
             display:
                 flex;
 
@@ -786,16 +1147,20 @@
 
             border-bottom:
                 1px solid var(--borde);
+
         }
 
 
         .panel-header h3 {
+
             font-size:
                 15px;
+
         }
 
 
         .panel-header p {
+
             color:
                 var(--texto-secundario);
 
@@ -804,12 +1169,15 @@
 
             margin-top:
                 4px;
+
         }
 
 
         .panel-body {
+
             padding:
                 22px;
+
         }
 
 
@@ -818,6 +1186,7 @@
         ===================================================== */
 
         .config-layout {
+
             display:
                 grid;
 
@@ -829,19 +1198,23 @@
 
             gap:
                 22px;
+
         }
 
 
         .config-nav {
+
             border-right:
                 1px solid var(--borde);
 
             padding-right:
                 16px;
+
         }
 
 
         .config-nav button {
+
             width:
                 100%;
 
@@ -868,31 +1241,37 @@
 
             margin-bottom:
                 4px;
+
         }
 
 
         .config-nav button.active {
+
             background:
-                #f0fdf4;
+                var(--verde-suave);
 
             color:
                 var(--verde-oscuro);
 
             font-weight:
                 600;
+
         }
 
 
         .config-section-title {
+
             margin-bottom:
                 5px;
 
             font-size:
                 17px;
+
         }
 
 
         .config-description {
+
             color:
                 var(--texto-secundario);
 
@@ -904,10 +1283,12 @@
 
             margin-bottom:
                 22px;
+
         }
 
 
         .form-grid {
+
             display:
                 grid;
 
@@ -922,10 +1303,12 @@
 
             gap:
                 17px;
+
         }
 
 
         .field {
+
             display:
                 flex;
 
@@ -934,28 +1317,34 @@
 
             gap:
                 7px;
+
         }
 
 
         .field label {
+
             font-size:
                 12px;
 
             font-weight:
                 600;
+
         }
 
 
         .field small {
+
             color:
                 var(--texto-secundario);
 
             font-size:
                 11px;
+
         }
 
 
         .field input {
+
             width:
                 100%;
 
@@ -972,17 +1361,19 @@
                 none;
 
             background:
-                #fff;
+                white;
 
             color:
                 var(--texto);
 
             transition:
                 .18s ease;
+
         }
 
 
         .field input:focus {
+
             border-color:
                 var(--verde);
 
@@ -994,10 +1385,12 @@
                     74,
                     .08
                 );
+
         }
 
 
         .config-actions {
+
             display:
                 flex;
 
@@ -1007,6 +1400,9 @@
             justify-content:
                 space-between;
 
+            gap:
+                15px;
+
             margin-top:
                 25px;
 
@@ -1015,19 +1411,23 @@
 
             border-top:
                 1px solid var(--borde);
+
         }
 
 
         .save-status {
+
             color:
                 var(--texto-secundario);
 
             font-size:
                 12px;
+
         }
 
 
         .btn-primary {
+
             border:
                 none;
 
@@ -1048,12 +1448,15 @@
 
             font-weight:
                 600;
+
         }
 
 
         .btn-primary:hover {
+
             background:
                 var(--verde-oscuro);
+
         }
 
 
@@ -1062,6 +1465,7 @@
         ===================================================== */
 
         .marketplace-row {
+
             display:
                 flex;
 
@@ -1076,10 +1480,12 @@
 
             padding:
                 24px;
+
         }
 
 
         .marketplace-info {
+
             display:
                 flex;
 
@@ -1088,10 +1494,12 @@
 
             gap:
                 16px;
+
         }
 
 
         .marketplace-icon {
+
             width:
                 50px;
 
@@ -1115,16 +1523,20 @@
 
             font-size:
                 23px;
+
         }
 
 
         .marketplace-info h3 {
+
             font-size:
                 15px;
+
         }
 
 
         .marketplace-info p {
+
             color:
                 var(--texto-secundario);
 
@@ -1133,10 +1545,12 @@
 
             margin-top:
                 4px;
+
         }
 
 
         .btn-secondary {
+
             border:
                 1px solid var(--borde);
 
@@ -1157,15 +1571,18 @@
 
             font-weight:
                 600;
+
         }
 
 
         .btn-secondary:hover {
+
             border-color:
                 #cbd5e1;
 
             background:
                 #f8fafc;
+
         }
 
 
@@ -1173,11 +1590,10 @@
            RESPONSIVE
         ===================================================== */
 
-        @media (
-            max-width: 1050px
-        ) {
+        @media (max-width: 1050px) {
 
             .stats {
+
                 grid-template-columns:
                     repeat(
                         2,
@@ -1186,6 +1602,7 @@
                             1fr
                         )
                     );
+
             }
 
         }
@@ -1193,95 +1610,116 @@
 
         @media (max-width: 700px) {
 
-    .sidebar {
-        width: 220px;
-    }
-
-    .logo-area {
-        justify-content: flex-start;
-        padding: 0 18px;
-    }
-
-    .logo-text,
-    .menu-label,
-    .menu-button span,
-    .admin-user-info,
-    .btn-logout {
-        display: initial;
-    }
-
-    .menu-button {
-        justify-content: flex-start;
-    }
-
-    .sidebar-bottom {
-        padding: 14px;
-    }
-
-    .admin-user {
-        justify-content: flex-start;
-    }
-
-    .main {
-        margin-left: 220px;
-        width: calc(100% - 220px);
-    }
-
-    .config-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .config-nav {
-        border-right: none;
-        border-bottom: 1px solid var(--borde);
-        padding: 0 0 12px;
-    }
-
-    .config-nav button {
-        display: inline-block;
-        width: auto;
-    }
-
-}
-
-
-        @media (
-            max-width: 600px
-        ) {
-
             .topbar {
+
                 padding:
-                    0 17px;
+                    0 17px 0 72px;
+
+            }
+
+
+            .topbar-title h1 {
+
+                font-size:
+                    18px;
+
+            }
+
+
+            .status {
+
+                display:
+                    none;
+
             }
 
 
             .content {
+
                 padding:
                     20px 15px;
+
             }
 
 
             .stats {
+
                 grid-template-columns:
                     1fr;
+
+            }
+
+
+            .config-layout {
+
+                grid-template-columns:
+                    1fr;
+
+            }
+
+
+            .config-nav {
+
+                border-right:
+                    none;
+
+                border-bottom:
+                    1px solid var(--borde);
+
+                padding:
+                    0 0 12px;
+
+                white-space:
+                    nowrap;
+
+                overflow-x:
+                    auto;
+
+            }
+
+
+            .config-nav button {
+
+                display:
+                    inline-block;
+
+                width:
+                    auto;
+
             }
 
 
             .form-grid {
+
                 grid-template-columns:
                     1fr;
+
+            }
+
+
+            .config-actions {
+
+                align-items:
+                    flex-start;
+
+                flex-direction:
+                    column;
+
             }
 
 
             .marketplace-row {
+
                 flex-direction:
                     column;
 
                 align-items:
                     flex-start;
+
             }
 
         }
+
 
     </style>
 
@@ -1290,14 +1728,43 @@
 
 <body>
 
+
 <div class="app">
+
+
+    <!-- =====================================================
+         BOTÓN HAMBURGUESA
+    ====================================================== -->
+
+    <button
+        id="btnMenu"
+        class="menu-toggle"
+        aria-label="Abrir menú"
+        aria-expanded="false"
+    >
+        ☰
+    </button>
+
+
+    <!-- =====================================================
+         OSCURECER CONTENIDO
+    ====================================================== -->
+
+    <div
+        id="sidebarOverlay"
+        class="sidebar-overlay"
+    ></div>
 
 
     <!-- =====================================================
          SIDEBAR
     ====================================================== -->
 
-    <aside class="sidebar">
+    <aside
+        id="sidebar"
+        class="sidebar"
+    >
+
 
         <div class="logo-area">
 
@@ -1317,21 +1784,39 @@
 
             </div>
 
+
+            <button
+                id="btnCerrarMenu"
+                class="sidebar-close"
+                aria-label="Cerrar menú"
+            >
+                ×
+            </button>
+
         </div>
 
 
         <nav class="menu">
 
+
             <div class="menu-label">
                 Principal
             </div>
+
 
             <button
                 class="menu-button active"
                 data-view="inicio"
             >
-                <span class="menu-icon">▦</span>
-                <span>Resumen</span>
+
+                <span class="menu-icon">
+                    ▦
+                </span>
+
+                <span>
+                    Resumen
+                </span>
+
             </button>
 
 
@@ -1339,36 +1824,68 @@
                 Operación
             </div>
 
+
             <button
                 class="menu-button"
                 data-view="tiendas"
             >
-                <span class="menu-icon">⌂</span>
-                <span>Tiendas</span>
+
+                <span class="menu-icon">
+                    ⌂
+                </span>
+
+                <span>
+                    Tiendas
+                </span>
+
             </button>
+
 
             <button
                 class="menu-button"
                 data-view="repartidores"
             >
-                <span class="menu-icon">◉</span>
-                <span>Repartidores</span>
+
+                <span class="menu-icon">
+                    ◉
+                </span>
+
+                <span>
+                    Repartidores
+                </span>
+
             </button>
+
 
             <button
                 class="menu-button"
                 data-view="clientes"
             >
-                <span class="menu-icon">◎</span>
-                <span>Clientes</span>
+
+                <span class="menu-icon">
+                    ◎
+                </span>
+
+                <span>
+                    Clientes
+                </span>
+
             </button>
+
 
             <button
                 class="menu-button"
                 data-view="pedidos"
             >
-                <span class="menu-icon">□</span>
-                <span>Pedidos</span>
+
+                <span class="menu-icon">
+                    □
+                </span>
+
+                <span>
+                    Pedidos
+                </span>
+
             </button>
 
 
@@ -1376,20 +1893,36 @@
                 Finanzas
             </div>
 
+
             <button
                 class="menu-button"
                 data-view="finanzas"
             >
-                <span class="menu-icon">$</span>
-                <span>Finanzas</span>
+
+                <span class="menu-icon">
+                    $
+                </span>
+
+                <span>
+                    Finanzas
+                </span>
+
             </button>
+
 
             <button
                 class="menu-button"
                 data-view="carteras"
             >
-                <span class="menu-icon">▤</span>
-                <span>Carteras</span>
+
+                <span class="menu-icon">
+                    ▤
+                </span>
+
+                <span>
+                    Carteras
+                </span>
+
             </button>
 
 
@@ -1397,20 +1930,36 @@
                 Sistema
             </div>
 
+
             <button
                 class="menu-button"
                 data-view="configuracion"
             >
-                <span class="menu-icon">⚙</span>
-                <span>Configuración</span>
+
+                <span class="menu-icon">
+                    ⚙
+                </span>
+
+                <span>
+                    Configuración
+                </span>
+
             </button>
+
 
             <button
                 class="menu-button"
                 data-view="operadores"
             >
-                <span class="menu-icon">♙</span>
-                <span>Operadores</span>
+
+                <span class="menu-icon">
+                    ♙
+                </span>
+
+                <span>
+                    Operadores
+                </span>
+
             </button>
 
 
@@ -1418,28 +1967,50 @@
                 Negocios
             </div>
 
+
             <button
                 class="menu-button"
                 id="btnMarketplace"
             >
-                <span class="menu-icon">🛍</span>
-                <span>Marketplace</span>
+
+                <span class="menu-icon">
+                    🛍
+                </span>
+
+                <span>
+                    Marketplace
+                </span>
+
             </button>
+
 
         </nav>
 
 
+        <!-- =================================================
+             USUARIO
+        ================================================== -->
+
         <div class="sidebar-bottom">
+
 
             <div class="admin-user">
 
-                <div class="admin-avatar">
+
+                <div
+                    class="admin-avatar"
+                >
                     A
                 </div>
 
-                <div class="admin-user-info">
 
-                    <strong id="nombreAdmin">
+                <div
+                    class="admin-user-info"
+                >
+
+                    <strong
+                        id="nombreAdmin"
+                    >
                         Administrador
                     </strong>
 
@@ -1449,17 +2020,20 @@
 
                 </div>
 
+
             </div>
 
 
             <button
-                class="btn-logout"
                 id="btnCerrarSesion"
+                class="btn-logout"
             >
                 Cerrar sesión
             </button>
 
+
         </div>
+
 
     </aside>
 
@@ -1471,7 +2045,12 @@
     <main class="main">
 
 
+        <!-- =================================================
+             TOPBAR
+        ================================================== -->
+
         <header class="topbar">
+
 
             <div class="topbar-title">
 
@@ -1496,20 +2075,26 @@
 
             </div>
 
+
         </header>
 
+
+        <!-- =================================================
+             CONTENIDO
+        ================================================== -->
 
         <div class="content">
 
 
             <!-- =================================================
-                 VISTA: INICIO
+                 RESUMEN
             ================================================== -->
 
             <section
                 class="view active"
                 id="view-inicio"
             >
+
 
                 <div class="welcome">
 
@@ -1525,6 +2110,7 @@
 
 
                 <div class="stats">
+
 
                     <div class="stat">
 
@@ -1609,10 +2195,12 @@
 
                     </div>
 
+
                 </div>
 
 
                 <div class="panel">
+
 
                     <div class="panel-header">
 
@@ -1630,16 +2218,55 @@
 
                     </div>
 
+
                     <div class="panel-body">
 
                         <p
                             style="
                                 color:#6b7280;
                                 font-size:13px;
+                                line-height:1.6;
                             "
                         >
                             El resumen se conectará con los pedidos y movimientos de MOTI GO en los siguientes módulos.
                         </p>
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+            <!-- =================================================
+                 TIENDAS
+            ================================================== -->
+
+            <section
+                class="view"
+                id="view-tiendas"
+            >
+
+                <div class="welcome">
+
+                    <h2>
+                        Tiendas
+                    </h2>
+
+                    <p>
+                        Administración de tiendas asociadas a MOTI GO.
+                    </p>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-body">
+
+                        Próximamente administraremos aquí tiendas, comisiones y catálogo.
 
                     </div>
 
@@ -1649,13 +2276,189 @@
 
 
             <!-- =================================================
-                 VISTA: CONFIGURACIÓN
+                 REPARTIDORES
+            ================================================== -->
+
+            <section
+                class="view"
+                id="view-repartidores"
+            >
+
+                <div class="welcome">
+
+                    <h2>
+                        Repartidores
+                    </h2>
+
+                    <p>
+                        Gestión de repartidores y operación.
+                    </p>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-body">
+
+                        Próximamente.
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 CLIENTES
+            ================================================== -->
+
+            <section
+                class="view"
+                id="view-clientes"
+            >
+
+                <div class="welcome">
+
+                    <h2>
+                        Clientes
+                    </h2>
+
+                    <p>
+                        Clientes registrados en MOTI GO.
+                    </p>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-body">
+
+                        Próximamente.
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 PEDIDOS
+            ================================================== -->
+
+            <section
+                class="view"
+                id="view-pedidos"
+            >
+
+                <div class="welcome">
+
+                    <h2>
+                        Pedidos
+                    </h2>
+
+                    <p>
+                        Consulta y seguimiento de pedidos.
+                    </p>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-body">
+
+                        Próximamente.
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 FINANZAS
+            ================================================== -->
+
+            <section
+                class="view"
+                id="view-finanzas"
+            >
+
+                <div class="welcome">
+
+                    <h2>
+                        Finanzas
+                    </h2>
+
+                    <p>
+                        Ingresos, comisiones y movimientos de MOTI GO.
+                    </p>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-body">
+
+                        Próximamente.
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 CARTERAS
+            ================================================== -->
+
+            <section
+                class="view"
+                id="view-carteras"
+            >
+
+                <div class="welcome">
+
+                    <h2>
+                        Carteras
+                    </h2>
+
+                    <p>
+                        Administración de saldos y movimientos.
+                    </p>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-body">
+
+                        Próximamente.
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 CONFIGURACIÓN
             ================================================== -->
 
             <section
                 class="view"
                 id="view-configuracion"
             >
+
 
                 <div class="welcome">
 
@@ -1672,12 +2475,19 @@
 
                 <div class="panel">
 
+
                     <div class="panel-body">
+
 
                         <div class="config-layout">
 
 
+                            <!-- =================================
+                                 NAVEGACIÓN CONFIGURACIÓN
+                            ================================== -->
+
                             <div class="config-nav">
+
 
                                 <button
                                     class="active"
@@ -1685,28 +2495,42 @@
                                     🚴 Entregas
                                 </button>
 
+
                                 <button>
                                     🏪 Tiendas
                                 </button>
+
 
                                 <button>
                                     💳 Pagos
                                 </button>
 
+
                                 <button>
                                     🔔 Notificaciones
                                 </button>
 
+
                             </div>
 
 
+                            <!-- =================================
+                                 TARIFAS
+                            ================================== -->
+
                             <div>
 
-                                <h3 class="config-section-title">
+
+                                <h3
+                                    class="config-section-title"
+                                >
                                     Tarifas de entregas
                                 </h3>
 
-                                <p class="config-description">
+
+                                <p
+                                    class="config-description"
+                                >
                                     Define cuánto corresponde al repartidor por realizar una entrega. Estos valores posteriormente serán utilizados por el motor de tarifas de MOTI GO.
                                 </p>
 
@@ -1716,7 +2540,9 @@
 
                                     <div class="field">
 
-                                        <label for="tarifaBase">
+                                        <label
+                                            for="tarifaBase"
+                                        >
                                             Tarifa base
                                         </label>
 
@@ -1737,7 +2563,9 @@
 
                                     <div class="field">
 
-                                        <label for="precioKm">
+                                        <label
+                                            for="precioKm"
+                                        >
                                             Precio por kilómetro
                                         </label>
 
@@ -1758,7 +2586,9 @@
 
                                     <div class="field">
 
-                                        <label for="tiendaAdicional">
+                                        <label
+                                            for="tiendaAdicional"
+                                        >
                                             Tienda adicional
                                         </label>
 
@@ -1779,7 +2609,9 @@
 
                                     <div class="field">
 
-                                        <label for="minimoRepartidor">
+                                        <label
+                                            for="minimoRepartidor"
+                                        >
                                             Comisión mínima
                                         </label>
 
@@ -1800,7 +2632,9 @@
 
                                     <div class="field">
 
-                                        <label for="maximoRepartidor">
+                                        <label
+                                            for="maximoRepartidor"
+                                        >
                                             Comisión máxima
                                         </label>
 
@@ -1818,10 +2652,14 @@
 
                                     </div>
 
+
                                 </div>
 
 
-                                <div class="config-actions">
+                                <div
+                                    class="config-actions"
+                                >
+
 
                                     <span
                                         class="save-status"
@@ -1832,198 +2670,34 @@
 
 
                                     <button
-                                        class="btn-primary"
                                         id="btnGuardarTarifas"
+                                        class="btn-primary"
                                     >
                                         Guardar configuración
                                     </button>
 
+
                                 </div>
+
 
                             </div>
 
+
                         </div>
+
 
                     </div>
 
+
                 </div>
+
 
             </section>
 
 
             <!-- =================================================
-                 VISTAS FUTURAS
+                 OPERADORES
             ================================================== -->
-
-            <section
-                class="view"
-                id="view-tiendas"
-            >
-
-                <div class="welcome">
-
-                    <h2>
-                        Tiendas
-                    </h2>
-
-                    <p>
-                        Administración de tiendas asociadas a MOTI GO.
-                    </p>
-
-                </div>
-
-                <div class="panel">
-
-                    <div class="panel-body">
-
-                        Próximamente administraremos aquí tiendas, comisiones y catálogo.
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <section
-                class="view"
-                id="view-repartidores"
-            >
-
-                <div class="welcome">
-
-                    <h2>
-                        Repartidores
-                    </h2>
-
-                    <p>
-                        Gestión de repartidores y operación.
-                    </p>
-
-                </div>
-
-                <div class="panel">
-
-                    <div class="panel-body">
-                        Próximamente.
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <section
-                class="view"
-                id="view-clientes"
-            >
-
-                <div class="welcome">
-
-                    <h2>
-                        Clientes
-                    </h2>
-
-                    <p>
-                        Clientes registrados en MOTI GO.
-                    </p>
-
-                </div>
-
-                <div class="panel">
-
-                    <div class="panel-body">
-                        Próximamente.
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <section
-                class="view"
-                id="view-pedidos"
-            >
-
-                <div class="welcome">
-
-                    <h2>
-                        Pedidos
-                    </h2>
-
-                    <p>
-                        Consulta y seguimiento de pedidos.
-                    </p>
-
-                </div>
-
-                <div class="panel">
-
-                    <div class="panel-body">
-                        Próximamente.
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <section
-                class="view"
-                id="view-finanzas"
-            >
-
-                <div class="welcome">
-
-                    <h2>
-                        Finanzas
-                    </h2>
-
-                    <p>
-                        Ingresos, comisiones y movimientos de MOTI GO.
-                    </p>
-
-                </div>
-
-                <div class="panel">
-
-                    <div class="panel-body">
-                        Próximamente.
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <section
-                class="view"
-                id="view-carteras"
-            >
-
-                <div class="welcome">
-
-                    <h2>
-                        Carteras
-                    </h2>
-
-                    <p>
-                        Administración de saldos y movimientos.
-                    </p>
-
-                </div>
-
-                <div class="panel">
-
-                    <div class="panel-body">
-                        Próximamente.
-                    </div>
-
-                </div>
-
-            </section>
-
 
             <section
                 class="view"
@@ -2042,10 +2716,13 @@
 
                 </div>
 
+
                 <div class="panel">
 
                     <div class="panel-body">
+
                         Próximamente.
+
                     </div>
 
                 </div>
@@ -2055,20 +2732,23 @@
 
         </div>
 
+
     </main>
+
 
 </div>
 
 
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
 
-    <script
+<script
     type="module"
     src="./dashboard-admin.js"
 ></script>
 
-    
-</body>
 
-    
+</body>
 
 </html>
