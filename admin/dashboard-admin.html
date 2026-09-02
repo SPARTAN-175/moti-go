@@ -2244,35 +2244,136 @@
                  TIENDAS
             ================================================== -->
 
-            <section
-                class="view"
-                id="view-tiendas"
+            <section class="view" id="view-tiendas">
+
+    <div class="view-header">
+        <div>
+            <h2>Tiendas</h2>
+            <p>Administra los negocios asociados a MOTI GO.</p>
+        </div>
+
+        <button
+            class="btn-principal"
+            id="btnNuevaTienda"
+            type="button"
+        >
+            + Nueva tienda
+        </button>
+    </div>
+
+    <div class="panel-principal">
+
+        <div class="panel-cabecera">
+            <div>
+                <h3>Mis tiendas</h3>
+                <p>
+                    Aquí aparecerán las tiendas registradas en MOTI GO.
+                </p>
+            </div>
+        </div>
+
+        <div
+            id="contenedorTiendas"
+            class="contenedor-tiendas"
+        >
+
+            <div class="estado-vacio">
+
+                <div class="estado-vacio-icono">
+                    🏪
+                </div>
+
+                <h3>Aún no hay tiendas registradas</h3>
+
+                <p>
+                    Genera una invitación para que una nueva tienda
+                    pueda registrarse por sí misma.
+                </p>
+
+                <button
+                    class="btn-principal"
+                    id="btnNuevaTiendaVacio"
+                    type="button"
+                >
+                    + Generar invitación
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- MODAL: NUEVA INVITACIÓN DE TIENDA -->
+<div
+    class="modal"
+    id="modalNuevaTienda"
+    aria-hidden="true"
+>
+
+    <div class="modal-contenido">
+
+        <div class="modal-cabecera">
+
+            <div>
+                <h3>Nueva invitación</h3>
+                <p>
+                    Genera un enlace único para que la tienda
+                    pueda registrarse.
+                </p>
+            </div>
+
+            <button
+                class="modal-cerrar"
+                id="btnCerrarModalTienda"
+                type="button"
+                aria-label="Cerrar"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <div class="modal-cuerpo">
+
+            <div
+                id="contenidoInvitacionTienda"
+                class="contenido-invitacion"
             >
 
-                <div class="welcome">
+                <div class="invitacion-info">
 
-                    <h2>
-                        Tiendas
-                    </h2>
+                    <div class="invitacion-icono">
+                        🏪
+                    </div>
+
+                    <h4>Crear invitación</h4>
 
                     <p>
-                        Administración de tiendas asociadas a MOTI GO.
+                        Al generar la invitación se creará un código
+                        único que podrá utilizar una sola tienda.
                     </p>
 
                 </div>
 
+                <button
+                    class="btn-principal btn-ancho"
+                    id="btnGenerarInvitacion"
+                    type="button"
+                >
+                    Generar invitación
+                </button>
 
-                <div class="panel">
+            </div>
 
-                    <div class="panel-body">
+        </div>
 
-                        Próximamente administraremos aquí tiendas, comisiones y catálogo.
+    </div>
 
-                    </div>
-
-                </div>
-
-            </section>
+</div>
 
 
             <!-- =================================================
