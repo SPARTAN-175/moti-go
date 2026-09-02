@@ -23,7 +23,10 @@ import {
 
 import {
     doc,
-    getDoc
+    getDoc,
+    collection,
+    setDoc,
+    serverTimestamp
 } from
 "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
@@ -109,6 +112,46 @@ const btnGuardarTarifas =
 const estadoConfiguracion =
     document.getElementById(
         "estadoConfiguracion"
+    );
+
+
+/* =========================================================
+   ELEMENTOS — INVITACIONES DE TIENDAS
+========================================================= */
+
+const btnNuevaTienda =
+    document.getElementById(
+        "btnNuevaTienda"
+    );
+
+
+const btnNuevaTiendaVacio =
+    document.getElementById(
+        "btnNuevaTiendaVacio"
+    );
+
+
+const modalNuevaTienda =
+    document.getElementById(
+        "modalNuevaTienda"
+    );
+
+
+const btnCerrarModalTienda =
+    document.getElementById(
+        "btnCerrarModalTienda"
+    );
+
+
+const btnGenerarInvitacion =
+    document.getElementById(
+        "btnGenerarInvitacion"
+    );
+
+
+const contenidoInvitacionTienda =
+    document.getElementById(
+        "contenidoInvitacionTienda"
     );
 
 
@@ -484,7 +527,7 @@ function mostrarVista(
 
 
     /* -----------------------------------------------------
-       VOLVER AL INICIO DEL CONTENIDO
+       VOLVER AL INICIO
     ----------------------------------------------------- */
 
     window.scrollTo({
@@ -534,16 +577,492 @@ if (btnMarketplace) {
         "click",
         () => {
 
-            /*
-             * Marketplace tendrá su propio
-             * panel administrativo.
-             *
-             * No mezclamos su funcionamiento
-             * con este dashboard.
-             */
-
             window.location.href =
                 "./marketplace/dashboard-marketplace.html";
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   MODAL — INVITACIÓN DE TIENDA
+========================================================= */
+
+function abrirModalNuevaTienda() {
+
+    if (!modalNuevaTienda) {
+        return;
+    }
+
+
+    modalNuevaTienda.classList.add(
+        "active"
+    );
+
+
+    modalNuevaTienda.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+}
+
+
+function cerrarModalNuevaTienda() {
+
+    if (!modalNuevaTienda) {
+        return;
+    }
+
+
+    modalNuevaTienda.classList.remove(
+        "active"
+    );
+
+
+    modalNuevaTienda.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+}
+
+
+/* =========================================================
+   BOTONES PARA ABRIR EL MODAL
+========================================================= */
+
+if (btnNuevaTienda) {
+
+    btnNuevaTienda.addEventListener(
+        "click",
+        () => {
+
+            abrirModalNuevaTienda();
+
+        }
+    );
+
+}
+
+
+if (btnNuevaTiendaVacio) {
+
+    btnNuevaTiendaVacio.addEventListener(
+        "click",
+        () => {
+
+            abrirModalNuevaTienda();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CERRAR MODAL
+========================================================= */
+
+if (btnCerrarModalTienda) {
+
+    btnCerrarModalTienda.addEventListener(
+        "click",
+        () => {
+
+            cerrarModalNuevaTienda();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CERRAR MODAL AL HACER CLIC EN EL FONDO
+========================================================= */
+
+if (modalNuevaTienda) {
+
+    modalNuevaTienda.addEventListener(
+        "click",
+        evento => {
+
+            if (
+                evento.target ===
+                modalNuevaTienda
+            ) {
+
+                cerrarModalNuevaTienda();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   GENERAR CÓDIGO DE INVITACIÓN
+========================================================= */
+
+function generarCodigoInvitacion() {
+
+    const caracteres =
+        "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+
+    let codigo =
+        "MG-";
+
+
+    for (
+        let i = 0;
+        i < 8;
+        i++
+    ) {
+
+        const posicion =
+            Math.floor(
+                Math.random() *
+                caracteres.length
+            );
+
+
+        codigo +=
+            caracteres[
+                posicion
+            ];
+
+    }
+
+
+    return codigo;
+
+}
+
+
+/* =========================================================
+   GENERAR INVITACIÓN
+========================================================= */
+
+async function crearInvitacionTienda() {
+
+    if (!auth.currentUser) {
+
+        alert(
+            "Tu sesión administrativa ya no está disponible."
+        );
+
+        return;
+
+    }
+
+
+    if (!btnGenerarInvitacion) {
+        return;
+    }
+
+
+    try {
+
+        /* -------------------------------------------------
+           DESACTIVAR BOTÓN
+        ------------------------------------------------- */
+
+        btnGenerarInvitacion.disabled =
+            true;
+
+
+        btnGenerarInvitacion.textContent =
+            "Generando...";
+
+
+        /* -------------------------------------------------
+           GENERAR CÓDIGO ÚNICO
+        ------------------------------------------------- */
+
+        let codigo;
+
+        let referenciaInvitacion;
+
+        let snapshotInvitacion;
+
+        let intentos = 0;
+
+
+        do {
+
+            codigo =
+                generarCodigoInvitacion();
+
+
+            referenciaInvitacion =
+                doc(
+                    db,
+                    "invitacionesTiendas",
+                    codigo
+                );
+
+
+            snapshotInvitacion =
+                await getDoc(
+                    referenciaInvitacion
+                );
+
+
+            intentos++;
+
+        }
+        while (
+            snapshotInvitacion.exists() &&
+            intentos < 5
+        );
+
+
+        if (
+            snapshotInvitacion.exists()
+        ) {
+
+            throw new Error(
+                "No fue posible generar un código único."
+            );
+
+        }
+
+
+        /* -------------------------------------------------
+           GUARDAR INVITACIÓN
+        ------------------------------------------------- */
+
+        await setDoc(
+            referenciaInvitacion,
+            {
+
+                codigo,
+
+                estado:
+                    "pendiente",
+
+                creadoPor:
+                    auth.currentUser.uid,
+
+                creadoEn:
+                    serverTimestamp(),
+
+                usadoEn:
+                    null,
+
+                tiendaId:
+                    null
+
+            }
+        );
+
+
+        /* -------------------------------------------------
+           CREAR ENLACE
+        ------------------------------------------------- */
+
+        const enlace =
+            new URL(
+                "../registro-tienda.html",
+                window.location.href
+            );
+
+
+        enlace.searchParams.set(
+            "codigo",
+            codigo
+        );
+
+
+        const enlaceRegistro =
+            enlace.href;
+
+
+        /* -------------------------------------------------
+           MOSTRAR RESULTADO
+        ------------------------------------------------- */
+
+        if (contenidoInvitacionTienda) {
+
+            contenidoInvitacionTienda.innerHTML = `
+
+                <div class="invitacion-generada">
+
+                    <div class="invitacion-exito">
+                        ✓ Invitación generada
+                    </div>
+
+                    <div class="invitacion-bloque">
+
+                        <span class="invitacion-label">
+                            Código de invitación
+                        </span>
+
+                        <strong class="invitacion-codigo">
+                            ${codigo}
+                        </strong>
+
+                    </div>
+
+                    <div class="invitacion-bloque">
+
+                        <span class="invitacion-label">
+                            Enlace de registro
+                        </span>
+
+                        <div class="invitacion-enlace">
+                            ${enlaceRegistro}
+                        </div>
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn-principal btn-ancho"
+                        id="btnCopiarInvitacion"
+                    >
+                        Copiar enlace
+                    </button>
+
+                    <div class="invitacion-qr-pendiente">
+
+                        <div class="qr-placeholder">
+                            QR
+                        </div>
+
+                        <p>
+                            El código QR lo agregaremos
+                            en el siguiente paso.
+                        </p>
+
+                    </div>
+
+                    <div class="invitacion-aviso">
+
+                        🔒 Esta invitación es de un solo uso.
+                        Después del registro quedará invalidada.
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            /* -------------------------------------------------
+               BOTÓN COPIAR
+            ------------------------------------------------- */
+
+            const btnCopiarInvitacion =
+                document.getElementById(
+                    "btnCopiarInvitacion"
+                );
+
+
+            if (btnCopiarInvitacion) {
+
+                btnCopiarInvitacion.addEventListener(
+                    "click",
+                    async () => {
+
+                        try {
+
+                            await navigator.clipboard.writeText(
+                                enlaceRegistro
+                            );
+
+
+                            btnCopiarInvitacion.textContent =
+                                "✓ Enlace copiado";
+
+
+                            setTimeout(
+                                () => {
+
+                                    btnCopiarInvitacion.textContent =
+                                        "Copiar enlace";
+
+                                },
+                                2000
+                            );
+
+                        }
+                        catch (error) {
+
+                            console.error(
+                                "Error copiando enlace:",
+                                error
+                            );
+
+
+                            alert(
+                                "No se pudo copiar automáticamente. Copia el enlace manualmente."
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+
+        }
+
+
+        console.log(
+            "🏪 MOTI GO: invitación de tienda creada:",
+            codigo
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "❌ Error creando invitación:",
+            error
+        );
+
+
+        alert(
+            "No se pudo crear la invitación. Revisa Firebase y las reglas de Firestore."
+        );
+
+    }
+    finally {
+
+        if (btnGenerarInvitacion) {
+
+            btnGenerarInvitacion.disabled =
+                false;
+
+
+            btnGenerarInvitacion.textContent =
+                "Generar invitación";
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   EVENTO — GENERAR INVITACIÓN
+========================================================= */
+
+if (btnGenerarInvitacion) {
+
+    btnGenerarInvitacion.addEventListener(
+        "click",
+        () => {
+
+            crearInvitacionTienda();
 
         }
     );
@@ -854,10 +1373,6 @@ if (btnGuardarTarifas) {
                 );
 
 
-            /* -------------------------------------------------
-               VALIDAR VALORES
-            ------------------------------------------------- */
-
             const valores = [
 
                 tarifaBase,
@@ -895,10 +1410,6 @@ if (btnGuardarTarifas) {
             }
 
 
-            /* -------------------------------------------------
-               VALIDAR MÍNIMO / MÁXIMO
-            ------------------------------------------------- */
-
             if (
                 maximoRepartidor <
                 minimoRepartidor
@@ -915,10 +1426,6 @@ if (btnGuardarTarifas) {
 
             }
 
-
-            /* -------------------------------------------------
-               PREPARAR CONFIGURACIÓN
-            ------------------------------------------------- */
 
             const configuracion = {
 
