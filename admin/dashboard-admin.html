@@ -2,7 +2,6 @@
 <html lang="es">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -10,9 +9,13 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>MOTI GO - Administración</title>
+    <title>MOTI GO · Administración</title>
 
     <style>
+
+        /* =====================================================
+           RESET
+        ===================================================== */
 
         * {
             box-sizing: border-box;
@@ -21,32 +24,491 @@
         }
 
 
-        body {
+        :root {
+            --verde: #16a34a;
+            --verde-oscuro: #15803d;
 
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
+            --fondo: #f5f7f8;
+            --panel: #ffffff;
 
-            background:
-                #f4f6f8;
+            --texto: #17202a;
+            --texto-secundario: #6b7280;
 
-            color:
-                #1f2937;
+            --borde: #e5e7eb;
 
+            --sidebar: #101827;
+
+            --sidebar-texto: #cbd5e1;
+            --sidebar-hover: #1b2738;
+
+            --rojo: #dc2626;
+
+            --sombra:
+                0 10px 30px rgba(
+                    15,
+                    23,
+                    42,
+                    .06
+                );
         }
 
 
-        .admin-header {
+        body {
+            font-family:
+                Inter,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
 
             background:
-                #111827;
+                var(--fondo);
+
+            color:
+                var(--texto);
+
+            min-height:
+                100vh;
+        }
+
+
+        button,
+        input {
+            font:
+                inherit;
+        }
+
+
+        button {
+            cursor:
+                pointer;
+        }
+
+
+        /* =====================================================
+           APLICACIÓN
+        ===================================================== */
+
+        .app {
+            display:
+                flex;
+
+            min-height:
+                100vh;
+        }
+
+
+        /* =====================================================
+           SIDEBAR
+        ===================================================== */
+
+        .sidebar {
+            width:
+                250px;
+
+            background:
+                var(--sidebar);
 
             color:
                 white;
 
+            position:
+                fixed;
+
+            left:
+                0;
+
+            top:
+                0;
+
+            bottom:
+                0;
+
+            display:
+                flex;
+
+            flex-direction:
+                column;
+
+            z-index:
+                100;
+        }
+
+
+        .logo-area {
+            height:
+                76px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                12px;
+
             padding:
+                0 22px;
+
+            border-bottom:
+                1px solid rgba(
+                    255,
+                    255,
+                    255,
+                    .07
+                );
+        }
+
+
+        .logo-mark {
+            width:
+                38px;
+
+            height:
+                38px;
+
+            border-radius:
+                11px;
+
+            background:
+                var(--verde);
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            font-size:
+                19px;
+
+            font-weight:
+                800;
+        }
+
+
+        .logo-text strong {
+            display:
+                block;
+
+            font-size:
+                17px;
+
+            letter-spacing:
+                .2px;
+        }
+
+
+        .logo-text span {
+            display:
+                block;
+
+            margin-top:
+                2px;
+
+            color:
+                #94a3b8;
+
+            font-size:
+                11px;
+        }
+
+
+        .menu {
+            padding:
+                20px 12px;
+
+            overflow-y:
+                auto;
+        }
+
+
+        .menu-label {
+            padding:
+                0 11px;
+
+            margin:
+                12px 0 7px;
+
+            color:
+                #64748b;
+
+            font-size:
+                10px;
+
+            font-weight:
+                700;
+
+            text-transform:
+                uppercase;
+
+            letter-spacing:
+                .12em;
+        }
+
+
+        .menu-button {
+            width:
+                100%;
+
+            border:
+                none;
+
+            background:
+                transparent;
+
+            color:
+                var(--sidebar-texto);
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                11px;
+
+            padding:
+                11px 12px;
+
+            border-radius:
+                9px;
+
+            margin-bottom:
+                3px;
+
+            text-align:
+                left;
+
+            transition:
+                .18s ease;
+        }
+
+
+        .menu-button:hover {
+            background:
+                var(--sidebar-hover);
+
+            color:
+                white;
+        }
+
+
+        .menu-button.active {
+            background:
+                rgba(
+                    22,
+                    163,
+                    74,
+                    .16
+                );
+
+            color:
+                #86efac;
+        }
+
+
+        .menu-icon {
+            width:
                 20px;
+
+            text-align:
+                center;
+
+            font-size:
+                16px;
+        }
+
+
+        .sidebar-bottom {
+            margin-top:
+                auto;
+
+            padding:
+                14px;
+
+            border-top:
+                1px solid rgba(
+                    255,
+                    255,
+                    255,
+                    .07
+                );
+        }
+
+
+        .admin-user {
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                10px;
+
+            padding:
+                9px;
+        }
+
+
+        .admin-avatar {
+            width:
+                34px;
+
+            height:
+                34px;
+
+            border-radius:
+                50%;
+
+            background:
+                #243244;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            font-size:
+                14px;
+        }
+
+
+        .admin-user-info {
+            min-width:
+                0;
+        }
+
+
+        .admin-user-info strong {
+            display:
+                block;
+
+            color:
+                white;
+
+            font-size:
+                12px;
+
+            overflow:
+                hidden;
+
+            text-overflow:
+                ellipsis;
+
+            white-space:
+                nowrap;
+        }
+
+
+        .admin-user-info span {
+            display:
+                block;
+
+            color:
+                #64748b;
+
+            font-size:
+                10px;
+
+            margin-top:
+                2px;
+        }
+
+
+        .btn-logout {
+            width:
+                100%;
+
+            margin-top:
+                7px;
+
+            border:
+                1px solid rgba(
+                    255,
+                    255,
+                    255,
+                    .08
+                );
+
+            background:
+                transparent;
+
+            color:
+                #94a3b8;
+
+            border-radius:
+                8px;
+
+            padding:
+                9px;
+
+            font-size:
+                12px;
+        }
+
+
+        .btn-logout:hover {
+            color:
+                #fca5a5;
+
+            border-color:
+                rgba(
+                    220,
+                    38,
+                    38,
+                    .3
+                );
+        }
+
+
+        /* =====================================================
+           CONTENIDO
+        ===================================================== */
+
+        .main {
+            margin-left:
+                250px;
+
+            width:
+                calc(
+                    100% - 250px
+                );
+
+            min-width:
+                0;
+        }
+
+
+        /* =====================================================
+           TOPBAR
+        ===================================================== */
+
+        .topbar {
+            height:
+                76px;
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .94
+                );
+
+            border-bottom:
+                1px solid var(--borde);
 
             display:
                 flex;
@@ -57,188 +519,800 @@
             justify-content:
                 space-between;
 
-        }
-
-
-        .admin-header h1 {
-
-            font-size:
-                22px;
-
-        }
-
-
-        .admin-header span {
-
-            font-size:
-                13px;
-
-            opacity:
-                .75;
-
-        }
-
-
-        .contenedor {
-
-            width:
-                min(1100px, 92%);
-
-            margin:
-                30px auto;
-
-        }
-
-
-        .bienvenida {
-
-            background:
-                white;
-
-            border-radius:
-                16px;
-
             padding:
-                25px;
+                0 30px;
 
-            margin-bottom:
-                25px;
+            position:
+                sticky;
 
-            box-shadow:
-                0 4px 15px rgba(
-                    0,
-                    0,
-                    0,
-                    .06
-                );
+            top:
+                0;
 
+            z-index:
+                50;
+
+            backdrop-filter:
+                blur(12px);
         }
 
 
-        .bienvenida h2 {
+        .topbar-title h1 {
+            font-size:
+                20px;
 
-            margin-bottom:
-                8px;
-
+            font-weight:
+                700;
         }
 
 
-        .bienvenida p {
+        .topbar-title p {
+            margin-top:
+                3px;
 
             color:
-                #6b7280;
+                var(--texto-secundario);
 
+            font-size:
+                12px;
         }
 
 
-        .grid {
+        .status {
+            display:
+                flex;
 
+            align-items:
+                center;
+
+            gap:
+                7px;
+
+            color:
+                #15803d;
+
+            font-size:
+                12px;
+        }
+
+
+        .status-dot {
+            width:
+                8px;
+
+            height:
+                8px;
+
+            border-radius:
+                50%;
+
+            background:
+                #22c55e;
+        }
+
+
+        /* =====================================================
+           ÁREA DE CONTENIDO
+        ===================================================== */
+
+        .content {
+            padding:
+                30px;
+
+            max-width:
+                1500px;
+
+            margin:
+                0 auto;
+        }
+
+
+        .view {
+            display:
+                none;
+        }
+
+
+        .view.active {
+            display:
+                block;
+        }
+
+
+        /* =====================================================
+           BIENVENIDA
+        ===================================================== */
+
+        .welcome {
+            margin-bottom:
+                28px;
+        }
+
+
+        .welcome h2 {
+            font-size:
+                25px;
+
+            letter-spacing:
+                -.4px;
+        }
+
+
+        .welcome p {
+            margin-top:
+                7px;
+
+            color:
+                var(--texto-secundario);
+
+            font-size:
+                14px;
+        }
+
+
+        /* =====================================================
+           RESUMEN
+        ===================================================== */
+
+        .stats {
             display:
                 grid;
 
             grid-template-columns:
                 repeat(
-                    auto-fit,
+                    4,
                     minmax(
-                        220px,
+                        0,
                         1fr
                     )
                 );
 
             gap:
-                18px;
-
-        }
-
-
-        .card {
-
-            background:
-                white;
-
-            border-radius:
                 16px;
 
-            padding:
-                25px;
+            margin-bottom:
+                28px;
+        }
 
-            min-height:
-                150px;
+
+        .stat {
+            background:
+                var(--panel);
+
+            border:
+                1px solid var(--borde);
+
+            border-radius:
+                12px;
+
+            padding:
+                19px;
 
             box-shadow:
-                0 4px 15px rgba(
-                    0,
-                    0,
-                    0,
-                    .06
-                );
-
+                var(--sombra);
         }
 
 
-        .card h3 {
+        .stat-top {
+            display:
+                flex;
 
-            margin-bottom:
-                10px;
+            justify-content:
+                space-between;
 
+            align-items:
+                center;
         }
 
 
-        .card p {
-
+        .stat-label {
             color:
-                #6b7280;
+                var(--texto-secundario);
 
             font-size:
-                14px;
-
+                12px;
         }
 
 
-        .card button {
+        .stat-icon {
+            width:
+                34px;
+
+            height:
+                34px;
+
+            border-radius:
+                9px;
+
+            background:
+                #f0fdf4;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+        }
+
+
+        .stat-value {
+            margin-top:
+                13px;
+
+            font-size:
+                25px;
+
+            font-weight:
+                750;
+        }
+
+
+        /* =====================================================
+           PANEL
+        ===================================================== */
+
+        .panel {
+            background:
+                var(--panel);
+
+            border:
+                1px solid var(--borde);
+
+            border-radius:
+                12px;
+
+            box-shadow:
+                var(--sombra);
+
+            overflow:
+                hidden;
+        }
+
+
+        .panel-header {
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            padding:
+                20px 22px;
+
+            border-bottom:
+                1px solid var(--borde);
+        }
+
+
+        .panel-header h3 {
+            font-size:
+                15px;
+        }
+
+
+        .panel-header p {
+            color:
+                var(--texto-secundario);
+
+            font-size:
+                12px;
 
             margin-top:
-                18px;
+                4px;
+        }
+
+
+        .panel-body {
+            padding:
+                22px;
+        }
+
+
+        /* =====================================================
+           CONFIGURACIÓN
+        ===================================================== */
+
+        .config-layout {
+            display:
+                grid;
+
+            grid-template-columns:
+                210px minmax(
+                    0,
+                    1fr
+                );
+
+            gap:
+                22px;
+        }
+
+
+        .config-nav {
+            border-right:
+                1px solid var(--borde);
+
+            padding-right:
+                16px;
+        }
+
+
+        .config-nav button {
+            width:
+                100%;
 
             border:
                 none;
 
-            border-radius:
-                10px;
+            background:
+                transparent;
 
             padding:
-                10px 16px;
+                11px 12px;
 
-            cursor:
-                pointer;
+            border-radius:
+                8px;
+
+            text-align:
+                left;
+
+            color:
+                var(--texto-secundario);
+
+            font-size:
+                13px;
+
+            margin-bottom:
+                4px;
+        }
+
+
+        .config-nav button.active {
+            background:
+                #f0fdf4;
+
+            color:
+                var(--verde-oscuro);
+
+            font-weight:
+                600;
+        }
+
+
+        .config-section-title {
+            margin-bottom:
+                5px;
+
+            font-size:
+                17px;
+        }
+
+
+        .config-description {
+            color:
+                var(--texto-secundario);
+
+            font-size:
+                13px;
+
+            line-height:
+                1.5;
+
+            margin-bottom:
+                22px;
+        }
+
+
+        .form-grid {
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(
+                    2,
+                    minmax(
+                        0,
+                        1fr
+                    )
+                );
+
+            gap:
+                17px;
+        }
+
+
+        .field {
+            display:
+                flex;
+
+            flex-direction:
+                column;
+
+            gap:
+                7px;
+        }
+
+
+        .field label {
+            font-size:
+                12px;
+
+            font-weight:
+                600;
+        }
+
+
+        .field small {
+            color:
+                var(--texto-secundario);
+
+            font-size:
+                11px;
+        }
+
+
+        .field input {
+            width:
+                100%;
+
+            border:
+                1px solid var(--borde);
+
+            border-radius:
+                8px;
+
+            padding:
+                11px 12px;
+
+            outline:
+                none;
 
             background:
-                #111827;
+                #fff;
+
+            color:
+                var(--texto);
+
+            transition:
+                .18s ease;
+        }
+
+
+        .field input:focus {
+            border-color:
+                var(--verde);
+
+            box-shadow:
+                0 0 0 3px
+                rgba(
+                    22,
+                    163,
+                    74,
+                    .08
+                );
+        }
+
+
+        .config-actions {
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            margin-top:
+                25px;
+
+            padding-top:
+                20px;
+
+            border-top:
+                1px solid var(--borde);
+        }
+
+
+        .save-status {
+            color:
+                var(--texto-secundario);
+
+            font-size:
+                12px;
+        }
+
+
+        .btn-primary {
+            border:
+                none;
+
+            background:
+                var(--verde);
 
             color:
                 white;
 
-        }
+            border-radius:
+                8px;
 
-
-        .cerrar {
-
-            background:
-                #dc2626 !important;
-
-        }
-
-
-        #estadoAdmin {
-
-            margin-top:
-                15px;
+            padding:
+                10px 18px;
 
             font-size:
-                14px;
+                13px;
+
+            font-weight:
+                600;
+        }
+
+
+        .btn-primary:hover {
+            background:
+                var(--verde-oscuro);
+        }
+
+
+        /* =====================================================
+           MARKETPLACE
+        ===================================================== */
+
+        .marketplace-row {
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            gap:
+                20px;
+
+            padding:
+                24px;
+        }
+
+
+        .marketplace-info {
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                16px;
+        }
+
+
+        .marketplace-icon {
+            width:
+                50px;
+
+            height:
+                50px;
+
+            border-radius:
+                12px;
+
+            background:
+                #eff6ff;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            font-size:
+                23px;
+        }
+
+
+        .marketplace-info h3 {
+            font-size:
+                15px;
+        }
+
+
+        .marketplace-info p {
+            color:
+                var(--texto-secundario);
+
+            font-size:
+                12px;
+
+            margin-top:
+                4px;
+        }
+
+
+        .btn-secondary {
+            border:
+                1px solid var(--borde);
+
+            background:
+                white;
 
             color:
-                #16a34a;
+                var(--texto);
+
+            border-radius:
+                8px;
+
+            padding:
+                10px 16px;
+
+            font-size:
+                12px;
+
+            font-weight:
+                600;
+        }
+
+
+        .btn-secondary:hover {
+            border-color:
+                #cbd5e1;
+
+            background:
+                #f8fafc;
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (
+            max-width: 1050px
+        ) {
+
+            .stats {
+                grid-template-columns:
+                    repeat(
+                        2,
+                        minmax(
+                            0,
+                            1fr
+                        )
+                    );
+            }
+
+        }
+
+
+        @media (
+            max-width: 800px
+        ) {
+
+            .sidebar {
+                width:
+                    70px;
+            }
+
+
+            .logo-area {
+                justify-content:
+                    center;
+
+                padding:
+                    0;
+            }
+
+
+            .logo-text,
+            .menu-label,
+            .menu-button span,
+            .admin-user-info,
+            .btn-logout {
+                display:
+                    none;
+            }
+
+
+            .menu-button {
+                justify-content:
+                    center;
+            }
+
+
+            .sidebar-bottom {
+                padding:
+                    8px;
+            }
+
+
+            .admin-user {
+                justify-content:
+                    center;
+            }
+
+
+            .main {
+                margin-left:
+                    70px;
+
+                width:
+                    calc(
+                        100% - 70px
+                    );
+            }
+
+
+            .config-layout {
+                grid-template-columns:
+                    1fr;
+            }
+
+
+            .config-nav {
+                border-right:
+                    none;
+
+                border-bottom:
+                    1px solid var(--borde);
+
+                padding:
+                    0 0 12px;
+            }
+
+
+            .config-nav button {
+                display:
+                    inline-block;
+
+                width:
+                    auto;
+            }
+
+        }
+
+
+        @media (
+            max-width: 600px
+        ) {
+
+            .topbar {
+                padding:
+                    0 17px;
+            }
+
+
+            .content {
+                padding:
+                    20px 15px;
+            }
+
+
+            .stats {
+                grid-template-columns:
+                    1fr;
+            }
+
+
+            .form-grid {
+                grid-template-columns:
+                    1fr;
+            }
+
+
+            .marketplace-row {
+                flex-direction:
+                    column;
+
+                align-items:
+                    flex-start;
+            }
 
         }
 
@@ -249,182 +1323,779 @@
 
 <body>
 
-
-<header class="admin-header">
-
-    <div>
-
-        <h1>
-            MOTI GO
-        </h1>
-
-        <span>
-            Panel de administración
-        </span>
-
-    </div>
+<div class="app">
 
 
-    <button
-        id="btnCerrarSesion"
-        class="cerrar"
-    >
-        Cerrar sesión
-    </button>
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
 
-</header>
+    <aside class="sidebar">
 
+        <div class="logo-area">
 
+            <div class="logo-mark">
+                M
+            </div>
 
-<main class="contenedor">
+            <div class="logo-text">
 
+                <strong>
+                    MOTI GO
+                </strong>
 
-    <section class="bienvenida">
+                <span>
+                    Administración
+                </span>
 
-        <h2>
-            Panel administrativo
-        </h2>
+            </div>
 
-        <p>
-            Bienvenido al centro de administración de MOTI GO.
-        </p>
-
-        <div id="estadoAdmin">
-            Verificando cuenta...
         </div>
 
-    </section>
 
+        <nav class="menu">
 
-
-    <section class="grid">
-
-
-        <article class="card">
-
-            <h3>
-                🏪 Tiendas
-            </h3>
-
-            <p>
-                Administrar tiendas asociadas y sus comisiones.
-            </p>
+            <div class="menu-label">
+                Principal
+            </div>
 
             <button
-                id="btnTiendas"
+                class="menu-button active"
+                data-view="inicio"
             >
-                Administrar tiendas
+                <span class="menu-icon">▦</span>
+                <span>Resumen</span>
             </button>
 
-        </article>
 
-
-
-        <article class="card">
-
-            <h3>
-                🛵 Repartidores
-            </h3>
-
-            <p>
-                Consultar y administrar repartidores.
-            </p>
+            <div class="menu-label">
+                Operación
+            </div>
 
             <button
-                id="btnRepartidores"
+                class="menu-button"
+                data-view="tiendas"
             >
-                Ver repartidores
+                <span class="menu-icon">⌂</span>
+                <span>Tiendas</span>
             </button>
-
-        </article>
-
-
-
-        <article class="card">
-
-            <h3>
-                👥 Clientes
-            </h3>
-
-            <p>
-                Consultar clientes registrados en MOTI GO.
-            </p>
 
             <button
-                id="btnClientes"
+                class="menu-button"
+                data-view="repartidores"
             >
-                Ver clientes
+                <span class="menu-icon">◉</span>
+                <span>Repartidores</span>
             </button>
-
-        </article>
-
-
-
-        <article class="card">
-
-            <h3>
-                📦 Pedidos
-            </h3>
-
-            <p>
-                Consultar pedidos y su estado.
-            </p>
 
             <button
-                id="btnPedidos"
+                class="menu-button"
+                data-view="clientes"
             >
-                Ver pedidos
+                <span class="menu-icon">◎</span>
+                <span>Clientes</span>
             </button>
-
-        </article>
-
-
-
-        <article class="card">
-
-            <h3>
-                💰 Finanzas
-            </h3>
-
-            <p>
-                Comisiones, saldo operativo y movimientos de MOTI GO.
-            </p>
 
             <button
-                id="btnFinanzas"
+                class="menu-button"
+                data-view="pedidos"
             >
-                Ver finanzas
+                <span class="menu-icon">□</span>
+                <span>Pedidos</span>
             </button>
 
-        </article>
 
-
-
-        <article class="card">
-
-            <h3>
-                👑 Operadores
-            </h3>
-
-            <p>
-                Carteras y movimientos de los operadores fundadores.
-            </p>
+            <div class="menu-label">
+                Finanzas
+            </div>
 
             <button
-                id="btnOperadores"
+                class="menu-button"
+                data-view="finanzas"
             >
-                Ver operadores
+                <span class="menu-icon">$</span>
+                <span>Finanzas</span>
             </button>
 
-        </article>
+            <button
+                class="menu-button"
+                data-view="carteras"
+            >
+                <span class="menu-icon">▤</span>
+                <span>Carteras</span>
+            </button>
 
 
-    </section>
+            <div class="menu-label">
+                Sistema
+            </div>
+
+            <button
+                class="menu-button"
+                data-view="configuracion"
+            >
+                <span class="menu-icon">⚙</span>
+                <span>Configuración</span>
+            </button>
+
+            <button
+                class="menu-button"
+                data-view="operadores"
+            >
+                <span class="menu-icon">♙</span>
+                <span>Operadores</span>
+            </button>
 
 
-</main>
+            <div class="menu-label">
+                Negocios
+            </div>
+
+            <button
+                class="menu-button"
+                id="btnMarketplace"
+            >
+                <span class="menu-icon">🛍</span>
+                <span>Marketplace</span>
+            </button>
+
+        </nav>
 
 
+        <div class="sidebar-bottom">
+
+            <div class="admin-user">
+
+                <div class="admin-avatar">
+                    A
+                </div>
+
+                <div class="admin-user-info">
+
+                    <strong id="nombreAdmin">
+                        Administrador
+                    </strong>
+
+                    <span>
+                        Cuenta administrativa
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="btn-logout"
+                id="btnCerrarSesion"
+            >
+                Cerrar sesión
+            </button>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         CONTENIDO PRINCIPAL
+    ====================================================== -->
+
+    <main class="main">
+
+
+        <header class="topbar">
+
+            <div class="topbar-title">
+
+                <h1 id="tituloVista">
+                    Resumen
+                </h1>
+
+                <p id="subtituloVista">
+                    Centro de operaciones de MOTI GO
+                </p>
+
+            </div>
+
+
+            <div class="status">
+
+                <span class="status-dot"></span>
+
+                <span id="estadoAdmin">
+                    Verificando sesión...
+                </span>
+
+            </div>
+
+        </header>
+
+
+        <div class="content">
+
+
+            <!-- =================================================
+                 VISTA: INICIO
+            ================================================== -->
+
+            <section
+                class="view active"
+                id="view-inicio"
+            >
+
+                <div class="welcome">
+
+                    <h2>
+                        Buenos días 👋
+                    </h2>
+
+                    <p>
+                        Aquí tendrás una visión general de la operación de MOTI GO.
+                    </p>
+
+                </div>
+
+
+                <div class="stats">
+
+                    <div class="stat">
+
+                        <div class="stat-top">
+
+                            <span class="stat-label">
+                                Pedidos hoy
+                            </span>
+
+                            <span class="stat-icon">
+                                📦
+                            </span>
+
+                        </div>
+
+                        <div class="stat-value">
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat">
+
+                        <div class="stat-top">
+
+                            <span class="stat-label">
+                                Repartidores activos
+                            </span>
+
+                            <span class="stat-icon">
+                                🛵
+                            </span>
+
+                        </div>
+
+                        <div class="stat-value">
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat">
+
+                        <div class="stat-top">
+
+                            <span class="stat-label">
+                                Ventas de hoy
+                            </span>
+
+                            <span class="stat-icon">
+                                💰
+                            </span>
+
+                        </div>
+
+                        <div class="stat-value">
+                            —
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat">
+
+                        <div class="stat-top">
+
+                            <span class="stat-label">
+                                Ingresos MOTI
+                            </span>
+
+                            <span class="stat-icon">
+                                $
+                            </span>
+
+                        </div>
+
+                        <div class="stat-value">
+                            —
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-header">
+
+                        <div>
+
+                            <h3>
+                                Actividad reciente
+                            </h3>
+
+                            <p>
+                                Próximamente podremos consultar aquí la operación en tiempo real.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="panel-body">
+
+                        <p
+                            style="
+                                color:#6b7280;
+                                font-size:13px;
+                            "
+                        >
+                            El resumen se conectará con los pedidos y movimientos de MOTI GO en los siguientes módulos.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 VISTA: CONFIGURACIÓN
+            ================================================== -->
+
+            <section
+                class="view"
+                id="view-configuracion"
+            >
+
+                <div class="welcome">
+
+                    <h2>
+                        Configuración
+                    </h2>
+
+                    <p>
+                        Controla las reglas generales que utiliza MOTI GO.
+                    </p>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-body">
+
+                        <div class="config-layout">
+
+
+                            <div class="config-nav">
+
+                                <button
+                                    class="active"
+                                >
+                                    🚴 Entregas
+                                </button>
+
+                                <button>
+                                    🏪 Tiendas
+                                </button>
+
+                                <button>
+                                    💳 Pagos
+                                </button>
+
+                                <button>
+                                    🔔 Notificaciones
+                                </button>
+
+                            </div>
+
+
+                            <div>
+
+                                <h3 class="config-section-title">
+                                    Tarifas de entregas
+                                </h3>
+
+                                <p class="config-description">
+                                    Define cuánto corresponde al repartidor por realizar una entrega. Estos valores posteriormente serán utilizados por el motor de tarifas de MOTI GO.
+                                </p>
+
+
+                                <div class="form-grid">
+
+
+                                    <div class="field">
+
+                                        <label for="tarifaBase">
+                                            Tarifa base
+                                        </label>
+
+                                        <input
+                                            id="tarifaBase"
+                                            type="number"
+                                            min="0"
+                                            step="1"
+                                            value="8"
+                                        >
+
+                                        <small>
+                                            Importe inicial de cada entrega.
+                                        </small>
+
+                                    </div>
+
+
+                                    <div class="field">
+
+                                        <label for="precioKm">
+                                            Precio por kilómetro
+                                        </label>
+
+                                        <input
+                                            id="precioKm"
+                                            type="number"
+                                            min="0"
+                                            step="1"
+                                            value="2"
+                                        >
+
+                                        <small>
+                                            Se aplica a la distancia tarifable.
+                                        </small>
+
+                                    </div>
+
+
+                                    <div class="field">
+
+                                        <label for="tiendaAdicional">
+                                            Tienda adicional
+                                        </label>
+
+                                        <input
+                                            id="tiendaAdicional"
+                                            type="number"
+                                            min="0"
+                                            step="1"
+                                            value="4"
+                                        >
+
+                                        <small>
+                                            Cargo por cada tienda adicional.
+                                        </small>
+
+                                    </div>
+
+
+                                    <div class="field">
+
+                                        <label for="minimoRepartidor">
+                                            Comisión mínima
+                                        </label>
+
+                                        <input
+                                            id="minimoRepartidor"
+                                            type="number"
+                                            min="0"
+                                            step="1"
+                                            value="10"
+                                        >
+
+                                        <small>
+                                            Nunca será inferior a este importe.
+                                        </small>
+
+                                    </div>
+
+
+                                    <div class="field">
+
+                                        <label for="maximoRepartidor">
+                                            Comisión máxima
+                                        </label>
+
+                                        <input
+                                            id="maximoRepartidor"
+                                            type="number"
+                                            min="0"
+                                            step="1"
+                                            value="60"
+                                        >
+
+                                        <small>
+                                            Límite superior de la comisión.
+                                        </small>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="config-actions">
+
+                                    <span
+                                        class="save-status"
+                                        id="estadoConfiguracion"
+                                    >
+                                        Cambios pendientes de guardar.
+                                    </span>
+
+
+                                    <button
+                                        class="btn-primary"
+                                        id="btnGuardarTarifas"
+                                    >
+                                        Guardar configuración
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 VISTAS FUTURAS
+            ================================================== -->
+
+            <section
+                class="view"
+                id="view-tiendas"
+            >
+
+                <div class="welcome">
+
+                    <h2>
+                        Tiendas
+                    </h2>
+
+                    <p>
+                        Administración de tiendas asociadas a MOTI GO.
+                    </p>
+
+                </div>
+
+                <div class="panel">
+
+                    <div class="panel-body">
+
+                        Próximamente administraremos aquí tiendas, comisiones y catálogo.
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <section
+                class="view"
+                id="view-repartidores"
+            >
+
+                <div class="welcome">
+
+                    <h2>
+                        Repartidores
+                    </h2>
+
+                    <p>
+                        Gestión de repartidores y operación.
+                    </p>
+
+                </div>
+
+                <div class="panel">
+
+                    <div class="panel-body">
+                        Próximamente.
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <section
+                class="view"
+                id="view-clientes"
+            >
+
+                <div class="welcome">
+
+                    <h2>
+                        Clientes
+                    </h2>
+
+                    <p>
+                        Clientes registrados en MOTI GO.
+                    </p>
+
+                </div>
+
+                <div class="panel">
+
+                    <div class="panel-body">
+                        Próximamente.
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <section
+                class="view"
+                id="view-pedidos"
+            >
+
+                <div class="welcome">
+
+                    <h2>
+                        Pedidos
+                    </h2>
+
+                    <p>
+                        Consulta y seguimiento de pedidos.
+                    </p>
+
+                </div>
+
+                <div class="panel">
+
+                    <div class="panel-body">
+                        Próximamente.
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <section
+                class="view"
+                id="view-finanzas"
+            >
+
+                <div class="welcome">
+
+                    <h2>
+                        Finanzas
+                    </h2>
+
+                    <p>
+                        Ingresos, comisiones y movimientos de MOTI GO.
+                    </p>
+
+                </div>
+
+                <div class="panel">
+
+                    <div class="panel-body">
+                        Próximamente.
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <section
+                class="view"
+                id="view-carteras"
+            >
+
+                <div class="welcome">
+
+                    <h2>
+                        Carteras
+                    </h2>
+
+                    <p>
+                        Administración de saldos y movimientos.
+                    </p>
+
+                </div>
+
+                <div class="panel">
+
+                    <div class="panel-body">
+                        Próximamente.
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <section
+                class="view"
+                id="view-operadores"
+            >
+
+                <div class="welcome">
+
+                    <h2>
+                        Operadores
+                    </h2>
+
+                    <p>
+                        Administración de cuentas operadoras.
+                    </p>
+
+                </div>
+
+                <div class="panel">
+
+                    <div class="panel-body">
+                        Próximamente.
+                    </div>
+
+                </div>
+
+            </section>
+
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     FIREBASE + ADMINISTRACIÓN
+========================================================= -->
 
 <script type="module">
 
@@ -448,14 +2119,19 @@
     "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
-
-    // ==========================================
-    // ELEMENTOS
-    // ==========================================
+    /* =====================================================
+       ELEMENTOS
+    ===================================================== */
 
     const estadoAdmin =
         document.getElementById(
             "estadoAdmin"
+        );
+
+
+    const nombreAdmin =
+        document.getElementById(
+            "nombreAdmin"
         );
 
 
@@ -465,53 +2141,230 @@
         );
 
 
+    const tituloVista =
+        document.getElementById(
+            "tituloVista"
+        );
 
-    // ==========================================
-    // VERIFICAR SESIÓN
-    // ==========================================
+
+    const subtituloVista =
+        document.getElementById(
+            "subtituloVista"
+        );
+
+
+    /* =====================================================
+       NOMBRES DE VISTAS
+    ===================================================== */
+
+    const informacionVistas = {
+
+        inicio: {
+            titulo: "Resumen",
+            subtitulo:
+                "Centro de operaciones de MOTI GO"
+        },
+
+        tiendas: {
+            titulo: "Tiendas",
+            subtitulo:
+                "Administración de tiendas"
+        },
+
+        repartidores: {
+            titulo: "Repartidores",
+            subtitulo:
+                "Gestión de repartidores"
+        },
+
+        clientes: {
+            titulo: "Clientes",
+            subtitulo:
+                "Clientes registrados"
+        },
+
+        pedidos: {
+            titulo: "Pedidos",
+            subtitulo:
+                "Operación y seguimiento"
+        },
+
+        finanzas: {
+            titulo: "Finanzas",
+            subtitulo:
+                "Movimientos e ingresos"
+        },
+
+        carteras: {
+            titulo: "Carteras",
+            subtitulo:
+                "Saldos y movimientos"
+        },
+
+        configuracion: {
+            titulo: "Configuración",
+            subtitulo:
+                "Reglas generales de MOTI GO"
+        },
+
+        operadores: {
+            titulo: "Operadores",
+            subtitulo:
+                "Cuentas administrativas"
+        }
+
+    };
+
+
+    /* =====================================================
+       NAVEGACIÓN INTERNA
+    ===================================================== */
+
+    const botonesMenu =
+        document.querySelectorAll(
+            ".menu-button[data-view]"
+        );
+
+
+    const vistas =
+        document.querySelectorAll(
+            ".view"
+        );
+
+
+    function mostrarVista(
+        nombreVista
+    ) {
+
+        if (
+            !informacionVistas[
+                nombreVista
+            ]
+        ) {
+
+            return;
+
+        }
+
+
+        vistas.forEach(
+            vista => {
+
+                vista.classList.remove(
+                    "active"
+                );
+
+            }
+        );
+
+
+        const vista =
+            document.getElementById(
+                `view-${nombreVista}`
+            );
+
+
+        if (vista) {
+
+            vista.classList.add(
+                "active"
+            );
+
+        }
+
+
+        botonesMenu.forEach(
+            boton => {
+
+                boton.classList.toggle(
+                    "active",
+                    boton.dataset.view ===
+                    nombreVista
+                );
+
+            }
+        );
+
+
+        tituloVista.textContent =
+            informacionVistas[
+                nombreVista
+            ].titulo;
+
+
+        subtituloVista.textContent =
+            informacionVistas[
+                nombreVista
+            ].subtitulo;
+
+    }
+
+
+    botonesMenu.forEach(
+        boton => {
+
+            boton.addEventListener(
+                "click",
+                () => {
+
+                    mostrarVista(
+                        boton.dataset.view
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    /* =====================================================
+       MARKETPLACE
+       POR AHORA NO LO IMPLEMENTAMOS.
+    ===================================================== */
+
+    const btnMarketplace =
+        document.getElementById(
+            "btnMarketplace"
+        );
+
+
+    btnMarketplace.addEventListener(
+        "click",
+        () => {
+
+            alert(
+                "El panel administrativo de Marketplace se construirá como una aplicación independiente."
+            );
+
+        }
+    );
+
+
+    /* =====================================================
+       VERIFICAR ADMINISTRADOR
+    ===================================================== */
 
     onAuthStateChanged(
         auth,
-        async (
-            usuario
-        ) => {
+        async usuario => {
 
             console.log(
                 "🔐 MOTI GO ADMIN: verificando sesión..."
             );
 
 
-            // ----------------------------------
-            // SIN SESIÓN
-            // ----------------------------------
-
             if (!usuario) {
-
-                console.warn(
-                    "⚠️ MOTI GO ADMIN: no hay sesión."
-                );
-
 
                 window.location.href =
                     "../index.html";
-
 
                 return;
 
             }
 
 
-            console.log(
-                "👤 MOTI GO ADMIN:",
-                usuario.uid
-            );
-
-
             try {
-
-                // ----------------------------------
-                // OBTENER PERFIL
-                // ----------------------------------
 
                 const referenciaUsuario =
                     doc(
@@ -531,19 +2384,12 @@
                     !snapshot.exists()
                 ) {
 
-                    console.error(
-                        "❌ MOTI GO ADMIN: no existe el perfil."
-                    );
-
-
                     await signOut(
                         auth
                     );
 
-
                     window.location.href =
                         "../index.html";
-
 
                     return;
 
@@ -554,26 +2400,10 @@
                     snapshot.data();
 
 
-                console.log(
-                    "👑 MOTI GO ADMIN: perfil:",
-                    datosUsuario
-                );
-
-
-                // ----------------------------------
-                // VERIFICAR TIPO
-                // ----------------------------------
-
                 if (
                     datosUsuario.tipo !==
                     "admin"
                 ) {
-
-                    console.warn(
-                        "⛔ MOTI GO ADMIN: usuario no autorizado:",
-                        datosUsuario.tipo
-                    );
-
 
                     alert(
                         "No tienes permisos para acceder al panel administrativo."
@@ -588,18 +2418,35 @@
                     window.location.href =
                         "../index.html";
 
-
                     return;
 
                 }
 
 
-                // ----------------------------------
-                // ADMIN CORRECTO
-                // ----------------------------------
+                /* -----------------------------------------
+                   ADMINISTRADOR AUTORIZADO
+                ----------------------------------------- */
 
                 estadoAdmin.textContent =
-                    "✓ Sesión administrativa activa";
+                    "Sesión administrativa activa";
+
+
+                if (
+                    datosUsuario.nombre
+                ) {
+
+                    nombreAdmin.textContent =
+                        datosUsuario.nombre;
+
+                }
+                else if (
+                    usuario.email
+                ) {
+
+                    nombreAdmin.textContent =
+                        usuario.email;
+
+                }
 
 
                 console.log(
@@ -612,7 +2459,7 @@
             ) {
 
                 console.error(
-                    "❌ MOTI GO ADMIN: error verificando cuenta:",
+                    "❌ MOTI GO ADMIN:",
                     error
                 );
 
@@ -636,10 +2483,9 @@
     );
 
 
-
-    // ==========================================
-    // CERRAR SESIÓN
-    // ==========================================
+    /* =====================================================
+       CERRAR SESIÓN
+    ===================================================== */
 
     btnCerrarSesion.addEventListener(
         "click",
@@ -652,11 +2498,6 @@
                 );
 
 
-                console.log(
-                    "👋 MOTI GO ADMIN: sesión cerrada."
-                );
-
-
                 window.location.href =
                     "../index.html";
 
@@ -666,7 +2507,7 @@
             ) {
 
                 console.error(
-                    "❌ MOTI GO ADMIN: error cerrando sesión:",
+                    "❌ Error cerrando sesión:",
                     error
                 );
 
@@ -676,105 +2517,32 @@
     );
 
 
+    /* =====================================================
+       CONFIGURACIÓN — ESTADO VISUAL
+       TODAVÍA NO GUARDA EN FIREBASE.
+    ===================================================== */
 
-    // ==========================================
-    // BOTONES TEMPORALES
-    // ==========================================
-
-    document
-        .getElementById(
-            "btnTiendas"
-        )
-        .addEventListener(
-            "click",
-            () => {
-
-                alert(
-                    "Módulo de tiendas próximamente."
-                );
-
-            }
+    const btnGuardarTarifas =
+        document.getElementById(
+            "btnGuardarTarifas"
         );
 
 
-    document
-        .getElementById(
-            "btnRepartidores"
-        )
-        .addEventListener(
-            "click",
-            () => {
-
-                alert(
-                    "Módulo de repartidores próximamente."
-                );
-
-            }
+    const estadoConfiguracion =
+        document.getElementById(
+            "estadoConfiguracion"
         );
 
 
-    document
-        .getElementById(
-            "btnClientes"
-        )
-        .addEventListener(
-            "click",
-            () => {
+    btnGuardarTarifas.addEventListener(
+        "click",
+        () => {
 
-                alert(
-                    "Módulo de clientes próximamente."
-                );
+            estadoConfiguracion.textContent =
+                "Configuración preparada. La conexión con Firebase se agregará en el siguiente paso.";
 
-            }
-        );
-
-
-    document
-        .getElementById(
-            "btnPedidos"
-        )
-        .addEventListener(
-            "click",
-            () => {
-
-                alert(
-                    "Módulo de pedidos próximamente."
-                );
-
-            }
-        );
-
-
-    document
-        .getElementById(
-            "btnFinanzas"
-        )
-        .addEventListener(
-            "click",
-            () => {
-
-                alert(
-                    "Módulo financiero próximamente."
-                );
-
-            }
-        );
-
-
-    document
-        .getElementById(
-            "btnOperadores"
-        )
-        .addEventListener(
-            "click",
-            () => {
-
-                alert(
-                    "Módulo de operadores próximamente."
-                );
-
-            }
-        );
+        }
+    );
 
 </script>
 
