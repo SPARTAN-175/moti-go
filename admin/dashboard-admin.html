@@ -1191,91 +1191,58 @@
         }
 
 
-        @media (
-            max-width: 800px
-        ) {
+        @media (max-width: 700px) {
 
-            .sidebar {
-                width:
-                    70px;
-            }
+    .sidebar {
+        width: 220px;
+    }
 
+    .logo-area {
+        justify-content: flex-start;
+        padding: 0 18px;
+    }
 
-            .logo-area {
-                justify-content:
-                    center;
+    .logo-text,
+    .menu-label,
+    .menu-button span,
+    .admin-user-info,
+    .btn-logout {
+        display: initial;
+    }
 
-                padding:
-                    0;
-            }
+    .menu-button {
+        justify-content: flex-start;
+    }
 
+    .sidebar-bottom {
+        padding: 14px;
+    }
 
-            .logo-text,
-            .menu-label,
-            .menu-button span,
-            .admin-user-info,
-            .btn-logout {
-                display:
-                    none;
-            }
+    .admin-user {
+        justify-content: flex-start;
+    }
 
+    .main {
+        margin-left: 220px;
+        width: calc(100% - 220px);
+    }
 
-            .menu-button {
-                justify-content:
-                    center;
-            }
+    .config-layout {
+        grid-template-columns: 1fr;
+    }
 
+    .config-nav {
+        border-right: none;
+        border-bottom: 1px solid var(--borde);
+        padding: 0 0 12px;
+    }
 
-            .sidebar-bottom {
-                padding:
-                    8px;
-            }
+    .config-nav button {
+        display: inline-block;
+        width: auto;
+    }
 
-
-            .admin-user {
-                justify-content:
-                    center;
-            }
-
-
-            .main {
-                margin-left:
-                    70px;
-
-                width:
-                    calc(
-                        100% - 70px
-                    );
-            }
-
-
-            .config-layout {
-                grid-template-columns:
-                    1fr;
-            }
-
-
-            .config-nav {
-                border-right:
-                    none;
-
-                border-bottom:
-                    1px solid var(--borde);
-
-                padding:
-                    0 0 12px;
-            }
-
-
-            .config-nav button {
-                display:
-                    inline-block;
-
-                width:
-                    auto;
-            }
-
-        }
+}
 
 
         @media (
