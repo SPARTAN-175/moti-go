@@ -2674,3 +2674,426 @@ button {
     }
 
 }
+
+
+/* =========================================================
+   NOTIFICACIONES MOTI GO
+========================================================= */
+
+.moti-notificaciones {
+
+    position:
+        fixed;
+
+    top:
+        22px;
+
+    right:
+        22px;
+
+    z-index:
+        99999;
+
+    width:
+        min(
+            390px,
+            calc(
+                100vw - 30px
+            )
+        );
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        10px;
+
+}
+
+
+.moti-notificacion {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    padding:
+        14px 15px;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid #e5e7eb;
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        0 15px 35px rgba(
+            0,
+            0,
+            0,
+            .12
+        );
+
+    opacity:
+        0;
+
+    transform:
+        translateY(
+            -12px
+        );
+
+    transition:
+        opacity .25s ease,
+        transform .25s ease;
+
+}
+
+
+.moti-notificacion.visible {
+
+    opacity:
+        1;
+
+    transform:
+        translateY(
+            0
+        );
+
+}
+
+
+.moti-notificacion-icono {
+
+    width:
+        34px;
+
+    height:
+        34px;
+
+    flex-shrink:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        50%;
+
+    background:
+        #f3f4f6;
+
+    font-weight:
+        800;
+
+}
+
+
+.moti-notificacion-texto {
+
+    flex:
+        1;
+
+    font-size:
+        13px;
+
+    line-height:
+        1.45;
+
+    color:
+        #111827;
+
+}
+
+
+.moti-notificacion-cerrar {
+
+    width:
+        28px;
+
+    height:
+        28px;
+
+    border:
+        0;
+
+    border-radius:
+        8px;
+
+    background:
+        transparent;
+
+    color:
+        #6b7280;
+
+    cursor:
+        pointer;
+
+    font-size:
+        20px;
+
+}
+
+
+.moti-notificacion-cerrar:hover {
+
+    background:
+        #f3f4f6;
+
+}
+
+
+.moti-notificacion-exito {
+
+    border-left:
+        4px solid #16a34a;
+
+}
+
+
+.moti-notificacion-exito
+.moti-notificacion-icono {
+
+    background:
+        #dcfce7;
+
+    color:
+        #16a34a;
+
+}
+
+
+.moti-notificacion-error {
+
+    border-left:
+        4px solid #dc2626;
+
+}
+
+
+.moti-notificacion-error
+.moti-notificacion-icono {
+
+    background:
+        #fee2e2;
+
+    color:
+        #dc2626;
+
+}
+
+
+.moti-notificacion-advertencia {
+
+    border-left:
+        4px solid #d97706;
+
+}
+
+
+.moti-notificacion-advertencia
+.moti-notificacion-icono {
+
+    background:
+        #fef3c7;
+
+    color:
+        #d97706;
+
+}
+
+
+/* =========================================================
+   QR DE INVITACIÓN
+========================================================= */
+
+.invitacion-qr-real {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    padding:
+        20px 0;
+
+    text-align:
+        center;
+
+}
+
+
+.qr-invitacion {
+
+    width:
+        220px;
+
+    height:
+        220px;
+
+    padding:
+        10px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid #e5e7eb;
+
+    border-radius:
+        14px;
+
+}
+
+
+.qr-invitacion img,
+.qr-invitacion canvas {
+
+    display:
+        block;
+
+    max-width:
+        100%;
+
+}
+
+
+.invitacion-qr-real p {
+
+    max-width:
+        320px;
+
+    margin:
+        12px auto 0;
+
+    color:
+        #6b7280;
+
+    font-size:
+        12px;
+
+    line-height:
+        1.5;
+
+}
+
+
+.qr-error {
+
+    color:
+        #dc2626;
+
+    font-size:
+        12px;
+
+}
+
+
+/* =========================================================
+   ACCIONES DE INVITACIÓN
+========================================================= */
+
+.invitacion-acciones {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:
+        10px;
+
+}
+
+
+.btn-secundario {
+
+    min-height:
+        44px;
+
+    padding:
+        0 16px;
+
+    border:
+        1px solid #e5e7eb;
+
+    border-radius:
+        10px;
+
+    background:
+        #ffffff;
+
+    color:
+        #111827;
+
+    cursor:
+        pointer;
+
+    font-weight:
+        700;
+
+}
+
+
+.btn-secundario:hover {
+
+    background:
+        #f9fafb;
+
+}
+
+
+@media (
+    max-width: 600px
+) {
+
+    .moti-notificaciones {
+
+        top:
+            12px;
+
+        right:
+            12px;
+
+    }
+
+
+    .invitacion-acciones {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+}
+
