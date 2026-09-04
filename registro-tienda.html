@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#111827"
+    >
+
+    <title>
+        Registro de tienda — MOTI GO
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="./registro-tienda.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <main class="registro-contenedor">
+
+
+        <!-- =================================================
+             ENCABEZADO
+        ================================================== -->
+
+        <section class="registro-encabezado">
+
+            <div class="logo-moti">
+                MOTI
+                <span>GO</span>
+            </div>
+
+            <div class="logo-subtitulo">
+                Registro de tienda
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             TARJETA PRINCIPAL
+        ================================================== -->
+
+        <section class="registro-card">
+
+
+            <!-- =================================================
+                 VERIFICANDO
+            ================================================== -->
+
+            <div
+                id="estadoVerificacion"
+                class="estado-verificacion"
+            >
+
+                <div class="spinner"></div>
+
+                <h2>
+                    Verificando invitación
+                </h2>
+
+                <p>
+                    Estamos comprobando tu enlace de registro...
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 FORMULARIO
+            ================================================== -->
+
+            <form
+                id="formRegistroTienda"
+                class="formulario"
+                style="display:none;"
+            >
+
+
+                <div class="formulario-cabecera">
+
+                    <div class="icono-tienda">
+                        🏪
+                    </div>
+
+                    <div>
+
+                        <h1>
+                            Registra tu tienda
+                        </h1>
+
+                        <p>
+                            Completa los datos de tu negocio
+                            y crea tus credenciales de acceso.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     INFORMACIÓN DEL NEGOCIO
+                ================================================== -->
+
+                <div class="seccion-formulario">
+
+                    <div class="seccion-titulo">
+
+                        <span>
+                            01
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Información del negocio
+                            </strong>
+
+                            <small>
+                                Estos datos aparecerán en MOTI GO.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="campo">
+
+                        <label for="nombreTienda">
+                            Nombre de la tienda
+                        </label>
+
+                        <input
+                            type="text"
+                            id="nombreTienda"
+                            name="nombreTienda"
+                            placeholder="Ej. Abarrotes Don Carlos"
+                            autocomplete="organization"
+                            maxlength="100"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="fila-campos">
+
+                        <div class="campo">
+
+                            <label for="tipoTienda">
+                                Tipo de tienda
+                            </label>
+
+                            <select
+                                id="tipoTienda"
+                                name="tipoTienda"
+                                required
+                            >
+
+                                <option
+                                    value=""
+                                >
+                                    Selecciona una opción
+                                </option>
+
+                                <option
+                                    value="abarrotes"
+                                >
+                                    Abarrotes
+                                </option>
+
+                                <option
+                                    value="carnicería"
+                                >
+                                    Carnicería
+                                </option>
+
+                                <option
+                                    value="frutas y verduras"
+                                >
+                                    Frutas y verduras
+                                </option>
+
+                                <option
+                                    value="farmacia"
+                                >
+                                    Farmacia
+                                </option>
+
+                                <option
+                                    value="panadería"
+                                >
+                                    Panadería
+                                </option>
+
+                                <option
+                                    value="papelería"
+                                >
+                                    Papelería
+                                </option>
+
+                                <option
+                                    value="restaurante"
+                                >
+                                    Restaurante
+                                </option>
+
+                                <option
+                                    value="tienda de ropa"
+                                >
+                                    Tienda de ropa
+                                </option>
+
+                                <option
+                                    value="otro"
+                                >
+                                    Otro
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="campo">
+
+                            <label for="municipio">
+                                Municipio
+                            </label>
+
+                            <input
+                                type="text"
+                                id="municipio"
+                                name="municipio"
+                                value="Ostuacán"
+                                maxlength="100"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="campo">
+
+                        <label for="direccion">
+                            Dirección
+                        </label>
+
+                        <input
+                            type="text"
+                            id="direccion"
+                            name="direccion"
+                            placeholder="Ej. Calle principal #123"
+                            maxlength="200"
+                            autocomplete="street-address"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     UBICACIÓN
+                ================================================== -->
+
+                <div class="seccion-formulario">
+
+                    <div class="seccion-titulo">
+
+                        <span>
+                            02
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Ubicación de la tienda
+                            </strong>
+
+                            <small>
+                                La ubicación se guardará para calcular
+                                rutas y mostrar la tienda correctamente.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        id="btnObtenerUbicacion"
+                        class="btn-ubicacion"
+                    >
+
+                        📍
+                        <span>
+                            Obtener mi ubicación actual
+                        </span>
+
+                    </button>
+
+
+                    <div
+                        id="estadoUbicacion"
+                        class="estado-ubicacion"
+                    >
+                        Aún no se ha establecido la ubicación.
+                    </div>
+
+
+                    <div class="fila-campos">
+
+                        <div class="campo">
+
+                            <label for="latitud">
+                                Latitud
+                            </label>
+
+                            <input
+                                type="number"
+                                id="latitud"
+                                step="any"
+                                placeholder="17.40992"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="campo">
+
+                            <label for="longitud">
+                                Longitud
+                            </label>
+
+                            <input
+                                type="number"
+                                id="longitud"
+                                step="any"
+                                placeholder="-93.332008"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     CUENTA
+                ================================================== -->
+
+                <div class="seccion-formulario">
+
+                    <div class="seccion-titulo">
+
+                        <span>
+                            03
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                Credenciales de acceso
+                            </strong>
+
+                            <small>
+                                Tú crearás el correo y contraseña
+                                de tu cuenta.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="campo">
+
+                        <label for="correo">
+                            Correo electrónico
+                        </label>
+
+                        <input
+                            type="email"
+                            id="correo"
+                            name="correo"
+                            placeholder="tutienda@correo.com"
+                            autocomplete="email"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="fila-campos">
+
+                        <div class="campo">
+
+                            <label for="password">
+                                Contraseña
+                            </label>
+
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Mínimo 6 caracteres"
+                                autocomplete="new-password"
+                                minlength="6"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="campo">
+
+                            <label for="confirmarPassword">
+                                Confirmar contraseña
+                            </label>
+
+                            <input
+                                type="password"
+                                id="confirmarPassword"
+                                name="confirmarPassword"
+                                placeholder="Repite tu contraseña"
+                                autocomplete="new-password"
+                                minlength="6"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     AVISO
+                ================================================== -->
+
+                <div class="aviso-registro">
+
+                    🔐
+                    <div>
+
+                        <strong>
+                            Tu cuenta es personal
+                        </strong>
+
+                        <p>
+                            Estas credenciales serán utilizadas
+                            para acceder al panel de administración
+                            de tu tienda.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     ERROR
+                ================================================== -->
+
+                <div
+                    id="mensajeError"
+                    class="mensaje-error"
+                    style="display:none;"
+                ></div>
+
+
+                <!-- =================================================
+                     BOTÓN
+                ================================================== -->
+
+                <button
+                    type="submit"
+                    id="btnRegistrar"
+                    class="btn-registrar"
+                >
+
+                    Crear mi tienda
+
+                </button>
+
+
+                <p class="texto-final">
+
+                    Al registrarte aceptas utilizar MOTI GO
+                    de acuerdo con las reglas de operación
+                    establecidas.
+
+                </p>
+
+
+            </form>
+
+
+            <!-- =================================================
+                 REGISTRO COMPLETADO
+            ================================================== -->
+
+            <div
+                id="registroExitoso"
+                class="registro-exitoso"
+                style="display:none;"
+            >
+
+                <div class="exito-icono">
+                    ✓
+                </div>
+
+                <h1>
+                    ¡Tu tienda está lista!
+                </h1>
+
+                <p>
+                    Tu cuenta fue creada correctamente.
+                    Ya puedes acceder al panel de tu tienda.
+                </p>
+
+                <div
+                    id="datosTiendaCreada"
+                    class="datos-tienda-creada"
+                ></div>
+
+                <button
+                    type="button"
+                    id="btnEntrarTienda"
+                    class="btn-registrar"
+                >
+                    Entrar a mi tienda
+                </button>
+
+            </div>
+
+
+            <!-- =================================================
+                 INVITACIÓN INVÁLIDA
+            ================================================== -->
+
+            <div
+                id="registroInvalido"
+                class="registro-invalido"
+                style="display:none;"
+            >
+
+                <div class="error-icono">
+                    !
+                </div>
+
+                <h1>
+                    Invitación no disponible
+                </h1>
+
+                <p id="mensajeInvitacionInvalida">
+                    Este enlace de registro no es válido
+                    o ya fue utilizado.
+                </p>
+
+            </div>
+
+
+        </section>
+
+
+        <footer class="registro-footer">
+
+            MOTI GO · Administración de tiendas
+
+        </footer>
+
+
+    </main>
+
+
+    <script
+        type="module"
+        src="./registro-tienda.js"
+    ></script>
+
+
+</body>
+
+</html>
