@@ -1,0 +1,1051 @@
+/* =========================================================
+   MOTI GO — REGISTRO DE TIENDA
+========================================================= */
+
+:root {
+
+    --fondo:
+        #f3f4f6;
+
+    --blanco:
+        #ffffff;
+
+    --texto:
+        #111827;
+
+    --texto-secundario:
+        #6b7280;
+
+    --borde:
+        #e5e7eb;
+
+    --principal:
+        #111827;
+
+    --principal-hover:
+        #1f2937;
+
+    --verde:
+        #16a34a;
+
+    --rojo:
+        #dc2626;
+
+    --azul:
+        #2563eb;
+
+    --radio:
+        18px;
+
+}
+
+
+* {
+
+    box-sizing:
+        border-box;
+
+}
+
+
+body {
+
+    margin:
+        0;
+
+    min-height:
+        100vh;
+
+    background:
+        var(--fondo);
+
+    color:
+        var(--texto);
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+}
+
+
+button,
+input,
+select {
+
+    font:
+        inherit;
+
+}
+
+
+.registro-contenedor {
+
+    width:
+        100%;
+
+    max-width:
+        900px;
+
+    margin:
+        0 auto;
+
+    padding:
+        35px 20px 30px;
+
+}
+
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.registro-encabezado {
+
+    text-align:
+        center;
+
+    margin-bottom:
+        25px;
+
+}
+
+
+.logo-moti {
+
+    font-size:
+        34px;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        -1px;
+
+}
+
+
+.logo-moti span {
+
+    font-weight:
+        400;
+
+}
+
+
+.logo-subtitulo {
+
+    margin-top:
+        5px;
+
+    color:
+        var(--texto-secundario);
+
+    font-size:
+        14px;
+
+}
+
+
+/* =========================================================
+   TARJETA
+========================================================= */
+
+.registro-card {
+
+    background:
+        var(--blanco);
+
+    border:
+        1px solid var(--borde);
+
+    border-radius:
+        var(--radio);
+
+    box-shadow:
+        0 15px 40px rgba(
+            0,
+            0,
+            0,
+            .07
+        );
+
+    overflow:
+        hidden;
+
+}
+
+
+/* =========================================================
+   VERIFICACIÓN
+========================================================= */
+
+.estado-verificacion {
+
+    padding:
+        80px 30px;
+
+    text-align:
+        center;
+
+}
+
+
+.estado-verificacion h2 {
+
+    margin:
+        20px 0 8px;
+
+}
+
+
+.estado-verificacion p {
+
+    margin:
+        0;
+
+    color:
+        var(--texto-secundario);
+
+}
+
+
+.spinner {
+
+    width:
+        42px;
+
+    height:
+        42px;
+
+    margin:
+        0 auto;
+
+    border:
+        4px solid var(--borde);
+
+    border-top-color:
+        var(--principal);
+
+    border-radius:
+        50%;
+
+    animation:
+        girar 1s linear infinite;
+
+}
+
+
+@keyframes girar {
+
+    to {
+
+        transform:
+            rotate(360deg);
+
+    }
+
+}
+
+
+/* =========================================================
+   FORMULARIO
+========================================================= */
+
+.formulario {
+
+    padding:
+        35px;
+
+}
+
+
+.formulario-cabecera {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        18px;
+
+    padding-bottom:
+        30px;
+
+    border-bottom:
+        1px solid var(--borde);
+
+}
+
+
+.icono-tienda {
+
+    width:
+        62px;
+
+    height:
+        62px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        16px;
+
+    background:
+        #f3f4f6;
+
+    font-size:
+        30px;
+
+}
+
+
+.formulario-cabecera h1 {
+
+    margin:
+        0 0 5px;
+
+    font-size:
+        27px;
+
+}
+
+
+.formulario-cabecera p {
+
+    margin:
+        0;
+
+    color:
+        var(--texto-secundario);
+
+    line-height:
+        1.5;
+
+}
+
+
+/* =========================================================
+   SECCIONES
+========================================================= */
+
+.seccion-formulario {
+
+    padding:
+        30px 0;
+
+    border-bottom:
+        1px solid var(--borde);
+
+}
+
+
+.seccion-titulo {
+
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    gap:
+        13px;
+
+    margin-bottom:
+        22px;
+
+}
+
+
+.seccion-titulo > span {
+
+    width:
+        32px;
+
+    height:
+        32px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    flex-shrink:
+        0;
+
+    border-radius:
+        10px;
+
+    background:
+        #f3f4f6;
+
+    font-size:
+        12px;
+
+    font-weight:
+        800;
+
+}
+
+
+.seccion-titulo strong {
+
+    display:
+        block;
+
+    font-size:
+        16px;
+
+}
+
+
+.seccion-titulo small {
+
+    display:
+        block;
+
+    margin-top:
+        4px;
+
+    color:
+        var(--texto-secundario);
+
+    line-height:
+        1.4;
+
+}
+
+
+/* =========================================================
+   CAMPOS
+========================================================= */
+
+.campo {
+
+    margin-bottom:
+        18px;
+
+}
+
+
+.campo:last-child {
+
+    margin-bottom:
+        0;
+
+}
+
+
+.campo label {
+
+    display:
+        block;
+
+    margin-bottom:
+        7px;
+
+    font-size:
+        13px;
+
+    font-weight:
+        700;
+
+}
+
+
+.campo input,
+.campo select {
+
+    width:
+        100%;
+
+    min-height:
+        46px;
+
+    padding:
+        0 13px;
+
+    border:
+        1px solid var(--borde);
+
+    border-radius:
+        11px;
+
+    outline:
+        none;
+
+    background:
+        var(--blanco);
+
+    color:
+        var(--texto);
+
+    transition:
+        border-color .2s,
+        box-shadow .2s;
+
+}
+
+
+.campo input:focus,
+.campo select:focus {
+
+    border-color:
+        var(--principal);
+
+    box-shadow:
+        0 0 0 3px rgba(
+            17,
+            24,
+            39,
+            .08
+        );
+
+}
+
+
+.fila-campos {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap:
+        15px;
+
+    margin-bottom:
+        18px;
+
+}
+
+
+.fila-campos .campo {
+
+    margin-bottom:
+        0;
+
+}
+
+
+/* =========================================================
+   UBICACIÓN
+========================================================= */
+
+.btn-ubicacion {
+
+    width:
+        100%;
+
+    min-height:
+        48px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        9px;
+
+    border:
+        1px dashed #cbd5e1;
+
+    border-radius:
+        12px;
+
+    background:
+        #f8fafc;
+
+    color:
+        var(--texto);
+
+    cursor:
+        pointer;
+
+    font-weight:
+        700;
+
+}
+
+
+.btn-ubicacion:hover {
+
+    background:
+        #f1f5f9;
+
+}
+
+
+.estado-ubicacion {
+
+    margin:
+        9px 0 18px;
+
+    padding:
+        10px 12px;
+
+    border-radius:
+        9px;
+
+    background:
+        #f9fafb;
+
+    color:
+        var(--texto-secundario);
+
+    font-size:
+        12px;
+
+}
+
+
+/* =========================================================
+   AVISO
+========================================================= */
+
+.aviso-registro {
+
+    display:
+        flex;
+
+    gap:
+        12px;
+
+    margin-top:
+        25px;
+
+    padding:
+        15px;
+
+    border-radius:
+        12px;
+
+    background:
+        #f8fafc;
+
+    font-size:
+        13px;
+
+}
+
+
+.aviso-registro strong {
+
+    display:
+        block;
+
+    margin-bottom:
+        4px;
+
+}
+
+
+.aviso-registro p {
+
+    margin:
+        0;
+
+    color:
+        var(--texto-secundario);
+
+    line-height:
+        1.5;
+
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.mensaje-error {
+
+    margin-top:
+        18px;
+
+    padding:
+        13px 15px;
+
+    border-radius:
+        10px;
+
+    background:
+        #fef2f2;
+
+    color:
+        var(--rojo);
+
+    font-size:
+        13px;
+
+    line-height:
+        1.5;
+
+}
+
+
+/* =========================================================
+   BOTÓN REGISTRAR
+========================================================= */
+
+.btn-registrar {
+
+    width:
+        100%;
+
+    min-height:
+        50px;
+
+    margin-top:
+        22px;
+
+    border:
+        0;
+
+    border-radius:
+        12px;
+
+    background:
+        var(--principal);
+
+    color:
+        white;
+
+    cursor:
+        pointer;
+
+    font-weight:
+        800;
+
+}
+
+
+.btn-registrar:hover {
+
+    background:
+        var(--principal-hover);
+
+}
+
+
+.btn-registrar:disabled {
+
+    opacity:
+        .55;
+
+    cursor:
+        not-allowed;
+
+}
+
+
+.texto-final {
+
+    margin:
+        14px 0 0;
+
+    text-align:
+        center;
+
+    color:
+        var(--texto-secundario);
+
+    font-size:
+        11px;
+
+    line-height:
+        1.5;
+
+}
+
+
+/* =========================================================
+   ÉXITO
+========================================================= */
+
+.registro-exitoso {
+
+    padding:
+        70px 30px;
+
+    text-align:
+        center;
+
+}
+
+
+.exito-icono {
+
+    width:
+        70px;
+
+    height:
+        70px;
+
+    margin:
+        0 auto 20px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        50%;
+
+    background:
+        #dcfce7;
+
+    color:
+        var(--verde);
+
+    font-size:
+        35px;
+
+    font-weight:
+        900;
+
+}
+
+
+.registro-exitoso h1 {
+
+    margin:
+        0 0 10px;
+
+}
+
+
+.registro-exitoso p {
+
+    max-width:
+        500px;
+
+    margin:
+        0 auto;
+
+    color:
+        var(--texto-secundario);
+
+    line-height:
+        1.6;
+
+}
+
+
+.datos-tienda-creada {
+
+    max-width:
+        430px;
+
+    margin:
+        25px auto 0;
+
+    padding:
+        16px;
+
+    border:
+        1px solid var(--borde);
+
+    border-radius:
+        12px;
+
+    background:
+        #f9fafb;
+
+    text-align:
+        left;
+
+}
+
+
+/* =========================================================
+   INVITACIÓN INVÁLIDA
+========================================================= */
+
+.registro-invalido {
+
+    padding:
+        80px 30px;
+
+    text-align:
+        center;
+
+}
+
+
+.error-icono {
+
+    width:
+        65px;
+
+    height:
+        65px;
+
+    margin:
+        0 auto 20px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        50%;
+
+    background:
+        #fee2e2;
+
+    color:
+        var(--rojo);
+
+    font-size:
+        30px;
+
+    font-weight:
+        900;
+
+}
+
+
+.registro-invalido h1 {
+
+    margin:
+        0 0 10px;
+
+}
+
+
+.registro-invalido p {
+
+    max-width:
+        480px;
+
+    margin:
+        auto;
+
+    color:
+        var(--texto-secundario);
+
+    line-height:
+        1.6;
+
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.registro-footer {
+
+    padding-top:
+        20px;
+
+    text-align:
+        center;
+
+    color:
+        #9ca3af;
+
+    font-size:
+        11px;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (
+    max-width: 650px
+) {
+
+    .registro-contenedor {
+
+        padding:
+            20px 12px;
+
+    }
+
+
+    .formulario {
+
+        padding:
+            23px 18px;
+
+    }
+
+
+    .formulario-cabecera {
+
+        align-items:
+            flex-start;
+
+    }
+
+
+    .formulario-cabecera h1 {
+
+        font-size:
+            22px;
+
+    }
+
+
+    .fila-campos {
+
+        grid-template-columns:
+            1fr;
+
+        gap:
+            0;
+
+    }
+
+
+    .fila-campos .campo {
+
+        margin-bottom:
+            18px;
+
+    }
+
+
+    .fila-campos .campo:last-child {
+
+        margin-bottom:
+            0;
+
+    }
+
+}
