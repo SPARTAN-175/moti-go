@@ -126,27 +126,17 @@ const contenedorTiendas =
     );
 
 
-/* =========================================================
-   LISTENER DE TIENDAS
-========================================================= */
-
 let listenerTiendas =
     null;
 
 
 /* =========================================================
-   ELEMENTOS — INVITACIONES DE TIENDAS
+   ELEMENTOS — INVITACIONES
 ========================================================= */
 
 const btnNuevaTienda =
     document.getElementById(
         "btnNuevaTienda"
-    );
-
-
-const btnNuevaTiendaVacio =
-    document.getElementById(
-        "btnNuevaTiendaVacio"
     );
 
 
@@ -298,6 +288,224 @@ const vistas =
 
 
 /* =========================================================
+   SISTEMA DE NOTIFICACIONES
+========================================================= */
+
+function crearContenedorNotificaciones() {
+
+    let contenedor =
+        document.getElementById(
+            "motiNotificaciones"
+        );
+
+
+    if (contenedor) {
+
+        return contenedor;
+
+    }
+
+
+    contenedor =
+        document.createElement(
+            "div"
+        );
+
+
+    contenedor.id =
+        "motiNotificaciones";
+
+
+    contenedor.className =
+        "moti-notificaciones";
+
+
+    document.body.appendChild(
+        contenedor
+    );
+
+
+    return contenedor;
+
+}
+
+
+/* =========================================================
+   MOSTRAR NOTIFICACIÓN
+========================================================= */
+
+function mostrarNotificacion(
+    mensaje,
+    tipo = "info",
+    duracion = 4000
+) {
+
+    const contenedor =
+        crearContenedorNotificaciones();
+
+
+    const notificacion =
+        document.createElement(
+            "div"
+        );
+
+
+    notificacion.className =
+        `moti-notificacion moti-notificacion-${tipo}`;
+
+
+    let icono =
+        "info";
+
+
+    if (
+        tipo ===
+        "exito"
+    ) {
+
+        icono =
+            "✓";
+
+    }
+    else if (
+        tipo ===
+        "error"
+    ) {
+
+        icono =
+            "×";
+
+    }
+    else if (
+        tipo ===
+        "advertencia"
+    ) {
+
+        icono =
+            "!";
+
+    }
+
+
+    notificacion.innerHTML = `
+
+        <div class="moti-notificacion-icono">
+            ${icono}
+        </div>
+
+        <div class="moti-notificacion-texto">
+            ${escaparHTMLAdmin(
+                mensaje
+            )}
+        </div>
+
+        <button
+            type="button"
+            class="moti-notificacion-cerrar"
+            aria-label="Cerrar"
+        >
+            ×
+        </button>
+
+    `;
+
+
+    contenedor.appendChild(
+        notificacion
+    );
+
+
+    requestAnimationFrame(
+        () => {
+
+            notificacion.classList.add(
+                "visible"
+            );
+
+        }
+    );
+
+
+    const cerrar =
+        notificacion.querySelector(
+            ".moti-notificacion-cerrar"
+        );
+
+
+    const eliminar =
+        () => {
+
+            notificacion.classList.remove(
+                "visible"
+            );
+
+
+            setTimeout(
+                () => {
+
+                    notificacion.remove();
+
+                },
+                250
+            );
+
+        };
+
+
+    if (cerrar) {
+
+        cerrar.addEventListener(
+            "click",
+            eliminar
+        );
+
+    }
+
+
+    setTimeout(
+        eliminar,
+        duracion
+    );
+
+}
+
+
+/* =========================================================
+   ESCAPAR HTML
+========================================================= */
+
+function escaparHTMLAdmin(
+    texto
+) {
+
+    return String(
+        texto ?? ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+/* =========================================================
    ABRIR MENÚ
 ========================================================= */
 
@@ -406,18 +614,14 @@ if (btnMenu) {
 
 
 /* =========================================================
-   EVENTO BOTÓN CERRAR
+   EVENTO BOTÓN CERRAR MENÚ
 ========================================================= */
 
 if (btnCerrarMenu) {
 
     btnCerrarMenu.addEventListener(
         "click",
-        () => {
-
-            cerrarMenu();
-
-        }
+        cerrarMenu
     );
 
 }
@@ -431,18 +635,14 @@ if (sidebarOverlay) {
 
     sidebarOverlay.addEventListener(
         "click",
-        () => {
-
-            cerrarMenu();
-
-        }
+        cerrarMenu
     );
 
 }
 
 
 /* =========================================================
-   CAMBIAR DE VISTA
+   CAMBIAR VISTA
 ========================================================= */
 
 function mostrarVista(
@@ -467,10 +667,6 @@ function mostrarVista(
     }
 
 
-    /* -----------------------------------------------------
-       OCULTAR TODAS LAS VISTAS
-    ----------------------------------------------------- */
-
     vistas.forEach(
         vista => {
 
@@ -481,10 +677,6 @@ function mostrarVista(
         }
     );
 
-
-    /* -----------------------------------------------------
-       MOSTRAR VISTA SELECCIONADA
-    ----------------------------------------------------- */
 
     const vistaSeleccionada =
         document.getElementById(
@@ -501,10 +693,6 @@ function mostrarVista(
     }
 
 
-    /* -----------------------------------------------------
-       ACTUALIZAR BOTÓN ACTIVO
-    ----------------------------------------------------- */
-
     botonesMenu.forEach(
         boton => {
 
@@ -517,10 +705,6 @@ function mostrarVista(
         }
     );
 
-
-    /* -----------------------------------------------------
-       ACTUALIZAR ENCABEZADO
-    ----------------------------------------------------- */
 
     if (tituloVista) {
 
@@ -538,16 +722,8 @@ function mostrarVista(
     }
 
 
-    /* -----------------------------------------------------
-       CERRAR MENÚ
-    ----------------------------------------------------- */
-
     cerrarMenu();
 
-
-    /* -----------------------------------------------------
-       VOLVER AL INICIO
-    ----------------------------------------------------- */
 
     window.scrollTo({
 
@@ -561,7 +737,7 @@ function mostrarVista(
 
 
 /* =========================================================
-   EVENTOS DE LAS OPCIONES DEL MENÚ
+   EVENTOS DEL MENÚ
 ========================================================= */
 
 botonesMenu.forEach(
@@ -571,12 +747,8 @@ botonesMenu.forEach(
             "click",
             () => {
 
-                const nombreVista =
-                    boton.dataset.view;
-
-
                 mostrarVista(
-                    nombreVista
+                    boton.dataset.view
                 );
 
             }
@@ -606,70 +778,6 @@ if (btnMarketplace) {
 
 
 /* =========================================================
-   ESCAPAR TEXTO PARA HTML
-========================================================= */
-
-function escaparHTMLAdmin(
-    texto
-) {
-
-    return String(
-        texto ?? ""
-    )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-}
-
-
-/* =========================================================
-   MOSTRAR BOTÓN DE INVITACIÓN CUANDO NO HAY TIENDAS
-========================================================= */
-
-function configurarBotonNuevaTiendaVacio() {
-
-    const boton =
-        document.getElementById(
-            "btnNuevaTiendaVacio"
-        );
-
-
-    if (!boton) {
-        return;
-    }
-
-
-    boton.addEventListener(
-        "click",
-        () => {
-
-            abrirModalNuevaTienda();
-
-        }
-    );
-
-}
-
-
-/* =========================================================
    CARGAR TIENDAS EN TIEMPO REAL
 ========================================================= */
 
@@ -685,10 +793,6 @@ function escucharTiendas() {
 
     }
 
-
-    /* -----------------------------------------------------
-       EVITAR LISTENERS DUPLICADOS
-    ----------------------------------------------------- */
 
     if (listenerTiendas) {
 
@@ -724,10 +828,6 @@ function escucharTiendas() {
                     snapshot.size
                 );
 
-
-                /* -----------------------------------------
-                   NO HAY TIENDAS
-                ----------------------------------------- */
 
                 if (
                     snapshot.empty
@@ -771,10 +871,6 @@ function escucharTiendas() {
                 }
 
 
-                /* -----------------------------------------
-                   OBTENER TIENDAS
-                ----------------------------------------- */
-
                 const tiendas =
                     snapshot.docs.map(
                         documento => {
@@ -792,10 +888,6 @@ function escucharTiendas() {
                     );
 
 
-                /* -----------------------------------------
-                   ORDENAR POR NOMBRE
-                ----------------------------------------- */
-
                 tiendas.sort(
                     (a, b) => {
 
@@ -811,10 +903,6 @@ function escucharTiendas() {
                     }
                 );
 
-
-                /* -----------------------------------------
-                   CONSTRUIR HTML
-                ----------------------------------------- */
 
                 let html =
                     "";
@@ -852,7 +940,7 @@ function escucharTiendas() {
 
                         html += `
 
-                            <div
+                            <article
                                 class="tienda-admin-card"
                             >
 
@@ -927,7 +1015,7 @@ function escucharTiendas() {
 
                                 </div>
 
-                            </div>
+                            </article>
 
                         `;
 
@@ -977,7 +1065,32 @@ function escucharTiendas() {
 
 
 /* =========================================================
-   MODAL — INVITACIÓN DE TIENDA
+   BOTÓN NUEVA TIENDA CUANDO LISTA VACÍA
+========================================================= */
+
+function configurarBotonNuevaTiendaVacio() {
+
+    const boton =
+        document.getElementById(
+            "btnNuevaTiendaVacio"
+        );
+
+
+    if (!boton) {
+        return;
+    }
+
+
+    boton.addEventListener(
+        "click",
+        abrirModalNuevaTienda
+    );
+
+}
+
+
+/* =========================================================
+   MODAL — NUEVA TIENDA
 ========================================================= */
 
 function abrirModalNuevaTienda() {
@@ -1021,32 +1134,14 @@ function cerrarModalNuevaTienda() {
 
 
 /* =========================================================
-   BOTONES PARA ABRIR EL MODAL
+   BOTÓN NUEVA TIENDA
 ========================================================= */
 
 if (btnNuevaTienda) {
 
     btnNuevaTienda.addEventListener(
         "click",
-        () => {
-
-            abrirModalNuevaTienda();
-
-        }
-    );
-
-}
-
-
-if (btnNuevaTiendaVacio) {
-
-    btnNuevaTiendaVacio.addEventListener(
-        "click",
-        () => {
-
-            abrirModalNuevaTienda();
-
-        }
+        abrirModalNuevaTienda
     );
 
 }
@@ -1060,19 +1155,11 @@ if (btnCerrarModalTienda) {
 
     btnCerrarModalTienda.addEventListener(
         "click",
-        () => {
-
-            cerrarModalNuevaTienda();
-
-        }
+        cerrarModalNuevaTienda
     );
 
 }
 
-
-/* =========================================================
-   CERRAR MODAL AL HACER CLIC EN EL FONDO
-========================================================= */
 
 if (modalNuevaTienda) {
 
@@ -1096,7 +1183,7 @@ if (modalNuevaTienda) {
 
 
 /* =========================================================
-   GENERAR CÓDIGO DE INVITACIÓN
+   GENERAR CÓDIGO
 ========================================================= */
 
 function generarCodigoInvitacion() {
@@ -1136,15 +1223,189 @@ function generarCodigoInvitacion() {
 
 
 /* =========================================================
-   GENERAR INVITACIÓN
+   GENERAR QR
+========================================================= */
+
+function generarQRInvitacion(
+    enlaceRegistro
+) {
+
+    const contenedor =
+        document.getElementById(
+            "qrInvitacionTienda"
+        );
+
+
+    if (!contenedor) {
+
+        console.warn(
+            "⚠️ No existe qrInvitacionTienda."
+        );
+
+        return;
+
+    }
+
+
+    contenedor.innerHTML =
+        "";
+
+
+    if (
+        typeof QRCode ===
+        "undefined"
+    ) {
+
+        contenedor.innerHTML = `
+
+            <div class="qr-error">
+                No se pudo cargar el generador QR.
+            </div>
+
+        `;
+
+        console.error(
+            "❌ QRCode no está disponible."
+        );
+
+        return;
+
+    }
+
+
+    new QRCode(
+        contenedor,
+        {
+
+            text:
+                enlaceRegistro,
+
+            width:
+                220,
+
+            height:
+                220,
+
+            correctLevel:
+                QRCode.CorrectLevel.H
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   DESCARGAR QR
+========================================================= */
+
+function descargarQRInvitacion(
+    codigo
+) {
+
+    const contenedor =
+        document.getElementById(
+            "qrInvitacionTienda"
+        );
+
+
+    if (!contenedor) {
+
+        return;
+
+    }
+
+
+    const imagen =
+        contenedor.querySelector(
+            "img"
+        );
+
+
+    const canvas =
+        contenedor.querySelector(
+            "canvas"
+        );
+
+
+    let enlace =
+        null;
+
+
+    if (imagen) {
+
+        enlace =
+            document.createElement(
+                "a"
+            );
+
+
+        enlace.href =
+            imagen.src;
+
+    }
+    else if (canvas) {
+
+        enlace =
+            document.createElement(
+                "a"
+            );
+
+
+        enlace.href =
+            canvas.toDataURL(
+                "image/png"
+            );
+
+    }
+
+
+    if (!enlace) {
+
+        mostrarNotificacion(
+            "No se pudo preparar el QR para descargar.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    enlace.download =
+        `MOTI-G-invitacion-${codigo}.png`;
+
+
+    document.body.appendChild(
+        enlace
+    );
+
+
+    enlace.click();
+
+
+    enlace.remove();
+
+
+    mostrarNotificacion(
+        "QR guardado correctamente.",
+        "exito"
+    );
+
+}
+
+
+/* =========================================================
+   CREAR INVITACIÓN
 ========================================================= */
 
 async function crearInvitacionTienda() {
 
     if (!auth.currentUser) {
 
-        alert(
-            "Tu sesión administrativa ya no está disponible."
+        mostrarNotificacion(
+            "Tu sesión administrativa ya no está disponible.",
+            "error"
         );
 
         return;
@@ -1159,10 +1420,6 @@ async function crearInvitacionTienda() {
 
     try {
 
-        /* -------------------------------------------------
-           DESACTIVAR BOTÓN
-        ------------------------------------------------- */
-
         btnGenerarInvitacion.disabled =
             true;
 
@@ -1171,17 +1428,14 @@ async function crearInvitacionTienda() {
             "Generando...";
 
 
-        /* -------------------------------------------------
-           GENERAR CÓDIGO ÚNICO
-        ------------------------------------------------- */
-
         let codigo;
 
         let referenciaInvitacion;
 
         let snapshotInvitacion;
 
-        let intentos = 0;
+        let intentos =
+            0;
 
 
         do {
@@ -1224,10 +1478,6 @@ async function crearInvitacionTienda() {
         }
 
 
-        /* -------------------------------------------------
-           GUARDAR INVITACIÓN
-        ------------------------------------------------- */
-
         await setDoc(
             referenciaInvitacion,
             {
@@ -1253,10 +1503,6 @@ async function crearInvitacionTienda() {
         );
 
 
-        /* -------------------------------------------------
-           CREAR ENLACE
-        ------------------------------------------------- */
-
         const enlace =
             new URL(
                 "../registro-tienda.html",
@@ -1273,32 +1519,6 @@ async function crearInvitacionTienda() {
         const enlaceRegistro =
             enlace.href;
 
-       const qrContenedor =
-    document.getElementById(
-        "qrInvitacionTienda"
-    );
-
-if (qrContenedor) {
-
-    qrContenedor.innerHTML = "";
-
-    new QRCode(
-        qrContenedor,
-        {
-            text: enlaceRegistro,
-            width: 220,
-            height: 220,
-            correctLevel:
-                QRCode.CorrectLevel.H
-        }
-    );
-
-}
-
-
-        /* -------------------------------------------------
-           MOSTRAR RESULTADO
-        ------------------------------------------------- */
 
         if (contenidoInvitacionTienda) {
 
@@ -1317,7 +1537,6 @@ if (qrContenedor) {
                             Código de invitación
                         </span>
 
-
                         <strong class="invitacion-codigo">
                             ${codigo}
                         </strong>
@@ -1331,7 +1550,6 @@ if (qrContenedor) {
                             Enlace de registro
                         </span>
 
-
                         <div class="invitacion-enlace">
                             ${escaparHTMLAdmin(
                                 enlaceRegistro
@@ -1341,27 +1559,39 @@ if (qrContenedor) {
                     </div>
 
 
-                    <button
-                        type="button"
-                        class="btn-principal btn-ancho"
-                        id="btnCopiarInvitacion"
-                    >
-                        Copiar enlace
-                    </button>
+                    <div class="invitacion-qr-real">
 
-
-                    <div class="invitacion-qr-pendiente">
-
-   <div
-    id="qrInvitacionTienda"
-    class="qr-invitacion">
-</div>
-
+                        <div
+                            id="qrInvitacionTienda"
+                            class="qr-invitacion"
+                        ></div>
 
                         <p>
-                            El código QR lo agregaremos
-                            en el siguiente paso.
+                            Escanea este código para abrir
+                            directamente el registro de la tienda.
                         </p>
+
+                    </div>
+
+
+                    <div class="invitacion-acciones">
+
+                        <button
+                            type="button"
+                            class="btn-principal btn-ancho"
+                            id="btnCopiarInvitacion"
+                        >
+                            Copiar enlace
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="btn-secundario btn-ancho"
+                            id="btnDescargarQR"
+                        >
+                            Descargar QR
+                        </button>
 
                     </div>
 
@@ -1379,18 +1609,27 @@ if (qrContenedor) {
 
 
             /* -------------------------------------------------
-               BOTÓN COPIAR
+               GENERAR QR
             ------------------------------------------------- */
 
-            const btnCopiarInvitacion =
+            generarQRInvitacion(
+                enlaceRegistro
+            );
+
+
+            /* -------------------------------------------------
+               COPIAR ENLACE
+            ------------------------------------------------- */
+
+            const btnCopiar =
                 document.getElementById(
                     "btnCopiarInvitacion"
                 );
 
 
-            if (btnCopiarInvitacion) {
+            if (btnCopiar) {
 
-                btnCopiarInvitacion.addEventListener(
+                btnCopiar.addEventListener(
                     "click",
                     async () => {
 
@@ -1401,14 +1640,20 @@ if (qrContenedor) {
                             );
 
 
-                            btnCopiarInvitacion.textContent =
+                            btnCopiar.textContent =
                                 "✓ Enlace copiado";
+
+
+                            mostrarNotificacion(
+                                "Enlace copiado correctamente.",
+                                "exito"
+                            );
 
 
                             setTimeout(
                                 () => {
 
-                                    btnCopiarInvitacion.textContent =
+                                    btnCopiar.textContent =
                                         "Copiar enlace";
 
                                 },
@@ -1424,8 +1669,9 @@ if (qrContenedor) {
                             );
 
 
-                            alert(
-                                "No se pudo copiar automáticamente. Copia el enlace manualmente."
+                            mostrarNotificacion(
+                                "No se pudo copiar automáticamente el enlace.",
+                                "error"
                             );
 
                         }
@@ -1435,11 +1681,43 @@ if (qrContenedor) {
 
             }
 
+
+            /* -------------------------------------------------
+               DESCARGAR QR
+            ------------------------------------------------- */
+
+            const btnDescargarQR =
+                document.getElementById(
+                    "btnDescargarQR"
+                );
+
+
+            if (btnDescargarQR) {
+
+                btnDescargarQR.addEventListener(
+                    "click",
+                    () => {
+
+                        descargarQRInvitacion(
+                            codigo
+                        );
+
+                    }
+                );
+
+            }
+
         }
 
 
+        mostrarNotificacion(
+            "La invitación fue generada correctamente.",
+            "exito"
+        );
+
+
         console.log(
-            "🏪 MOTI GO: invitación de tienda creada:",
+            "🏪 MOTI GO: invitación creada:",
             codigo
         );
 
@@ -1452,8 +1730,10 @@ if (qrContenedor) {
         );
 
 
-        alert(
-            "No se pudo crear la invitación. Revisa Firebase y las reglas de Firestore."
+        mostrarNotificacion(
+            "No se pudo crear la invitación. Revisa Firebase y las reglas de Firestore.",
+            "error",
+            6000
         );
 
     }
@@ -1483,11 +1763,7 @@ if (btnGenerarInvitacion) {
 
     btnGenerarInvitacion.addEventListener(
         "click",
-        () => {
-
-            crearInvitacionTienda();
-
-        }
+        crearInvitacionTienda
     );
 
 }
@@ -1506,10 +1782,6 @@ onAuthStateChanged(
         );
 
 
-        /* -------------------------------------------------
-           NO HAY SESIÓN
-        ------------------------------------------------- */
-
         if (!usuario) {
 
             window.location.href =
@@ -1521,10 +1793,6 @@ onAuthStateChanged(
 
 
         try {
-
-            /* -------------------------------------------------
-               OBTENER DOCUMENTO DEL USUARIO
-            ------------------------------------------------- */
 
             const referenciaUsuario =
                 doc(
@@ -1540,14 +1808,16 @@ onAuthStateChanged(
                 );
 
 
-            /* -------------------------------------------------
-               EL DOCUMENTO NO EXISTE
-            ------------------------------------------------- */
-
             if (!snapshot.exists()) {
 
                 console.error(
                     "❌ El documento del usuario no existe."
+                );
+
+
+                mostrarNotificacion(
+                    "No se encontró tu perfil administrativo.",
+                    "error"
                 );
 
 
@@ -1568,17 +1838,15 @@ onAuthStateChanged(
                 snapshot.data();
 
 
-            /* -------------------------------------------------
-               COMPROBAR TIPO DE USUARIO
-            ------------------------------------------------- */
-
             if (
                 datosUsuario.tipo !==
                 "admin"
             ) {
 
-                alert(
-                    "No tienes permisos para acceder al panel administrativo."
+                mostrarNotificacion(
+                    "No tienes permisos para acceder al panel administrativo.",
+                    "error",
+                    5000
                 );
 
 
@@ -1595,10 +1863,6 @@ onAuthStateChanged(
             }
 
 
-            /* -------------------------------------------------
-               ACCESO AUTORIZADO
-            ------------------------------------------------- */
-
             console.log(
                 "✅ MOTI GO ADMIN: acceso autorizado."
             );
@@ -1611,10 +1875,6 @@ onAuthStateChanged(
 
             }
 
-
-            /* -------------------------------------------------
-               NOMBRE DEL ADMINISTRADOR
-            ------------------------------------------------- */
 
             const nombre =
                 datosUsuario.nombre ||
@@ -1630,10 +1890,6 @@ onAuthStateChanged(
 
             }
 
-
-            /* -------------------------------------------------
-               AVATAR
-            ------------------------------------------------- */
 
             const avatar =
                 document.querySelector(
@@ -1653,11 +1909,7 @@ onAuthStateChanged(
 
 
             /* -------------------------------------------------
-               ESCUCHAR TIENDAS
-               
-               IMPORTANTE:
-               Esto ocurre DESPUÉS de comprobar que el
-               usuario realmente es administrador.
+               INICIAR TIENDAS
             ------------------------------------------------- */
 
             escucharTiendas();
@@ -1671,8 +1923,10 @@ onAuthStateChanged(
             );
 
 
-            alert(
-                "No se pudo verificar tu cuenta administrativa."
+            mostrarNotificacion(
+                "No se pudo verificar tu cuenta administrativa.",
+                "error",
+                5000
             );
 
 
@@ -1739,6 +1993,12 @@ if (btnCerrarSesion) {
                 );
 
 
+                mostrarNotificacion(
+                    "No se pudo cerrar la sesión.",
+                    "error"
+                );
+
+
                 btnCerrarSesion.disabled =
                     false;
 
@@ -1756,9 +2016,6 @@ if (btnCerrarSesion) {
 
 /* =========================================================
    CONFIGURACIÓN DE TARIFAS
-   -----------------------------------------------
-   TODAVÍA NO GUARDA EN FIREBASE.
-   SOLAMENTE VALIDAMOS LOS VALORES.
 ========================================================= */
 
 if (btnGuardarTarifas) {
@@ -1839,6 +2096,13 @@ if (btnGuardarTarifas) {
 
                 }
 
+
+                mostrarNotificacion(
+                    "Revisa los valores de las tarifas.",
+                    "advertencia"
+                );
+
+
                 return;
 
             }
@@ -1855,6 +2119,13 @@ if (btnGuardarTarifas) {
                         "La comisión máxima no puede ser menor que la mínima.";
 
                 }
+
+
+                mostrarNotificacion(
+                    "La comisión máxima no puede ser menor que la mínima.",
+                    "advertencia"
+                );
+
 
                 return;
 
@@ -1889,6 +2160,12 @@ if (btnGuardarTarifas) {
 
             }
 
+
+            mostrarNotificacion(
+                "Los valores son válidos. La conexión con Firebase se agregará en el módulo de configuración.",
+                "info"
+            );
+
         }
     );
 
@@ -1896,7 +2173,7 @@ if (btnGuardarTarifas) {
 
 
 /* =========================================================
-   INICIO DEL PANEL
+   INICIO
 ========================================================= */
 
 mostrarVista(
