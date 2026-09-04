@@ -1301,6 +1301,77 @@ function abrirModalAdministrarTienda(
 
                 </div>
 
+                <div class="admin-detail-section">
+
+    <h3>
+        Comisión MOTI
+    </h3>
+
+    <p>
+        Define el porcentaje que MOTI GO recibirá
+        de las ventas realizadas mediante Mandaditos
+        en esta tienda.
+    </p>
+
+    <div class="field">
+
+        <label for="comisionTiendaAdmin">
+            Comisión de la tienda
+        </label>
+
+        <div class="config-input-suffix">
+
+            <input
+                id="comisionTiendaAdmin"
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
+                value="${
+                    Number.isFinite(
+                        Number(
+                            tienda.comisionTiendaPorcentaje
+                        )
+                    )
+                        ? tienda.comisionTiendaPorcentaje
+                        : configuracionMOTI.comisionTiendaPorcentaje
+                }"
+            >
+
+            <span>
+                %
+            </span>
+
+        </div>
+
+        <small>
+            Esta comisión se descuenta de la venta
+            de la tienda. No se suma al cliente.
+        </small>
+
+    </div>
+
+    <div class="config-actions">
+
+        <span
+            class="save-status"
+            id="estadoComisionTiendaAdmin"
+        >
+            Configuración actual.
+        </span>
+
+        <button
+            type="button"
+            id="btnGuardarComisionTiendaAdmin"
+            class="btn-primary"
+        >
+            Guardar comisión
+        </button>
+
+    </div>
+
+</div>
+
 
                 <div class="admin-detail-section">
 
@@ -1419,6 +1490,153 @@ function abrirModalAdministrarTienda(
 
             }
         );
+
+   document
+    .getElementById(
+        "btnGuardarComisionTiendaAdmin"
+    )
+    ?.addEventListener(
+        "click",
+        async () => {
+
+            await guardarComisionTiendaAdmin(
+                tienda
+            );
+
+        }
+    );
+
+}
+
+/* =========================================================
+   GUARDAR COMISIÓN INDIVIDUAL DE TIENDA
+========================================================= */
+
+async function guardarComisionTiendaAdmin(
+    tienda
+) {
+
+    const campo =
+        document.getElementById(
+            "comisionTiendaAdmin"
+        );
+
+
+    if (!campo) {
+        return;
+    }
+
+
+    const porcentaje =
+        Number(
+            campo.value
+        );
+
+
+    if (
+        !Number.isFinite(porcentaje) ||
+        porcentaje < 0 ||
+        porcentaje > 100
+    ) {
+
+        mostrarNotificacion(
+            "La comisión debe estar entre 0 % y 100 %.",
+            "advertencia"
+        );
+
+        return;
+
+    }
+
+
+    const boton =
+        document.getElementById(
+            "btnGuardarComisionTiendaAdmin"
+        );
+
+
+    try {
+
+        if (boton) {
+
+            boton.disabled =
+                true;
+
+            boton.textContent =
+                "Guardando...";
+
+        }
+
+
+        await updateDoc(
+            doc(
+                db,
+                "tiendas",
+                tienda.id
+            ),
+            {
+
+                comisionTiendaPorcentaje:
+                    porcentaje,
+
+                comisionTiendaActualizadaPor:
+                    auth.currentUser?.uid ||
+                    null,
+
+                comisionTiendaActualizadaEn:
+                    serverTimestamp()
+
+            }
+        );
+
+
+        const estado =
+            document.getElementById(
+                "estadoComisionTiendaAdmin"
+            );
+
+
+        if (estado) {
+
+            estado.textContent =
+                "Comisión guardada correctamente.";
+
+        }
+
+
+        mostrarNotificacion(
+            `Comisión de ${porcentaje}% guardada correctamente.`,
+            "exito"
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "Error guardando comisión de tienda:",
+            error
+        );
+
+
+        mostrarNotificacion(
+            "No se pudo guardar la comisión de la tienda.",
+            "error"
+        );
+
+    }
+    finally {
+
+        if (boton) {
+
+            boton.disabled =
+                false;
+
+            boton.textContent =
+                "Guardar comisión";
+
+        }
+
+    }
 
 }
 
