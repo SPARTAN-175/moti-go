@@ -130,19 +130,13 @@ let listenerUsuarios = null;
 let listenerPedidos = null;
 
 let configuracionMOTI = {
-
     tarifaBase: 8,
-
     precioKm: 2,
-
     tiendaAdicional: 4,
-
     minimoRepartidor: 10,
-
     maximoRepartidor: 60,
-
-    comisionTiendaPorcentaje: 10
-
+    comisionTiendaPorcentaje: 10,
+    comisionFundadorPorcentaje: 100
 };
 
 
@@ -4958,13 +4952,13 @@ function mostrarConfigTiendas(
         </h3>
 
         <p class="config-description">
-            Define el porcentaje que corresponde
-            a MOTI GO por las ventas realizadas
-            mediante Mandaditos.
+            Define la comisión que MOTI GO recibe
+            de las ventas y la participación que
+            corresponde a los fundadores.
         </p>
 
 
-        <div class="config-single-card">
+        <div class="form-grid">
 
             <div class="field">
 
@@ -4993,9 +4987,42 @@ function mostrarConfigTiendas(
                 </div>
 
                 <small>
-                    Esta comisión se descuenta
-                    de la venta de la tienda,
-                    no se suma al cliente.
+                    Comisión que MOTI GO genera
+                    sobre las ventas de la tienda.
+                </small>
+
+            </div>
+
+
+            <div class="field">
+
+                <label for="comisionFundadorPorcentaje">
+                    Participación de fundadores
+                </label>
+
+                <div class="config-input-suffix">
+
+                    <input
+                        id="comisionFundadorPorcentaje"
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="1"
+                        value="${
+                            configuracionMOTI
+                                .comisionFundadorPorcentaje
+                        }"
+                    >
+
+                    <span>
+                        %
+                    </span>
+
+                </div>
+
+                <small>
+                    Porcentaje de la comisión de tienda
+                    que corresponde a los fundadores.
                 </small>
 
             </div>
@@ -5011,8 +5038,11 @@ function mostrarConfigTiendas(
 
             <p>
                 Si una venta es de $200 y la comisión
-                es del 10 %, MOTI genera $20 de comisión
-                y la tienda conserva $180.
+                es del 10 %, MOTI genera $20.
+                Si la participación de fundadores
+                es del 100 %, los fundadores tendrán
+                derecho a esos $20 una vez que MOTI
+                haya recibido el pago de la tienda.
             </p>
 
         </div>
@@ -5032,7 +5062,7 @@ function mostrarConfigTiendas(
                 class="btn-primary"
                 type="button"
             >
-                Guardar comisión
+                Guardar configuración
             </button>
 
         </div>
@@ -5500,7 +5530,16 @@ async function guardarComisionTienda() {
         );
 
 
-    if (!campo) {
+    const campoFundador =
+        document.getElementById(
+            "comisionFundadorPorcentaje"
+        );
+
+
+    if (
+        !campo ||
+        !campoFundador
+    ) {
         return;
     }
 
@@ -5511,6 +5550,12 @@ async function guardarComisionTienda() {
         );
 
 
+    const porcentajeFundador =
+        Number(
+            campoFundador.value
+        );
+
+
     if (
         !Number.isFinite(porcentaje) ||
         porcentaje < 0 ||
@@ -5518,7 +5563,23 @@ async function guardarComisionTienda() {
     ) {
 
         mostrarNotificacion(
-            "La comisión debe estar entre 0 % y 100 %.",
+            "La comisión de tiendas debe estar entre 0 % y 100 %.",
+            "advertencia"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !Number.isFinite(porcentajeFundador) ||
+        porcentajeFundador < 0 ||
+        porcentajeFundador > 100
+    ) {
+
+        mostrarNotificacion(
+            "La participación de fundadores debe estar entre 0 % y 100 %.",
             "advertencia"
         );
 
@@ -5577,6 +5638,9 @@ async function guardarComisionTienda() {
                 comisionTiendaPorcentaje:
                     porcentaje,
 
+                comisionFundadorPorcentaje:
+                    porcentajeFundador,
+
                 actualizadoPor:
                     auth.currentUser?.uid ||
                     null,
@@ -5591,13 +5655,21 @@ async function guardarComisionTienda() {
         );
 
 
-        configuracionMOTI
-            .comisionTiendaPorcentaje =
-            porcentaje;
+        configuracionMOTI = {
+
+            ...configuracionMOTI,
+
+            comisionTiendaPorcentaje:
+                porcentaje,
+
+            comisionFundadorPorcentaje:
+                porcentajeFundador
+
+        };
 
 
         mostrarNotificacion(
-            "La comisión de tiendas fue guardada correctamente.",
+            "La configuración de comisiones fue guardada correctamente.",
             "exito"
         );
 
@@ -5611,7 +5683,7 @@ async function guardarComisionTienda() {
         if (estado) {
 
             estado.textContent =
-                "Comisión guardada correctamente.";
+                "Configuración guardada correctamente.";
 
         }
 
@@ -5619,13 +5691,13 @@ async function guardarComisionTienda() {
     catch (error) {
 
         console.error(
-            "Error guardando comisión:",
+            "Error guardando configuración de comisiones:",
             error
         );
 
 
         mostrarNotificacion(
-            "No se pudo guardar la comisión de tiendas.",
+            "No se pudo guardar la configuración de comisiones.",
             "error"
         );
 
@@ -5644,7 +5716,7 @@ async function guardarComisionTienda() {
                 false;
 
             boton.textContent =
-                "Guardar comisión";
+                "Guardar configuración";
 
         }
 
