@@ -26,6 +26,10 @@ import {
 }
 from "./dispatcher/dispatcher.js";
 
+import {
+    calcularComisionesPedido
+}
+from "./motigo-comisiones.js";
 
 // =====================================================
 // MOTI GO
@@ -2320,6 +2324,411 @@ console.log(
     tiendasPedido
 );
 
+    // =====================================================
+// MOTOR DE COMISIONES MOTI GO
+// =====================================================
+//
+// Calculamos las comisiones ANTES de crear el pedido.
+//
+// IMPORTANTE:
+// Este motor es independiente del motor de asignación.
+//
+// Aquí solamente calculamos:
+//
+// - tarifa de entrega;
+// - comisión de cada tienda;
+// - participación del fundador;
+// - configuración aplicada.
+//
+// =====================================================
+
+// =====================================================
+// CALCULAR SUBTOTAL DE CADA TIENDA
+// =====================================================
+
+const tiendasParaComisiones =
+    tiendasPedido.map(
+        tienda => {
+
+            const subtotalTienda =
+                tienda.productos.reduce(
+                    (
+                        total,
+                        producto
+                    ) => {
+
+                        return (
+                            total +
+                            Number(
+                                producto.importe
+                            )
+                        );
+
+                    },
+                    0
+                );
+
+
+            const tiendaOriginal =
+                pedidoTiendas.find(
+                    item =>
+                        item.id ===
+                        tienda.tiendaId
+                );
+
+
+            return {
+
+                id:
+                    tienda.tiendaId,
+
+                nombre:
+                    tienda.nombre,
+
+                subtotal:
+                    subtotalTienda,
+
+                comisionTiendaPorcentaje:
+                    tiendaOriginal
+                        ?.comisionTiendaPorcentaje
+
+            };
+
+        }
+    );
+
+
+// =====================================================
+// CALCULAR DISTANCIA REAL DEL PEDIDO
+// =====================================================
+//
+// Ruta:
+//
+// Cliente
+//    ↓
+// Tienda 1
+//    ↓
+// Tienda 2
+//    ↓
+// ...
+//    ↓
+// Cliente
+//
+// La distancia se calcula mediante coordenadas GPS.
+//
+// =====================================================
+
+function calcularDistanciaEntrePuntosMotiGo(
+    lat1,
+    lon1,
+    lat2,
+    lon2
+) {
+
+    const radioTierraKm =
+        6371;
+
+
+    const dLat =
+        (
+            lat2 -
+            lat1
+        ) *
+        Math.PI /
+        180;
+
+
+    const dLon =
+        (
+            lon2 -
+            lon1
+        ) *
+        Math.PI /
+        180;
+
+
+    const lat1Rad =
+        lat1 *
+        Math.PI /
+        180;
+
+
+    const lat2Rad =
+        lat2 *
+        Math.PI /
+        180;
+
+
+    const a =
+        Math.sin(
+            dLat / 2
+        ) *
+        Math.sin(
+            dLat / 2
+        )
+        +
+        Math.cos(
+            lat1Rad
+        ) *
+        Math.cos(
+            lat2Rad
+        ) *
+        Math.sin(
+            dLon / 2
+        ) *
+        Math.sin(
+            dLon / 2
+        );
+
+
+    const c =
+        2 *
+        Math.atan2(
+            Math.sqrt(a),
+            Math.sqrt(
+                1 - a
+            )
+        );
+
+
+    return (
+        radioTierraKm *
+        c
+    );
+
+}
+
+
+// =====================================================
+// CONSTRUIR RUTA
+// =====================================================
+
+const puntosRuta =
+    [
+
+        {
+
+            latitud:
+                Number(
+                    destino.latitud
+                ),
+
+            longitud:
+                Number(
+                    destino.longitud
+                )
+
+        }
+
+    ];
+
+
+// =====================================================
+// AGREGAR TIENDAS
+// =====================================================
+
+tiendasPedido.forEach(
+    tienda => {
+
+        const latitud =
+            Number(
+                tienda.latitud
+            );
+
+
+        const longitud =
+            Number(
+                tienda.longitud
+            );
+
+
+        if (
+            Number.isFinite(
+                latitud
+            ) &&
+            Number.isFinite(
+                longitud
+            )
+        ) {
+
+            puntosRuta.push({
+
+                latitud:
+                    latitud,
+
+                longitud:
+                    longitud
+
+            });
+
+        }
+
+    }
+);
+
+
+// =====================================================
+// REGRESAR AL CLIENTE
+// =====================================================
+
+puntosRuta.push({
+
+    latitud:
+        Number(
+            destino.latitud
+        ),
+
+    longitud:
+        Number(
+            destino.longitud
+        )
+
+});
+
+
+// =====================================================
+// SUMAR DISTANCIAS
+// =====================================================
+
+let distanciaKm =
+    0;
+
+
+for (
+    let i = 0;
+    i < puntosRuta.length - 1;
+    i++
+) {
+
+    const puntoActual =
+        puntosRuta[i];
+
+
+    const siguientePunto =
+        puntosRuta[
+            i + 1
+        ];
+
+
+    distanciaKm +=
+        calcularDistanciaEntrePuntosMotiGo(
+
+            puntoActual.latitud,
+
+            puntoActual.longitud,
+
+            siguientePunto.latitud,
+
+            siguientePunto.longitud
+
+        );
+
+}
+
+
+// =====================================================
+// VALIDAR DISTANCIA
+// =====================================================
+
+if (
+    !Number.isFinite(
+        distanciaKm
+    ) ||
+    distanciaKm < 0
+) {
+
+    throw new Error(
+        "No se pudo calcular correctamente la distancia del pedido."
+    );
+
+}
+
+
+// =====================================================
+// SEGURIDAD
+// =====================================================
+//
+// Una distancia exageradamente grande indica que
+// alguna coordenada probablemente está incorrecta.
+//
+// =====================================================
+
+if (
+    distanciaKm > 100
+) {
+
+    console.error(
+        "❌ MOTI GO: distancia del pedido fuera de rango:",
+        distanciaKm,
+        puntosRuta
+    );
+
+
+    throw new Error(
+        "La distancia calculada del pedido parece incorrecta."
+    );
+
+}
+
+
+console.log(
+    "📏 MOTI GO - DISTANCIA REAL DEL PEDIDO:",
+    {
+        distanciaKm:
+            Number(
+                distanciaKm.toFixed(
+                    2
+                )
+            ),
+
+        puntosRuta:
+            puntosRuta
+
+    }
+);
+
+
+// =====================================================
+// IDENTIFICAR SI EL PEDIDO ES DE FUNDADOR
+// =====================================================
+//
+// Por ahora dejamos false.
+//
+// Después conectaremos la identificación real
+// de los fundadores.
+// =====================================================
+
+const esFundador =
+    false;
+
+
+// =====================================================
+// EJECUTAR MOTOR DE COMISIONES
+// =====================================================
+
+const resultadoComisiones =
+    await calcularComisionesPedido({
+
+        distanciaKm:
+
+            distanciaKm,
+
+        tiendas:
+
+            tiendasParaComisiones,
+
+        esFundador:
+
+            esFundador
+
+    });
+
+
+console.log(
+    "🧮 MOTI GO - RESULTADO DE COMISIONES:",
+    resultadoComisiones
+);
+
 
 // =====================================================
 // CONSTRUIR PEDIDO FINAL
@@ -2379,9 +2788,33 @@ const subtotal =
 // =====================================================
 // COMISIÓN DE ENTREGA
 // =====================================================
+//
+// El monto ya no es fijo.
+//
+// Lo proporciona el motor de comisiones según:
+//
+// - distancia;
+// - cantidad de tiendas;
+// - tarifa base;
+// - precio por km;
+// - tiendas adicionales;
+// - mínimo;
+// - máximo.
+//
+// =====================================================
 
 const costoEntrega =
-    obtenerCostoEntregaPedido();
+    Number(
+        resultadoComisiones
+            ?.tarifaEntrega
+            ?.monto
+    ) || 0;
+
+
+console.log(
+    "🚚 MOTI GO - TARIFA DE ENTREGA CALCULADA:",
+    costoEntrega
+);
 
 
 // =====================================================
@@ -2503,17 +2936,123 @@ const pedido = {
 
     subtotal:
 
-        subtotal,
+    subtotal,
 
 
-    costoEntrega:
+// =====================================================
+// COMISIONES MOTI GO
+// =====================================================
+//
+// Estos valores quedan congelados dentro del pedido.
+//
+// IMPORTANTE:
+//
+// La tarifa de entrega es lo que paga el cliente
+// por el servicio del repartidor.
+//
+// NO representa una deuda de MOTI.
+//
+// Las comisiones de las tiendas sí representan
+// ingresos/comisiones de MOTI.
+//
+// =====================================================
 
-        costoEntrega,
+costoEntrega:
+
+    costoEntrega,
 
 
-    total:
+comisiones: {
 
-        total,
+    repartidor: {
+
+        monto:
+            Number(
+                resultadoComisiones
+                    ?.tarifaEntrega
+                    ?.monto
+            ) || 0,
+
+        distanciaKm:
+            Number(
+                resultadoComisiones
+                    ?.tarifaEntrega
+                    ?.distanciaKm
+            ) || 0,
+
+        distanciaKmTarificada:
+            Number(
+                resultadoComisiones
+                    ?.tarifaEntrega
+                    ?.distanciaKmTarificada
+            ) || 0,
+
+        numeroTiendas:
+            Number(
+                resultadoComisiones
+                    ?.tarifaEntrega
+                    ?.numeroTiendas
+            ) || 0
+
+    },
+
+
+    tiendas:
+
+        resultadoComisiones
+            ?.comisionesTiendas ||
+        [],
+
+
+    totalTiendas:
+
+        Number(
+            resultadoComisiones
+                ?.resumen
+                ?.totalComisionesTiendas
+        ) || 0,
+
+
+    fundador: {
+
+        monto:
+
+            Number(
+                resultadoComisiones
+                    ?.resumen
+                    ?.totalFundador
+            ) || 0,
+
+        estado:
+            "pendiente_cobro_tienda"
+
+    }
+
+},
+
+
+// =====================================================
+// CONFIGURACIÓN APLICADA
+// =====================================================
+//
+// Guardamos una fotografía de la configuración
+// utilizada para calcular este pedido.
+//
+// Así los pedidos históricos no cambian si el
+// administrador modifica las tarifas posteriormente.
+//
+// =====================================================
+
+configuracionAplicada:
+
+    resultadoComisiones
+        ?.configuracionAplicada ||
+    {},
+
+
+total:
+
+    total,
 
 
     codigoEntrega:
