@@ -1273,6 +1273,28 @@ async function crearInvitacionTienda() {
         const enlaceRegistro =
             enlace.href;
 
+       const qrContenedor =
+    document.getElementById(
+        "qrInvitacionTienda"
+    );
+
+if (qrContenedor) {
+
+    qrContenedor.innerHTML = "";
+
+    new QRCode(
+        qrContenedor,
+        {
+            text: enlaceRegistro,
+            width: 220,
+            height: 220,
+            correctLevel:
+                QRCode.CorrectLevel.H
+        }
+    );
+
+}
+
 
         /* -------------------------------------------------
            MOSTRAR RESULTADO
@@ -1330,9 +1352,10 @@ async function crearInvitacionTienda() {
 
                     <div class="invitacion-qr-pendiente">
 
-                        <div class="qr-placeholder">
-                            QR
-                        </div>
+   <div
+    id="qrInvitacionTienda"
+    class="qr-invitacion">
+</div>
 
 
                         <p>
