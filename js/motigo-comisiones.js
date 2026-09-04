@@ -61,8 +61,8 @@ const CONFIGURACION_PREDETERMINADA = {
     maximoRepartidor:
         60,
 
-    comisionTiendaGlobal:
-        10,
+    comisionTiendaPorcentaje:
+    10,
 
     comisionFundadorPorcentaje:
         100
@@ -402,9 +402,9 @@ export function obtenerPorcentajeComisionTienda(
 
 
     return numeroSeguro(
-        configuracion.comisionTiendaGlobal,
-        CONFIGURACION_PREDETERMINADA.comisionTiendaGlobal
-    );
+    configuracion.comisionTiendaPorcentaje,
+    CONFIGURACION_PREDETERMINADA.comisionTiendaPorcentaje
+);
 
 }
 
@@ -734,10 +734,10 @@ export async function calcularComisionesPedido(
                     configuracion.maximoRepartidor
                 ),
 
-            comisionTiendaGlobal:
-                numeroSeguro(
-                    configuracion.comisionTiendaGlobal
-                ),
+            comisionTiendaPorcentaje:
+    numeroSeguro(
+        configuracion.comisionTiendaPorcentaje
+    ),
 
             comisionFundadorPorcentaje:
                 numeroSeguro(
