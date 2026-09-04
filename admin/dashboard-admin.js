@@ -22,9 +22,10 @@ import {
 
 
 import {
+    collection,
     doc,
     getDoc,
-    collection,
+    onSnapshot,
     setDoc,
     serverTimestamp
 } from
@@ -113,6 +114,24 @@ const estadoConfiguracion =
     document.getElementById(
         "estadoConfiguracion"
     );
+
+
+/* =========================================================
+   ELEMENTOS — TIENDAS
+========================================================= */
+
+const contenedorTiendas =
+    document.getElementById(
+        "contenedorTiendas"
+    );
+
+
+/* =========================================================
+   LISTENER DE TIENDAS
+========================================================= */
+
+let listenerTiendas =
+    null;
 
 
 /* =========================================================
@@ -587,6 +606,377 @@ if (btnMarketplace) {
 
 
 /* =========================================================
+   ESCAPAR TEXTO PARA HTML
+========================================================= */
+
+function escaparHTMLAdmin(
+    texto
+) {
+
+    return String(
+        texto ?? ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+/* =========================================================
+   MOSTRAR BOTÓN DE INVITACIÓN CUANDO NO HAY TIENDAS
+========================================================= */
+
+function configurarBotonNuevaTiendaVacio() {
+
+    const boton =
+        document.getElementById(
+            "btnNuevaTiendaVacio"
+        );
+
+
+    if (!boton) {
+        return;
+    }
+
+
+    boton.addEventListener(
+        "click",
+        () => {
+
+            abrirModalNuevaTienda();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CARGAR TIENDAS EN TIEMPO REAL
+========================================================= */
+
+function escucharTiendas() {
+
+    if (!contenedorTiendas) {
+
+        console.warn(
+            "⚠️ MOTI GO ADMIN: no existe contenedorTiendas."
+        );
+
+        return;
+
+    }
+
+
+    /* -----------------------------------------------------
+       EVITAR LISTENERS DUPLICADOS
+    ----------------------------------------------------- */
+
+    if (listenerTiendas) {
+
+        listenerTiendas();
+
+        listenerTiendas =
+            null;
+
+    }
+
+
+    console.log(
+        "👂 MOTI GO ADMIN: escuchando colección tiendas..."
+    );
+
+
+    const referenciaTiendas =
+        collection(
+            db,
+            "tiendas"
+        );
+
+
+    listenerTiendas =
+        onSnapshot(
+
+            referenciaTiendas,
+
+            snapshot => {
+
+                console.log(
+                    "🏪 MOTI GO ADMIN: tiendas recibidas:",
+                    snapshot.size
+                );
+
+
+                /* -----------------------------------------
+                   NO HAY TIENDAS
+                ----------------------------------------- */
+
+                if (
+                    snapshot.empty
+                ) {
+
+                    contenedorTiendas.innerHTML = `
+
+                        <div class="tiendas-vacio">
+
+                            <div class="tiendas-vacio-icono">
+                                🏪
+                            </div>
+
+                            <h3>
+                                Aún no hay tiendas registradas
+                            </h3>
+
+                            <p>
+                                Genera una invitación para que
+                                una nueva tienda pueda registrarse.
+                            </p>
+
+                            <button
+                                class="btn-generar"
+                                id="btnNuevaTiendaVacio"
+                                type="button"
+                            >
+                                + Generar invitación
+                            </button>
+
+                        </div>
+
+                    `;
+
+
+                    configurarBotonNuevaTiendaVacio();
+
+
+                    return;
+
+                }
+
+
+                /* -----------------------------------------
+                   OBTENER TIENDAS
+                ----------------------------------------- */
+
+                const tiendas =
+                    snapshot.docs.map(
+                        documento => {
+
+                            return {
+
+                                id:
+                                    documento.id,
+
+                                ...documento.data()
+
+                            };
+
+                        }
+                    );
+
+
+                /* -----------------------------------------
+                   ORDENAR POR NOMBRE
+                ----------------------------------------- */
+
+                tiendas.sort(
+                    (a, b) => {
+
+                        return String(
+                            a.nombre || ""
+                        ).localeCompare(
+                            String(
+                                b.nombre || ""
+                            ),
+                            "es"
+                        );
+
+                    }
+                );
+
+
+                /* -----------------------------------------
+                   CONSTRUIR HTML
+                ----------------------------------------- */
+
+                let html =
+                    "";
+
+
+                tiendas.forEach(
+                    tienda => {
+
+                        const activa =
+                            tienda.activa !== false;
+
+
+                        const estadoTexto =
+                            activa
+                                ? "Activa"
+                                : "Suspendida";
+
+
+                        const estadoClase =
+                            activa
+                                ? "activa"
+                                : "suspendida";
+
+
+                        const tipo =
+                            tienda.tipo ||
+                            "Sin tipo";
+
+
+                        const ubicacion =
+                            tienda.direccion ||
+                            tienda.municipio ||
+                            "Sin dirección";
+
+
+                        html += `
+
+                            <div
+                                class="tienda-admin-card"
+                            >
+
+                                <div
+                                    class="tienda-admin-icono"
+                                >
+                                    🏪
+                                </div>
+
+
+                                <div
+                                    class="tienda-admin-info"
+                                >
+
+                                    <div
+                                        class="tienda-admin-titulo"
+                                    >
+
+                                        <h3>
+                                            ${escaparHTMLAdmin(
+                                                tienda.nombre ||
+                                                "Tienda sin nombre"
+                                            )}
+                                        </h3>
+
+
+                                        <span
+                                            class="tienda-admin-estado ${estadoClase}"
+                                        >
+                                            ${estadoTexto}
+                                        </span>
+
+                                    </div>
+
+
+                                    <div
+                                        class="tienda-admin-datos"
+                                    >
+
+                                        <span>
+                                            ${escaparHTMLAdmin(
+                                                tipo
+                                            )}
+                                        </span>
+
+
+                                        <span>
+                                            ${escaparHTMLAdmin(
+                                                ubicacion
+                                            )}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div
+                                    class="tienda-admin-id"
+                                >
+
+                                    <span>
+                                        ID
+                                    </span>
+
+
+                                    <strong>
+                                        ${escaparHTMLAdmin(
+                                            tienda.id
+                                        )}
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        `;
+
+                    }
+                );
+
+
+                contenedorTiendas.innerHTML =
+                    html;
+
+            },
+
+            error => {
+
+                console.error(
+                    "❌ MOTI GO ADMIN: error escuchando tiendas:",
+                    error
+                );
+
+
+                contenedorTiendas.innerHTML = `
+
+                    <div class="tiendas-vacio">
+
+                        <div class="tiendas-vacio-icono">
+                            ⚠️
+                        </div>
+
+                        <h3>
+                            No pudimos cargar las tiendas
+                        </h3>
+
+                        <p>
+                            Revisa las reglas de Firestore
+                            y vuelve a intentarlo.
+                        </p>
+
+                    </div>
+
+                `;
+
+            }
+
+        );
+
+}
+
+
+/* =========================================================
    MODAL — INVITACIÓN DE TIENDA
 ========================================================= */
 
@@ -898,11 +1288,13 @@ async function crearInvitacionTienda() {
                         ✓ Invitación generada
                     </div>
 
+
                     <div class="invitacion-bloque">
 
                         <span class="invitacion-label">
                             Código de invitación
                         </span>
+
 
                         <strong class="invitacion-codigo">
                             ${codigo}
@@ -910,17 +1302,22 @@ async function crearInvitacionTienda() {
 
                     </div>
 
+
                     <div class="invitacion-bloque">
 
                         <span class="invitacion-label">
                             Enlace de registro
                         </span>
 
+
                         <div class="invitacion-enlace">
-                            ${enlaceRegistro}
+                            ${escaparHTMLAdmin(
+                                enlaceRegistro
+                            )}
                         </div>
 
                     </div>
+
 
                     <button
                         type="button"
@@ -930,11 +1327,13 @@ async function crearInvitacionTienda() {
                         Copiar enlace
                     </button>
 
+
                     <div class="invitacion-qr-pendiente">
 
                         <div class="qr-placeholder">
                             QR
                         </div>
+
 
                         <p>
                             El código QR lo agregaremos
@@ -942,6 +1341,7 @@ async function crearInvitacionTienda() {
                         </p>
 
                     </div>
+
 
                     <div class="invitacion-aviso">
 
@@ -1227,6 +1627,17 @@ onAuthStateChanged(
                         .toUpperCase();
 
             }
+
+
+            /* -------------------------------------------------
+               ESCUCHAR TIENDAS
+               
+               IMPORTANTE:
+               Esto ocurre DESPUÉS de comprobar que el
+               usuario realmente es administrador.
+            ------------------------------------------------- */
+
+            escucharTiendas();
 
         }
         catch (error) {
