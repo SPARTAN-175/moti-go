@@ -1002,8 +1002,8 @@ if (formRegistroTienda) {
                         "click",
                         () => {
 
-                            window.location.href =
-                                "./tienda/dashboard-tienda.html";
+                           window.location.href =
+                            "./pages/dashboard-negocio.html";
 
                         }
                     );
