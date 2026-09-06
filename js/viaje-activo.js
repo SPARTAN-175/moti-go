@@ -2544,15 +2544,14 @@ async function finalizarCompraTiendaActual() {
         producto => {
 
             if (
-                !producto.productoId
-            ) {
+    !producto.productoId
+) {
 
-                throw new Error(
-                    `El producto "${producto.nombre}" no tiene productoId.`
-                );
+    throw new Error(
+        `El producto "${producto.nombre}" no tiene productoId.`
+    );
 
-            }
-
+}
 
             if (
                 producto.cantidadSolicitada <= 0
@@ -4413,36 +4412,31 @@ function dibujarRuta(
                     );
 
 
-                actualizarNavegacion(
+    const distanciaTexto =
+    distanciaKm < 1
+        ? Math.round(ruta.summary.totalDistance) + " m"
+        : distanciaKm.toFixed(1) + " km";
 
-                    document
-                        .getElementById(
-                            "navigationTitle"
-                        )
-                        ?.textContent ||
-                        "Destino",
+const tiempoTexto =
+    tiempoMin + " min";
 
-                    document
-                        .getElementById(
-                            "navigationIcon"
-                        )
-                        ?.textContent ||
-                        "navigation",
+actualizarNavegacion(
 
-                    distanciaKm < 1
+    document
+        .getElementById("navigationTitle")
+        ?.textContent ||
+        "Destino",
 
-                        ? `${Math.round(
-                            ruta.summary.totalDistance
-                        )} m`
+    document
+        .getElementById("navigationIcon")
+        ?.textContent ||
+        "navigation",
 
-                        : `${distanciaKm.toFixed(
-                            1
-                        )} km`,
+    distanciaTexto,
 
-                    `${tiempoMin} min`
+    tiempoTexto
 
-                );
-
+);
             }
 
         );
