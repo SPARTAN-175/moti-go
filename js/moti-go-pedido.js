@@ -773,7 +773,8 @@ async function calcularTarifaPreviewMotiGo(
     ) || 0;
 
 }
-
+window.calcularTarifaPreviewMotiGo =
+    calcularTarifaPreviewMotiGo;
 
 // =====================================================
 // FORMATEAR PRECIO
