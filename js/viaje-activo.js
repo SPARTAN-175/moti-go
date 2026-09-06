@@ -2386,6 +2386,7 @@ function todosLosProductosVerificados() {
     );
 
 }
+
 // =====================================================
 // FINALIZAR COMPRA DE LA TIENDA ACTUAL
 // =====================================================
@@ -2400,12 +2401,16 @@ function todosLosProductosVerificados() {
 //    existencia no cambia
 //    reservado -= cantidad solicitada
 //
-// 💰 La comisión se calcula sobre la venta REAL.
+// 💰 La comisión de la tienda se calcula
+//    SOLAMENTE sobre la venta REAL.
 //
-// 🔐 El movimiento contable utiliza:
-//    pedidoId_tiendaId
+// 🛵 La tarifa del repartidor NO se modifica.
 //
-//    para evitar duplicar una comisión.
+// 🔐 Cada tienda tiene un movimiento independiente:
+//
+//    movimientosTiendas/{pedidoId}_{tiendaId}
+//
+//    Esto evita duplicar cargos.
 //
 // =====================================================
 
@@ -2470,7 +2475,7 @@ async function finalizarCompraTiendaActual() {
 
 
     // =================================================
-    // PREPARAR PRODUCTOS
+    // PREPARAR PRODUCTOS DE ESTA TIENDA
     // =================================================
 
     const productosProcesados =
@@ -2502,6 +2507,15 @@ async function finalizarCompraTiendaActual() {
                         "pendiente";
 
 
+                    const precio =
+                        Number(
+                            producto.precio ??
+                            producto.precioUnitario ??
+                            producto.precioVenta ??
+                            0
+                        ) || 0;
+
+
                     return {
 
                         productoId,
@@ -2514,10 +2528,7 @@ async function finalizarCompraTiendaActual() {
                             producto.nombre ||
                             "Producto",
 
-                        precio:
-                            Number(
-                                producto.precio
-                            ) || 0
+                        precio
 
                     };
 
@@ -2544,11 +2555,19 @@ async function finalizarCompraTiendaActual() {
 
 
             if (
-                producto.estado !==
-                    "disponible" &&
+                producto.cantidadSolicitada <= 0
+            ) {
 
-                producto.estado !==
-                    "no_disponible"
+                throw new Error(
+                    `La cantidad de "${producto.nombre}" no es válida.`
+                );
+
+            }
+
+
+            if (
+                producto.estado !== "disponible" &&
+                producto.estado !== "no_disponible"
             ) {
 
                 throw new Error(
@@ -2635,7 +2654,7 @@ async function finalizarCompraTiendaActual() {
 
 
             // =========================================
-            // BUSCAR INVENTARIOS
+            // LEER INVENTARIOS
             // =========================================
 
             const inventarios =
@@ -2715,7 +2734,7 @@ async function finalizarCompraTiendaActual() {
 
 
                     // =================================
-                    // SEGURIDAD
+                    // SEGURIDAD DE RESERVA
                     // =================================
 
                     if (
@@ -2735,8 +2754,7 @@ async function finalizarCompraTiendaActual() {
                     // =================================
 
                     if (
-                        item.estado ===
-                        "disponible"
+                        item.estado === "disponible"
                     ) {
 
                         if (
@@ -2817,12 +2835,8 @@ async function finalizarCompraTiendaActual() {
                     else {
 
                         const nuevoReservado =
-                            Math.max(
-                                0,
-
-                                reservado -
-                                item.cantidadSolicitada
-                            );
+                            reservado -
+                            item.cantidadSolicitada;
 
 
                         transaction.update(
@@ -2832,7 +2846,10 @@ async function finalizarCompraTiendaActual() {
                             {
 
                                 reservado:
-                                    nuevoReservado,
+                                    Math.max(
+                                        nuevoReservado,
+                                        0
+                                    ),
 
                                 disponible:
                                     existencia > 0,
@@ -2846,7 +2863,7 @@ async function finalizarCompraTiendaActual() {
 
 
                         console.log(
-                            "📦 MOTI GO: reserva liberada:",
+                            "❌ MOTI GO: producto no disponible:",
                             item.nombre,
                             {
 
@@ -2857,7 +2874,10 @@ async function finalizarCompraTiendaActual() {
                                     reservado,
 
                                 reservadoNuevo:
-                                    nuevoReservado
+                                    Math.max(
+                                        nuevoReservado,
+                                        0
+                                    )
 
                             }
                         );
@@ -2868,13 +2888,33 @@ async function finalizarCompraTiendaActual() {
             );
 
 
-            // =========================================
-            // MARCAR PRODUCTOS COMO PROCESADOS
-            // =========================================
+            // =================================================
+            // MARCAR PRODUCTOS PROCESADOS
+            // =================================================
 
             const productosActualizados =
                 productosPedido.map(
                     producto => {
+
+                        const productoTiendaId =
+                            producto.tiendaId ||
+                            producto.idTienda ||
+                            producto.tienda_id;
+
+
+                        if (
+                            String(
+                                productoTiendaId
+                            ) !==
+                            String(
+                                tiendaId
+                            )
+                        ) {
+
+                            return producto;
+
+                        }
+
 
                         const procesado =
                             productosProcesados.find(
@@ -2885,13 +2925,6 @@ async function finalizarCompraTiendaActual() {
                                     ) ===
                                     String(
                                         producto.productoId
-                                    ) &&
-
-                                    String(
-                                        producto.tiendaId
-                                    ) ===
-                                    String(
-                                        tiendaId
                                     )
                             );
 
@@ -2909,17 +2942,14 @@ async function finalizarCompraTiendaActual() {
                             producto.inventarioProcesado === true
                         ) {
 
-                            console.warn(
-                                "⚠️ MOTI GO: producto ya procesado, no se volverá a descontar:",
-                                producto.nombre ||
-                                producto.productoNombre ||
-                                producto.productoId
-                            );
-
-
                             return producto;
 
                         }
+
+
+                        const disponible =
+                            procesado.estado ===
+                            "disponible";
 
 
                         return {
@@ -2933,8 +2963,7 @@ async function finalizarCompraTiendaActual() {
                                 true,
 
                             cantidadComprada:
-                                procesado.estado ===
-                                "disponible"
+                                disponible
                                     ? procesado.cantidadSolicitada
                                     : 0
 
@@ -2944,9 +2973,17 @@ async function finalizarCompraTiendaActual() {
                 );
 
 
-            // =========================================
-            // CALCULAR VENTA REAL DE LA TIENDA
-            // =========================================
+            // =================================================
+            // VENTA REAL DE ESTA TIENDA
+            // =================================================
+            //
+            // SOLAMENTE:
+            //
+            // disponible × cantidadComprada × precio
+            //
+            // Los productos no disponibles = $0.
+            //
+            // =================================================
 
             let subtotalVentaReal =
                 0;
@@ -2955,9 +2992,15 @@ async function finalizarCompraTiendaActual() {
             productosActualizados.forEach(
                 producto => {
 
+                    const productoTiendaId =
+                        producto.tiendaId ||
+                        producto.idTienda ||
+                        producto.tienda_id;
+
+
                     if (
                         String(
-                            producto.tiendaId
+                            productoTiendaId
                         ) !==
                         String(
                             tiendaId
@@ -2981,15 +3024,16 @@ async function finalizarCompraTiendaActual() {
 
                     const cantidadComprada =
                         Number(
-                            producto.cantidadComprada ??
-                            producto.cantidad ??
-                            0
-                        );
+                            producto.cantidadComprada
+                        ) || 0;
 
 
                     const precio =
                         Number(
-                            producto.precio
+                            producto.precio ??
+                            producto.precioUnitario ??
+                            producto.precioVenta ??
+                            0
                         ) || 0;
 
 
@@ -3003,20 +3047,17 @@ async function finalizarCompraTiendaActual() {
 
             subtotalVentaReal =
                 Number(
-                    subtotalVentaReal.toFixed(
-                        2
-                    )
+                    subtotalVentaReal.toFixed(2)
                 );
 
 
-            // =========================================
-            // COMISIÓN CONGELADA DE LA TIENDA
-            // =========================================
+            // =================================================
+            // OBTENER COMISIÓN CONGELADA
+            // =================================================
 
             const comisionesActuales =
                 pedido.comisiones &&
-                typeof pedido.comisiones ===
-                    "object"
+                typeof pedido.comisiones === "object"
 
                     ? pedido.comisiones
 
@@ -3036,7 +3077,6 @@ async function finalizarCompraTiendaActual() {
             const indiceComision =
                 comisionesTiendas.findIndex(
                     comision =>
-
                         String(
                             comision.tiendaId
                         ) ===
@@ -3073,9 +3113,9 @@ async function finalizarCompraTiendaActual() {
             }
 
 
-            // =========================================
-            // CALCULAR COMISIÓN REAL
-            // =========================================
+            // =================================================
+            // COMISIÓN REAL
+            // =================================================
 
             const montoComision =
                 Number(
@@ -3083,15 +3123,13 @@ async function finalizarCompraTiendaActual() {
                         subtotalVentaReal *
                         porcentaje /
                         100
-                    ).toFixed(
-                        2
-                    )
+                    ).toFixed(2)
                 );
 
 
-            // =========================================
-            // ACTUALIZAR COMISIÓN DE ESTA TIENDA
-            // =========================================
+            // =================================================
+            // ACTUALIZAR COMISIÓN DE LA TIENDA
+            // =================================================
 
             const comisionActualizada = {
 
@@ -3143,9 +3181,9 @@ async function finalizarCompraTiendaActual() {
             }
 
 
-            // =========================================
-            // RECALCULAR TOTALES DE COMISIONES
-            // =========================================
+            // =================================================
+            // TOTAL DE COMISIONES DE TIENDAS
+            // =================================================
 
             const totalComisionesTiendas =
                 Number(
@@ -3168,24 +3206,26 @@ async function finalizarCompraTiendaActual() {
                             },
                             0
                         )
-                        .toFixed(
-                            2
-                        )
+                        .toFixed(2)
                 );
 
 
-            // =========================================
+            // =================================================
             // SUBTOTAL REAL DEL PEDIDO
-            // =========================================
+            // =================================================
             //
-            // Solamente descontamos del subtotal
-            // los productos que ya fueron procesados
-            // y resultaron no disponibles.
+            // Muy importante:
             //
-            // Los productos de otras tiendas todavía
-            // no procesadas conservan su valor original.
+            // Las tiendas ya procesadas utilizan
+            // cantidadComprada.
             //
-            // =========================================
+            // Las tiendas todavía NO procesadas
+            // conservan su cantidad original.
+            //
+            // Así no eliminamos accidentalmente
+            // productos de otras tiendas.
+            //
+            // =================================================
 
             let subtotalPedidoReal =
                 0;
@@ -3194,20 +3234,31 @@ async function finalizarCompraTiendaActual() {
             productosActualizados.forEach(
                 producto => {
 
+                    const procesado =
+                        producto.inventarioProcesado === true;
+
+
                     const cantidad =
-                        Number(
-                            producto.cantidadComprada ??
-                            (
-                                producto.inventarioProcesado === true
-                                    ? 0
-                                    : producto.cantidad
-                            )
-                        ) || 0;
+                        procesado
+
+                            ? Number(
+                                producto.cantidadComprada
+                            ) || 0
+
+                            : Number(
+                                producto.cantidad ??
+                                producto.qty ??
+                                producto.cantidadSolicitada ??
+                                1
+                            ) || 0;
 
 
                     const precio =
                         Number(
-                            producto.precio
+                            producto.precio ??
+                            producto.precioUnitario ??
+                            producto.precioVenta ??
+                            0
                         ) || 0;
 
 
@@ -3221,22 +3272,20 @@ async function finalizarCompraTiendaActual() {
 
             subtotalPedidoReal =
                 Number(
-                    subtotalPedidoReal.toFixed(
-                        2
-                    )
+                    subtotalPedidoReal.toFixed(2)
                 );
 
 
-            // =========================================
+            // =================================================
             // COSTO DE ENTREGA
-            // =========================================
+            // =================================================
             //
             // 🚨 NO SE RECALCULA.
             //
-            // El repartidor ya tiene su tarifa
-            // congelada en el pedido.
+            // El repartidor conserva la tarifa
+            // que fue calculada al crear el pedido.
             //
-            // =========================================
+            // =================================================
 
             const costoEntrega =
                 Number(
@@ -3251,15 +3300,13 @@ async function finalizarCompraTiendaActual() {
                     (
                         subtotalPedidoReal +
                         costoEntrega
-                    ).toFixed(
-                        2
-                    )
+                    ).toFixed(2)
                 );
 
 
-            // =========================================
+            // =================================================
             // ACTUALIZAR PEDIDO
-            // =========================================
+            // =================================================
 
             transaction.update(
 
@@ -3299,9 +3346,17 @@ async function finalizarCompraTiendaActual() {
             );
 
 
-            // =========================================
-            // CREAR / ACTUALIZAR MOVIMIENTO CONTABLE
-            // =========================================
+            // =================================================
+            // MOVIMIENTO DE LA TIENDA
+            // =================================================
+            //
+            // Este movimiento representa:
+            //
+            // "La tienda debe esta comisión a MOTI."
+            //
+            // NO significa que MOTI ya recibió el dinero.
+            //
+            // =================================================
 
             if (
                 !movimientoSnapshot.exists()
@@ -3351,7 +3406,7 @@ async function finalizarCompraTiendaActual() {
 
 
                 console.log(
-                    "💰 MOTI GO: comisión de tienda creada:",
+                    "💰 MOTI GO: deuda de tienda creada:",
                     {
 
                         movimientoId,
@@ -3363,8 +3418,7 @@ async function finalizarCompraTiendaActual() {
 
                         porcentaje,
 
-                        monto:
-                            montoComision
+                        montoComision
 
                     }
                 );
@@ -3373,7 +3427,7 @@ async function finalizarCompraTiendaActual() {
             else {
 
                 console.log(
-                    "🔐 MOTI GO: la comisión de esta tienda ya existe. No se duplicará:",
+                    "🔐 MOTI GO: movimiento de tienda ya existente:",
                     movimientoId
                 );
 
@@ -3385,10 +3439,12 @@ async function finalizarCompraTiendaActual() {
 
 
     console.log(
-        "✅ MOTI GO: compra finalizada, inventario y contabilidad actualizados correctamente."
+        "✅ MOTI GO: compra finalizada correctamente."
     );
 
 }
+```
+
 
 // =====================================================
 // CAMBIAR ESTADO
