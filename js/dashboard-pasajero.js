@@ -4798,7 +4798,7 @@ function crearPanelCarrito() {
                 <strong
                     id="motiCartDelivery"
                 >
-                    $10.00
+                    $0.00
                 </strong>
 
             </div>
@@ -4815,7 +4815,7 @@ function crearPanelCarrito() {
                 <strong
                     id="motiCartTotal"
                 >
-                    $10.00
+                    $0.00
                 </strong>
 
             </div>
@@ -5010,13 +5010,11 @@ else {
 // ABRIR PANEL
 // =====================================================
 
-function abrirPanelCarrito() {
+async function abrirPanelCarrito() {
 
     crearPanelCarrito();
 
-
-    actualizarPanelCarrito();
-
+    await actualizarPanelCarrito();
 
     requestAnimationFrame(
         () => {
