@@ -5058,6 +5058,396 @@ function cerrarPanelCarrito() {
 
 }
 
+// =====================================================
+// MOTI GO - CALCULAR TARIFA ESTIMADA DEL CARRITO
+// =====================================================
+
+async function calcularTarifaEstimadaCarrito() {
+
+    const itemsCarrito =
+        Object.values(carrito)
+            .filter(
+                item =>
+                    item &&
+                    item.productoId &&
+                    item.tiendaId &&
+                    Number(item.cantidad || 0) > 0
+            );
+
+
+    if (!itemsCarrito.length) {
+
+        return 0;
+
+    }
+
+
+    // =================================================
+    // OBTENER TIENDAS DEL CARRITO
+    // =================================================
+
+    const tiendasPedido =
+        [];
+
+
+    const tiendasIds =
+        [
+            ...new Set(
+                itemsCarrito.map(
+                    item =>
+                        item.tiendaId
+                )
+            )
+        ];
+
+
+    tiendasIds.forEach(
+        tiendaId => {
+
+            const tienda =
+                tiendasDisponibles.find(
+                    item =>
+                        item.id ===
+                        tiendaId
+                );
+
+
+            if (!tienda) {
+
+                return;
+
+            }
+
+
+            tiendasPedido.push({
+
+                id:
+                    tienda.id,
+
+                nombre:
+                    tienda.nombre ||
+                    "Tienda",
+
+                latitud:
+                    Number(
+                        tienda.latitud
+                    ),
+
+                longitud:
+                    Number(
+                        tienda.longitud
+                    )
+
+            });
+
+        }
+    );
+
+
+    // =================================================
+    // VALIDAR UBICACIÓN DEL CLIENTE
+    // =================================================
+
+    const latCliente =
+        Number(userLat);
+
+
+    const lngCliente =
+        Number(userLng);
+
+
+    if (
+        !Number.isFinite(latCliente) ||
+        !Number.isFinite(lngCliente)
+    ) {
+
+        console.warn(
+            "⚠️ MOTI GO: no hay ubicación válida para calcular entrega."
+        );
+
+
+        return 0;
+
+    }
+
+
+    // =================================================
+    // VALIDAR TIENDAS
+    // =================================================
+
+    if (
+        !tiendasPedido.length
+    ) {
+
+        return 0;
+
+    }
+
+
+    // =================================================
+    // CONSTRUIR RUTA
+    //
+    // CLIENTE → TIENDAS → CLIENTE
+    // =================================================
+
+    const puntosRuta = [
+
+        {
+
+            lat:
+                latCliente,
+
+            lng:
+                lngCliente
+
+        }
+
+    ];
+
+
+    tiendasPedido.forEach(
+        tienda => {
+
+            if (
+                Number.isFinite(
+                    tienda.latitud
+                ) &&
+                Number.isFinite(
+                    tienda.longitud
+                )
+            ) {
+
+                puntosRuta.push({
+
+                    lat:
+                        tienda.latitud,
+
+                    lng:
+                        tienda.longitud
+
+                });
+
+            }
+
+        }
+    );
+
+
+    puntosRuta.push({
+
+        lat:
+            latCliente,
+
+        lng:
+            lngCliente
+
+    });
+
+
+    // =================================================
+    // CALCULAR DISTANCIA TOTAL
+    // =================================================
+
+    let distanciaKm =
+        0;
+
+
+    for (
+        let i = 0;
+        i < puntosRuta.length - 1;
+        i++
+    ) {
+
+        distanciaKm +=
+            calcularDistanciaKm(
+
+                puntosRuta[i].lat,
+                puntosRuta[i].lng,
+
+                puntosRuta[i + 1].lat,
+                puntosRuta[i + 1].lng
+
+            );
+
+    }
+
+
+    console.log(
+        "📍 MOTI GO: distancia estimada del carrito:",
+        distanciaKm
+    );
+
+
+    // =================================================
+    // USAR EL MISMO MOTOR DE COMISIONES
+    // =================================================
+
+    if (
+        typeof window.calcularTarifaEntrega !==
+        "function"
+    ) {
+
+        console.warn(
+            "⚠️ MOTI GO: motor de tarifa no disponible."
+        );
+
+
+        return 0;
+
+    }
+
+
+    // =================================================
+    // CONSTRUIR TIENDAS PARA EL MOTOR
+    // =================================================
+
+    const tiendasParaMotor =
+        tiendasPedido.map(
+            tienda => {
+
+                const subtotal =
+                    itemsCarrito
+                        .filter(
+                            item =>
+                                item.tiendaId ===
+                                tienda.id
+                        )
+                        .reduce(
+                            (
+                                total,
+                                item
+                            ) => {
+
+                                return (
+                                    total +
+                                    (
+                                        Number(
+                                            item.precio || 0
+                                        ) *
+                                        Number(
+                                            item.cantidad || 0
+                                        )
+                                    )
+                                );
+
+                            },
+                            0
+                        );
+
+
+                return {
+
+                    id:
+                        tienda.id,
+
+                    nombre:
+                        tienda.nombre,
+
+                    subtotal:
+                        subtotal
+
+                };
+
+            }
+        );
+
+
+    // =================================================
+    // OBTENER CONFIGURACIÓN
+    // =================================================
+
+    let configuracion = {
+
+        tarifaBase:
+            8,
+
+        precioKm:
+            2,
+
+        tiendaAdicional:
+            4,
+
+        minimoRepartidor:
+            10,
+
+        maximoRepartidor:
+            60
+
+    };
+
+
+    try {
+
+        const configuracionRef =
+            doc(
+                db,
+                "configuracion",
+                "motigo"
+            );
+
+
+        const configuracionSnap =
+            await getDoc(
+                configuracionRef
+            );
+
+
+        if (
+            configuracionSnap.exists()
+        ) {
+
+            configuracion = {
+
+                ...configuracion,
+
+                ...configuracionSnap.data()
+
+            };
+
+        }
+
+    }
+    catch (error) {
+
+        console.warn(
+            "⚠️ MOTI GO: no se pudo cargar configuración de tarifa. Se usarán valores base.",
+            error
+        );
+
+    }
+
+
+    // =================================================
+    // CALCULAR TARIFA
+    // =================================================
+
+    const resultado =
+        window.calcularTarifaEntrega({
+
+            distanciaKm:
+                distanciaKm,
+
+            numeroTiendas:
+                tiendasParaMotor.length,
+
+            configuracion:
+                configuracion
+
+        });
+
+
+    console.log(
+        "💰 MOTI GO: tarifa estimada del carrito:",
+        resultado
+    );
+
+
+    return Number(
+        resultado?.monto ||
+        0
+    );
+
+}
 
 // =====================================================
 // ACTUALIZAR PANEL DEL CARRITO
@@ -5478,78 +5868,11 @@ let costoEntrega =
 
 
 if (
-    totalProductos > 0 &&
-    typeof window.calcularTarifaPreviewMotiGo ===
-        "function"
+    totalProductos > 0
 ) {
 
     costoEntrega =
-        await window.calcularTarifaPreviewMotiGo(
-            Object.values(
-                carrito
-            )
-                .filter(
-                    item =>
-                        item &&
-                        item.productoId &&
-                        item.tiendaId &&
-                        Number(
-                            item.cantidad || 0
-                        ) > 0
-                )
-                .map(
-                    item => {
-
-                        const producto =
-                            productos.find(
-                                productoItem =>
-                                    productoItem.id ===
-                                    item.productoId
-                            );
-
-
-                        const tienda =
-                            tiendasDisponibles.find(
-                                tiendaItem =>
-                                    tiendaItem.id ===
-                                    item.tiendaId
-                            );
-
-
-                        return {
-
-                            productoId:
-                                item.productoId,
-
-                            tiendaId:
-                                item.tiendaId,
-
-                            tiendaNombre:
-                                tienda?.nombre ||
-                                "Tienda",
-
-                            cantidad:
-                                Number(
-                                    item.cantidad || 0
-                                ),
-
-                            precio:
-                                Number(
-                                    item.precio ??
-                                    producto?.precio ??
-                                    0
-                                ),
-
-                            nombre:
-                                producto?.nombre ||
-                                item.nombre ||
-                                "Producto"
-
-                        };
-
-                    }
-                )
-        );
+        await calcularTarifaEstimadaCarrito();
 
 }
 
