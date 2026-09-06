@@ -444,9 +444,333 @@ function calcularSubtotalPedido(
 //
 // =====================================================
 
-function obtenerCostoEntregaPedido() {
+// =====================================================
+// CALCULAR DISTANCIA DE LA RUTA PARA LA REVISIÓN
+// =====================================================
 
-    return 10;
+function calcularDistanciaEntrePuntosPreviewMotiGo(
+    lat1,
+    lon1,
+    lat2,
+    lon2
+) {
+
+    const radioTierraKm =
+        6371;
+
+    const dLat =
+        (
+            lat2 -
+            lat1
+        ) *
+        Math.PI /
+        180;
+
+    const dLon =
+        (
+            lon2 -
+            lon1
+        ) *
+        Math.PI /
+        180;
+
+    const lat1Rad =
+        lat1 *
+        Math.PI /
+        180;
+
+    const lat2Rad =
+        lat2 *
+        Math.PI /
+        180;
+
+    const a =
+        Math.sin(
+            dLat / 2
+        ) *
+        Math.sin(
+            dLat / 2
+        )
+        +
+        Math.cos(
+            lat1Rad
+        ) *
+        Math.cos(
+            lat2Rad
+        ) *
+        Math.sin(
+            dLon / 2
+        ) *
+        Math.sin(
+            dLon / 2
+        );
+
+    const c =
+        2 *
+        Math.atan2(
+            Math.sqrt(a),
+            Math.sqrt(
+                1 - a
+            )
+        );
+
+    return (
+        radioTierraKm *
+        c
+    );
+
+}
+
+
+// =====================================================
+// CALCULAR TARIFA PARA LA REVISIÓN DEL PEDIDO
+// =====================================================
+
+async function calcularTarifaPreviewMotiGo(
+    productosPedido
+) {
+
+    const destino =
+        obtenerDestinoClienteMotiGo();
+
+
+    if (
+        !destino
+    ) {
+
+        console.warn(
+            "⚠️ MOTI GO: no se pudo calcular la tarifa previa porque falta la ubicación del cliente."
+        );
+
+        return 0;
+
+    }
+
+
+    const grupos =
+        agruparProductosPorTienda(
+            productosPedido
+        );
+
+
+    const puntosRuta =
+        [
+
+            {
+
+                latitud:
+                    Number(
+                        destino.latitud
+                    ),
+
+                longitud:
+                    Number(
+                        destino.longitud
+                    )
+
+            }
+
+        ];
+
+
+    // =================================================
+    // AGREGAR TIENDAS
+    // =================================================
+
+    grupos.forEach(
+        grupo => {
+
+            const tienda =
+                pedidoTiendas.find(
+                    item =>
+                        item.id ===
+                        grupo.tiendaId
+                );
+
+
+            const latitud =
+                Number(
+                    tienda?.latitud
+                );
+
+
+            const longitud =
+                Number(
+                    tienda?.longitud
+                );
+
+
+            if (
+                Number.isFinite(
+                    latitud
+                ) &&
+                Number.isFinite(
+                    longitud
+                )
+            ) {
+
+                puntosRuta.push({
+
+                    latitud:
+                        latitud,
+
+                    longitud:
+                        longitud
+
+                });
+
+            }
+
+        }
+    );
+
+
+    // =================================================
+    // REGRESAR AL CLIENTE
+    // =================================================
+
+    puntosRuta.push({
+
+        latitud:
+            Number(
+                destino.latitud
+            ),
+
+        longitud:
+            Number(
+                destino.longitud
+            )
+
+    });
+
+
+    // =================================================
+    // CALCULAR DISTANCIA TOTAL
+    // =================================================
+
+    let distanciaKm =
+        0;
+
+
+    for (
+        let i = 0;
+        i < puntosRuta.length - 1;
+        i++
+    ) {
+
+        distanciaKm +=
+            calcularDistanciaEntrePuntosPreviewMotiGo(
+
+                puntosRuta[i].latitud,
+
+                puntosRuta[i].longitud,
+
+                puntosRuta[i + 1].latitud,
+
+                puntosRuta[i + 1].longitud
+
+            );
+
+    }
+
+
+    // =================================================
+    // PREPARAR TIENDAS PARA EL MOTOR
+    // =================================================
+
+    const tiendasParaComisiones =
+        grupos.map(
+            grupo => {
+
+                const subtotalTienda =
+                    grupo.productos.reduce(
+                        (
+                            total,
+                            producto
+                        ) => {
+
+                            return (
+                                total +
+                                (
+                                    Number(
+                                        producto.precio
+                                    ) *
+                                    Number(
+                                        producto.cantidad
+                                    )
+                                )
+                            );
+
+                        },
+                        0
+                    );
+
+
+                const tiendaOriginal =
+                    pedidoTiendas.find(
+                        item =>
+                            item.id ===
+                            grupo.tiendaId
+                    );
+
+
+                return {
+
+                    id:
+                        grupo.tiendaId,
+
+                    nombre:
+                        grupo.nombre,
+
+                    subtotal:
+                        subtotalTienda,
+
+                    comisionTiendaPorcentaje:
+                        tiendaOriginal
+                            ?.comisionTiendaPorcentaje
+
+                };
+
+            }
+        );
+
+
+    // =================================================
+    // EJECUTAR MOTOR
+    // =================================================
+
+    const resultado =
+        await calcularComisionesPedido({
+
+            distanciaKm:
+                distanciaKm,
+
+            tiendas:
+                tiendasParaComisiones,
+
+            esFundador:
+                false
+
+        });
+
+
+    console.log(
+        "🧮 MOTI GO - TARIFA PREVIA PARA REVISIÓN:",
+        {
+            distanciaKm,
+            numeroTiendas:
+                grupos.length,
+            tarifa:
+                resultado?.tarifaEntrega?.monto
+        }
+    );
+
+
+    return Number(
+        resultado
+            ?.tarifaEntrega
+            ?.monto
+    ) || 0;
 
 }
 
@@ -747,7 +1071,7 @@ function crearPanelRevisionPedido() {
 }
 
 
-window.abrirRevisionPedido = function (
+window.abrirRevisionPedido = async function (
     carritoActual,
     productosActuales,
     tiendasActuales,
@@ -817,10 +1141,10 @@ window.abrirRevisionPedido = function (
     // MOSTRAR CONTENIDO
     // =================================================
 
-    renderizarRevisionPedido(
-        productosPedido,
-        tiendasDisponiblesActuales
-    );
+    await renderizarRevisionPedido(
+    productosPedido,
+    tiendasDisponiblesActuales
+);
 
 
     // =================================================
@@ -1342,7 +1666,7 @@ function agregarEstilosBuscandoRepartidorMotiGo() {
 // RENDERIZAR REVISIÓN
 // =====================================================
 
-function renderizarRevisionPedido(
+async function renderizarRevisionPedido(
     productosPedido
 ) {
 
@@ -1374,7 +1698,9 @@ function renderizarRevisionPedido(
 
 
     const costoEntrega =
-        obtenerCostoEntregaPedido();
+    await calcularTarifaPreviewMotiGo(
+        productosPedido
+    );
 
 
     const total =
