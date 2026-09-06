@@ -5065,7 +5065,7 @@ function cerrarPanelCarrito() {
 // ACTUALIZAR PANEL DEL CARRITO
 // =====================================================
 
-function actualizarPanelCarrito() {
+async function actualizarPanelCarrito() {
 
     if (!cartPanel) {
 
@@ -5471,20 +5471,98 @@ function actualizarPanelCarrito() {
 
     }
 
+// =================================================
+// ENTREGA
+// =================================================
 
-    // =================================================
-    // ENTREGA
-    // =================================================
-
-    const costoEntrega =
-        totalProductos > 0
-            ? 10
-            : 0;
+let costoEntrega =
+    0;
 
 
-    const total =
-        subtotal +
-        costoEntrega;
+if (
+    totalProductos > 0 &&
+    typeof window.calcularTarifaPreviewMotiGo ===
+        "function"
+) {
+
+    costoEntrega =
+        await window.calcularTarifaPreviewMotiGo(
+            Object.values(
+                carrito
+            )
+                .filter(
+                    item =>
+                        item &&
+                        item.productoId &&
+                        item.tiendaId &&
+                        Number(
+                            item.cantidad || 0
+                        ) > 0
+                )
+                .map(
+                    item => {
+
+                        const producto =
+                            productos.find(
+                                productoItem =>
+                                    productoItem.id ===
+                                    item.productoId
+                            );
+
+
+                        const tienda =
+                            tiendasDisponibles.find(
+                                tiendaItem =>
+                                    tiendaItem.id ===
+                                    item.tiendaId
+                            );
+
+
+                        return {
+
+                            productoId:
+                                item.productoId,
+
+                            tiendaId:
+                                item.tiendaId,
+
+                            tiendaNombre:
+                                tienda?.nombre ||
+                                "Tienda",
+
+                            cantidad:
+                                Number(
+                                    item.cantidad || 0
+                                ),
+
+                            precio:
+                                Number(
+                                    item.precio ??
+                                    producto?.precio ??
+                                    0
+                                ),
+
+                            nombre:
+                                producto?.nombre ||
+                                item.nombre ||
+                                "Producto"
+
+                        };
+
+                    }
+                )
+        );
+
+}
+
+
+// =================================================
+// TOTAL
+// =================================================
+
+const total =
+    subtotal +
+    costoEntrega;
 
 
     // =================================================
