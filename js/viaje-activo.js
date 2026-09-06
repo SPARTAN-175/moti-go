@@ -3442,7 +3442,6 @@ async function finalizarCompraTiendaActual() {
     );
 
 }
-```
 
 
 // =====================================================
