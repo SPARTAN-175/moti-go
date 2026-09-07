@@ -1,6 +1,10 @@
 import { auth, db } from "./firebase-config.js";
 
 import {
+    calcularTarifaEntrega
+} from "./motigo-comisiones.js";
+
+import {
     doc,
     updateDoc,
     collection,
@@ -5279,25 +5283,6 @@ async function calcularTarifaEstimadaCarrito() {
 
 
     // =================================================
-    // USAR EL MISMO MOTOR DE COMISIONES
-    // =================================================
-
-    if (
-        typeof window.calcularTarifaEntrega !==
-        "function"
-    ) {
-
-        console.warn(
-            "⚠️ MOTI GO: motor de tarifa no disponible."
-        );
-
-
-        return 0;
-
-    }
-
-
-    // =================================================
     // CONSTRUIR TIENDAS PARA EL MOTOR
     // =================================================
 
@@ -5422,18 +5407,18 @@ async function calcularTarifaEstimadaCarrito() {
     // =================================================
 
     const resultado =
-        window.calcularTarifaEntrega({
+    calcularTarifaEntrega({
 
-            distanciaKm:
-                distanciaKm,
+        distanciaKm:
+            distanciaKm,
 
-            numeroTiendas:
-                tiendasParaMotor.length,
+        numeroTiendas:
+            tiendasParaMotor.length,
 
-            configuracion:
-                configuracion
+        configuracion:
+            configuracion
 
-        });
+    });
 
 
     console.log(
