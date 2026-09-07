@@ -2597,19 +2597,7 @@ async function finalizarCompraTiendaActual() {
                 );
 
 
-            const movimientoId =
-                `${viajeId}_${tiendaId}`;
-
-
-            const movimientoRef =
-                doc(
-                    db,
-                    "movimientosTiendas",
-                    movimientoId
-                );
-
-
-            // =========================================
+             // =========================================
             // LEER PEDIDO
             // =========================================
 
@@ -2641,15 +2629,6 @@ async function finalizarCompraTiendaActual() {
                     ? pedido.productos
                     : [];
 
-
-            // =========================================
-            // LEER MOVIMIENTO EXISTENTE
-            // =========================================
-
-            const movimientoSnapshot =
-                await transaction.get(
-                    movimientoRef
-                );
 
 
             // =========================================
@@ -3343,94 +3322,6 @@ async function finalizarCompraTiendaActual() {
                 }
 
             );
-
-
-            // =================================================
-            // MOVIMIENTO DE LA TIENDA
-            // =================================================
-            //
-            // Este movimiento representa:
-            //
-            // "La tienda debe esta comisión a MOTI."
-            //
-            // NO significa que MOTI ya recibió el dinero.
-            //
-            // =================================================
-
-            if (
-                !movimientoSnapshot.exists()
-            ) {
-
-                transaction.set(
-
-                    movimientoRef,
-
-                    {
-
-                        tipo:
-                            "comision",
-
-                        estado:
-                            "pendiente",
-
-                        pedidoId:
-                            viajeId,
-
-                        tiendaId:
-                            tiendaId,
-
-                        tiendaNombre:
-                            tienda.nombre ||
-                            tienda.nombreTienda ||
-                            "Tienda",
-
-                        subtotalVenta:
-                            subtotalVentaReal,
-
-                        porcentaje:
-                            porcentaje,
-
-                        monto:
-                            montoComision,
-
-                        creadoEn:
-                            serverTimestamp(),
-
-                        actualizadoEn:
-                            serverTimestamp()
-
-                    }
-
-                );
-
-
-                console.log(
-                    "💰 MOTI GO: deuda de tienda creada:",
-                    {
-
-                        movimientoId,
-
-                        tiendaId,
-
-                        subtotalVenta:
-                            subtotalVentaReal,
-
-                        porcentaje,
-
-                        montoComision
-
-                    }
-                );
-
-            }
-            else {
-
-                console.log(
-                    "🔐 MOTI GO: movimiento de tienda ya existente:",
-                    movimientoId
-                );
-
-            }
 
         }
 
@@ -4792,31 +4683,329 @@ async function finalizarViaje() {
             new Date();
 
 
-        // =====================================
-        // PEDIDO
-        // =====================================
+        // =================================================
+        // FINALIZAR PEDIDO + GENERAR DEUDAS DE TIENDAS
+        // =================================================
+        //
+        // IMPORTANTE:
+        //
+        // Las comisiones de las tiendas NO se crean
+        // cuando se compra en la tienda.
+        //
+        // Se crean aquí, únicamente cuando:
+        //
+        // 1. Todas las compras terminaron.
+        // 2. El cliente proporcionó el código correcto.
+        // 3. El pedido va a quedar como ENTREGADO.
+        //
+        // Esto convierte la comisión en una cuenta por cobrar.
+        //
+        // =================================================
 
-        await updateDoc(
+        await runTransaction(
 
-            doc(
-                db,
-                "pedidos",
-                viajeId
-            ),
+            db,
 
-            {
+            async transaction => {
 
-                estado:
-                    "entregado",
+                const pedidoRef =
+                    doc(
+                        db,
+                        "pedidos",
+                        viajeId
+                    );
 
-                fechaFinalizacion:
-                    ahora,
 
-                entregaConfirmada:
-                    true,
+                // =============================================
+                // LEER PEDIDO
+                // =============================================
 
-                codigoValidado:
-                    true
+                const pedidoSnapshot =
+                    await transaction.get(
+                        pedidoRef
+                    );
+
+
+                if (
+                    !pedidoSnapshot.exists()
+                ) {
+
+                    throw new Error(
+                        "El pedido ya no existe."
+                    );
+
+                }
+
+
+                const pedido =
+                    pedidoSnapshot.data();
+
+
+                // =============================================
+                // SEGURIDAD
+                // =============================================
+
+                if (
+                    pedido.estado ===
+                    "entregado"
+                ) {
+
+                    console.log(
+                        "🔐 MOTI GO: el pedido ya estaba entregado."
+                    );
+
+                    return;
+
+                }
+
+
+                // =============================================
+                // COMISIONES DE TIENDAS
+                // =============================================
+
+                const comisiones =
+                    pedido.comisiones &&
+                    typeof pedido.comisiones === "object"
+
+                        ? pedido.comisiones
+
+                        : {};
+
+
+                const comisionesTiendas =
+                    Array.isArray(
+                        comisiones.tiendas
+                    )
+                        ? comisiones.tiendas
+                        : [];
+
+
+                // =============================================
+                // PREPARAR REFERENCIAS DE MOVIMIENTOS
+                // =============================================
+                //
+                // Primero hacemos todas las lecturas.
+                // Después hacemos las escrituras.
+                //
+                // Así respetamos las reglas de Firestore
+                // para transacciones.
+                //
+                // =============================================
+
+                const movimientos =
+                    [];
+
+
+                for (
+                    const comision
+                    of comisionesTiendas
+                ) {
+
+                    const tiendaId =
+                        comision.tiendaId;
+
+
+                    if (!tiendaId) {
+
+                        console.warn(
+                            "⚠️ MOTI GO: comisión sin tiendaId:",
+                            comision
+                        );
+
+                        continue;
+
+                    }
+
+
+                    const movimientoId =
+                        `${viajeId}_${tiendaId}`;
+
+
+                    const movimientoRef =
+                        doc(
+                            db,
+                            "movimientosTiendas",
+                            movimientoId
+                        );
+
+
+                    const movimientoSnapshot =
+                        await transaction.get(
+                            movimientoRef
+                        );
+
+
+                    movimientos.push({
+
+                        comision,
+
+                        movimientoId,
+
+                        movimientoRef,
+
+                        movimientoSnapshot
+
+                    });
+
+                }
+
+
+                // =============================================
+                // CREAR MOVIMIENTOS
+                // =============================================
+
+                movimientos.forEach(
+
+                    movimiento => {
+
+                        const {
+                            comision,
+                            movimientoId,
+                            movimientoRef,
+                            movimientoSnapshot
+                        } = movimiento;
+
+
+                        // =====================================
+                        // IDEMPOTENCIA
+                        // =====================================
+                        //
+                        // Si ya existe, NO volvemos a cobrar.
+                        //
+                        // Esto protege contra:
+                        //
+                        // doble clic
+                        // reconexión
+                        // reintento
+                        // actualización repetida
+                        //
+                        // =====================================
+
+                        if (
+                            movimientoSnapshot.exists()
+                        ) {
+
+                            console.log(
+                                "🔐 MOTI GO: movimiento ya existente:",
+                                movimientoId
+                            );
+
+                            return;
+
+                        }
+
+
+                        const subtotalVenta =
+                            Number(
+                                comision.subtotal
+                            ) || 0;
+
+
+                        const porcentaje =
+                            Number(
+                                comision.porcentaje
+                            ) || 0;
+
+
+                        const monto =
+                            Number(
+                                comision.monto
+                            ) || 0;
+
+
+                        transaction.set(
+
+                            movimientoRef,
+
+                            {
+
+                                tipo:
+                                    "comision",
+
+                                estado:
+                                    "pendiente",
+
+                                pedidoId:
+                                    viajeId,
+
+                                tiendaId:
+                                    comision.tiendaId,
+
+                                tiendaNombre:
+                                    comision.tiendaNombre ||
+                                    "Tienda",
+
+                                subtotalVenta:
+                                    subtotalVenta,
+
+                                porcentaje:
+                                    porcentaje,
+
+                                monto:
+                                    monto,
+
+                                creadoEn:
+                                    serverTimestamp(),
+
+                                actualizadoEn:
+                                    serverTimestamp()
+
+                            }
+
+                        );
+
+
+                        console.log(
+                            "💰 MOTI GO: comisión convertida en cuenta por cobrar:",
+                            {
+
+                                movimientoId,
+
+                                tiendaId:
+                                    comision.tiendaId,
+
+                                subtotalVenta,
+
+                                porcentaje,
+
+                                monto
+
+                            }
+                        );
+
+                    }
+
+                );
+
+
+                // =============================================
+                // MARCAR PEDIDO COMO ENTREGADO
+                // =============================================
+
+                transaction.update(
+
+                    pedidoRef,
+
+                    {
+
+                        estado:
+                            "entregado",
+
+                        fechaFinalizacion:
+                            ahora,
+
+                        entregaConfirmada:
+                            true,
+
+                        codigoValidado:
+                            true,
+
+                        actualizadoEn:
+                            serverTimestamp()
+
+                    }
+
+                );
 
             }
 
@@ -4824,13 +5013,13 @@ async function finalizarViaje() {
 
 
         console.log(
-            "✅ MOTI GO: pedido marcado como entregado."
+            "✅ MOTI GO: pedido entregado y comisiones de tiendas registradas."
         );
 
 
-        // =====================================
+        // =================================================
         // LIBERAR REPARTIDOR
-        // =====================================
+        // =================================================
 
         await updateDoc(
 
@@ -4892,6 +5081,7 @@ async function finalizarViaje() {
 
 
         alert(
+            error.message ||
             "No se pudo finalizar la entrega."
         );
 
