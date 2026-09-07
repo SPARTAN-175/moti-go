@@ -2473,3 +2473,530 @@ button {
     }
 
 }
+
+
+/* =========================================================
+   MI CUENTA
+========================================================= */
+
+.account-summary {
+    max-width: 700px;
+
+    margin-bottom: 25px;
+
+    background: #ffffff;
+
+    border: 1px solid #e6e9ec;
+
+    border-radius: 16px;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   SALDO PRINCIPAL
+========================================================= */
+
+.account-balance-card {
+    min-height: 105px;
+
+    padding: 18px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+}
+
+
+.account-balance-icon {
+    width: 52px;
+    height: 52px;
+
+    flex: 0 0 52px;
+
+    border-radius: 14px;
+
+    background: #ecfdf5;
+
+    color: #16a34a;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.account-balance-icon .material-symbols-outlined {
+    font-size: 27px;
+}
+
+
+.account-balance-info {
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+
+.account-balance-info span {
+    color: #9ca3af;
+
+    font-size: 9px;
+}
+
+
+.account-balance-info strong {
+    color: #111827;
+
+    font-size: 25px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   ESTADÍSTICAS
+========================================================= */
+
+.account-stats {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    border-top: 1px solid #f0f1f3;
+}
+
+
+.account-stat {
+    min-height: 67px;
+
+    padding: 11px 17px;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+
+    gap: 2px;
+}
+
+
+.account-stat + .account-stat {
+    border-left: 1px solid #f0f1f3;
+}
+
+
+.account-stat span {
+    color: #9ca3af;
+
+    font-size: 8px;
+}
+
+
+.account-stat strong {
+    color: #374151;
+
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   FILTROS DE CUENTA
+========================================================= */
+
+.account-filters {
+    display: flex;
+
+    gap: 6px;
+
+    margin-bottom: 12px;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+}
+
+
+.account-filters::-webkit-scrollbar {
+    display: none;
+}
+
+
+.account-filter {
+    flex: 0 0 auto;
+
+    min-height: 32px;
+
+    padding: 0 13px;
+
+    border-radius: 20px;
+
+    background: #ffffff;
+
+    border: 1px solid #e4e7ea;
+
+    color: #6b7280;
+
+    font-size: 9px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background .18s ease,
+        border-color .18s ease,
+        color .18s ease;
+}
+
+
+.account-filter:hover {
+    background: #fafcfb;
+}
+
+
+.account-filter.active {
+    background: #ecfdf5;
+
+    border-color: #bbf7d0;
+
+    color: #15803d;
+}
+
+
+/* =========================================================
+   FILTROS DE FECHA
+========================================================= */
+
+.account-date-filters {
+    max-width: 700px;
+
+    margin-bottom: 12px;
+
+    padding: 11px;
+
+    background: #ffffff;
+
+    border: 1px solid #e6e9ec;
+
+    border-radius: 13px;
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr auto;
+
+    align-items: end;
+
+    gap: 8px;
+}
+
+
+.account-date-field {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+
+.account-date-field label {
+    color: #9ca3af;
+
+    font-size: 8px;
+    font-weight: 600;
+}
+
+
+.account-date-field input {
+    width: 100%;
+    height: 37px;
+
+    padding: 0 9px;
+
+    border: 1px solid #e1e5e8;
+
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    color: #374151;
+
+    font-size: 9px;
+
+    outline: none;
+}
+
+
+.account-date-field input:focus {
+    border-color: #16a34a;
+
+    box-shadow:
+        0 0 0 3px rgba(22, 163, 74, .06);
+}
+
+
+.account-clear-filters {
+    height: 37px;
+
+    padding: 0 10px;
+
+    border-radius: 9px;
+
+    background: #f3f4f6;
+
+    color: #6b7280;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 4px;
+
+    font-size: 8px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.account-clear-filters:hover {
+    background: #e5e7eb;
+
+    color: #374151;
+}
+
+
+.account-clear-filters .material-symbols-outlined {
+    font-size: 16px;
+}
+
+
+/* =========================================================
+   TOOLBAR MOVIMIENTOS
+========================================================= */
+
+.account-movements-toolbar {
+    margin-bottom: 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+.account-movements-toolbar span {
+    color: #9ca3af;
+
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   LISTA MOVIMIENTOS
+========================================================= */
+
+.account-movements-list {
+    max-width: 700px;
+
+    background: #ffffff;
+
+    border: 1px solid #e6e9ec;
+
+    border-radius: 15px;
+
+    overflow: hidden;
+}
+
+
+.account-movement {
+    min-height: 74px;
+
+    padding: 11px 13px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
+    border-bottom: 1px solid #f0f1f3;
+}
+
+
+.account-movement:last-child {
+    border-bottom: none;
+}
+
+
+.account-movement-icon {
+    width: 40px;
+    height: 40px;
+
+    flex: 0 0 40px;
+
+    border-radius: 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.account-movement-icon.comision {
+    background: #fff7ed;
+
+    color: #ea580c;
+}
+
+
+.account-movement-icon.pago {
+    background: #ecfdf5;
+
+    color: #16a34a;
+}
+
+
+.account-movement-icon .material-symbols-outlined {
+    font-size: 20px;
+}
+
+
+.account-movement-info {
+    min-width: 0;
+
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+
+.account-movement-info strong {
+    overflow: hidden;
+
+    color: #374151;
+
+    font-size: 10px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.account-movement-info span {
+    overflow: hidden;
+
+    color: #9ca3af;
+
+    font-size: 8px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+.account-movement-amount {
+    display: flex;
+    flex-direction: column;
+
+    align-items: flex-end;
+
+    gap: 2px;
+}
+
+
+.account-movement-amount strong {
+    color: #374151;
+
+    font-size: 10px;
+
+    white-space: nowrap;
+}
+
+
+.account-movement-amount span {
+    font-size: 8px;
+
+    white-space: nowrap;
+}
+
+
+.account-movement-amount span.pending {
+    color: #d97706;
+}
+
+
+.account-movement-amount span.paid {
+    color: #16a34a;
+}
+
+
+/* =========================================================
+   EMPTY CUENTA
+========================================================= */
+
+.account-empty {
+    padding: 45px 20px;
+
+    text-align: center;
+}
+
+
+.account-empty > .material-symbols-outlined {
+    color: #c4c9cf;
+
+    font-size: 38px;
+}
+
+
+.account-empty strong {
+    display: block;
+
+    margin-top: 8px;
+
+    color: #374151;
+
+    font-size: 12px;
+}
+
+
+.account-empty p {
+    max-width: 300px;
+
+    margin: 5px auto 0;
+
+    color: #9ca3af;
+
+    font-size: 9px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   RESPONSIVE — MI CUENTA
+========================================================= */
+
+@media (max-width: 430px) {
+
+    .account-date-filters {
+        grid-template-columns: 1fr 1fr;
+    }
+
+
+    .account-clear-filters {
+        grid-column: 1 / -1;
+
+        width: 100%;
+    }
+
+
+    .account-balance-info strong {
+        font-size: 22px;
+    }
+
+}
