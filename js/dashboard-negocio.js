@@ -25,8 +25,10 @@ import {
     setDoc,
     addDoc,
     serverTimestamp,
-    documentId
+    documentId,
+    onSnapshot
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
 import {
     ref,
     uploadBytes,
@@ -52,6 +54,20 @@ let filtroActual = "todos";
 let archivoSeleccionado = null;
 
 let productosParaImportar = [];
+
+// =========================================================
+// CUENTA DEL NEGOCIO
+// =========================================================
+
+let movimientosCuenta = [];
+
+let filtroCuentaActual = "todos";
+
+let fechaCuentaDesde = "";
+
+let fechaCuentaHasta = "";
+
+let cancelarListenerCuenta = null;
 
 
 // =========================================================
@@ -117,11 +133,16 @@ const viewConfig = {
     },
 
     negocio: {
-        title: "Mi negocio",
-        subtitle: "Información de tu negocio"
-    },
+    title: "Mi negocio",
+    subtitle: "Información de tu negocio"
+},
 
-    configuracion: {
+cuenta: {
+    title: "Mi cuenta",
+    subtitle: "Comisiones, pagos y saldo pendiente"
+},
+
+configuracion: {
         title: "Configuración",
         subtitle: "Administra las opciones de tu cuenta"
     }
@@ -498,8 +519,9 @@ async function cargarDatosNegocio() {
 
         await cargarTienda();
 
+await cargarProductos();
 
-        await cargarProductos();
+escucharMovimientosCuenta();
 
 
     }
@@ -5742,6 +5764,1004 @@ function mostrarErrorProductos(
 
 }
 
+// =========================================================
+// CUENTA DEL NEGOCIO
+// =========================================================
+
+function escucharMovimientosCuenta() {
+
+    if (!tiendaId) {
+
+        console.warn(
+            "⚠️ No se puede escuchar la cuenta: falta tiendaId."
+        );
+
+        return;
+
+    }
+
+
+    // =====================================================
+    // CANCELAR LISTENER ANTERIOR
+    // =====================================================
+
+    if (cancelarListenerCuenta) {
+
+        cancelarListenerCuenta();
+
+        cancelarListenerCuenta = null;
+
+    }
+
+
+    console.log(
+        "💳 Escuchando movimientos de la tienda:",
+        tiendaId
+    );
+
+
+    // =====================================================
+    // CONSULTA
+    // =====================================================
+
+    const movimientosQuery =
+        query(
+            collection(
+                db,
+                "movimientosTiendas"
+            ),
+            where(
+                "tiendaId",
+                "==",
+                tiendaId
+            )
+        );
+
+
+    cancelarListenerCuenta =
+        onSnapshot(
+            movimientosQuery,
+
+            snapshot => {
+
+                movimientosCuenta =
+                    snapshot.docs.map(
+                        movimientoDoc => ({
+
+                            id:
+                                movimientoDoc.id,
+
+                            ...movimientoDoc.data()
+
+                        })
+                    );
+
+
+                // =================================================
+                // ORDENAR POR FECHA
+                // =================================================
+
+                movimientosCuenta.sort(
+                    (a, b) => {
+
+                        const fechaA =
+                            obtenerFechaMovimiento(
+                                a
+                            );
+
+                        const fechaB =
+                            obtenerFechaMovimiento(
+                                b
+                            );
+
+
+                        return (
+                            fechaB -
+                            fechaA
+                        );
+
+                    }
+                );
+
+
+                console.log(
+                    "💳 Movimientos de cuenta:",
+                    movimientosCuenta.length
+                );
+
+
+                actualizarResumenCuenta();
+
+                aplicarFiltrosCuenta();
+
+            },
+
+            error => {
+
+                console.error(
+                    "❌ Error escuchando movimientos de cuenta:",
+                    error
+                );
+
+            }
+        );
+
+}
+
+
+// =========================================================
+// RESUMEN DE CUENTA
+// =========================================================
+
+function actualizarResumenCuenta() {
+
+    let generado =
+        0;
+
+    let pagado =
+        0;
+
+
+    movimientosCuenta.forEach(
+        movimiento => {
+
+            const tipo =
+                String(
+                    movimiento.tipo ||
+                    ""
+                ).toLowerCase();
+
+
+            const monto =
+                Number(
+                    movimiento.monto ||
+                    0
+                );
+
+
+            if (
+                tipo ===
+                "comision"
+            ) {
+
+                generado +=
+                    monto;
+
+            }
+
+
+            if (
+                tipo ===
+                "pago"
+            ) {
+
+                pagado +=
+                    monto;
+
+            }
+
+        }
+    );
+
+
+    const pendiente =
+        Math.max(
+            0,
+            generado - pagado
+        );
+
+
+    const generatedElement =
+        document.getElementById(
+            "accountGenerated"
+        );
+
+
+    const paidElement =
+        document.getElementById(
+            "accountPaid"
+        );
+
+
+    const pendingElement =
+        document.getElementById(
+            "accountPendingBalance"
+        );
+
+
+    if (generatedElement) {
+
+        generatedElement.textContent =
+            formatearPrecio(
+                generado
+            );
+
+    }
+
+
+    if (paidElement) {
+
+        paidElement.textContent =
+            formatearPrecio(
+                pagado
+            );
+
+    }
+
+
+    if (pendingElement) {
+
+        pendingElement.textContent =
+            formatearPrecio(
+                pendiente
+            );
+
+    }
+
+
+    console.log(
+        "💰 Resumen cuenta:",
+        {
+
+            generado,
+
+            pagado,
+
+            pendiente
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// FILTROS DE CUENTA
+// =========================================================
+
+const accountFilters =
+    document.querySelectorAll(
+        ".account-filter[data-account-filter]"
+    );
+
+
+accountFilters.forEach(
+    button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                accountFilters.forEach(
+                    item => {
+
+                        item.classList.remove(
+                            "active"
+                        );
+
+                    }
+                );
+
+
+                button.classList.add(
+                    "active"
+                );
+
+
+                filtroCuentaActual =
+                    button.dataset.accountFilter;
+
+
+                aplicarFiltrosCuenta();
+
+            }
+        );
+
+    }
+);
+
+
+// =========================================================
+// FECHAS
+// =========================================================
+
+const accountDateFrom =
+    document.getElementById(
+        "accountDateFrom"
+    );
+
+
+const accountDateTo =
+    document.getElementById(
+        "accountDateTo"
+    );
+
+
+if (accountDateFrom) {
+
+    accountDateFrom.addEventListener(
+        "change",
+        () => {
+
+            fechaCuentaDesde =
+                accountDateFrom.value ||
+                "";
+
+            aplicarFiltrosCuenta();
+
+        }
+    );
+
+}
+
+
+if (accountDateTo) {
+
+    accountDateTo.addEventListener(
+        "change",
+        () => {
+
+            fechaCuentaHasta =
+                accountDateTo.value ||
+                "";
+
+            aplicarFiltrosCuenta();
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// LIMPIAR FILTROS
+// =========================================================
+
+const accountClearFilters =
+    document.getElementById(
+        "accountClearFilters"
+    );
+
+
+if (accountClearFilters) {
+
+    accountClearFilters.addEventListener(
+        "click",
+        () => {
+
+            filtroCuentaActual =
+                "todos";
+
+            fechaCuentaDesde =
+                "";
+
+            fechaCuentaHasta =
+                "";
+
+
+            if (accountDateFrom) {
+
+                accountDateFrom.value =
+                    "";
+
+            }
+
+
+            if (accountDateTo) {
+
+                accountDateTo.value =
+                    "";
+
+            }
+
+
+            accountFilters.forEach(
+                button => {
+
+                    button.classList.toggle(
+                        "active",
+                        button.dataset.accountFilter ===
+                            "todos"
+                    );
+
+                }
+            );
+
+
+            aplicarFiltrosCuenta();
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// APLICAR FILTROS
+// =========================================================
+
+function aplicarFiltrosCuenta() {
+
+    let movimientos =
+        [...movimientosCuenta];
+
+
+    // =====================================================
+    // FILTRO POR TIPO
+    // =====================================================
+
+    if (
+        filtroCuentaActual !==
+        "todos"
+    ) {
+
+        movimientos =
+            movimientos.filter(
+                movimiento => {
+
+                    return (
+                        String(
+                            movimiento.tipo ||
+                            ""
+                        ).toLowerCase() ===
+                        filtroCuentaActual
+                    );
+
+                }
+            );
+
+    }
+
+
+    // =====================================================
+    // FILTRO DESDE
+    // =====================================================
+
+    if (fechaCuentaDesde) {
+
+        const desde =
+            crearFechaInicio(
+                fechaCuentaDesde
+            );
+
+
+        movimientos =
+            movimientos.filter(
+                movimiento => {
+
+                    const fecha =
+                        obtenerFechaMovimiento(
+                            movimiento
+                        );
+
+
+                    return (
+                        fecha >=
+                        desde
+                    );
+
+                }
+            );
+
+    }
+
+
+    // =====================================================
+    // FILTRO HASTA
+    // =====================================================
+
+    if (fechaCuentaHasta) {
+
+        const hasta =
+            crearFechaFin(
+                fechaCuentaHasta
+            );
+
+
+        movimientos =
+            movimientos.filter(
+                movimiento => {
+
+                    const fecha =
+                        obtenerFechaMovimiento(
+                            movimiento
+                        );
+
+
+                    return (
+                        fecha <=
+                        hasta
+                    );
+
+                }
+            );
+
+    }
+
+
+    renderizarMovimientosCuenta(
+        movimientos
+    );
+
+}
+
+
+// =========================================================
+// RENDERIZAR MOVIMIENTOS
+// =========================================================
+
+function renderizarMovimientosCuenta(
+    movimientos
+) {
+
+    const container =
+        document.getElementById(
+            "accountMovementsList"
+        );
+
+
+    const empty =
+        document.getElementById(
+            "accountMovementsEmpty"
+        );
+
+
+    const count =
+        document.getElementById(
+            "accountMovementsCount"
+        );
+
+
+    if (!container) {
+
+        return;
+
+    }
+
+
+    // =====================================================
+    // CONTADOR
+    // =====================================================
+
+    if (count) {
+
+        count.textContent =
+            `${movimientos.length} movimiento${
+                movimientos.length === 1
+                    ? ""
+                    : "s"
+            }`;
+
+    }
+
+
+    // =====================================================
+    // LIMPIAR
+    // =====================================================
+
+    container.innerHTML =
+        "";
+
+
+    // =====================================================
+    // SIN MOVIMIENTOS
+    // =====================================================
+
+    if (
+        movimientos.length ===
+        0
+    ) {
+
+        if (empty) {
+
+            container.appendChild(
+                empty
+            );
+
+            empty.style.display =
+                "block";
+
+        }
+
+        return;
+
+    }
+
+
+    // =====================================================
+    // MOSTRAR MOVIMIENTOS
+    // =====================================================
+
+    movimientos.forEach(
+        movimiento => {
+
+            container.appendChild(
+                crearMovimientoCuenta(
+                    movimiento
+                )
+            );
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// CREAR MOVIMIENTO
+// =========================================================
+
+function crearMovimientoCuenta(
+    movimiento
+) {
+
+    const article =
+        document.createElement(
+            "article"
+        );
+
+
+    article.className =
+        "account-movement";
+
+
+    const tipo =
+        String(
+            movimiento.tipo ||
+            ""
+        ).toLowerCase();
+
+
+    const esComision =
+        tipo ===
+        "comision";
+
+
+    const monto =
+        Number(
+            movimiento.monto ||
+            0
+        );
+
+
+    const fecha =
+        obtenerFechaMovimiento(
+            movimiento
+        );
+
+
+    const fechaTexto =
+        formatearFechaMovimiento(
+            fecha
+        );
+
+
+    const folio =
+        movimiento.pedidoId ||
+        movimiento.folio ||
+        movimiento.id ||
+        "Sin referencia";
+
+
+    const concepto =
+        esComision
+            ? "Comisión por venta"
+            : "Pago recibido";
+
+
+    const estado =
+        String(
+            movimiento.estado ||
+            ""
+        ).toLowerCase();
+
+
+    let estadoTexto =
+        "";
+
+
+    let estadoClase =
+        "";
+
+
+    if (esComision) {
+
+        if (
+            estado ===
+            "pendiente"
+        ) {
+
+            estadoTexto =
+                "Pendiente";
+
+            estadoClase =
+                "pending";
+
+        }
+        else {
+
+            estadoTexto =
+                movimiento.estado ||
+                "Registrada";
+
+        }
+
+    }
+    else {
+
+        estadoTexto =
+            movimiento.estado ||
+            "Aplicado";
+
+        estadoClase =
+            "paid";
+
+    }
+
+
+    article.innerHTML = `
+
+        <div
+            class="account-movement-icon ${
+                esComision
+                    ? "comision"
+                    : "pago"
+            }"
+        >
+
+            <span class="material-symbols-outlined">
+
+                ${
+                    esComision
+                        ? "receipt_long"
+                        : "payments"
+                }
+
+            </span>
+
+        </div>
+
+
+        <div class="account-movement-info">
+
+            <strong>
+                ${escapeHtml(
+                    concepto
+                )}
+            </strong>
+
+            <span>
+                ${escapeHtml(
+                    fechaTexto
+                )}
+                ·
+                ${escapeHtml(
+                    folio
+                )}
+            </span>
+
+        </div>
+
+
+        <div class="account-movement-amount">
+
+            <strong>
+                ${
+                    esComision
+                        ? "+"
+                        : "-"
+                }${formatearPrecio(
+                    monto
+                )}
+            </strong>
+
+            <span class="${estadoClase}">
+                ${escapeHtml(
+                    estadoTexto
+                )}
+            </span>
+
+        </div>
+
+    `;
+
+
+    return article;
+
+}
+
+
+// =========================================================
+// OBTENER FECHA DEL MOVIMIENTO
+// =========================================================
+
+function obtenerFechaMovimiento(
+    movimiento
+) {
+
+    const valor =
+        movimiento.creadoEn ||
+        movimiento.actualizadoEn ||
+        movimiento.fecha ||
+        null;
+
+
+    if (!valor) {
+
+        return new Date(0);
+
+    }
+
+
+    // =====================================================
+    // TIMESTAMP FIREBASE
+    // =====================================================
+
+    if (
+        typeof valor.toDate ===
+        "function"
+    ) {
+
+        return valor.toDate();
+
+    }
+
+
+    // =====================================================
+    // DATE NATIVO
+    // =====================================================
+
+    if (
+        valor instanceof Date
+    ) {
+
+        return valor;
+
+    }
+
+
+    // =====================================================
+    // MILISEGUNDOS
+    // =====================================================
+
+    if (
+        typeof valor ===
+        "number"
+    ) {
+
+        return new Date(
+            valor
+        );
+
+    }
+
+
+    // =====================================================
+    // TEXTO
+    // =====================================================
+
+    const fecha =
+        new Date(
+            valor
+        );
+
+
+    return Number.isNaN(
+        fecha.getTime()
+    )
+        ? new Date(0)
+        : fecha;
+
+}
+
+
+// =========================================================
+// FECHA INICIO
+// =========================================================
+
+function crearFechaInicio(
+    fecha
+) {
+
+    const partes =
+        fecha.split(
+            "-"
+        );
+
+
+    if (
+        partes.length !==
+        3
+    ) {
+
+        return new Date(0);
+
+    }
+
+
+    return new Date(
+        Number(partes[0]),
+        Number(partes[1]) - 1,
+        Number(partes[2]),
+        0,
+        0,
+        0,
+        0
+    );
+
+}
+
+
+// =========================================================
+// FECHA FIN
+// =========================================================
+
+function crearFechaFin(
+    fecha
+) {
+
+    const partes =
+        fecha.split(
+            "-"
+        );
+
+
+    if (
+        partes.length !==
+        3
+    ) {
+
+        return new Date(
+            8640000000000000
+        );
+
+    }
+
+
+    return new Date(
+        Number(partes[0]),
+        Number(partes[1]) - 1,
+        Number(partes[2]),
+        23,
+        59,
+        59,
+        999
+    );
+
+}
+
+
+// =========================================================
+// FORMATEAR FECHA
+// =========================================================
+
+function formatearFechaMovimiento(
+    fecha
+) {
+
+    if (
+        !fecha ||
+        fecha.getTime() ===
+            0
+    ) {
+
+        return "Fecha no disponible";
+
+    }
+
+
+    return new Intl.DateTimeFormat(
+        "es-MX",
+        {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        }
+    ).format(
+        fecha
+    );
+
+}
 
 // =========================================================
 // INICIO
