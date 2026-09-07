@@ -29,6 +29,7 @@ import {
     onSnapshot,
     setDoc,
     updateDoc,
+    addDoc,
     serverTimestamp
 } from
 "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
@@ -126,8 +127,11 @@ let repartidoresActuales = [];
 let clientesActuales = [];
 let pedidosActuales = [];
 
+let movimientosTiendasActuales = [];
+
 let listenerUsuarios = null;
 let listenerPedidos = null;
+let listenerMovimientosTiendas = null;
 
 let configuracionMOTI = {
     tarifaBase: 8,
@@ -3162,6 +3166,75 @@ function escucharPedidos() {
 
 }
 
+/* =========================================================
+   MOVIMIENTOS DE TIENDAS
+========================================================= */
+
+function escucharMovimientosTiendas() {
+
+    if (listenerMovimientosTiendas) {
+
+        listenerMovimientosTiendas();
+
+        listenerMovimientosTiendas =
+            null;
+
+    }
+
+
+    listenerMovimientosTiendas =
+        onSnapshot(
+
+            collection(
+                db,
+                "movimientosTiendas"
+            ),
+
+            snapshot => {
+
+                movimientosTiendasActuales =
+                    snapshot.docs.map(
+                        documento => {
+
+                            return {
+
+                                id:
+                                    documento.id,
+
+                                ...documento.data()
+
+                            };
+
+                        }
+                    );
+
+
+                console.log(
+                    "💰 MOTI GO: movimientos de tiendas:",
+                    movimientosTiendasActuales
+                );
+
+
+                renderizarCarteras();
+
+                renderizarTiendas(
+                    tiendasActuales
+                );
+
+            },
+
+            error => {
+
+                console.error(
+                    "❌ MOTI GO: error escuchando movimientos de tiendas:",
+                    error
+                );
+
+            }
+
+        );
+
+}
 
 /* =========================================================
    PEDIDOS
@@ -4358,34 +4431,181 @@ function renderizarCarteras() {
             "view-carteras"
         );
 
+
     if (!vista) {
         return;
     }
 
 
-    const comisionesTiendas =
-        pedidosActuales.reduce(
-            (total, pedido) =>
-                total +
-                Number(
-                    pedido.comisionTienda ||
-                    0
-                ),
+    // =====================================================
+    // SOLO MOVIMIENTOS CONTABLES DE TIENDAS
+    // =====================================================
+
+    const movimientos =
+        Array.isArray(
+            movimientosTiendasActuales
+        )
+            ? movimientosTiendasActuales
+            : [];
+
+
+    const comisionesGeneradas =
+        movimientos
+            .filter(
+                movimiento =>
+                    movimiento.tipo ===
+                    "comision"
+            )
+            .reduce(
+                (
+                    total,
+                    movimiento
+                ) =>
+                    total +
+                    (
+                        Number(
+                            movimiento.monto
+                        ) || 0
+                    ),
+                0
+            );
+
+
+    const pagosRealizados =
+        movimientos
+            .filter(
+                movimiento =>
+                    movimiento.tipo ===
+                    "pago"
+            )
+            .reduce(
+                (
+                    total,
+                    movimiento
+                ) =>
+                    total +
+                    (
+                        Number(
+                            movimiento.monto
+                        ) || 0
+                    ),
+                0
+            );
+
+
+    const saldoPendiente =
+        Math.max(
+            comisionesGeneradas -
+            pagosRealizados,
             0
         );
 
 
-    const gananciasRepartidores =
-        pedidosActuales.reduce(
-            (total, pedido) =>
-                total +
-                Number(
-                    pedido.comisionRepartidor ||
-                    0
-                ),
-            0
+    // =====================================================
+    // AGRUPAR POR TIENDA
+    // =====================================================
+
+    const cuentasTiendas = {};
+
+
+    movimientos.forEach(
+        movimiento => {
+
+            const tiendaId =
+                movimiento.tiendaId ||
+                "sin_tienda";
+
+
+            if (
+                !cuentasTiendas[
+                    tiendaId
+                ]
+            ) {
+
+                cuentasTiendas[
+                    tiendaId
+                ] = {
+
+                    tiendaId,
+
+                    tiendaNombre:
+                        movimiento.tiendaNombre ||
+                        "Tienda",
+
+                    generado:
+                        0,
+
+                    pagado:
+                        0
+
+                };
+
+            }
+
+
+            const cuenta =
+                cuentasTiendas[
+                    tiendaId
+                ];
+
+
+            if (
+                movimiento.tipo ===
+                "comision"
+            ) {
+
+                cuenta.generado +=
+                    Number(
+                        movimiento.monto
+                    ) || 0;
+
+            }
+
+
+            if (
+                movimiento.tipo ===
+                "pago"
+            ) {
+
+                cuenta.pagado +=
+                    Number(
+                        movimiento.monto
+                    ) || 0;
+
+            }
+
+        }
+    );
+
+
+    const tiendas =
+        Object.values(
+            cuentasTiendas
+        )
+        .map(
+            cuenta => ({
+
+                ...cuenta,
+
+                pendiente:
+                    Math.max(
+                        cuenta.generado -
+                        cuenta.pagado,
+                        0
+                    )
+
+            })
+        )
+        .sort(
+            (a, b) =>
+                b.pendiente -
+                a.pendiente
         );
 
+
+    // =====================================================
+    // RENDER
+    // =====================================================
 
     vista.innerHTML = `
 
@@ -4394,7 +4614,7 @@ function renderizarCarteras() {
             <div>
 
                 <span class="admin-kicker">
-                    Saldos
+                    Cuentas por cobrar
                 </span>
 
                 <h2>
@@ -4402,7 +4622,7 @@ function renderizarCarteras() {
                 </h2>
 
                 <p>
-                    Control de obligaciones y movimientos.
+                    Control de comisiones y pagos de las tiendas.
                 </p>
 
             </div>
@@ -4410,54 +4630,64 @@ function renderizarCarteras() {
         </div>
 
 
-        <div class="admin-wallet-grid">
+        <div class="admin-summary-grid">
 
-
-            <div class="admin-wallet">
-
-                <div class="admin-wallet-icon">
-                    🏪
-                </div>
+            <div class="admin-summary">
 
                 <span>
-                    Tiendas
+                    Comisión generada
                 </span>
 
                 <strong>
                     ${moneda(
-                        comisionesTiendas
+                        comisionesGeneradas
                     )}
                 </strong>
-
-                <small>
-                    Comisión generada pendiente
-                </small>
 
             </div>
 
 
-            <div class="admin-wallet">
-
-                <div class="admin-wallet-icon">
-                    🛵
-                </div>
+            <div class="admin-summary">
 
                 <span>
-                    Repartidores
+                    Pagado
                 </span>
 
                 <strong>
                     ${moneda(
-                        gananciasRepartidores
+                        pagosRealizados
                     )}
                 </strong>
 
-                <small>
-                    Ganancias registradas
-                </small>
+            </div>
+
+
+            <div class="admin-summary">
+
+                <span>
+                    Pendiente
+                </span>
+
+                <strong>
+                    ${moneda(
+                        saldoPendiente
+                    )}
+                </strong>
 
             </div>
 
+
+            <div class="admin-summary">
+
+                <span>
+                    Tiendas con movimientos
+                </span>
+
+                <strong>
+                    ${tiendas.length}
+                </strong>
+
+            </div>
 
         </div>
 
@@ -4473,8 +4703,7 @@ function renderizarCarteras() {
                     </h3>
 
                     <p>
-                        Aquí iremos acumulando las comisiones
-                        generadas y los pagos recibidos.
+                        El saldo se calcula a partir de comisiones generadas y pagos registrados.
                     </p>
 
                 </div>
@@ -4482,34 +4711,117 @@ function renderizarCarteras() {
             </div>
 
 
-            <div class="admin-muted-box">
+            ${
+                tiendas.length === 0
 
-                🧾
+                    ? `
 
-                <div>
+                        <div class="admin-empty">
 
-                    <strong>
-                        Control contable preparado
-                    </strong>
+                            <div class="admin-empty-icon">
+                                🏪
+                            </div>
 
-                    <p>
-                        Los próximos pedidos guardarán
-                        la comisión aplicada. Después
-                        conectaremos los movimientos de
-                        pago de cada tienda para calcular
-                        exactamente cuánto debe.
-                    </p>
+                            <h3>
+                                Aún no hay movimientos
+                            </h3>
 
-                </div>
+                            <p>
+                                Las comisiones aparecerán aquí cuando se completen pedidos.
+                            </p>
 
-            </div>
+                        </div>
+
+                    `
+
+                    : `
+
+                        <div class="admin-finance-list">
+
+                            ${
+                                tiendas.map(
+                                    tienda => `
+
+                                        <div
+                                            class="admin-finance-line"
+                                            style="
+                                                align-items:flex-start;
+                                                gap:16px;
+                                                flex-wrap:wrap;
+                                            "
+                                        >
+
+                                            <div>
+
+                                                <strong>
+                                                    ${escaparHTMLAdmin(
+                                                        tienda.tiendaNombre
+                                                    )}
+                                                </strong>
+
+                                                <div
+                                                    style="
+                                                        font-size:13px;
+                                                        opacity:.7;
+                                                        margin-top:4px;
+                                                    "
+                                                >
+                                                    Generado:
+                                                    ${moneda(
+                                                        tienda.generado
+                                                    )}
+
+                                                    ·
+
+                                                    Pagado:
+                                                    ${moneda(
+                                                        tienda.pagado
+                                                    )}
+                                                </div>
+
+                                            </div>
+
+
+                                            <div
+                                                style="
+                                                    text-align:right;
+                                                "
+                                            >
+
+                                                <span
+                                                    style="
+                                                        display:block;
+                                                        font-size:12px;
+                                                        opacity:.7;
+                                                    "
+                                                >
+                                                    Pendiente
+                                                </span>
+
+                                                <strong>
+                                                    ${moneda(
+                                                        tienda.pendiente
+                                                    )}
+                                                </strong>
+
+                                            </div>
+
+                                        </div>
+
+                                    `
+                                ).join("")
+                            }
+
+                        </div>
+
+                    `
+            }
 
         </div>
 
     `;
 
 }
-
 
 /* =========================================================
    CONFIGURACIÓN
@@ -6677,6 +6989,8 @@ onAuthStateChanged(
             escucharUsuarios();
 
             escucharPedidos();
+
+            escucharMovimientosTiendas();
 
             await cargarConfiguracion();
 
