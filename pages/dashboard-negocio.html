@@ -232,28 +232,55 @@
                 </span>
 
 
-                <button
-                    type="button"
-                    class="nav-item"
-                    data-view="negocio"
-                >
+               <button
+    type="button"
+    class="nav-item"
+    data-view="negocio"
+>
 
-                    <span class="material-symbols-outlined">
-                        storefront
-                    </span>
+    <span class="material-symbols-outlined">
+        storefront
+    </span>
 
-                    <span>
-                        Mi negocio
-                    </span>
+    <span>
+        Mi negocio
+    </span>
 
-                </button>
+</button>
 
 
-                <button
-                    type="button"
-                    class="nav-item"
-                    data-view="configuracion"
-                >
+<button
+    type="button"
+    class="nav-item"
+    data-view="cuenta"
+>
+
+    <span class="material-symbols-outlined">
+        account_balance_wallet
+    </span>
+
+    <span>
+        Mi cuenta
+    </span>
+
+</button>
+
+
+<button
+    type="button"
+    class="nav-item"
+    data-view="configuracion"
+>
+
+    <span class="material-symbols-outlined">
+        settings
+    </span>
+
+    <span>
+        Configuración
+    </span>
+
+</button>
 
                     <span class="material-symbols-outlined">
                         settings
@@ -1451,7 +1478,242 @@
 
             </section>
 
+<!-- =================================================
+     VISTA: MI CUENTA
+================================================= -->
 
+<section
+    class="business-view"
+    id="viewCuenta"
+    data-view-content="cuenta"
+>
+
+    <div class="view-intro compact">
+
+        <span class="eyebrow">
+            CUENTA
+        </span>
+
+        <h1>
+            Mi cuenta
+        </h1>
+
+        <p>
+            Consulta las comisiones generadas por tus ventas,
+            los pagos realizados y el saldo pendiente con MOTI GO.
+        </p>
+
+    </div>
+
+
+    <!-- =================================================
+         RESUMEN DE CUENTA
+    ================================================== -->
+
+    <div class="account-summary">
+
+        <!-- SALDO PENDIENTE -->
+
+        <div class="account-balance-card">
+
+            <div class="account-balance-icon">
+
+                <span class="material-symbols-outlined">
+                    account_balance_wallet
+                </span>
+
+            </div>
+
+
+            <div class="account-balance-info">
+
+                <span>
+                    Saldo pendiente
+                </span>
+
+                <strong id="accountPendingBalance">
+                    $0.00
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- ESTADÍSTICAS -->
+
+        <div class="account-stats">
+
+            <div class="account-stat">
+
+                <span>
+                    Generado
+                </span>
+
+                <strong id="accountGenerated">
+                    $0.00
+                </strong>
+
+            </div>
+
+
+            <div class="account-stat">
+
+                <span>
+                    Pagado
+                </span>
+
+                <strong id="accountPaid">
+                    $0.00
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         MOVIMIENTOS
+    ================================================== -->
+
+    <div class="view-section">
+
+        <div class="section-heading">
+
+            <h2>
+                Movimientos
+            </h2>
+
+        </div>
+
+
+        <!-- FILTROS -->
+
+        <div class="account-filters">
+
+            <button
+                type="button"
+                class="account-filter active"
+                data-account-filter="todos"
+            >
+                Todos
+            </button>
+
+
+            <button
+                type="button"
+                class="account-filter"
+                data-account-filter="comision"
+            >
+                Comisiones
+            </button>
+
+
+            <button
+                type="button"
+                class="account-filter"
+                data-account-filter="pago"
+            >
+                Pagos
+            </button>
+
+        </div>
+
+
+        <!-- FILTRO DE FECHAS -->
+
+        <div class="account-date-filters">
+
+            <div class="account-date-field">
+
+                <label for="accountDateFrom">
+                    Desde
+                </label>
+
+                <input
+                    type="date"
+                    id="accountDateFrom"
+                >
+
+            </div>
+
+
+            <div class="account-date-field">
+
+                <label for="accountDateTo">
+                    Hasta
+                </label>
+
+                <input
+                    type="date"
+                    id="accountDateTo"
+                >
+
+            </div>
+
+
+            <button
+                type="button"
+                class="account-clear-filters"
+                id="accountClearFilters"
+            >
+
+                <span class="material-symbols-outlined">
+                    filter_alt_off
+                </span>
+
+                Limpiar
+
+            </button>
+
+        </div>
+
+
+        <!-- CONTADOR -->
+
+        <div class="account-movements-toolbar">
+
+            <span id="accountMovementsCount">
+                0 movimientos
+            </span>
+
+        </div>
+
+
+        <!-- LISTA -->
+
+        <div
+            class="account-movements-list"
+            id="accountMovementsList"
+        >
+
+            <div
+                class="account-empty"
+                id="accountMovementsEmpty"
+            >
+
+                <span class="material-symbols-outlined">
+                    receipt_long
+                </span>
+
+                <strong>
+                    Sin movimientos
+                </strong>
+
+                <p>
+                    Aquí aparecerán las comisiones
+                    y pagos de tu cuenta.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
 
             <!-- =================================================
                  VISTA: CONFIGURACIÓN
