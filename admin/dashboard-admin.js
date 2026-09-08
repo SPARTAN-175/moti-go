@@ -3202,6 +3202,10 @@ function configurarBotonesClientes() {
    MODAL USUARIO
 ========================================================= */
 
+/* =========================================================
+   MODAL USUARIO
+========================================================= */
+
 function abrirModalUsuario(
     usuario,
     tipo
@@ -3218,6 +3222,224 @@ function abrirModalUsuario(
     const activo =
         usuario.activo !== false;
 
+
+    // =====================================================
+    // DATOS REALES
+    // =====================================================
+
+    const pedidosUsuario =
+        Array.isArray(
+            pedidosActuales
+        )
+            ? pedidosActuales.filter(
+                pedido => {
+
+                    if (
+                        tipo ===
+                        "repartidor"
+                    ) {
+
+                        return (
+                            pedido.repartidorId ===
+                            usuario.id
+                        );
+
+                    }
+
+                    return (
+                        pedido.clienteId ===
+                        usuario.id ||
+                        pedido.usuarioId ===
+                        usuario.id
+                    );
+
+                }
+            )
+            : [];
+
+
+    // =====================================================
+    // ESTADOS DEL REPARTIDOR
+    // =====================================================
+
+    const pedidosCompletados =
+        pedidosUsuario.filter(
+            pedido =>
+                pedido.estado ===
+                "entregado"
+        );
+
+
+    const pedidosCancelados =
+        pedidosUsuario.filter(
+            pedido =>
+                pedido.estado ===
+                    "cancelado" ||
+                pedido.estado ===
+                    "cancelada"
+        );
+
+
+    // =====================================================
+    // GANANCIAS REALES
+    // =====================================================
+
+    const ganancias =
+        pedidosCompletados.reduce(
+            (
+                total,
+                pedido
+            ) => {
+
+                return (
+                    total +
+                    Number(
+                        pedido.comisiones
+                            ?.repartidor ||
+                        0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    // =====================================================
+    // VALORACIONES DEL REPARTIDOR
+    // =====================================================
+
+    const valoraciones =
+        tipo === "repartidor"
+            ? pedidosCompletados
+                .map(
+                    pedido =>
+                        pedido
+                            .valoracionRepartidor
+                )
+                .filter(
+                    valoracion =>
+                        valoracion &&
+                        Number(
+                            valoracion.estrellas
+                        ) >= 1 &&
+                        Number(
+                            valoracion.estrellas
+                        ) <= 5
+                )
+            : [];
+
+
+    const cantidadValoraciones =
+        valoraciones.length;
+
+
+    const sumaEstrellas =
+        valoraciones.reduce(
+            (
+                total,
+                valoracion
+            ) => {
+
+                return (
+                    total +
+                    Number(
+                        valoracion.estrellas
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    const promedioEstrellas =
+        cantidadValoraciones > 0
+            ? (
+                sumaEstrellas /
+                cantidadValoraciones
+            ).toFixed(1)
+            : "0.0";
+
+
+    // =====================================================
+    // DISTRIBUCIÓN DE ESTRELLAS
+    // =====================================================
+
+    const cantidad5 =
+        valoraciones.filter(
+            v =>
+                Number(
+                    v.estrellas
+                ) === 5
+        ).length;
+
+
+    const cantidad4 =
+        valoraciones.filter(
+            v =>
+                Number(
+                    v.estrellas
+                ) === 4
+        ).length;
+
+
+    const cantidad3 =
+        valoraciones.filter(
+            v =>
+                Number(
+                    v.estrellas
+                ) === 3
+        ).length;
+
+
+    const cantidad2 =
+        valoraciones.filter(
+            v =>
+                Number(
+                    v.estrellas
+                ) === 2
+        ).length;
+
+
+    const cantidad1 =
+        valoraciones.filter(
+            v =>
+                Number(
+                    v.estrellas
+                ) === 1
+        ).length;
+
+
+    // =====================================================
+    // ESTRELLAS VISUALES
+    // =====================================================
+
+    const estrellas =
+        cantidadValoraciones > 0
+            ? Array.from(
+                {
+                    length: 5
+                },
+                (
+                    _,
+                    indice
+                ) =>
+                    indice <
+                    Math.round(
+                        Number(
+                            promedioEstrellas
+                        )
+                    )
+                        ? "★"
+                        : "☆"
+            ).join("")
+            : "☆☆☆☆☆";
+
+
+    // =====================================================
+    // MODAL
+    // =====================================================
 
     const modal =
         document.createElement("div");
@@ -3239,27 +3461,39 @@ function abrirModalUsuario(
 
         <div class="admin-modal-content">
 
+            <!-- =========================================
+                 ENCABEZADO
+            ========================================== -->
+
             <div class="admin-modal-header">
 
                 <div>
 
-                    <span class="admin-modal-kicker">
+                    <span
+                        class="admin-modal-kicker"
+                    >
                         Administración
                     </span>
 
+
                     <h2>
+
                         ${escaparHTMLAdmin(
                             usuario.nombre ||
                             usuario.email ||
                             titulo
                         )}
+
                     </h2>
 
+
                     <p>
-                        Gestión de cuenta y actividad.
+                        Expediente y actividad
+                        del ${titulo.toLowerCase()}.
                     </p>
 
                 </div>
+
 
                 <button
                     type="button"
@@ -3275,11 +3509,18 @@ function abrirModalUsuario(
             <div class="admin-modal-body">
 
 
-                <div class="admin-detail-status">
+                <!-- =====================================
+                     ESTADO
+                ====================================== -->
+
+                <div
+                    class="admin-detail-status"
+                >
 
                     <span>
                         Estado de cuenta
                     </span>
+
 
                     <strong
                         class="${
@@ -3298,7 +3539,13 @@ function abrirModalUsuario(
                 </div>
 
 
-                <div class="admin-detail-grid">
+                <!-- =====================================
+                     INFORMACIÓN
+                ====================================== -->
+
+                <div
+                    class="admin-detail-grid"
+                >
 
                     <div>
 
@@ -3347,91 +3594,315 @@ function abrirModalUsuario(
 
 
                 ${
-                    tipo === "cliente"
-                    ? `
+                    tipo === "repartidor"
+                        ? `
 
-                        <div class="admin-detail-section">
+                            <!-- =====================
+                                 OPERACIÓN
+                            ====================== -->
 
-                            <h3>
-                                Comportamiento
-                            </h3>
+                            <div
+                                class="admin-detail-section"
+                            >
 
-                            <div class="admin-behavior-large">
+                                <h3>
+                                    Operación
+                                </h3>
 
-                                <div>
-                                    <span>Pedidos</span>
-                                    <strong>—</strong>
-                                </div>
 
-                                <div>
-                                    <span>Completados</span>
-                                    <strong>—</strong>
-                                </div>
+                                <div
+                                    class="admin-behavior-large"
+                                >
 
-                                <div>
-                                    <span>Cancelados</span>
-                                    <strong>—</strong>
-                                </div>
+                                    <div>
 
-                                <div>
-                                    <span>Reportes</span>
-                                    <strong>0</strong>
+                                        <span>
+                                            Pedidos
+                                        </span>
+
+                                        <strong>
+                                            ${pedidosUsuario.length}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <span>
+                                            Completados
+                                        </span>
+
+                                        <strong>
+                                            ${pedidosCompletados.length}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <span>
+                                            Cancelaciones
+                                        </span>
+
+                                        <strong>
+                                            ${pedidosCancelados.length}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <span>
+                                            Ganancias
+                                        </span>
+
+                                        <strong>
+                                            ${moneda(
+                                                ganancias
+                                            )}
+                                        </strong>
+
+                                    </div>
+
                                 </div>
 
                             </div>
 
-                            <p class="admin-muted">
-                                Las métricas se conectarán
-                                al historial de pedidos e
-                                incidencias.
-                            </p>
 
-                        </div>
+                            <!-- =====================
+                                 REPUTACIÓN
+                            ====================== -->
 
-                    `
-                    : `
+                            <div
+                                class="admin-detail-section"
+                            >
 
-                        <div class="admin-detail-section">
+                                <h3>
+                                    Reputación
+                                </h3>
 
-                            <h3>
-                                Operación
-                            </h3>
 
-                            <div class="admin-behavior-large">
+                                <div
+                                    class="admin-repartidor-rating-modal"
+                                >
 
-                                <div>
-                                    <span>Pedidos</span>
-                                    <strong>—</strong>
+                                    <div
+                                        class="admin-rating-score"
+                                    >
+
+                                        <strong>
+                                            ${promedioEstrellas}
+                                        </strong>
+
+                                        <span>
+                                            / 5.0
+                                        </span>
+
+                                    </div>
+
+
+                                    <div
+                                        class="admin-rating-stars-large"
+                                    >
+                                        ${estrellas}
+                                    </div>
+
+
+                                    <div
+                                        class="admin-rating-count"
+                                    >
+                                        ${
+                                            cantidadValoraciones === 1
+                                                ? "1 valoración"
+                                                : `${cantidadValoraciones} valoraciones`
+                                        }
+                                    </div>
+
                                 </div>
 
-                                <div>
-                                    <span>Completados</span>
-                                    <strong>—</strong>
-                                </div>
 
-                                <div>
-                                    <span>Cancelaciones</span>
-                                    <strong>—</strong>
-                                </div>
+                                <!-- DISTRIBUCIÓN -->
 
-                                <div>
-                                    <span>Ganancias</span>
-                                    <strong>—</strong>
+                                <div
+                                    class="admin-rating-distribution"
+                                >
+
+                                    <div>
+
+                                        <span>
+                                            5 ★
+                                        </span>
+
+                                        <strong>
+                                            ${cantidad5}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <span>
+                                            4 ★
+                                        </span>
+
+                                        <strong>
+                                            ${cantidad4}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <span>
+                                            3 ★
+                                        </span>
+
+                                        <strong>
+                                            ${cantidad3}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <span>
+                                            2 ★
+                                        </span>
+
+                                        <strong>
+                                            ${cantidad2}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <span>
+                                            1 ★
+                                        </span>
+
+                                        <strong>
+                                            ${cantidad1}
+                                        </strong>
+
+                                    </div>
+
                                 </div>
 
                             </div>
 
-                        </div>
+                        `
+                        : `
 
-                    `
+                            <!-- =====================
+                                 CLIENTE
+                            ====================== -->
+
+                            <div
+                                class="admin-detail-section"
+                            >
+
+                                <h3>
+                                    Comportamiento
+                                </h3>
+
+
+                                <div
+                                    class="admin-behavior-large"
+                                >
+
+                                    <div>
+
+                                        <span>
+                                            Pedidos
+                                        </span>
+
+                                        <strong>
+                                            ${pedidosUsuario.length}
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <span>
+                                            Completados
+                                        </span>
+
+                                        <strong>
+                                            ${
+                                                pedidosUsuario.filter(
+                                                    pedido =>
+                                                        pedido.estado ===
+                                                        "entregado"
+                                                ).length
+                                            }
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <span>
+                                            Cancelados
+                                        </span>
+
+                                        <strong>
+                                            ${
+                                                pedidosUsuario.filter(
+                                                    pedido =>
+                                                        pedido.estado ===
+                                                            "cancelado" ||
+                                                        pedido.estado ===
+                                                            "cancelada"
+                                                ).length
+                                            }
+                                        </strong>
+
+                                    </div>
+
+
+                                    <div>
+
+                                        <span>
+                                            Reportes
+                                        </span>
+
+                                        <strong>
+                                            0
+                                        </strong>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        `
                 }
 
 
-                <div class="admin-detail-section">
+                <!-- =====================================
+                     ESTADO DE CUENTA
+                ====================================== -->
+
+                <div
+                    class="admin-detail-section"
+                >
 
                     <h3>
                         Estado de la cuenta
                     </h3>
+
 
                     <button
                         type="button"
@@ -3442,11 +3913,13 @@ function abrirModalUsuario(
                                 : "admin-button-primary"
                         }"
                     >
+
                         ${
                             activo
                                 ? "Suspender cuenta"
                                 : "Reactivar cuenta"
                         }
+
                     </button>
 
                 </div>
@@ -3464,14 +3937,20 @@ function abrirModalUsuario(
     );
 
 
-    requestAnimationFrame(() => {
+    requestAnimationFrame(
+        () => {
 
-        modal.classList.add(
-            "visible"
-        );
+            modal.classList.add(
+                "visible"
+            );
 
-    });
+        }
+    );
 
+
+    // =====================================================
+    // CERRAR MODAL
+    // =====================================================
 
     document
         .getElementById(
@@ -3499,6 +3978,10 @@ function abrirModalUsuario(
         }
     );
 
+
+    // =====================================================
+    // CAMBIAR ESTADO
+    // =====================================================
 
     document
         .getElementById(
@@ -3561,6 +4044,7 @@ function abrirModalUsuario(
                         "Error actualizando usuario:",
                         error
                     );
+
 
                     mostrarNotificacion(
                         "No se pudo actualizar la cuenta.",
