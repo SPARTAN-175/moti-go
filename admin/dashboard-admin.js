@@ -2442,7 +2442,6 @@ function crearTarjetaRepartidor(
                     Number(
                         pedido.comisiones
                             ?.repartidor ||
-                        pedido.comisionRepartidor ||
                         0
                     )
                 );
@@ -2453,7 +2452,7 @@ function crearTarjetaRepartidor(
 
 
     // =====================================================
-    // CALIFICACIONES
+    // VALORACIONES
     // =====================================================
 
     const valoraciones =
@@ -2503,8 +2502,7 @@ function crearTarjetaRepartidor(
             ? (
                 sumaEstrellas /
                 cantidadValoraciones
-            )
-                .toFixed(1)
+            ).toFixed(1)
             : "0.0";
 
 
@@ -2539,9 +2537,7 @@ function crearTarjetaRepartidor(
     // =====================================================
 
     const disponible =
-        repartidor.disponible === true ||
-        repartidor.estadoServicio ===
-            "disponible";
+        repartidor.disponible === true;
 
 
     return `
@@ -2610,7 +2606,6 @@ function crearTarjetaRepartidor(
 
                 <div
                     class="admin-repartidor-rating"
-                    title="Calificación del repartidor"
                 >
 
                     <span
@@ -2642,7 +2637,7 @@ function crearTarjetaRepartidor(
 
 
                 <!-- =======================================
-                     DATOS FINANCIEROS
+                     DATOS
                 ======================================== -->
 
                 <div class="admin-card-finance">
