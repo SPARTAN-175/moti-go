@@ -8752,10 +8752,7 @@ async function guardarComisionTienda() {
 function actualizarResumen() {
 
     const vista =
-        document.getElementById(
-            "view-inicio"
-        );
-
+        document.getElementById("view-inicio");
 
     if (!vista) {
         return;
@@ -8763,47 +8760,44 @@ function actualizarResumen() {
 
 
     const tarjetas =
-        vista.querySelectorAll(
-            ".stat"
-        );
-
+        vista.querySelectorAll(".stat");
 
     if (tarjetas.length < 4) {
         return;
     }
 
 
-    const hoy =
-        new Date();
+    /* =====================================================
+       PEDIDOS DE HOY
+    ===================================================== */
 
+    const hoy = new Date();
 
     const pedidosHoy =
-        pedidosActuales.filter(
-            pedido => {
+        pedidosActuales.filter(pedido => {
 
-                const fecha =
-                    convertirFecha(
-                        pedido.creadoEn
-                    );
-
-                if (!fecha) {
-                    return false;
-                }
-
-                return (
-                    fecha.getDate() ===
-                    hoy.getDate() &&
-
-                    fecha.getMonth() ===
-                    hoy.getMonth() &&
-
-                    fecha.getFullYear() ===
-                    hoy.getFullYear()
-                );
-
+            if (!pedido.creadoEn) {
+                return false;
             }
-        );
 
+            const fecha =
+                pedido.creadoEn.toDate
+                    ? pedido.creadoEn.toDate()
+                    : new Date(pedido.creadoEn);
+
+            return (
+                fecha.getFullYear() === hoy.getFullYear() &&
+                fecha.getMonth() === hoy.getMonth() &&
+                fecha.getDate() === hoy.getDate()
+            );
+
+        });
+
+
+    /* =====================================================
+       VENTAS DE HOY
+       (POR AHORA CONSERVAMOS ESTE DATO COMO ESTÁ)
+    ===================================================== */
 
     const ventasHoy =
         pedidosHoy.reduce(
@@ -8818,17 +8812,54 @@ function actualizarResumen() {
         );
 
 
+    /* =====================================================
+       INGRESOS REALES DE MOTI
+       
+       Solo contamos pagos de tiendas
+       que ya fueron confirmados.
+    ===================================================== */
+
     const ingresosMOTI =
-        pedidosHoy.reduce(
-            (total, pedido) =>
-                total +
-                Number(
-                    pedido.comisionTienda ||
-                    0
-                ),
+        movimientosTiendasActuales.reduce(
+            (total, movimiento) => {
+
+                const tipo =
+                    String(
+                        movimiento.tipo || ""
+                    ).toLowerCase();
+
+                const estado =
+                    String(
+                        movimiento.estado || ""
+                    ).toLowerCase();
+
+                if (
+                    tipo === "pago" &&
+                    (
+                        !estado ||
+                        estado === "confirmado"
+                    )
+                ) {
+
+                    return (
+                        total +
+                        Number(
+                            movimiento.monto || 0
+                        )
+                    );
+
+                }
+
+                return total;
+
+            },
             0
         );
 
+
+    /* =====================================================
+       VALORES DEL RESUMEN
+    ===================================================== */
 
     const valores = [
 
@@ -8839,16 +8870,16 @@ function actualizarResumen() {
                 repartidor.activo !== false
         ).length,
 
-        moneda(
-            ventasHoy
-        ),
+        moneda(ventasHoy),
 
-        moneda(
-            ingresosMOTI
-        )
+        moneda(ingresosMOTI)
 
     ];
 
+
+    /* =====================================================
+       ACTUALIZAR TARJETAS
+    ===================================================== */
 
     tarjetas.forEach(
         (tarjeta, indice) => {
