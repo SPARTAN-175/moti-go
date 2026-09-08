@@ -6012,6 +6012,8 @@ function actualizarResumenCuenta() {
         }
     );
 
+        actualizarGraficaGanancias();
+
 }
 
 
@@ -6760,6 +6762,314 @@ function formatearFechaMovimiento(
     ).format(
         fecha
     );
+
+}
+
+// =========================================================
+// GRÁFICA DE GANANCIAS POR MES
+// =========================================================
+
+function renderizarGraficaGanancias() {
+
+    const container =
+        document.getElementById(
+            "accountEarningsChart"
+        );
+
+
+    if (!container) {
+
+        return;
+
+    }
+
+
+    // =====================================================
+    // SOLO COMISIONES GENERADAS
+    // =====================================================
+
+    const comisiones =
+        movimientosCuenta.filter(
+            movimiento =>
+                String(
+                    movimiento.tipo ||
+                    ""
+                ).toLowerCase() ===
+                "comision"
+        );
+
+
+    if (
+        comisiones.length === 0
+    ) {
+
+        container.innerHTML = `
+
+            <div class="account-chart-empty">
+
+                <div>
+
+                    <span
+                        class="material-symbols-outlined"
+                        style="
+                            display:block;
+                            font-size:32px;
+                            margin-bottom:7px;
+                        "
+                    >
+                        bar_chart
+                    </span>
+
+                    Todavía no hay comisiones
+                    generadas.
+
+                </div>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    // =====================================================
+    // AGRUPAR POR MES
+    // =====================================================
+
+    const meses =
+        new Map();
+
+
+    comisiones.forEach(
+        movimiento => {
+
+            const fecha =
+                obtenerFechaMovimiento(
+                    movimiento
+                );
+
+
+            if (
+                !fecha ||
+                fecha.getTime() ===
+                    0
+            ) {
+
+                return;
+
+            }
+
+
+            const año =
+                fecha.getFullYear();
+
+
+            const mes =
+                fecha.getMonth();
+
+
+            const clave =
+                `${año}-${String(
+                    mes + 1
+                ).padStart(
+                    2,
+                    "0"
+                )}`;
+
+
+            const monto =
+                Number(
+                    movimiento.monto ||
+                    0
+                );
+
+
+            meses.set(
+                clave,
+                (
+                    meses.get(
+                        clave
+                    ) ||
+                    0
+                ) + monto
+            );
+
+        }
+    );
+
+
+    // =====================================================
+    // ORDENAR MESES
+    // =====================================================
+
+    const datos =
+        [...meses.entries()]
+            .sort(
+                (
+                    a,
+                    b
+                ) =>
+                    a[0].localeCompare(
+                        b[0]
+                    )
+            )
+            .slice(
+                -12
+            );
+
+
+    if (
+        datos.length === 0
+    ) {
+
+        container.innerHTML = `
+
+            <div class="account-chart-empty">
+
+                No hay fechas válidas
+                para mostrar.
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    const maximo =
+        Math.max(
+            ...datos.map(
+                ([, monto]) =>
+                    monto
+            ),
+            0
+        );
+
+
+    // =====================================================
+    // CREAR GRÁFICA
+    // =====================================================
+
+    container.innerHTML =
+        "";
+
+
+    datos.forEach(
+        ([clave, monto]) => {
+
+            const [año, mes] =
+                clave.split("-");
+
+
+            const fecha =
+                new Date(
+                    Number(año),
+                    Number(mes) - 1,
+                    1
+                );
+
+
+            const nombreMes =
+                new Intl.DateTimeFormat(
+                    "es-MX",
+                    {
+                        month:
+                            "short"
+                    }
+                )
+                .format(
+                    fecha
+                )
+                .replace(
+                    ".",
+                    ""
+                );
+
+
+            const porcentaje =
+                maximo > 0
+                    ? (
+                        monto /
+                        maximo
+                    ) * 100
+                    : 0;
+
+
+            const columna =
+                document.createElement(
+                    "div"
+                );
+
+
+            columna.className =
+                "account-chart-month";
+
+
+            columna.innerHTML = `
+
+                <div
+                    class="account-chart-value"
+                >
+                    ${formatearPrecio(
+                        monto
+                    )}
+                </div>
+
+
+                <div
+                    class="account-chart-bar-wrapper"
+                >
+
+                    <div
+                        class="account-chart-bar"
+                        style="
+                            height:${Math.max(
+                                porcentaje,
+                                3
+                            )}%;
+                        "
+                        title="${formatearPrecio(
+                            monto
+                        )}"
+                    ></div>
+
+                </div>
+
+
+                <div
+                    class="account-chart-label"
+                >
+                    ${escapeHtml(
+                        nombreMes
+                    )}
+                    ${año}
+                </div>
+
+            `;
+
+
+            container.appendChild(
+                columna
+            );
+
+        }
+    );
+
+}
+
+
+// =========================================================
+// ACTUALIZAR GRÁFICA CUANDO CAMBIAN
+// LOS MOVIMIENTOS
+// =========================================================
+
+function actualizarGraficaGanancias() {
+
+    renderizarGraficaGanancias();
 
 }
 
