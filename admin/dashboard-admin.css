@@ -4414,3 +4414,1137 @@ button {
     }
 
 }
+
+
+/* =========================================================
+   MOTI GO — CARTERAS
+   HISTORIAL + PAGOS + COMPROBANTE
+========================================================= */
+
+
+/* =========================================================
+   HISTORIAL DE CUENTA — MODAL
+========================================================= */
+
+.historial-pagos-modal {
+    z-index: 1000;
+}
+
+.historial-pagos-contenido {
+    width: min(940px, calc(100vw - 32px));
+    max-height: calc(100vh - 32px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.historial-pagos-cabecera {
+    flex-shrink: 0;
+}
+
+.historial-kicker {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #64746d;
+}
+
+.historial-pagos-cuerpo {
+    overflow-y: auto;
+}
+
+
+/* =========================================================
+   RESUMEN DE LA CUENTA
+========================================================= */
+
+.historial-cuenta-resumen {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 20px;
+    margin-bottom: 24px;
+    border: 1px solid #e6ebe8;
+    border-radius: 18px;
+    background: #f7f9f8;
+}
+
+.historial-cuenta-identidad {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 220px;
+}
+
+.historial-cuenta-icono {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    background: #17251f;
+    font-size: 24px;
+    box-shadow: 0 5px 14px rgba(23, 37, 31, .12);
+}
+
+.historial-cuenta-identidad strong {
+    display: block;
+    font-size: 16px;
+    line-height: 1.25;
+    color: #17251f;
+}
+
+.historial-cuenta-identidad span {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #75827d;
+}
+
+
+.historial-cuenta-saldos {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+}
+
+.historial-cuenta-saldos > div {
+    min-width: 125px;
+    padding: 0 18px;
+    border-left: 1px solid #dde4e0;
+}
+
+.historial-cuenta-saldos > div:first-child {
+    border-left: none;
+}
+
+.historial-cuenta-saldos span {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #77837e;
+}
+
+.historial-cuenta-saldos strong {
+    display: block;
+    font-size: 18px;
+    color: #17251f;
+}
+
+.historial-cuenta-saldos strong.positivo {
+    color: #18845b;
+}
+
+.historial-cuenta-saldos strong.pendiente {
+    color: #b56b00;
+}
+
+
+/* =========================================================
+   ENCABEZADO DE MOVIMIENTOS
+========================================================= */
+
+.historial-seccion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding: 0 3px;
+}
+
+.historial-seccion-header h4 {
+    margin: 0;
+    font-size: 16px;
+    color: #17251f;
+}
+
+.historial-seccion-header span {
+    display: block;
+    margin-top: 3px;
+    font-size: 12px;
+    color: #7a8581;
+}
+
+
+/* =========================================================
+   LISTA DE MOVIMIENTOS
+========================================================= */
+
+.historial-movimientos-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+/* =========================================================
+   TARJETA DE MOVIMIENTO
+========================================================= */
+
+.historial-movimiento {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    padding: 17px;
+    border: 1px solid #e4e9e6;
+    border-radius: 16px;
+    background: #ffffff;
+    box-sizing: border-box;
+    transition:
+        transform .16s ease,
+        border-color .16s ease,
+        box-shadow .16s ease,
+        background .16s ease;
+}
+
+.historial-movimiento-pago {
+    cursor: pointer;
+}
+
+.historial-movimiento-pago:hover {
+    transform: translateY(-1px);
+    border-color: #c9ddd3;
+    box-shadow: 0 8px 22px rgba(23, 37, 31, .07);
+    background: #fcfefd;
+}
+
+.historial-movimiento-pago:focus-visible {
+    outline: 3px solid rgba(24, 132, 91, .20);
+    outline-offset: 2px;
+}
+
+
+/* =========================================================
+   ICONO DEL MOVIMIENTO
+========================================================= */
+
+.historial-movimiento-icono {
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 13px;
+    font-size: 21px;
+    font-weight: 800;
+}
+
+.historial-movimiento-icono.pago {
+    background: #e8f6ef;
+}
+
+.historial-movimiento-icono.comision {
+    background: #fff3df;
+    color: #b56b00;
+    font-size: 18px;
+}
+
+
+/* =========================================================
+   INFORMACIÓN
+========================================================= */
+
+.historial-movimiento-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.historial-movimiento-titulo {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.historial-movimiento-titulo > div {
+    min-width: 0;
+}
+
+.historial-movimiento-titulo strong {
+    display: block;
+    font-size: 14px;
+    line-height: 1.3;
+    color: #17251f;
+}
+
+.historial-movimiento-titulo span {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #7b8782;
+}
+
+.historial-movimiento-monto {
+    flex-shrink: 0;
+    font-size: 16px !important;
+    white-space: nowrap;
+}
+
+.historial-movimiento-monto.pago {
+    color: #18845b;
+}
+
+.historial-movimiento-monto.comision {
+    color: #b56b00;
+}
+
+
+/* =========================================================
+   DETALLES DEL MOVIMIENTO
+========================================================= */
+
+.historial-movimiento-detalles {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 9px;
+}
+
+.historial-movimiento-detalles span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 25px;
+    padding: 4px 9px;
+    border-radius: 7px;
+    background: #f3f6f4;
+    color: #596761;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   PIE DEL MOVIMIENTO
+========================================================= */
+
+.historial-movimiento-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 11px;
+    padding-top: 10px;
+    border-top: 1px solid #eef1ef;
+}
+
+.historial-movimiento-footer > span {
+    font-size: 11px;
+    color: #84908b;
+}
+
+.btn-ver-comprobante-movimiento {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #177b57;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.btn-ver-comprobante-movimiento span {
+    font-size: 16px;
+    transition: transform .15s ease;
+}
+
+.btn-ver-comprobante-movimiento:hover {
+    color: #105d42;
+}
+
+.btn-ver-comprobante-movimiento:hover span {
+    transform: translateX(3px);
+}
+
+
+/* =========================================================
+   FLECHA
+========================================================= */
+
+.historial-movimiento-flecha {
+    flex-shrink: 0;
+    font-size: 25px;
+    line-height: 1;
+    color: #a5b0ab;
+}
+
+.historial-movimiento-pago:hover
+.historial-movimiento-flecha {
+    color: #177b57;
+}
+
+
+/* =========================================================
+   REGISTRAR PAGO
+========================================================= */
+
+.registrar-pago-modal {
+    z-index: 1010;
+}
+
+.registrar-pago-contenido {
+    width: min(560px, calc(100vw - 32px));
+    max-height: calc(100vh - 32px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.registrar-pago-cuerpo {
+    overflow-y: auto;
+}
+
+.registrar-pago-saldo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 17px;
+    margin-bottom: 22px;
+    border: 1px solid #e0ebe5;
+    border-radius: 16px;
+    background: #f4faf7;
+}
+
+.registrar-pago-saldo-icono {
+    width: 45px;
+    height: 45px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #dff3e9;
+    font-size: 21px;
+}
+
+.registrar-pago-saldo span {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #718079;
+}
+
+.registrar-pago-saldo strong {
+    display: block;
+    font-size: 23px;
+    color: #17251f;
+}
+
+
+/* =========================================================
+   CAMPO DE MONTO
+========================================================= */
+
+.campo-monto-pago {
+    display: flex;
+    align-items: center;
+    border: 1px solid #d9e1dd;
+    border-radius: 12px;
+    background: #ffffff;
+    overflow: hidden;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.campo-monto-pago:focus-within {
+    border-color: #23845f;
+    box-shadow: 0 0 0 3px rgba(35, 132, 95, .10);
+}
+
+.campo-monto-pago > span {
+    padding-left: 14px;
+    font-size: 18px;
+    font-weight: 800;
+    color: #68766f;
+}
+
+.campo-monto-pago input {
+    flex: 1;
+    min-width: 0;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    padding-left: 6px !important;
+    font-size: 20px !important;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   TEXTO OPCIONAL
+========================================================= */
+
+.campo-opcional {
+    margin-left: 5px;
+    font-size: 10px;
+    font-weight: 500;
+    color: #89948f;
+}
+
+
+/* =========================================================
+   SALDO POSTERIOR
+========================================================= */
+
+.pago-saldo-posterior {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 17px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #f5f7f6;
+    color: #65716c;
+    font-size: 12px;
+}
+
+.pago-saldo-posterior span {
+    font-weight: 600;
+}
+
+.pago-saldo-posterior strong {
+    color: #17251f;
+    font-size: 15px;
+}
+
+
+/* =========================================================
+   ACCIONES DEL FORMULARIO
+========================================================= */
+
+.registrar-pago-acciones {
+    margin-top: 22px;
+}
+
+
+/* =========================================================
+   COMPROBANTE — MODAL
+========================================================= */
+
+.comprobante-pago-modal {
+    z-index: 1020;
+}
+
+.comprobante-modal {
+    width: min(600px, calc(100vw - 32px));
+    max-height: calc(100vh - 24px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.comprobante-modal-cuerpo {
+    overflow-y: auto;
+    padding-bottom: 20px;
+}
+
+
+/* =========================================================
+   DOCUMENTO / TICKET
+========================================================= */
+
+.comprobante-documento {
+    position: relative;
+    width: min(100%, 490px);
+    margin: 4px auto 22px;
+    padding: 28px 28px 24px;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #e4e8e5;
+    box-shadow: 0 12px 35px rgba(23, 37, 31, .10);
+    color: #17251f;
+}
+
+
+/*
+ * Parte inferior tipo ticket.
+ */
+
+.comprobante-documento::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -7px;
+    height: 14px;
+    background:
+        radial-gradient(
+            circle at 7px 0,
+            transparent 7px,
+            #ffffff 7.5px
+        ) 0 0 / 14px 14px repeat-x;
+    filter: drop-shadow(
+        0 1px 0 #e4e8e5
+    );
+}
+
+
+/* =========================================================
+   MARCA
+========================================================= */
+
+.comprobante-marca {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.comprobante-logo {
+    width: 45px;
+    height: 45px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 13px;
+    background: #17251f;
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 900;
+}
+
+.comprobante-marca strong {
+    display: block;
+    font-size: 21px;
+    letter-spacing: -.02em;
+}
+
+.comprobante-marca span {
+    display: block;
+    margin-top: 2px;
+    color: #7a8580;
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   LÍNEAS TIPO TICKET
+========================================================= */
+
+.comprobante-linea-punteada {
+    height: 1px;
+    margin: 20px 0;
+    border-top: 1px dashed #cfd7d3;
+}
+
+
+/* =========================================================
+   TÍTULO DEL TICKET
+========================================================= */
+
+.comprobante-titulo {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.comprobante-titulo span {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .10em;
+    color: #68756f;
+}
+
+.comprobante-titulo strong {
+    padding: 6px 8px;
+    border-radius: 7px;
+    background: #e8f6ef;
+    color: #18845b;
+    font-size: 9px;
+    letter-spacing: .05em;
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   FOLIO
+========================================================= */
+
+.comprobante-folio {
+    margin-top: 13px;
+    padding: 11px 12px;
+    border-radius: 9px;
+    background: #f5f7f6;
+}
+
+.comprobante-folio span {
+    display: block;
+    margin-bottom: 4px;
+    color: #7c8883;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .08em;
+}
+
+.comprobante-folio strong {
+    display: block;
+    font-size: 13px;
+    letter-spacing: .03em;
+}
+
+
+/* =========================================================
+   TIENDA
+========================================================= */
+
+.comprobante-dato-principal {
+    padding: 17px 0 7px;
+}
+
+.comprobante-dato-principal > span {
+    display: block;
+    margin-bottom: 5px;
+    color: #7b8782;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .09em;
+}
+
+.comprobante-dato-principal > strong {
+    display: block;
+    font-size: 17px;
+}
+
+.comprobante-dato-principal > small {
+    display: block;
+    margin-top: 4px;
+    color: #89938f;
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   FILAS
+========================================================= */
+
+.comprobante-fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 9px 0;
+}
+
+.comprobante-fila span {
+    color: #76827d;
+    font-size: 11px;
+}
+
+.comprobante-fila strong {
+    text-align: right;
+    color: #17251f;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   TOTAL
+========================================================= */
+
+.comprobante-total {
+    margin: 8px 0 20px;
+    padding: 20px 18px;
+    border-radius: 13px;
+    background: #f3f8f5;
+    text-align: center;
+}
+
+.comprobante-total span {
+    display: block;
+    margin-bottom: 5px;
+    color: #6c7973;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .10em;
+}
+
+.comprobante-total strong {
+    display: block;
+    color: #17251f;
+    font-size: 32px;
+    letter-spacing: -.03em;
+}
+
+
+/* =========================================================
+   SECCIONES
+========================================================= */
+
+.comprobante-seccion-ticket {
+    margin-top: 18px;
+}
+
+.comprobante-seccion-ticket h4 {
+    margin: 0 0 7px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #edf0ee;
+    color: #55625c;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+
+/* =========================================================
+   PAGO APLICADO
+========================================================= */
+
+.comprobante-pago-aplicado {
+    color: #18845b !important;
+}
+
+
+/* =========================================================
+   SALDO FINAL
+========================================================= */
+
+.comprobante-saldo-final {
+    margin-top: 4px;
+    padding: 12px 10px;
+    border-radius: 9px;
+    background: #f5f7f6;
+}
+
+.comprobante-saldo-final strong {
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   OBSERVACIONES
+========================================================= */
+
+.comprobante-observaciones {
+    margin-top: 18px;
+    padding: 13px;
+    border-radius: 10px;
+    background: #fafafa;
+    border: 1px solid #ecefed;
+}
+
+.comprobante-observaciones > span {
+    display: block;
+    margin-bottom: 5px;
+    color: #75817c;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.comprobante-observaciones p {
+    margin: 0;
+    color: #46534d;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   CONFIRMACIÓN
+========================================================= */
+
+.comprobante-confirmacion {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    padding: 13px;
+    border-radius: 11px;
+    background: #eef8f3;
+}
+
+.comprobante-confirmacion-icono {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #18845b;
+    color: white;
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.comprobante-confirmacion strong {
+    display: block;
+    color: #176b4b;
+    font-size: 11px;
+}
+
+.comprobante-confirmacion span {
+    display: block;
+    margin-top: 3px;
+    color: #60746b;
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   FOOTER DEL TICKET
+========================================================= */
+
+.comprobante-footer {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.comprobante-footer span {
+    display: block;
+    color: #89948f;
+    font-size: 9px;
+}
+
+.comprobante-footer strong {
+    display: block;
+    margin-top: 3px;
+    color: #53615a;
+    font-size: 10px;
+    overflow-wrap: anywhere;
+}
+
+.comprobante-footer small {
+    display: block;
+    margin-top: 6px;
+    color: #a0aaa6;
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   BOTONES DEL COMPROBANTE
+========================================================= */
+
+.comprobante-acciones {
+    width: min(100%, 490px);
+    margin: 0 auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 9px;
+    flex-wrap: wrap;
+}
+
+.comprobante-acciones button {
+    min-height: 42px;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 760px) {
+
+    .historial-pagos-contenido {
+        width: calc(100vw - 18px);
+        max-height: calc(100vh - 18px);
+    }
+
+
+    .historial-cuenta-resumen {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+
+    .historial-cuenta-saldos {
+        width: 100%;
+    }
+
+
+    .historial-cuenta-saldos > div {
+        flex: 1;
+        min-width: 0;
+        padding: 0 10px;
+    }
+
+
+    .historial-movimiento {
+        align-items: flex-start;
+        padding: 14px;
+    }
+
+
+    .historial-movimiento-titulo {
+        gap: 10px;
+    }
+
+
+    .historial-movimiento-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+
+    .historial-movimiento-flecha {
+        display: none;
+    }
+
+
+    .comprobante-modal {
+        width: calc(100vw - 18px);
+        max-height: calc(100vh - 18px);
+    }
+
+
+    .comprobante-documento {
+        padding: 22px 18px 20px;
+    }
+
+
+    .comprobante-titulo {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+
+    .comprobante-titulo strong {
+        align-self: flex-start;
+    }
+
+
+    .comprobante-fila {
+        gap: 12px;
+    }
+
+
+    .comprobante-total strong {
+        font-size: 29px;
+    }
+
+
+    .comprobante-acciones {
+        justify-content: stretch;
+    }
+
+
+    .comprobante-acciones button {
+        flex: 1;
+    }
+
+}
+
+
+@media (max-width: 480px) {
+
+    .historial-cuenta-saldos {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+
+
+    .historial-cuenta-saldos > div {
+        padding: 0 7px;
+    }
+
+
+    .historial-cuenta-saldos strong {
+        font-size: 14px;
+    }
+
+
+    .historial-movimiento-icono {
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+        font-size: 18px;
+    }
+
+
+    .historial-movimiento-titulo {
+        display: block;
+    }
+
+
+    .historial-movimiento-monto {
+        margin-top: 5px;
+    }
+
+
+    .historial-movimiento-detalles {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+
+    .historial-movimiento-detalles span {
+        width: fit-content;
+    }
+
+
+    .comprobante-documento {
+        width: 100%;
+        padding: 20px 15px 18px;
+    }
+
+
+    .comprobante-acciones {
+        flex-direction: column;
+    }
+
+
+    .comprobante-acciones button {
+        width: 100%;
+    }
+
+}
+
+
+/* =========================================================
+   IMPRESIÓN DEL TICKET
+========================================================= */
+
+@media print {
+
+    .comprobante-pago-modal {
+        position: static !important;
+        background: white !important;
+    }
+
+    .comprobante-modal-cabecera,
+    .comprobante-acciones {
+        display: none !important;
+    }
+
+    .comprobante-modal {
+        width: 100% !important;
+        max-width: none !important;
+        max-height: none !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+    }
+
+    .comprobante-modal-cuerpo {
+        overflow: visible !important;
+    }
+
+    .comprobante-documento {
+        width: 100% !important;
+        max-width: 600px !important;
+        margin: 0 auto !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+}
