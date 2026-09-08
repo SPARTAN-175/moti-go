@@ -4426,284 +4426,190 @@ function renderizarFinanzas() {
 
 function renderizarCarteras() {
 
-    const vista =
-        document.getElementById(
-            "view-carteras"
-        );
+    const contenedor = document.getElementById("view-carteras");
 
+    if (!contenedor) return;
 
-    if (!vista) {
-        return;
-    }
+    const movimientos = Array.isArray(movimientosTiendasActuales)
+        ? movimientosTiendasActuales
+        : [];
 
+    const cuentas = {};
 
-    // =====================================================
-    // SOLO MOVIMIENTOS CONTABLES DE TIENDAS
-    // =====================================================
+    movimientos.forEach(mov => {
 
-    const movimientos =
-        Array.isArray(
-            movimientosTiendasActuales
-        )
-            ? movimientosTiendasActuales
-            : [];
+        if (!mov.tiendaId) return;
 
+        if (!cuentas[mov.tiendaId]) {
 
-    const comisionesGeneradas =
-        movimientos
-            .filter(
-                movimiento =>
-                    movimiento.tipo ===
-                    "comision"
-            )
-            .reduce(
-                (
-                    total,
-                    movimiento
-                ) =>
-                    total +
-                    (
-                        Number(
-                            movimiento.monto
-                        ) || 0
-                    ),
-                0
-            );
-
-
-    const pagosRealizados =
-        movimientos
-            .filter(
-                movimiento =>
-                    movimiento.tipo ===
-                    "pago"
-            )
-            .reduce(
-                (
-                    total,
-                    movimiento
-                ) =>
-                    total +
-                    (
-                        Number(
-                            movimiento.monto
-                        ) || 0
-                    ),
-                0
-            );
-
-
-    const saldoPendiente =
-        Math.max(
-            comisionesGeneradas -
-            pagosRealizados,
-            0
-        );
-
-
-    // =====================================================
-    // AGRUPAR POR TIENDA
-    // =====================================================
-
-    const cuentasTiendas = {};
-
-
-    movimientos.forEach(
-        movimiento => {
-
-            const tiendaId =
-                movimiento.tiendaId ||
-                "sin_tienda";
-
-
-            if (
-                !cuentasTiendas[
-                    tiendaId
-                ]
-            ) {
-
-                cuentasTiendas[
-                    tiendaId
-                ] = {
-
-                    tiendaId,
-
-                    tiendaNombre:
-                        movimiento.tiendaNombre ||
-                        "Tienda",
-
-                    generado:
-                        0,
-
-                    pagado:
-                        0
-
-                };
-
-            }
-
-
-            const cuenta =
-                cuentasTiendas[
-                    tiendaId
-                ];
-
-
-            if (
-                movimiento.tipo ===
-                "comision"
-            ) {
-
-                cuenta.generado +=
-                    Number(
-                        movimiento.monto
-                    ) || 0;
-
-            }
-
-
-            if (
-                movimiento.tipo ===
-                "pago"
-            ) {
-
-                cuenta.pagado +=
-                    Number(
-                        movimiento.monto
-                    ) || 0;
-
-            }
+            cuentas[mov.tiendaId] = {
+                tiendaId: mov.tiendaId,
+                tiendaNombre: mov.tiendaNombre || "Tienda",
+                generado: 0,
+                pagado: 0,
+                movimientos: []
+            };
 
         }
+
+        const monto = Number(mov.monto || 0);
+
+        cuentas[mov.tiendaId].movimientos.push(mov);
+
+        if (mov.tipo === "comision") {
+            cuentas[mov.tiendaId].generado += monto;
+        }
+
+        if (mov.tipo === "pago") {
+            cuentas[mov.tiendaId].pagado += monto;
+        }
+
+    });
+
+
+    const listaCuentas = Object.values(cuentas);
+
+
+    let generadoTotal = 0;
+    let pagadoTotal = 0;
+
+    listaCuentas.forEach(cuenta => {
+
+        generadoTotal += cuenta.generado;
+        pagadoTotal += cuenta.pagado;
+
+    });
+
+
+    const pendienteTotal = Math.max(
+        generadoTotal - pagadoTotal,
+        0
     );
 
 
-    const tiendas =
-        Object.values(
-            cuentasTiendas
-        )
-        .map(
-            cuenta => ({
+    contenedor.innerHTML = `
 
-                ...cuenta,
+        <div class="welcome">
 
-                pendiente:
-                    Math.max(
-                        cuenta.generado -
-                        cuenta.pagado,
-                        0
-                    )
+            <h2>
+                Carteras
+            </h2>
 
-            })
-        )
-        .sort(
-            (a, b) =>
-                b.pendiente -
-                a.pendiente
-        );
+            <p>
+                Administración de saldos y movimientos de las tiendas.
+            </p>
+
+        </div>
 
 
-    // =====================================================
-    // RENDER
-    // =====================================================
+        <!-- ==============================================
+             RESUMEN GENERAL
+        =============================================== -->
 
-    vista.innerHTML = `
+        <div class="stats">
 
-        <div class="admin-page-header">
+            <div class="stat">
 
-            <div>
+                <div class="stat-top">
 
-                <span class="admin-kicker">
-                    Cuentas por cobrar
-                </span>
+                    <span class="stat-label">
+                        Comisiones generadas
+                    </span>
 
-                <h2>
-                    Carteras
-                </h2>
+                    <span class="stat-icon">
+                        💰
+                    </span>
 
-                <p>
-                    Control de comisiones y pagos de las tiendas.
-                </p>
+                </div>
+
+                <div class="stat-value">
+                    ${moneda(generadoTotal)}
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-top">
+
+                    <span class="stat-label">
+                        Pagos recibidos
+                    </span>
+
+                    <span class="stat-icon">
+                        💳
+                    </span>
+
+                </div>
+
+                <div class="stat-value">
+                    ${moneda(pagadoTotal)}
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-top">
+
+                    <span class="stat-label">
+                        Pendiente por cobrar
+                    </span>
+
+                    <span class="stat-icon">
+                        ⏳
+                    </span>
+
+                </div>
+
+                <div class="stat-value">
+                    ${moneda(pendienteTotal)}
+                </div>
+
+            </div>
+
+
+            <div class="stat">
+
+                <div class="stat-top">
+
+                    <span class="stat-label">
+                        Tiendas con movimientos
+                    </span>
+
+                    <span class="stat-icon">
+                        🏪
+                    </span>
+
+                </div>
+
+                <div class="stat-value">
+                    ${listaCuentas.length}
+                </div>
 
             </div>
 
         </div>
 
 
-        <div class="admin-summary-grid">
+        <!-- ==============================================
+             CUENTAS DE TIENDAS
+        =============================================== -->
 
-            <div class="admin-summary">
+        <div class="panel">
 
-                <span>
-                    Comisión generada
-                </span>
-
-                <strong>
-                    ${moneda(
-                        comisionesGeneradas
-                    )}
-                </strong>
-
-            </div>
-
-
-            <div class="admin-summary">
-
-                <span>
-                    Pagado
-                </span>
-
-                <strong>
-                    ${moneda(
-                        pagosRealizados
-                    )}
-                </strong>
-
-            </div>
-
-
-            <div class="admin-summary">
-
-                <span>
-                    Pendiente
-                </span>
-
-                <strong>
-                    ${moneda(
-                        saldoPendiente
-                    )}
-                </strong>
-
-            </div>
-
-
-            <div class="admin-summary">
-
-                <span>
-                    Tiendas con movimientos
-                </span>
-
-                <strong>
-                    ${tiendas.length}
-                </strong>
-
-            </div>
-
-        </div>
-
-
-        <div class="admin-section-panel">
-
-            <div class="admin-panel-heading">
+            <div class="panel-header">
 
                 <div>
 
                     <h3>
-                        Cuenta corriente de tiendas
+                        Cuentas por tienda
                     </h3>
 
                     <p>
-                        El saldo se calcula a partir de comisiones generadas y pagos registrados.
+                        Consulta saldos, registra pagos y revisa comprobantes.
                     </p>
 
                 </div>
@@ -4711,23 +4617,26 @@ function renderizarCarteras() {
             </div>
 
 
-            ${
-                tiendas.length === 0
+            <div class="panel-body">
+
+                ${
+                    listaCuentas.length === 0
 
                     ? `
 
-                        <div class="admin-empty">
+                        <div class="tiendas-vacio">
 
-                            <div class="admin-empty-icon">
-                                🏪
+                            <div class="tiendas-vacio-icono">
+                                💼
                             </div>
 
                             <h3>
-                                Aún no hay movimientos
+                                No hay movimientos todavía
                             </h3>
 
                             <p>
-                                Las comisiones aparecerán aquí cuando se completen pedidos.
+                                Las comisiones aparecerán aquí cuando
+                                existan pedidos entregados con tiendas.
                             </p>
 
                         </div>
@@ -4736,71 +4645,86 @@ function renderizarCarteras() {
 
                     : `
 
-                        <div class="admin-finance-list">
+                        <div class="carteras-lista">
 
-                            ${
-                                tiendas.map(
-                                    tienda => `
+                            ${listaCuentas.map(cuenta => {
 
-                                        <div
-                                            class="admin-finance-line"
-                                            style="
-                                                align-items:flex-start;
-                                                gap:16px;
-                                                flex-wrap:wrap;
-                                            "
-                                        >
+                                const pendiente = Math.max(
+                                    cuenta.generado - cuenta.pagado,
+                                    0
+                                );
+
+                                return `
+
+                                    <div class="cartera-tienda">
+
+                                        <div class="cartera-tienda-info">
+
+                                            <div class="cartera-tienda-icono">
+                                                🏪
+                                            </div>
 
                                             <div>
 
                                                 <strong>
                                                     ${escaparHTMLAdmin(
-                                                        tienda.tiendaNombre
+                                                        cuenta.tiendaNombre
                                                     )}
                                                 </strong>
 
-                                                <div
-                                                    style="
-                                                        font-size:13px;
-                                                        opacity:.7;
-                                                        margin-top:4px;
-                                                    "
-                                                >
-                                                    Generado:
-                                                    ${moneda(
-                                                        tienda.generado
+                                                <span>
+                                                    ID:
+                                                    ${escaparHTMLAdmin(
+                                                        cuenta.tiendaId
                                                     )}
+                                                </span>
 
-                                                    ·
+                                            </div>
 
-                                                    Pagado:
+                                        </div>
+
+
+                                        <div class="cartera-tienda-montos">
+
+                                            <div>
+
+                                                <span>
+                                                    Generado
+                                                </span>
+
+                                                <strong>
                                                     ${moneda(
-                                                        tienda.pagado
+                                                        cuenta.generado
                                                     )}
-                                                </div>
+                                                </strong>
 
                                             </div>
 
 
-                                            <div
-                                                style="
-                                                    text-align:right;
-                                                "
-                                            >
+                                            <div>
 
-                                                <span
-                                                    style="
-                                                        display:block;
-                                                        font-size:12px;
-                                                        opacity:.7;
-                                                    "
-                                                >
+                                                <span>
+                                                    Pagado
+                                                </span>
+
+                                                <strong>
+                                                    ${moneda(
+                                                        cuenta.pagado
+                                                    )}
+                                                </strong>
+
+                                            </div>
+
+
+                                            <div>
+
+                                                <span>
                                                     Pendiente
                                                 </span>
 
                                                 <strong>
                                                     ${moneda(
-                                                        tienda.pendiente
+                                                        pendiente
                                                     )}
                                                 </strong>
 
@@ -4808,14 +4732,56 @@ function renderizarCarteras() {
 
                                         </div>
 
-                                    `
-                                ).join("")
-                            }
+
+                                        <div class="cartera-tienda-acciones">
+
+                                            ${
+                                                pendiente > 0
+
+                                                ? `
+
+                                                    <button
+                                                        type="button"
+                                                        class="btn-primary"
+                                                        onclick="abrirModalPagoTienda('${cuenta.tiendaId}')"
+                                                    >
+                                                        Registrar pago
+                                                    </button>
+
+                                                `
+
+                                                : `
+
+                                                    <span class="cartera-pagada">
+                                                        ✓ Cuenta liquidada
+                                                    </span>
+
+                                                `
+                                            }
+
+
+                                            <button
+                                                type="button"
+                                                class="btn-secundario"
+                                                onclick="mostrarHistorialPagosTienda('${cuenta.tiendaId}')"
+                                            >
+                                                Ver historial
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+
+                                `;
+
+                            }).join("")}
 
                         </div>
 
                     `
-            }
+                }
+
+            </div>
 
         </div>
 
@@ -4823,6 +4789,1643 @@ function renderizarCarteras() {
 
 }
 
+// =========================================================
+// PAGOS DE TIENDAS
+// =========================================================
+
+window.abrirModalPagoTienda = function(tiendaId) {
+
+    const movimientos = movimientosTiendasActuales.filter(
+        mov => mov.tiendaId === tiendaId
+    );
+
+    if (!movimientos.length) {
+
+        mostrarNotificacion(
+            "No existen movimientos para esta tienda.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const tiendaNombre =
+        movimientos.find(m => m.tiendaNombre)?.tiendaNombre ||
+        "Tienda";
+
+
+    let generado = 0;
+    let pagado = 0;
+
+    movimientos.forEach(mov => {
+
+        const monto = Number(mov.monto || 0);
+
+        if (mov.tipo === "comision") {
+            generado += monto;
+        }
+
+        if (mov.tipo === "pago") {
+            pagado += monto;
+        }
+
+    });
+
+
+    const pendiente = Math.max(
+        generado - pagado,
+        0
+    );
+
+
+    if (pendiente <= 0) {
+
+        mostrarNotificacion(
+            "Esta tienda no tiene saldo pendiente.",
+            "info"
+        );
+
+        return;
+
+    }
+
+
+    const modal = document.createElement("div");
+
+    modal.id = "modalPagoTienda";
+
+    modal.className = "modal";
+
+    modal.setAttribute("aria-hidden", "false");
+
+
+    modal.innerHTML = `
+
+        <div class="modal-contenido">
+
+            <div class="modal-cabecera">
+
+                <div>
+
+                    <h3>
+                        Registrar pago
+                    </h3>
+
+                    <p>
+                        ${escaparHTMLAdmin(tiendaNombre)}
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="modal-cerrar"
+                    onclick="cerrarModalPagoTienda()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="modal-cuerpo">
+
+
+                <div class="pago-resumen">
+
+                    <div>
+
+                        <span>
+                            Saldo pendiente
+                        </span>
+
+                        <strong>
+                            ${moneda(pendiente)}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <form id="formPagoTienda">
+
+
+                    <input
+                        type="hidden"
+                        id="pagoTiendaId"
+                        value="${escaparHTMLAdmin(tiendaId)}"
+                    >
+
+
+                    <div class="field">
+
+                        <label for="pagoMonto">
+                            Monto del pago
+                        </label>
+
+                        <input
+                            id="pagoMonto"
+                            type="number"
+                            min="0.01"
+                            max="${pendiente.toFixed(2)}"
+                            step="0.01"
+                            required
+                            placeholder="0.00"
+                        >
+
+                        <small>
+                            Puede ser un pago parcial o liquidar
+                            todo el saldo.
+                        </small>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="pagoMetodo">
+                            Método de pago
+                        </label>
+
+                        <select
+                            id="pagoMetodo"
+                            required
+                        >
+
+                            <option value="transferencia">
+                                Transferencia bancaria
+                            </option>
+
+                            <option value="deposito">
+                                Depósito bancario
+                            </option>
+
+                            <option value="efectivo">
+                                Efectivo
+                            </option>
+
+                            <option value="otro">
+                                Otro
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="pagoReferencia">
+                            Referencia
+                        </label>
+
+                        <input
+                            id="pagoReferencia"
+                            type="text"
+                            maxlength="150"
+                            placeholder="Número de transferencia, depósito, etc."
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="pagoObservaciones">
+                            Observaciones
+                        </label>
+
+                        <textarea
+                            id="pagoObservaciones"
+                            rows="3"
+                            maxlength="500"
+                            placeholder="Información adicional..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <div
+                        id="pagoSaldoPosterior"
+                        class="pago-saldo-posterior"
+                    >
+                        Saldo después del pago: ${moneda(pendiente)}
+                    </div>
+
+
+                    <div class="config-actions">
+
+                        <button
+                            type="button"
+                            class="btn-secundario"
+                            onclick="cerrarModalPagoTienda()"
+                        >
+                            Cancelar
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            class="btn-primary"
+                        >
+                            Confirmar pago
+                        </button>
+
+                    </div>
+
+
+                </form>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(modal);
+
+
+    const inputMonto =
+        document.getElementById("pagoMonto");
+
+    const saldoPosterior =
+        document.getElementById("pagoSaldoPosterior");
+
+
+    inputMonto.addEventListener("input", () => {
+
+        let monto = Number(inputMonto.value || 0);
+
+        if (monto > pendiente) {
+            monto = pendiente;
+        }
+
+        const saldo = Math.max(
+            pendiente - monto,
+            0
+        );
+
+        saldoPosterior.textContent =
+            `Saldo después del pago: ${moneda(saldo)}`;
+
+    });
+
+
+    document
+        .getElementById("formPagoTienda")
+        .addEventListener(
+            "submit",
+            registrarPagoTienda
+        );
+
+};
+
+
+window.cerrarModalPagoTienda = function() {
+
+    const modal =
+        document.getElementById("modalPagoTienda");
+
+    if (modal) {
+        modal.remove();
+    }
+
+};
+
+async function registrarPagoTienda(evento) {
+
+    evento.preventDefault();
+
+
+    const tiendaId =
+        document.getElementById("pagoTiendaId")?.value;
+
+    const monto =
+        Number(
+            document.getElementById("pagoMonto")?.value || 0
+        );
+
+    const metodo =
+        document.getElementById("pagoMetodo")?.value;
+
+    const referencia =
+        document.getElementById("pagoReferencia")?.value
+            .trim() || "";
+
+    const observaciones =
+        document.getElementById("pagoObservaciones")?.value
+            .trim() || "";
+
+
+    if (!tiendaId) {
+
+        mostrarNotificacion(
+            "No se pudo identificar la tienda.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if (!Number.isFinite(monto) || monto <= 0) {
+
+        mostrarNotificacion(
+            "Ingresa un monto válido.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const movimientos =
+        movimientosTiendasActuales.filter(
+            mov => mov.tiendaId === tiendaId
+        );
+
+
+    let generado = 0;
+    let pagado = 0;
+
+
+    movimientos.forEach(mov => {
+
+        const valor = Number(mov.monto || 0);
+
+        if (mov.tipo === "comision") {
+            generado += valor;
+        }
+
+        if (mov.tipo === "pago") {
+            pagado += valor;
+        }
+
+    });
+
+
+    const saldoAnterior = Math.max(
+        generado - pagado,
+        0
+    );
+
+
+    if (monto > saldoAnterior + 0.001) {
+
+        mostrarNotificacion(
+            `El pago no puede superar el saldo pendiente de ${moneda(saldoAnterior)}.`,
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const saldoPosterior = Math.max(
+        saldoAnterior - monto,
+        0
+    );
+
+
+    if (
+        (metodo === "transferencia" ||
+         metodo === "deposito") &&
+        !referencia
+    ) {
+
+        mostrarNotificacion(
+            "Ingresa la referencia del pago bancario.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const tiendaNombre =
+        movimientos.find(
+            mov => mov.tiendaNombre
+        )?.tiendaNombre ||
+        "Tienda";
+
+
+    const referenciaMovimiento =
+        doc(
+            collection(
+                db,
+                "movimientosTiendas"
+            )
+        );
+
+
+    const comprobanteNumero =
+        generarNumeroComprobantePago(
+            referenciaMovimiento.id
+        );
+
+
+    const datosPago = {
+
+        tipo: "pago",
+
+        estado: "confirmado",
+
+        tiendaId,
+
+        tiendaNombre,
+
+        monto: Number(
+            monto.toFixed(2)
+        ),
+
+        metodo,
+
+        referencia,
+
+        observaciones,
+
+        saldoAnterior: Number(
+            saldoAnterior.toFixed(2)
+        ),
+
+        saldoPosterior: Number(
+            saldoPosterior.toFixed(2)
+        ),
+
+        comprobanteNumero,
+
+        registradoPor:
+            auth.currentUser?.uid || null,
+
+        registradoPorEmail:
+            auth.currentUser?.email || null,
+
+        creadoEn:
+            serverTimestamp(),
+
+        actualizadoEn:
+            serverTimestamp(),
+
+        registradoEn:
+            serverTimestamp()
+
+    };
+
+
+    try {
+
+        const formulario =
+            document.getElementById(
+                "formPagoTienda"
+            );
+
+
+        const boton =
+            formulario?.querySelector(
+                'button[type="submit"]'
+            );
+
+
+        if (boton) {
+
+            boton.disabled = true;
+
+            boton.textContent =
+                "Registrando...";
+
+        }
+
+
+        await setDoc(
+            referenciaMovimiento,
+            datosPago
+        );
+
+
+        cerrarModalPagoTienda();
+
+
+        mostrarNotificacion(
+            `Pago registrado correctamente. Comprobante ${comprobanteNumero}.`,
+            "success"
+        );
+
+
+        // Crear representación local inmediata
+        // para poder descargar el comprobante
+        // sin esperar al onSnapshot.
+
+        const movimientoPago = {
+
+            id: referenciaMovimiento.id,
+
+            ...datosPago,
+
+            creadoEn: new Date(),
+
+            actualizadoEn: new Date(),
+
+            registradoEn: new Date()
+
+        };
+
+
+        // Actualizar visualmente
+        renderizarCarteras();
+
+
+        // Abrir comprobante
+        // después de guardar el movimiento.
+
+        setTimeout(() => {
+
+            mostrarComprobantePago(
+                movimientoPago
+            );
+
+        }, 250);
+
+
+    } catch (error) {
+
+        console.error(
+            "Error registrando pago:",
+            error
+        );
+
+
+        mostrarNotificacion(
+            "No fue posible registrar el pago.",
+            "error"
+        );
+
+    }
+
+}
+
+function generarNumeroComprobantePago(idMovimiento) {
+
+    const ahora = new Date();
+
+    const fecha =
+        ahora.getFullYear().toString() +
+        String(
+            ahora.getMonth() + 1
+        ).padStart(2, "0") +
+        String(
+            ahora.getDate()
+        ).padStart(2, "0");
+
+
+    const sufijo =
+        String(idMovimiento)
+            .slice(-6)
+            .toUpperCase();
+
+
+    return `PG-${fecha}-${sufijo}`;
+
+}
+
+// =========================================================
+// COMPROBANTE OFICIAL DE PAGO
+// =========================================================
+
+window.mostrarComprobantePago = function(movimiento) {
+
+    if (!movimiento) {
+
+        mostrarNotificacion(
+            "No se encontró la información del pago.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const fecha = convertirFecha(
+        movimiento.registradoEn ||
+        movimiento.creadoEn
+    );
+
+
+    const fechaTexto = fecha
+        ? fecha.toLocaleString("es-MX", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        })
+        : new Date().toLocaleString("es-MX");
+
+
+    const modalAnterior =
+        document.getElementById(
+            "modalComprobantePago"
+        );
+
+
+    if (modalAnterior) {
+        modalAnterior.remove();
+    }
+
+
+    const modal =
+        document.createElement("div");
+
+
+    modal.id =
+        "modalComprobantePago";
+
+    modal.className =
+        "modal";
+
+    modal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+
+    modal.innerHTML = `
+
+        <div
+            class="modal-contenido comprobante-modal"
+        >
+
+            <div class="modal-cabecera">
+
+                <div>
+
+                    <h3>
+                        Comprobante de pago
+                    </h3>
+
+                    <p>
+                        Pago registrado correctamente
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="modal-cerrar"
+                    onclick="cerrarComprobantePago()"
+                    aria-label="Cerrar"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="modal-cuerpo">
+
+
+                <div
+                    id="comprobantePagoDocumento"
+                    class="comprobante-documento"
+                >
+
+                    <div class="comprobante-marca">
+
+                        <div class="comprobante-logo">
+                            M
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                MOTI GO
+                            </strong>
+
+                            <span>
+                                Comprobante de pago
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="comprobante-folio">
+
+                        <span>
+                            FOLIO
+                        </span>
+
+                        <strong>
+                            ${escaparHTMLAdmin(
+                                movimiento.comprobanteNumero ||
+                                "SIN FOLIO"
+                            )}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="comprobante-estado">
+                        ✓ PAGO CONFIRMADO
+                    </div>
+
+
+                    <div class="comprobante-separador"></div>
+
+
+                    <div class="comprobante-seccion">
+
+                        <span class="comprobante-etiqueta">
+                            TIENDA
+                        </span>
+
+                        <strong>
+                            ${escaparHTMLAdmin(
+                                movimiento.tiendaNombre ||
+                                "Tienda"
+                            )}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="comprobante-seccion">
+
+                        <span class="comprobante-etiqueta">
+                            FECHA DE REGISTRO
+                        </span>
+
+                        <strong>
+                            ${escaparHTMLAdmin(
+                                fechaTexto
+                            )}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="comprobante-total">
+
+                        <span>
+                            PAGO RECIBIDO
+                        </span>
+
+                        <strong>
+                            ${moneda(
+                                movimiento.monto
+                            )}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="comprobante-grid">
+
+
+                        <div>
+
+                            <span>
+                                Método
+                            </span>
+
+                            <strong>
+                                ${escaparHTMLAdmin(
+                                    obtenerNombreMetodoPago(
+                                        movimiento.metodo
+                                    )
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Referencia
+                            </span>
+
+                            <strong>
+                                ${
+                                    movimiento.referencia
+                                    ? escaparHTMLAdmin(
+                                        movimiento.referencia
+                                    )
+                                    : "Sin referencia"
+                                }
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="comprobante-saldos">
+
+
+                        <div>
+
+                            <span>
+                                Saldo anterior
+                            </span>
+
+                            <strong>
+                                ${moneda(
+                                    movimiento.saldoAnterior
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Pago aplicado
+                            </span>
+
+                            <strong>
+                                ${moneda(
+                                    movimiento.monto
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                        <div class="saldo-final">
+
+                            <span>
+                                Saldo pendiente
+                            </span>
+
+                            <strong>
+                                ${moneda(
+                                    movimiento.saldoPosterior
+                                )}
+                            </strong>
+
+                        </div>
+
+
+                    </div>
+
+
+                    ${
+                        movimiento.observaciones
+
+                        ? `
+
+                            <div class="comprobante-observaciones">
+
+                                <span>
+                                    Observaciones
+                                </span>
+
+                                <p>
+                                    ${escaparHTMLAdmin(
+                                        movimiento.observaciones
+                                    )}
+                                </p>
+
+                            </div>
+
+                        `
+
+                        : ""
+                    }
+
+
+                    <div class="comprobante-separador"></div>
+
+
+                    <div class="comprobante-footer">
+
+                        <p>
+                            Este comprobante acredita el registro
+                            del pago realizado a MOTI GO.
+                        </p>
+
+                        <span>
+                            ${escaparHTMLAdmin(
+                                movimiento.registradoPorEmail ||
+                                "Administrador MOTI GO"
+                            )}
+                        </span>
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="comprobante-acciones">
+
+
+                    <button
+                        type="button"
+                        class="btn-secundario"
+                        onclick="cerrarComprobantePago()"
+                    >
+                        Cerrar
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="btn-secundario"
+                        onclick="descargarComprobantePago()"
+                    >
+                        📥 Descargar
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="btn-primary"
+                        onclick="imprimirComprobantePago()"
+                    >
+                        🖨 Imprimir / PDF
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(modal);
+
+
+    window.comprobantePagoActual =
+        movimiento;
+
+};
+
+
+window.cerrarComprobantePago = function() {
+
+    const modal =
+        document.getElementById(
+            "modalComprobantePago"
+        );
+
+    if (modal) {
+        modal.remove();
+    }
+
+    window.comprobantePagoActual =
+        null;
+
+};
+
+function obtenerNombreMetodoPago(metodo) {
+
+    const nombres = {
+
+        transferencia:
+            "Transferencia bancaria",
+
+        deposito:
+            "Depósito bancario",
+
+        efectivo:
+            "Efectivo",
+
+        otro:
+            "Otro"
+
+    };
+
+
+    return nombres[metodo] ||
+        metodo ||
+        "No especificado";
+
+}
+
+window.descargarComprobantePago = function() {
+
+    const movimiento =
+        window.comprobantePagoActual;
+
+
+    if (!movimiento) {
+
+        mostrarNotificacion(
+            "No hay comprobante para descargar.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const fecha =
+        convertirFecha(
+            movimiento.registradoEn ||
+            movimiento.creadoEn
+        );
+
+
+    const fechaTexto = fecha
+        ? fecha.toLocaleString("es-MX", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        })
+        : new Date().toLocaleString("es-MX");
+
+
+    const html = `
+
+<!DOCTYPE html>
+
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>
+Comprobante ${movimiento.comprobanteNumero}
+</title>
+
+<style>
+
+body {
+    margin: 0;
+    padding: 30px;
+    background: #f3f4f6;
+    font-family: Arial, sans-serif;
+    color: #17251f;
+}
+
+.comprobante {
+    max-width: 650px;
+    margin: auto;
+    background: white;
+    padding: 35px;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.08);
+}
+
+.marca {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: #17251f;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.marca strong {
+    display: block;
+    font-size: 24px;
+}
+
+.marca span {
+    color: #68756f;
+    font-size: 13px;
+}
+
+.folio {
+    margin-top: 30px;
+    padding: 15px;
+    background: #f4f7f5;
+    border-radius: 10px;
+}
+
+.folio span {
+    display: block;
+    font-size: 11px;
+    color: #68756f;
+}
+
+.folio strong {
+    font-size: 18px;
+}
+
+.estado {
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.linea {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 25px 0;
+}
+
+.campo {
+    margin-bottom: 18px;
+}
+
+.campo span {
+    display: block;
+    font-size: 11px;
+    color: #68756f;
+    margin-bottom: 5px;
+}
+
+.campo strong {
+    font-size: 15px;
+}
+
+.total {
+    margin: 25px 0;
+    padding: 20px;
+    border-radius: 12px;
+    background: #f4f7f5;
+}
+
+.total span {
+    display: block;
+    font-size: 12px;
+}
+
+.total strong {
+    display: block;
+    margin-top: 6px;
+    font-size: 30px;
+}
+
+.saldos {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.saldo {
+    padding: 14px;
+    background: #f7f7f7;
+    border-radius: 10px;
+}
+
+.saldo span {
+    display: block;
+    font-size: 11px;
+    color: #68756f;
+}
+
+.saldo strong {
+    display: block;
+    margin-top: 6px;
+}
+
+.footer {
+    margin-top: 30px;
+    color: #68756f;
+    font-size: 12px;
+    text-align: center;
+}
+
+@media print {
+
+    body {
+        background: white;
+        padding: 0;
+    }
+
+    .comprobante {
+        box-shadow: none;
+        max-width: none;
+    }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="comprobante">
+
+    <div class="marca">
+
+        <div class="logo">
+            M
+        </div>
+
+        <div>
+
+            <strong>
+                MOTI GO
+            </strong>
+
+            <span>
+                Comprobante oficial de pago
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="folio">
+
+        <span>
+            FOLIO
+        </span>
+
+        <strong>
+            ${escaparHTMLAdmin(
+                movimiento.comprobanteNumero
+            )}
+        </strong>
+
+    </div>
+
+
+    <div class="estado">
+        ✓ PAGO CONFIRMADO
+    </div>
+
+
+    <div class="linea"></div>
+
+
+    <div class="campo">
+
+        <span>
+            TIENDA
+        </span>
+
+        <strong>
+            ${escaparHTMLAdmin(
+                movimiento.tiendaNombre
+            )}
+        </strong>
+
+    </div>
+
+
+    <div class="campo">
+
+        <span>
+            FECHA
+        </span>
+
+        <strong>
+            ${escaparHTMLAdmin(
+                fechaTexto
+            )}
+        </strong>
+
+    </div>
+
+
+    <div class="total">
+
+        <span>
+            PAGO RECIBIDO
+        </span>
+
+        <strong>
+            ${moneda(
+                movimiento.monto
+            )}
+        </strong>
+
+    </div>
+
+
+    <div class="campo">
+
+        <span>
+            MÉTODO DE PAGO
+        </span>
+
+        <strong>
+            ${escaparHTMLAdmin(
+                obtenerNombreMetodoPago(
+                    movimiento.metodo
+                )
+            )}
+        </strong>
+
+    </div>
+
+
+    <div class="campo">
+
+        <span>
+            REFERENCIA
+        </span>
+
+        <strong>
+            ${
+                movimiento.referencia
+                ? escaparHTMLAdmin(
+                    movimiento.referencia
+                )
+                : "Sin referencia"
+            }
+        </strong>
+
+    </div>
+
+
+    <div class="saldos">
+
+
+        <div class="saldo">
+
+            <span>
+                Saldo anterior
+            </span>
+
+            <strong>
+                ${moneda(
+                    movimiento.saldoAnterior
+                )}
+            </strong>
+
+        </div>
+
+
+        <div class="saldo">
+
+            <span>
+                Pago
+            </span>
+
+            <strong>
+                ${moneda(
+                    movimiento.monto
+                )}
+            </strong>
+
+        </div>
+
+
+        <div class="saldo">
+
+            <span>
+                Saldo pendiente
+            </span>
+
+            <strong>
+                ${moneda(
+                    movimiento.saldoPosterior
+                )}
+            </strong>
+
+        </div>
+
+
+    </div>
+
+
+    ${
+        movimiento.observaciones
+
+        ? `
+
+            <div class="linea"></div>
+
+            <div class="campo">
+
+                <span>
+                    OBSERVACIONES
+                </span>
+
+                <strong>
+                    ${escaparHTMLAdmin(
+                        movimiento.observaciones
+                    )}
+                </strong>
+
+            </div>
+
+        `
+
+        : ""
+    }
+
+
+    <div class="linea"></div>
+
+
+    <div class="footer">
+
+        Este comprobante acredita el registro
+        del pago realizado a MOTI GO.
+
+        <br><br>
+
+        ${escaparHTMLAdmin(
+            movimiento.registradoPorEmail ||
+            "Administrador MOTI GO"
+        )}
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
+
+    `;
+
+
+    const blob =
+        new Blob(
+            [html],
+            {
+                type: "text/html;charset=utf-8"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const enlace =
+        document.createElement("a");
+
+
+    enlace.href = url;
+
+    enlace.download =
+        `MOTIGO-${movimiento.comprobanteNumero}.html`;
+
+
+    document.body.appendChild(
+        enlace
+    );
+
+
+    enlace.click();
+
+    enlace.remove();
+
+
+    URL.revokeObjectURL(url);
+
+
+    mostrarNotificacion(
+        "Comprobante descargado correctamente.",
+        "success"
+    );
+
+};
+
+window.imprimirComprobantePago = function() {
+
+    const documento =
+        document.getElementById(
+            "comprobantePagoDocumento"
+        );
+
+
+    if (!documento) {
+
+        mostrarNotificacion(
+            "No se encontró el comprobante.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const ventana =
+        window.open(
+            "",
+            "_blank",
+            "width=800,height=900"
+        );
+
+
+    if (!ventana) {
+
+        mostrarNotificacion(
+            "El navegador bloqueó la ventana del comprobante.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    ventana.document.write(`
+
+        <!DOCTYPE html>
+
+        <html lang="es">
+
+        <head>
+
+            <meta charset="UTF-8">
+
+            <title>
+                Comprobante MOTI GO
+            </title>
+
+            <style>
+
+                body {
+                    margin: 0;
+                    padding: 30px;
+                    background: #f3f4f6;
+                    font-family: Arial, sans-serif;
+                    color: #17251f;
+                }
+
+                .hoja {
+                    max-width: 650px;
+                    margin: auto;
+                    background: white;
+                    padding: 35px;
+                    border-radius: 16px;
+                }
+
+                @media print {
+
+                    body {
+                        background: white;
+                        padding: 0;
+                    }
+
+                    .hoja {
+                        max-width: none;
+                        padding: 20px;
+                    }
+
+                }
+
+            </style>
+
+        </head>
+
+        <body>
+
+            <div class="hoja">
+
+                ${documento.innerHTML}
+
+            </div>
+
+            <script>
+
+                window.onload = function() {
+
+                    setTimeout(
+                        function() {
+                            window.print();
+                        },
+                        300
+                    );
+
+                };
+
+            <\/script>
+
+        </body>
+
+        </html>
+
+    `);
+
+
+    ventana.document.close();
+
+};
 /* =========================================================
    CONFIGURACIÓN
 ========================================================= */
