@@ -5208,9 +5208,12 @@ window.mostrarHistorialPagosTienda = function(tiendaId) {
     `;
 
 
-    document.body.appendChild(
-        modal
-    );
+   
+document.body.appendChild(modal);
+
+requestAnimationFrame(() => {
+    modal.classList.add("active");
+});
 
 
     modal
@@ -5538,6 +5541,10 @@ window.abrirModalPagoTienda = function(tiendaId) {
 
 
     document.body.appendChild(modal);
+
+requestAnimationFrame(() => {
+    modal.classList.add("active");
+});
 
 
     const inputMonto =
@@ -6262,6 +6269,10 @@ window.mostrarComprobantePago = function(movimiento) {
 
 
     document.body.appendChild(modal);
+
+requestAnimationFrame(() => {
+    modal.classList.add("active");
+});
 
 
     window.comprobantePagoActual =
