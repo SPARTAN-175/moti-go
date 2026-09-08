@@ -2398,6 +2398,152 @@ function crearTarjetaRepartidor(
         repartidor.activo !== false;
 
 
+    // =====================================================
+    // PEDIDOS DEL REPARTIDOR
+    // =====================================================
+
+    const pedidosRepartidor =
+        Array.isArray(
+            pedidosActuales
+        )
+            ? pedidosActuales.filter(
+                pedido =>
+                    pedido.repartidorId ===
+                    repartidor.id
+            )
+            : [];
+
+
+    // =====================================================
+    // PEDIDOS ENTREGADOS
+    // =====================================================
+
+    const pedidosEntregados =
+        pedidosRepartidor.filter(
+            pedido =>
+                pedido.estado ===
+                "entregado"
+        );
+
+
+    // =====================================================
+    // GANANCIAS DEL REPARTIDOR
+    // =====================================================
+
+    const ganancias =
+        pedidosEntregados.reduce(
+            (
+                total,
+                pedido
+            ) => {
+
+                return (
+                    total +
+                    Number(
+                        pedido.comisiones
+                            ?.repartidor ||
+                        pedido.comisionRepartidor ||
+                        0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    // =====================================================
+    // CALIFICACIONES
+    // =====================================================
+
+    const valoraciones =
+        pedidosEntregados
+            .map(
+                pedido =>
+                    pedido
+                        .valoracionRepartidor
+            )
+            .filter(
+                valoracion =>
+                    valoracion &&
+                    Number(
+                        valoracion.estrellas
+                    ) >= 1 &&
+                    Number(
+                        valoracion.estrellas
+                    ) <= 5
+            );
+
+
+    const cantidadValoraciones =
+        valoraciones.length;
+
+
+    const sumaEstrellas =
+        valoraciones.reduce(
+            (
+                total,
+                valoracion
+            ) => {
+
+                return (
+                    total +
+                    Number(
+                        valoracion.estrellas
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    const promedioEstrellas =
+        cantidadValoraciones > 0
+            ? (
+                sumaEstrellas /
+                cantidadValoraciones
+            )
+                .toFixed(1)
+            : "0.0";
+
+
+    // =====================================================
+    // ESTRELLAS VISUALES
+    // =====================================================
+
+    const estrellas =
+        cantidadValoraciones > 0
+            ? Array.from(
+                {
+                    length: 5
+                },
+                (
+                    _,
+                    indice
+                ) =>
+                    indice <
+                    Math.round(
+                        Number(
+                            promedioEstrellas
+                        )
+                    )
+                        ? "★"
+                        : "☆"
+            ).join("")
+            : "☆☆☆☆☆";
+
+
+    // =====================================================
+    // DISPONIBILIDAD
+    // =====================================================
+
+    const disponible =
+        repartidor.disponible === true ||
+        repartidor.estadoServicio ===
+            "disponible";
+
+
     return `
 
         <article class="admin-card">
@@ -2418,6 +2564,7 @@ function crearTarjetaRepartidor(
                             "Repartidor"
                         )}
                     </h3>
+
 
                     <span
                         class="admin-status ${
@@ -2445,9 +2592,10 @@ function crearTarjetaRepartidor(
                         )}
                     </span>
 
+
                     <span>
                         ${
-                            repartidor.disponible === true
+                            disponible
                                 ? "Disponible"
                                 : "No disponible"
                         }
@@ -2456,16 +2604,72 @@ function crearTarjetaRepartidor(
                 </div>
 
 
+                <!-- =======================================
+                     CALIFICACIÓN
+                ======================================== -->
+
+                <div
+                    class="admin-repartidor-rating"
+                    title="Calificación del repartidor"
+                >
+
+                    <span
+                        class="admin-repartidor-stars"
+                    >
+                        ${estrellas}
+                    </span>
+
+
+                    <strong>
+                        ${promedioEstrellas}
+                    </strong>
+
+
+                    <span>
+                        / 5.0
+                    </span>
+
+
+                    <small>
+                        ${
+                            cantidadValoraciones === 1
+                                ? "1 valoración"
+                                : `${cantidadValoraciones} valoraciones`
+                        }
+                    </small>
+
+                </div>
+
+
+                <!-- =======================================
+                     DATOS FINANCIEROS
+                ======================================== -->
+
                 <div class="admin-card-finance">
 
                     <div>
-                        <span>Pedidos</span>
-                        <strong>—</strong>
+
+                        <span>
+                            Pedidos
+                        </span>
+
+                        <strong>
+                            ${pedidosRepartidor.length}
+                        </strong>
+
                     </div>
 
+
                     <div>
-                        <span>Ganancias</span>
-                        <strong>—</strong>
+
+                        <span>
+                            Ganancias
+                        </span>
+
+                        <strong>
+                            ${moneda(ganancias)}
+                        </strong>
+
                     </div>
 
                 </div>
@@ -2490,7 +2694,6 @@ function crearTarjetaRepartidor(
     `;
 
 }
-
 
 function configurarBotonesRepartidores() {
 
@@ -3442,6 +3645,8 @@ function escucharPedidos() {
                 renderizarCarteras();
 
                 actualizarResumen();
+
+                renderizarRepartidores();
 
             },
             error => {
