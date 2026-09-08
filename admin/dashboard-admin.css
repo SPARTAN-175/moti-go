@@ -3487,6 +3487,59 @@ button {
 }
 
 
+.admin-repartidor-rating {
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    margin-top:10px;
+
+    flex-wrap:wrap;
+
+}
+
+
+.admin-repartidor-stars {
+
+    font-size:18px;
+
+    letter-spacing:1px;
+
+    line-height:1;
+
+}
+
+
+.admin-repartidor-rating strong {
+
+    font-size:15px;
+
+}
+
+
+.admin-repartidor-rating > span:not(
+    .admin-repartidor-stars
+) {
+
+    font-size:12px;
+
+}
+
+
+.admin-repartidor-rating small {
+
+    width:100%;
+
+    font-size:11px;
+
+    opacity:.65;
+
+}
+
+
 .admin-card-finance div {
 
     display: flex;
