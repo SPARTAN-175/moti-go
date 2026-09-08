@@ -989,20 +989,160 @@ function renderizarTiendas(
    TARJETA TIENDA
 ========================================================= */
 
-function crearTarjetaTienda(tienda) {
+function crearTarjetaTienda(
+    tienda
+) {
 
     const activa =
         tienda.activa !== false;
+
 
     const estado =
         activa
             ? "Activa"
             : "Suspendida";
 
+
     const clase =
         activa
             ? "activa"
             : "suspendida";
+
+
+    /* =====================================================
+       MOVIMIENTOS DE ESTA TIENDA
+    ===================================================== */
+
+    const movimientosTienda =
+        Array.isArray(
+            movimientosTiendasActuales
+        )
+            ? movimientosTiendasActuales.filter(
+                movimiento =>
+                    movimiento.tiendaId ===
+                    tienda.id
+            )
+            : [];
+
+
+    /* =====================================================
+       VENTAS REALIZADAS CON MOTI GO
+
+       Cada movimiento "comision" representa
+       una venta procesada de la tienda.
+
+       subtotalVenta = venta real de esa tienda.
+    ===================================================== */
+
+    const ventas =
+        movimientosTienda.reduce(
+            (
+                total,
+                movimiento
+            ) => {
+
+                if (
+                    movimiento.tipo !==
+                    "comision"
+                ) {
+
+                    return total;
+
+                }
+
+
+                return (
+                    total +
+                    Number(
+                        movimiento.subtotalVenta ||
+                        0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    /* =====================================================
+       COMISIÓN MOTI GENERADA
+    ===================================================== */
+
+    const comisionGenerada =
+        movimientosTienda.reduce(
+            (
+                total,
+                movimiento
+            ) => {
+
+                if (
+                    movimiento.tipo !==
+                    "comision"
+                ) {
+
+                    return total;
+
+                }
+
+
+                return (
+                    total +
+                    Number(
+                        movimiento.monto ||
+                        0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    /* =====================================================
+       PAGOS REALIZADOS A MOTI
+    ===================================================== */
+
+    const comisionPagada =
+        movimientosTienda.reduce(
+            (
+                total,
+                movimiento
+            ) => {
+
+                if (
+                    movimiento.tipo !==
+                    "pago"
+                ) {
+
+                    return total;
+
+                }
+
+
+                return (
+                    total +
+                    Number(
+                        movimiento.monto ||
+                        0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    /* =====================================================
+       COMISIÓN PENDIENTE
+    ===================================================== */
+
+    const comisionPendiente =
+        Math.max(
+            comisionGenerada -
+            comisionPagada,
+            0
+        );
+
 
     return `
 
@@ -1063,19 +1203,24 @@ function crearTarjetaTienda(tienda) {
                         </span>
 
                         <strong>
-                            $0.00
+                            ${moneda(
+                                comisionPendiente
+                            )}
                         </strong>
 
                     </div>
 
+
                     <div>
 
                         <span>
-                            Ventas
+                            Ventas con MOTI GO
                         </span>
 
                         <strong>
-                            —
+                            ${moneda(
+                                ventas
+                            )}
                         </strong>
 
                     </div>
@@ -1104,7 +1249,6 @@ function crearTarjetaTienda(tienda) {
     `;
 
 }
-
 
 /* =========================================================
    ADMINISTRAR TIENDAS
@@ -1158,6 +1302,226 @@ function abrirModalAdministrarTienda(
 
     const activa =
         tienda.activa !== false;
+
+       /* =====================================================
+       DATOS FINANCIEROS DE LA TIENDA
+    ===================================================== */
+
+    const movimientosTienda =
+        Array.isArray(
+            movimientosTiendasActuales
+        )
+            ? movimientosTiendasActuales.filter(
+                movimiento =>
+                    movimiento.tiendaId ===
+                    tienda.id
+            )
+            : [];
+
+
+    const ventasTienda =
+        movimientosTienda.reduce(
+            (
+                total,
+                movimiento
+            ) => {
+
+                if (
+                    movimiento.tipo !==
+                    "comision"
+                ) {
+
+                    return total;
+
+                }
+
+                return (
+                    total +
+                    Number(
+                        movimiento.subtotalVenta ||
+                        0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    const comisionGenerada =
+        movimientosTienda.reduce(
+            (
+                total,
+                movimiento
+            ) => {
+
+                if (
+                    movimiento.tipo !==
+                    "comision"
+                ) {
+
+                    return total;
+
+                }
+
+                return (
+                    total +
+                    Number(
+                        movimiento.monto ||
+                        0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    const comisionPagada =
+        movimientosTienda.reduce(
+            (
+                total,
+                movimiento
+            ) => {
+
+                if (
+                    movimiento.tipo !==
+                    "pago"
+                ) {
+
+                    return total;
+
+                }
+
+                return (
+                    total +
+                    Number(
+                        movimiento.monto ||
+                        0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    const comisionPendiente =
+        Math.max(
+            comisionGenerada -
+            comisionPagada,
+            0
+        );
+
+       /* =====================================================
+       DATOS FINANCIEROS DE LA TIENDA
+    ===================================================== */
+
+    const movimientosTienda =
+        Array.isArray(
+            movimientosTiendasActuales
+        )
+            ? movimientosTiendasActuales.filter(
+                movimiento =>
+                    movimiento.tiendaId ===
+                    tienda.id
+            )
+            : [];
+
+
+    const ventasTienda =
+        movimientosTienda.reduce(
+            (
+                total,
+                movimiento
+            ) => {
+
+                if (
+                    movimiento.tipo !==
+                    "comision"
+                ) {
+
+                    return total;
+
+                }
+
+                return (
+                    total +
+                    Number(
+                        movimiento.subtotalVenta ||
+                        0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    const comisionGenerada =
+        movimientosTienda.reduce(
+            (
+                total,
+                movimiento
+            ) => {
+
+                if (
+                    movimiento.tipo !==
+                    "comision"
+                ) {
+
+                    return total;
+
+                }
+
+                return (
+                    total +
+                    Number(
+                        movimiento.monto ||
+                        0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    const comisionPagada =
+        movimientosTienda.reduce(
+            (
+                total,
+                movimiento
+            ) => {
+
+                if (
+                    movimiento.tipo !==
+                    "pago"
+                ) {
+
+                    return total;
+
+                }
+
+                return (
+                    total +
+                    Number(
+                        movimiento.monto ||
+                        0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    const comisionPendiente =
+        Math.max(
+            comisionGenerada -
+            comisionPagada,
+            0
+        );
 
 
     const modal =
@@ -1371,13 +1735,30 @@ function abrirModalAdministrarTienda(
 </div>
 
 
-                <div class="admin-detail-section">
+                                <div class="admin-detail-section">
 
                     <h3>
                         Finanzas
                     </h3>
 
+
                     <div class="admin-finance-preview">
+
+
+                        <div>
+
+                            <span>
+                                Ventas con MOTI GO
+                            </span>
+
+                            <strong>
+                                ${moneda(
+                                    ventasTienda
+                                )}
+                            </strong>
+
+                        </div>
+
 
                         <div>
 
@@ -1386,10 +1767,13 @@ function abrirModalAdministrarTienda(
                             </span>
 
                             <strong>
-                                $0.00
+                                ${moneda(
+                                    comisionGenerada
+                                )}
                             </strong>
 
                         </div>
+
 
                         <div>
 
@@ -1398,10 +1782,13 @@ function abrirModalAdministrarTienda(
                             </span>
 
                             <strong>
-                                $0.00
+                                ${moneda(
+                                    comisionPagada
+                                )}
                             </strong>
 
                         </div>
+
 
                         <div>
 
@@ -1410,17 +1797,29 @@ function abrirModalAdministrarTienda(
                             </span>
 
                             <strong>
-                                $0.00
+                                ${moneda(
+                                    comisionPendiente
+                                )}
                             </strong>
 
                         </div>
 
+
                     </div>
 
+
                     <p class="admin-muted">
-                        El control contable se alimentará de
-                        los pedidos que empiecen a guardar
-                        la comisión MOTI.
+
+                        Las ventas corresponden al total
+                        de las ventas procesadas mediante
+                        MOTI GO en esta tienda.
+
+                        La comisión MOTI se calcula
+                        sobre esas ventas y el saldo
+                        pendiente corresponde a la parte
+                        que la tienda todavía debe pagar
+                        a MOTI.
+
                     </p>
 
                 </div>
