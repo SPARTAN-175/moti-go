@@ -5602,3 +5602,108 @@ button {
     }
 
 }
+
+.admin-repartidor-rating-modal {
+
+    text-align: center;
+
+    padding: 18px 10px;
+
+}
+
+
+.admin-rating-score {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: baseline;
+
+    gap: 4px;
+
+}
+
+
+.admin-rating-score strong {
+
+    font-size: 38px;
+
+    line-height: 1;
+
+}
+
+
+.admin-rating-score span {
+
+    font-size: 13px;
+
+    opacity: .6;
+
+}
+
+
+.admin-rating-stars-large {
+
+    margin-top: 8px;
+
+    font-size: 24px;
+
+    letter-spacing: 3px;
+
+}
+
+
+.admin-rating-count {
+
+    margin-top: 6px;
+
+    font-size: 12px;
+
+    opacity: .65;
+
+}
+
+
+.admin-rating-distribution {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+
+    margin-top: 14px;
+
+}
+
+
+.admin-rating-distribution > div {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 6px 10px;
+
+    border-radius: 8px;
+
+    background: rgba(0,0,0,.035);
+
+}
+
+
+.admin-rating-distribution span {
+
+    font-size: 12px;
+
+}
+
+
+.admin-rating-distribution strong {
+
+    font-size: 12px;
+
+}
