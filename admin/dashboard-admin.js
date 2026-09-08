@@ -8752,7 +8752,9 @@ async function guardarComisionTienda() {
 function actualizarResumen() {
 
     const vista =
-        document.getElementById("view-inicio");
+        document.getElementById(
+            "view-inicio"
+        );
 
     if (!vista) {
         return;
@@ -8760,7 +8762,9 @@ function actualizarResumen() {
 
 
     const tarjetas =
-        vista.querySelectorAll(".stat");
+        vista.querySelectorAll(
+            ".stat"
+        );
 
     if (tarjetas.length < 4) {
         return;
@@ -8771,86 +8775,136 @@ function actualizarResumen() {
        PEDIDOS DE HOY
     ===================================================== */
 
-    const hoy = new Date();
+    const hoy =
+        new Date();
+
 
     const pedidosHoy =
-        pedidosActuales.filter(pedido => {
+        pedidosActuales.filter(
+            pedido => {
 
-            if (!pedido.creadoEn) {
-                return false;
+                const fecha =
+                    convertirFecha(
+                        pedido.creadoEn
+                    );
+
+
+                if (!fecha) {
+                    return false;
+                }
+
+
+                return (
+                    fecha.getFullYear() ===
+                    hoy.getFullYear() &&
+
+                    fecha.getMonth() ===
+                    hoy.getMonth() &&
+
+                    fecha.getDate() ===
+                    hoy.getDate()
+                );
+
             }
-
-            const fecha =
-                pedido.creadoEn.toDate
-                    ? pedido.creadoEn.toDate()
-                    : new Date(pedido.creadoEn);
-
-            return (
-                fecha.getFullYear() === hoy.getFullYear() &&
-                fecha.getMonth() === hoy.getMonth() &&
-                fecha.getDate() === hoy.getDate()
-            );
-
-        });
+        );
 
 
     /* =====================================================
        VENTAS DE HOY
-       (POR AHORA CONSERVAMOS ESTE DATO COMO ESTÁ)
+
+       Por ahora conservamos este indicador.
     ===================================================== */
 
     const ventasHoy =
         pedidosHoy.reduce(
-            (total, pedido) =>
-                total +
-                Number(
-                    pedido.subtotal ||
-                    pedido.totalProductos ||
-                    0
-                ),
+            (
+                total,
+                pedido
+            ) => {
+
+                return (
+                    total +
+                    Number(
+                        pedido.subtotal ||
+                        pedido.totalProductos ||
+                        0
+                    )
+                );
+
+            },
             0
         );
 
 
     /* =====================================================
-       INGRESOS REALES DE MOTI
-       
-       Solo contamos pagos de tiendas
-       que ya fueron confirmados.
+       CARTERA DE MOTI
+
+       Los ingresos de MOTI son TODOS los movimientos
+       registrados como "pago".
+
+       No tomamos el dinero de los pedidos.
+       No tomamos comisiones generadas.
+       No tomamos ganancias del repartidor.
+
+       Aquí solamente entra dinero que ya fue registrado
+       como pago a MOTI.
     ===================================================== */
 
+    const movimientos =
+        Array.isArray(
+            movimientosTiendasActuales
+        )
+            ? movimientosTiendasActuales
+            : [];
+
+
     const ingresosMOTI =
-        movimientosTiendasActuales.reduce(
-            (total, movimiento) => {
+        movimientos.reduce(
+            (
+                total,
+                movimiento
+            ) => {
 
                 const tipo =
                     String(
-                        movimiento.tipo || ""
-                    ).toLowerCase();
+                        movimiento.tipo ||
+                        ""
+                    )
+                        .trim()
+                        .toLowerCase();
 
-                const estado =
-                    String(
-                        movimiento.estado || ""
-                    ).toLowerCase();
 
                 if (
-                    tipo === "pago" &&
-                    (
-                        !estado ||
-                        estado === "confirmado"
-                    )
+                    tipo !== "pago"
                 ) {
 
-                    return (
-                        total +
-                        Number(
-                            movimiento.monto || 0
-                        )
-                    );
+                    return total;
 
                 }
 
-                return total;
+
+                const monto =
+                    Number(
+                        movimiento.monto ||
+                        0
+                    );
+
+
+                if (
+                    !Number.isFinite(
+                        monto
+                    )
+                ) {
+
+                    return total;
+
+                }
+
+
+                return (
+                    total +
+                    monto
+                );
 
             },
             0
@@ -8870,9 +8924,13 @@ function actualizarResumen() {
                 repartidor.activo !== false
         ).length,
 
-        moneda(ventasHoy),
+        moneda(
+            ventasHoy
+        ),
 
-        moneda(ingresosMOTI)
+        moneda(
+            ingresosMOTI
+        )
 
     ];
 
@@ -8882,12 +8940,16 @@ function actualizarResumen() {
     ===================================================== */
 
     tarjetas.forEach(
-        (tarjeta, indice) => {
+        (
+            tarjeta,
+            indice
+        ) => {
 
             const valor =
                 tarjeta.querySelector(
                     ".stat-value"
                 );
+
 
             if (valor) {
 
@@ -8896,6 +8958,41 @@ function actualizarResumen() {
 
             }
 
+        }
+    );
+
+
+    /* =====================================================
+       DIAGNÓSTICO TEMPORAL
+       
+       Esto nos permite comprobar exactamente qué está
+       leyendo el Resumen.
+    ===================================================== */
+
+    console.log(
+        "📊 MOTI GO — Resumen actualizado:",
+        {
+            pedidosHoy:
+                pedidosHoy.length,
+
+            ventasHoy,
+
+            movimientosTotales:
+                movimientos.length,
+
+            pagosMOTI:
+                movimientos.filter(
+                    movimiento =>
+                        String(
+                            movimiento.tipo ||
+                            ""
+                        )
+                            .trim()
+                            .toLowerCase() ===
+                        "pago"
+                ).length,
+
+            ingresosMOTI
         }
     );
 
