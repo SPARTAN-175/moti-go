@@ -3217,9 +3217,11 @@ function escucharMovimientosTiendas() {
 
                 renderizarCarteras();
 
-                renderizarTiendas(
-                    tiendasActuales
-                );
+renderizarTiendas(
+    tiendasActuales
+);
+
+actualizarResumen();
 
             },
 
@@ -4239,51 +4241,67 @@ function renderizarFinanzas() {
     }
 
 
-    const ventas =
-        pedidosActuales.reduce(
-            (total, pedido) => {
+    /* =====================================================
+       CARTERA DE MOTI
+    ===================================================== */
 
-                return total +
-                    Number(
-                        pedido.subtotal ||
-                        pedido.totalProductos ||
-                        0
-                    );
+    let comisionesGeneradas = 0;
+    let comisionesCobradas = 0;
 
-            },
+
+    movimientosTiendasActuales.forEach(
+        movimiento => {
+
+            const tipo =
+                String(
+                    movimiento.tipo ||
+                    ""
+                ).toLowerCase();
+
+
+            const monto =
+                Number(
+                    movimiento.monto ||
+                    0
+                );
+
+
+            if (tipo === "comision") {
+
+                comisionesGeneradas +=
+                    monto;
+
+            }
+
+
+            if (
+                tipo === "pago" &&
+                (
+                    !movimiento.estado ||
+                    movimiento.estado === "confirmado"
+                )
+            ) {
+
+                comisionesCobradas +=
+                    monto;
+
+            }
+
+        }
+    );
+
+
+    const comisionesPendientes =
+        Math.max(
+            comisionesGeneradas -
+            comisionesCobradas,
             0
         );
 
 
-    const comisionesRepartidores =
-        pedidosActuales.reduce(
-            (total, pedido) => {
-
-                return total +
-                    Number(
-                        pedido.comisionRepartidor ||
-                        0
-                    );
-
-            },
-            0
-        );
-
-
-    const comisionesTiendas =
-        pedidosActuales.reduce(
-            (total, pedido) => {
-
-                return total +
-                    Number(
-                        pedido.comisionTienda ||
-                        0
-                    );
-
-            },
-            0
-        );
-
+    /* =====================================================
+       RENDER
+    ===================================================== */
 
     vista.innerHTML = `
 
@@ -4292,15 +4310,16 @@ function renderizarFinanzas() {
             <div>
 
                 <span class="admin-kicker">
-                    Dinero
+                    Finanzas
                 </span>
 
                 <h2>
-                    Finanzas
+                    Cartera de MOTI
                 </h2>
 
                 <p>
-                    Visión financiera de la operación.
+                    Control de las comisiones que MOTI GO
+                    ha cobrado y tiene pendientes de cobro.
                 </p>
 
             </div>
@@ -4310,54 +4329,88 @@ function renderizarFinanzas() {
 
         <div class="admin-summary-grid">
 
-            <div class="admin-summary">
-                <span>Ventas</span>
-                <strong>
-                    ${moneda(ventas)}
-                </strong>
-            </div>
+
+            <!-- GANANCIA MOTI -->
 
             <div class="admin-summary">
-                <span>Comisiones repartidores</span>
+
+                <span>
+                    Ganancia MOTI
+                </span>
+
                 <strong>
-                    ${moneda(
-                        comisionesRepartidores
-                    )}
+                    ${moneda(comisionesCobradas)}
                 </strong>
+
             </div>
 
-            <div class="admin-summary">
-                <span>Comisiones MOTI</span>
-                <strong>
-                    ${moneda(
-                        comisionesTiendas
-                    )}
-                </strong>
-            </div>
+
+            <!-- PENDIENTE -->
 
             <div class="admin-summary">
-                <span>Pedidos</span>
+
+                <span>
+                    Por cobrar
+                </span>
+
                 <strong>
-                    ${pedidosActuales.length}
+                    ${moneda(comisionesPendientes)}
                 </strong>
+
             </div>
+
+
+            <!-- GENERADO -->
+
+            <div class="admin-summary">
+
+                <span>
+                    Comisiones generadas
+                </span>
+
+                <strong>
+                    ${moneda(comisionesGeneradas)}
+                </strong>
+
+            </div>
+
+
+            <!-- MOVIMIENTOS -->
+
+            <div class="admin-summary">
+
+                <span>
+                    Movimientos
+                </span>
+
+                <strong>
+                    ${movimientosTiendasActuales.length}
+                </strong>
+
+            </div>
+
 
         </div>
 
 
         <div class="admin-section-panel">
 
-            <div class="admin-panel-heading">
+            <div class="admin-page-header">
 
                 <div>
+
+                    <span class="admin-kicker">
+                        Cartera
+                    </span>
 
                     <h3>
                         Resumen financiero
                     </h3>
 
                     <p>
-                        Los valores se alimentarán
-                        progresivamente de los pedidos.
+                        La ganancia de MOTI corresponde
+                        únicamente a las comisiones de tiendas
+                        que ya fueron cobradas.
                     </p>
 
                 </div>
@@ -4365,48 +4418,43 @@ function renderizarFinanzas() {
             </div>
 
 
-            <div class="admin-finance-list">
+            <div class="admin-summary-grid">
 
-                <div class="admin-finance-line">
+
+                <div class="admin-summary">
 
                     <span>
-                        Comisión de tiendas generada
+                        💰 Cobrado por MOTI
                     </span>
 
                     <strong>
-                        ${moneda(
-                            comisionesTiendas
-                        )}
+                        ${moneda(comisionesCobradas)}
                     </strong>
 
                 </div>
 
 
-                <div class="admin-finance-line">
+                <div class="admin-summary">
 
                     <span>
-                        Ganancias de repartidores
+                        🟠 Pendiente de cobro
                     </span>
 
                     <strong>
-                        ${moneda(
-                            comisionesRepartidores
-                        )}
+                        ${moneda(comisionesPendientes)}
                     </strong>
 
                 </div>
 
 
-                <div class="admin-finance-line">
+                <div class="admin-summary">
 
                     <span>
-                        Comisión MOTI pendiente de tiendas
+                        📊 Total generado
                     </span>
 
                     <strong>
-                        ${moneda(
-                            comisionesTiendas
-                        )}
+                        ${moneda(comisionesGeneradas)}
                     </strong>
 
                 </div>
