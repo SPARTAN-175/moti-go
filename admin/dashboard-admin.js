@@ -4786,9 +4786,100 @@ function renderizarCarteras() {
         </div>
 
     `;
-   conectarBotonesCarteras();
 
 }
+
+/* =========================================================
+   EVENTOS DE CARTERAS
+========================================================= */
+
+document.addEventListener(
+    "click",
+    function (evento) {
+
+        const botonPago =
+            evento.target.closest(
+                ".btn-registrar-pago"
+            );
+
+        if (botonPago) {
+
+            evento.preventDefault();
+            evento.stopPropagation();
+
+            const tiendaId =
+                botonPago.dataset.tiendaId;
+
+            console.log(
+                "💳 Click Registrar pago:",
+                tiendaId
+            );
+
+            if (
+                typeof window.abrirModalPagoTienda ===
+                "function"
+            ) {
+
+                window.abrirModalPagoTienda(
+                    tiendaId
+                );
+
+            }
+            else {
+
+                console.error(
+                    "❌ abrirModalPagoTienda no está disponible"
+                );
+
+            }
+
+            return;
+
+        }
+
+
+        const botonHistorial =
+            evento.target.closest(
+                ".btn-ver-historial"
+            );
+
+        if (botonHistorial) {
+
+            evento.preventDefault();
+            evento.stopPropagation();
+
+            const tiendaId =
+                botonHistorial.dataset.tiendaId;
+
+            console.log(
+                "📜 Click Ver historial:",
+                tiendaId
+            );
+
+            if (
+                typeof window.mostrarHistorialPagosTienda ===
+                "function"
+            ) {
+
+                window.mostrarHistorialPagosTienda(
+                    tiendaId
+                );
+
+            }
+            else {
+
+                console.error(
+                    "❌ mostrarHistorialPagosTienda no está disponible"
+                );
+
+            }
+
+            return;
+
+        }
+
+    }
+);
 
 window.mostrarHistorialPagosTienda = function(tiendaId) {
 
@@ -5142,9 +5233,28 @@ window.mostrarHistorialPagosTienda = function(tiendaId) {
 
                     if (movimiento) {
 
-                        mostrarComprobantePago(
-                            movimiento
-                        );
+                        if (
+    typeof window.mostrarComprobantePago ===
+    "function"
+) {
+
+    window.mostrarComprobantePago(
+        movimiento
+    );
+
+}
+else {
+
+    console.error(
+        "❌ mostrarComprobantePago todavía no está disponible"
+    );
+
+    mostrarNotificacion(
+        "El comprobante todavía no está disponible.",
+        "error"
+    );
+
+}
 
                     }
 
@@ -5169,50 +5279,6 @@ window.cerrarHistorialPagosTienda = function() {
 
 };
 
-function conectarBotonesCarteras() {
-
-    document
-        .querySelectorAll(".btn-registrar-pago")
-        .forEach(boton => {
-
-            boton.addEventListener(
-                "click",
-                () => {
-
-                    const tiendaId =
-                        boton.dataset.tiendaId;
-
-                    abrirModalPagoTienda(
-                        tiendaId
-                    );
-
-                }
-            );
-
-        });
-
-
-    document
-        .querySelectorAll(".btn-ver-historial")
-        .forEach(boton => {
-
-            boton.addEventListener(
-                "click",
-                () => {
-
-                    const tiendaId =
-                        boton.dataset.tiendaId;
-
-                    mostrarHistorialPagosTienda(
-                        tiendaId
-                    );
-
-                }
-            );
-
-        });
-
-}
 
 // =========================================================
 // PAGOS DE TIENDAS
