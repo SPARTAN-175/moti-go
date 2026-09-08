@@ -4735,40 +4735,40 @@ function renderizarCarteras() {
 
                                         <div class="cartera-tienda-acciones">
 
-                                            ${
-                                                pendiente > 0
+    ${
+        pendiente > 0
 
-                                                ? `
+        ? `
 
-                                                    <button
-                                                        type="button"
-                                                        class="btn-primary"
-                                                        onclick="abrirModalPagoTienda('${cuenta.tiendaId}')"
-                                                    >
-                                                        Registrar pago
-                                                    </button>
+            <button
+                type="button"
+                class="btn-primary btn-registrar-pago"
+                data-tienda-id="${escaparHTMLAdmin(cuenta.tiendaId)}"
+            >
+                💳 Registrar pago
+            </button>
 
-                                                `
+        `
 
-                                                : `
+        : `
 
-                                                    <span class="cartera-pagada">
-                                                        ✓ Cuenta liquidada
-                                                    </span>
+            <span class="cartera-pagada">
+                ✓ Cuenta liquidada
+            </span>
 
-                                                `
-                                            }
+        `
+    }
 
 
-                                            <button
-                                                type="button"
-                                                class="btn-secundario"
-                                                onclick="mostrarHistorialPagosTienda('${cuenta.tiendaId}')"
-                                            >
-                                                Ver historial
-                                            </button>
+    <button
+        type="button"
+        class="btn-secundario btn-ver-historial"
+        data-tienda-id="${escaparHTMLAdmin(cuenta.tiendaId)}"
+    >
+        📜 Ver historial
+    </button>
 
-                                        </div>
+</div>
 
                                     </div>
 
@@ -4786,6 +4786,431 @@ function renderizarCarteras() {
         </div>
 
     `;
+   conectarBotonesCarteras();
+
+}
+
+window.mostrarHistorialPagosTienda = function(tiendaId) {
+
+    const movimientos =
+        movimientosTiendasActuales
+            .filter(
+                mov =>
+                    mov.tiendaId === tiendaId
+            )
+            .sort(
+                (a, b) => {
+
+                    const fechaA =
+                        convertirFecha(
+                            a.creadoEn ||
+                            a.registradoEn
+                        )?.getTime() || 0;
+
+                    const fechaB =
+                        convertirFecha(
+                            b.creadoEn ||
+                            b.registradoEn
+                        )?.getTime() || 0;
+
+                    return fechaB - fechaA;
+
+                }
+            );
+
+
+    if (!movimientos.length) {
+
+        mostrarNotificacion(
+            "Esta tienda no tiene movimientos.",
+            "info"
+        );
+
+        return;
+
+    }
+
+
+    const tiendaNombre =
+        movimientos.find(
+            mov => mov.tiendaNombre
+        )?.tiendaNombre ||
+        "Tienda";
+
+
+    let generado = 0;
+    let pagado = 0;
+
+
+    movimientos.forEach(mov => {
+
+        const monto =
+            Number(mov.monto || 0);
+
+
+        if (mov.tipo === "comision") {
+
+            generado += monto;
+
+        }
+
+
+        if (mov.tipo === "pago") {
+
+            pagado += monto;
+
+        }
+
+    });
+
+
+    const pendiente =
+        Math.max(
+            generado - pagado,
+            0
+        );
+
+
+    const modal =
+        document.createElement("div");
+
+
+    modal.id =
+        "modalHistorialPagosTienda";
+
+    modal.className =
+        "modal";
+
+    modal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+
+    const filas =
+        movimientos.map(mov => {
+
+            const fecha =
+                convertirFecha(
+                    mov.creadoEn ||
+                    mov.registradoEn
+                );
+
+
+            const fechaTexto =
+                fecha
+                    ? fecha.toLocaleString(
+                        "es-MX",
+                        {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit"
+                        }
+                    )
+                    : "—";
+
+
+            const monto =
+                Number(
+                    mov.monto || 0
+                );
+
+
+            const esPago =
+                mov.tipo === "pago";
+
+
+            return `
+
+                <div class="movimiento-cuenta">
+
+                    <div>
+
+                        <strong>
+
+                            ${
+                                esPago
+                                    ? "💳 Pago recibido"
+                                    : "💰 Comisión generada"
+
+                            }
+
+                        </strong>
+
+                        <span>
+                            ${fechaTexto}
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            ${moneda(monto)}
+                        </strong>
+
+                        <span>
+
+                            ${
+                                esPago
+
+                                ? obtenerNombreMetodoPago(
+                                    mov.metodo
+                                  )
+
+                                : `${Number(
+                                    mov.porcentaje || 0
+                                  )}% comisión`
+
+                            }
+
+                        </span>
+
+                    </div>
+
+
+                    ${
+                        esPago
+
+                        ? `
+
+                            <div>
+
+                                <span>
+                                    Comprobante
+                                </span>
+
+                                <strong>
+                                    ${escaparHTMLAdmin(
+                                        mov.comprobanteNumero ||
+                                        "Sin folio"
+                                    )}
+                                </strong>
+
+                            </div>
+
+
+                            <button
+                                type="button"
+                                class="btn-secundario btn-comprobante-historial"
+                                data-movimiento-id="${escaparHTMLAdmin(
+                                    mov.id
+                                )}"
+                            >
+                                🧾 Ver comprobante
+                            </button>
+
+                        `
+
+                        : ""
+
+                    }
+
+                </div>
+
+            `;
+
+        }).join("");
+
+
+    modal.innerHTML = `
+
+        <div class="modal-contenido">
+
+            <div class="modal-cabecera">
+
+                <div>
+
+                    <h3>
+                        Historial de cuenta
+                    </h3>
+
+                    <p>
+                        ${escaparHTMLAdmin(
+                            tiendaNombre
+                        )}
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="modal-cerrar"
+                    onclick="cerrarHistorialPagosTienda()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="modal-cuerpo">
+
+
+                <div class="pago-resumen">
+
+
+                    <div>
+
+                        <span>
+                            Comisiones generadas
+                        </span>
+
+                        <strong>
+                            ${moneda(generado)}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Pagado
+                        </span>
+
+                        <strong>
+                            ${moneda(pagado)}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Pendiente
+                        </span>
+
+                        <strong>
+                            ${moneda(pendiente)}
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="movimientos-historial">
+
+                    ${
+                        filas ||
+                        `
+                            <p>
+                                No existen movimientos.
+                            </p>
+                        `
+                    }
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    modal
+        .querySelectorAll(
+            ".btn-comprobante-historial"
+        )
+        .forEach(boton => {
+
+            boton.addEventListener(
+                "click",
+                () => {
+
+                    const movimiento =
+                        movimientos.find(
+                            mov =>
+                                mov.id ===
+                                boton.dataset.movimientoId
+                        );
+
+
+                    if (movimiento) {
+
+                        mostrarComprobantePago(
+                            movimiento
+                        );
+
+                    }
+
+                }
+            );
+
+        });
+
+};
+window.cerrarHistorialPagosTienda = function() {
+
+    const modal =
+        document.getElementById(
+            "modalHistorialPagosTienda"
+        );
+
+    if (modal) {
+
+        modal.remove();
+
+    }
+
+};
+
+function conectarBotonesCarteras() {
+
+    document
+        .querySelectorAll(".btn-registrar-pago")
+        .forEach(boton => {
+
+            boton.addEventListener(
+                "click",
+                () => {
+
+                    const tiendaId =
+                        boton.dataset.tiendaId;
+
+                    abrirModalPagoTienda(
+                        tiendaId
+                    );
+
+                }
+            );
+
+        });
+
+
+    document
+        .querySelectorAll(".btn-ver-historial")
+        .forEach(boton => {
+
+            boton.addEventListener(
+                "click",
+                () => {
+
+                    const tiendaId =
+                        boton.dataset.tiendaId;
+
+                    mostrarHistorialPagosTienda(
+                        tiendaId
+                    );
+
+                }
+            );
+
+        });
 
 }
 
