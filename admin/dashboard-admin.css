@@ -3570,6 +3570,9 @@ button {
 .admin-card-actions {
 
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 
 }
 
@@ -4397,19 +4400,25 @@ button {
     }
 
 
-    .admin-card-actions {
+.admin-card-actions {
 
-        width: 100%;
-        margin-left: 61px;
+    width: calc(100% - 61px);
+    margin-left: 61px;
+    display: flex;
+    gap: 8px;
 
-    }
+}
 
 
-    .admin-card-actions button {
+.admin-card-actions button {
 
-        width: 100%;
+    flex: 1;
+    min-width: 0;
+    width: auto;
+    padding: 9px 8px;
+    font-size: 11px;
 
-    }
+}
 
 
     .admin-summary-grid {
