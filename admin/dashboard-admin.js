@@ -2661,22 +2661,32 @@ function crearTarjetaRepartidor(
 
                 <div class="admin-card-title-row">
 
-                    <h3>
-                        ${escaparHTMLAdmin(
-                            repartidor.nombre ||
-                            repartidor.email ||
-                            "Repartidor"
-                        )}
-                    </h3>
+                   <h3>
+    ${escaparHTMLAdmin(
+        repartidor.nombre ||
+        repartidor.email ||
+        "Repartidor"
+    )}
+
+    ${
+        esFundador
+            ? `
+                <span class="badge-fundador">
+                    👑 Fundador
+                </span>
+            `
+            : ""
+    }
+</h3>
 
 
-                    <span
-                        class="admin-status ${
-                            activo
-                                ? "activa"
-                                : "suspendida"
-                        }"
-                    >
+<span
+    class="admin-status ${
+        activo
+            ? "activa"
+            : "suspendida"
+    }"
+>
                         ${
                             activo
                                 ? "Activo"
@@ -2750,32 +2760,85 @@ function crearTarjetaRepartidor(
 
                 <div class="admin-card-finance">
 
-                    <div>
+    <div>
 
-                        <span>
-                            Pedidos
-                        </span>
+        <span>
+            Pedidos
+        </span>
 
-                        <strong>
-                            ${pedidosRepartidor.length}
-                        </strong>
+        <strong>
+            ${pedidosRepartidor.length}
+        </strong>
 
-                    </div>
+    </div>
 
 
-                    <div>
+    <div>
 
-                        <span>
-                            Ganancias
-                        </span>
+        <span>
+            Ganancias por entregas
+        </span>
 
-                        <strong>
-                            ${moneda(ganancias)}
-                        </strong>
+        <strong>
+            ${moneda(ganancias)}
+        </strong>
 
-                    </div>
+    </div>
+
+
+    ${
+        esFundador
+            ? `
+
+                <div>
+
+                    <span>
+                        🏆 Participación fundador
+                    </span>
+
+                    <strong>
+                        ${moneda(
+                            participacionFundador
+                        )}
+                    </strong>
 
                 </div>
+
+
+                <div>
+
+                    <span>
+                        ⏳ Pendiente de cobro
+                    </span>
+
+                    <strong>
+                        ${moneda(
+                            participacionPendiente
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        💵 Total generado
+                    </span>
+
+                    <strong>
+                        ${moneda(
+                            totalGenerado
+                        )}
+                    </strong>
+
+                </div>
+
+            `
+            : ""
+    }
+
+</div>
 
             </div>
 
