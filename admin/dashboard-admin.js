@@ -2790,56 +2790,56 @@ function crearTarjetaRepartidor(
 
 
     ${
-        esFundador
-            ? `
+    esFundador
+        ? `
 
-                <div>
+            <div>
 
-                    <span>
-                        🏆 Participación fundador
-                    </span>
+                <span>
+                    🏆 Participación fundador
+                </span>
 
-                    <strong>
-                        ${moneda(
-                            participacionFundador
-                        )}
-                    </strong>
+                <strong>
+                    ${moneda(
+                        participacionFundador
+                    )}
+                </strong>
 
-                </div>
-
-
-                <div>
-
-                    <span>
-                        ⏳ Pendiente de cobro
-                    </span>
-
-                    <strong>
-                        ${moneda(
-                            participacionPendiente
-                        )}
-                    </strong>
-
-                </div>
+            </div>
 
 
-                <div>
+            <div>
 
-                    <span>
-                        💵 Total generado
-                    </span>
+                <span>
+                    ⏳ Pendiente de cobro
+                </span>
 
-                    <strong>
-                        ${moneda(
-                            totalGenerado
-                        )}
-                    </strong>
+                <strong>
+                    ${moneda(
+                        participacionPendiente
+                    )}
+                </strong>
 
-                </div>
+            </div>
 
-            `
-            : ""
-    }
+
+            <div>
+
+                <span>
+                    💵 Total generado
+                </span>
+
+                <strong>
+                    ${moneda(
+                        totalGenerado
+                    )}
+                </strong>
+
+            </div>
+
+        `
+        : ""
+}
 
 </div>
 
@@ -2848,15 +2848,39 @@ function crearTarjetaRepartidor(
 
             <div class="admin-card-actions">
 
+    <button
+        type="button"
+        class="admin-button-primary"
+        data-admin-repartidor="${repartidor.id}"
+    >
+        Administrar
+    </button>
+
+
+    ${
+        esFundador
+            ? `
+
                 <button
                     type="button"
-                    class="admin-button-primary"
-                    data-admin-repartidor="${repartidor.id}"
+                    class="btn-primary"
+                    data-pago-fundador="${escaparHTMLAdmin(
+                        repartidor.id
+                    )}"
+                    data-fundador-nombre="${escaparHTMLAdmin(
+                        repartidor.nombre ||
+                        repartidor.email ||
+                        "Fundador"
+                    )}"
                 >
-                    Administrar
+                    💵 Registrar pago
                 </button>
 
-            </div>
+            `
+            : ""
+    }
+
+</div>
 
         </article>
 
@@ -2899,6 +2923,40 @@ function configurarBotonesRepartidores() {
             }
         );
 
+
+       document
+        .querySelectorAll(
+            "[data-pago-fundador]"
+        )
+        .forEach(
+            boton => {
+
+                boton.addEventListener(
+                    "click",
+                    evento => {
+
+                        evento.preventDefault();
+                        evento.stopPropagation();
+
+                        const fundadorId =
+                            boton.dataset.pagoFundador;
+
+                        const fundadorNombre =
+                            boton.dataset.fundadorNombre ||
+                            "Fundador";
+
+                        abrirModalPagoFundador(
+                            fundadorId,
+                            fundadorNombre
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+   
 }
 
 
@@ -4392,94 +4450,6 @@ actualizarResumen();
 
                 console.error(
                     "❌ MOTI GO: error escuchando movimientos de tiendas:",
-                    error
-                );
-
-            }
-
-        );
-
-}
-
-/* =========================================================
-   PAGOS A FUNDADORES
-========================================================= */
-
-function escucharPagosFundadores() {
-
-    if (listenerPagosFundadores) {
-
-        listenerPagosFundadores();
-
-        listenerPagosFundadores =
-            null;
-
-    }
-
-
-    listenerPagosFundadores =
-        onSnapshot(
-
-            collection(
-                db,
-                "pagosFundadores"
-            ),
-
-            snapshot => {
-
-                pagosFundadoresActuales =
-                    snapshot.docs.map(
-                        documento => {
-
-                            return {
-
-                                id:
-                                    documento.id,
-
-                                ...documento.data()
-
-                            };
-
-                        }
-                    );
-
-
-                pagosFundadoresActuales.sort(
-                    (a, b) => {
-
-                        const fechaA =
-                            a.creadoEn?.seconds ||
-                            0;
-
-                        const fechaB =
-                            b.creadoEn?.seconds ||
-                            0;
-
-                        return fechaB -
-                            fechaA;
-
-                    }
-                );
-
-
-                console.log(
-                    "👑 MOTI GO: pagos a fundadores:",
-                    pagosFundadoresActuales
-                );
-
-
-                renderizarCarteras();
-
-                renderizarFinanzas();
-
-                actualizarResumen();
-
-            },
-
-            error => {
-
-                console.error(
-                    "❌ MOTI GO: error escuchando pagos a fundadores:",
                     error
                 );
 
@@ -7843,6 +7813,532 @@ async function registrarPagoFundador({
 
 }
 
+/* =========================================================
+   MODAL — REGISTRAR PAGO A FUNDADOR
+========================================================= */
+
+window.abrirModalPagoFundador = function(
+    fundadorId,
+    fundadorNombre
+) {
+
+    if (!fundadorId) {
+
+        mostrarNotificacion(
+            "No se pudo identificar al fundador.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const fundador =
+        repartidoresActuales.find(
+            repartidor =>
+                repartidor.id === fundadorId
+        );
+
+
+    if (!fundador) {
+
+        mostrarNotificacion(
+            "No se encontró la información del fundador.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Por ahora utilizamos la participación
+     * generada registrada en los pedidos.
+     *
+     * Después conectaremos este saldo con
+     * las comisiones efectivamente cobradas
+     * a las tiendas.
+     */
+
+    const pedidosFundador =
+        pedidosActuales.filter(
+            pedido =>
+                pedido.estado === "entregado" &&
+                pedido.esFundador === true &&
+                (
+                    pedido.fundadorId === fundadorId ||
+                    pedido.repartidorId === fundadorId
+                )
+        );
+
+
+    const generado =
+        pedidosFundador.reduce(
+            (total, pedido) => {
+
+                return (
+                    total +
+                    Number(
+                        pedido.comisiones
+                            ?.fundador
+                            ?.monto ||
+                        0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    const pagado =
+        pagosFundadoresActuales
+            .filter(
+                pago =>
+                    pago.fundadorId ===
+                    fundadorId &&
+                    pago.estado === "pagado"
+            )
+            .reduce(
+                (
+                    total,
+                    pago
+                ) => {
+
+                    return (
+                        total +
+                        Number(
+                            pago.monto ||
+                            0
+                        )
+                    );
+
+                },
+                0
+            );
+
+
+    const pendiente =
+        Math.max(
+            generado - pagado,
+            0
+        );
+
+
+    if (pendiente <= 0) {
+
+        mostrarNotificacion(
+            "Este fundador no tiene saldo pendiente de pago.",
+            "info"
+        );
+
+        return;
+
+    }
+
+
+    document
+        .getElementById(
+            "modalPagoFundador"
+        )
+        ?.remove();
+
+
+    const modal =
+        document.createElement("div");
+
+
+    modal.id =
+        "modalPagoFundador";
+
+    modal.className =
+        "modal";
+
+    modal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+
+    modal.innerHTML = `
+
+        <div class="modal-contenido">
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h2>
+                        💵 Registrar pago
+                    </h2>
+
+                    <p>
+                        ${escaparHTMLAdmin(
+                            fundadorNombre
+                        )}
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="modal-cerrar"
+                    onclick="cerrarModalPagoFundador()"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="modal-cuerpo">
+
+                <div class="pago-resumen">
+
+                    <div>
+
+                        <span>
+                            Participación generada
+                        </span>
+
+                        <strong>
+                            ${moneda(generado)}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Pagado al fundador
+                        </span>
+
+                        <strong>
+                            ${moneda(pagado)}
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Pendiente de pago
+                        </span>
+
+                        <strong>
+                            ${moneda(pendiente)}
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <form id="formPagoFundador">
+
+                    <input
+                        type="hidden"
+                        id="pagoFundadorId"
+                        value="${escaparHTMLAdmin(
+                            fundadorId
+                        )}"
+                    >
+
+
+                    <div class="field">
+
+                        <label for="pagoFundadorMonto">
+                            Monto a pagar
+                        </label>
+
+                        <input
+                            type="number"
+                            id="pagoFundadorMonto"
+                            min="0.01"
+                            max="${pendiente.toFixed(2)}"
+                            step="0.01"
+                            value="${pendiente.toFixed(2)}"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="pagoFundadorMetodo">
+                            Método de pago
+                        </label>
+
+                        <select
+                            id="pagoFundadorMetodo"
+                            required
+                        >
+
+                            <option value="efectivo">
+                                Efectivo
+                            </option>
+
+                            <option value="transferencia">
+                                Transferencia
+                            </option>
+
+                            <option value="deposito">
+                                Depósito
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="pagoFundadorReferencia">
+                            Referencia
+                        </label>
+
+                        <input
+                            type="text"
+                            id="pagoFundadorReferencia"
+                            maxlength="100"
+                            placeholder="Folio, referencia bancaria, etc."
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="pagoFundadorObservaciones">
+                            Observaciones
+                        </label>
+
+                        <textarea
+                            id="pagoFundadorObservaciones"
+                            rows="3"
+                            maxlength="500"
+                            placeholder="Información adicional del pago..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <div
+                        id="pagoFundadorSaldoPosterior"
+                        class="pago-saldo-posterior"
+                    >
+
+                        <span>
+                            Saldo después del pago
+                        </span>
+
+                        <strong>
+                            ${moneda(0)}
+                        </strong>
+
+                    </div>
+
+
+                    <div class="config-actions registrar-pago-acciones">
+
+                        <button
+                            type="button"
+                            class="btn-secundario"
+                            onclick="cerrarModalPagoFundador()"
+                        >
+                            Cancelar
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            class="btn-primary"
+                        >
+                            ✓ Confirmar pago
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    requestAnimationFrame(() => {
+
+        modal.classList.add(
+            "active"
+        );
+
+    });
+
+
+    const inputMonto =
+        document.getElementById(
+            "pagoFundadorMonto"
+        );
+
+
+    const saldoPosterior =
+        document.getElementById(
+            "pagoFundadorSaldoPosterior"
+        );
+
+
+    inputMonto?.addEventListener(
+        "input",
+        () => {
+
+            let monto =
+                Number(
+                    inputMonto.value ||
+                    0
+                );
+
+
+            if (monto > pendiente) {
+
+                monto =
+                    pendiente;
+
+                inputMonto.value =
+                    pendiente.toFixed(2);
+
+            }
+
+
+            const saldo =
+                Math.max(
+                    pendiente - monto,
+                    0
+                );
+
+
+            if (saldoPosterior) {
+
+                saldoPosterior.innerHTML = `
+
+                    <span>
+                        Saldo después del pago
+                    </span>
+
+                    <strong>
+                        ${moneda(saldo)}
+                    </strong>
+
+                `;
+
+            }
+
+        }
+    );
+
+
+    document
+        .getElementById(
+            "formPagoFundador"
+        )
+        ?.addEventListener(
+            "submit",
+            async evento => {
+
+                evento.preventDefault();
+
+
+                const monto =
+                    Number(
+                        document
+                            .getElementById(
+                                "pagoFundadorMonto"
+                            )
+                            ?.value ||
+                        0
+                    );
+
+
+                const metodo =
+                    document
+                        .getElementById(
+                            "pagoFundadorMetodo"
+                        )
+                        ?.value;
+
+
+                const referencia =
+                    document
+                        .getElementById(
+                            "pagoFundadorReferencia"
+                        )
+                        ?.value
+                        .trim() ||
+                    "";
+
+
+                const observaciones =
+                    document
+                        .getElementById(
+                            "pagoFundadorObservaciones"
+                        )
+                        ?.value
+                        .trim() ||
+                    "";
+
+
+                const resultado =
+                    await registrarPagoFundador({
+                        fundadorId,
+                        fundadorNombre,
+                        monto,
+                        metodo,
+                        referencia,
+                        observaciones
+                    });
+
+
+                if (resultado) {
+
+                    cerrarModalPagoFundador();
+
+                    renderizarCarteras();
+
+                }
+
+            }
+        );
+
+};
+
+
+window.cerrarModalPagoFundador =
+    function() {
+
+        const modal =
+            document.getElementById(
+                "modalPagoFundador"
+            );
+
+        if (modal) {
+
+            modal.remove();
+
+        }
+
+    };
 
 
 function generarNumeroComprobantePago(idMovimiento) {
