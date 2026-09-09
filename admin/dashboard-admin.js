@@ -129,9 +129,12 @@ let pedidosActuales = [];
 
 let movimientosTiendasActuales = [];
 
+let pagosFundadoresActuales = [];
+
 let listenerUsuarios = null;
 let listenerPedidos = null;
 let listenerMovimientosTiendas = null;
+let listenerPagosFundadores = null;
 
 let configuracionMOTI = {
     tarifaBase: 8,
@@ -4399,6 +4402,93 @@ actualizarResumen();
 }
 
 /* =========================================================
+   PAGOS A FUNDADORES
+========================================================= */
+
+function escucharPagosFundadores() {
+
+    if (listenerPagosFundadores) {
+
+        listenerPagosFundadores();
+
+        listenerPagosFundadores =
+            null;
+
+    }
+
+
+    listenerPagosFundadores =
+        onSnapshot(
+
+            collection(
+                db,
+                "pagosFundadores"
+            ),
+
+            snapshot => {
+
+                pagosFundadoresActuales =
+                    snapshot.docs.map(
+                        documento => {
+
+                            return {
+
+                                id:
+                                    documento.id,
+
+                                ...documento.data()
+
+                            };
+
+                        }
+                    );
+
+
+                pagosFundadoresActuales.sort(
+                    (a, b) => {
+
+                        const fechaA =
+                            a.creadoEn?.seconds ||
+                            0;
+
+                        const fechaB =
+                            b.creadoEn?.seconds ||
+                            0;
+
+                        return fechaB -
+                            fechaA;
+
+                    }
+                );
+
+
+                console.log(
+                    "👑 MOTI GO: pagos a fundadores:",
+                    pagosFundadoresActuales
+                );
+
+
+                renderizarCarteras();
+
+                renderizarFinanzas();
+
+                actualizarResumen();
+
+            },
+
+            error => {
+
+                console.error(
+                    "❌ MOTI GO: error escuchando pagos a fundadores:",
+                    error
+                );
+
+            }
+
+        );
+
+}
+/* =========================================================
    PEDIDOS
 ========================================================= */
 
@@ -7502,6 +7592,168 @@ async function registrarPagoTienda(evento) {
     }
 
 }
+
+/* =========================================================
+   REGISTRAR PAGO A FUNDADOR
+========================================================= */
+
+async function registrarPagoFundador({
+    fundadorId,
+    fundadorNombre,
+    monto,
+    metodo,
+    referencia = "",
+    observaciones = ""
+}) {
+
+    if (!fundadorId) {
+
+        mostrarNotificacion(
+            "No se pudo identificar al fundador.",
+            "error"
+        );
+
+        return false;
+
+    }
+
+
+    const montoPago =
+        Number(monto);
+
+
+    if (
+        !Number.isFinite(montoPago) ||
+        montoPago <= 0
+    ) {
+
+        mostrarNotificacion(
+            "Ingresa un monto válido.",
+            "error"
+        );
+
+        return false;
+
+    }
+
+
+    if (
+        (
+            metodo === "transferencia" ||
+            metodo === "deposito"
+        ) &&
+        !referencia
+    ) {
+
+        mostrarNotificacion(
+            "Ingresa la referencia del pago bancario.",
+            "error"
+        );
+
+        return false;
+
+    }
+
+
+    const referenciaMovimiento =
+        doc(
+            collection(
+                db,
+                "pagosFundadores"
+            )
+        );
+
+
+    const pagoId =
+        referenciaMovimiento.id;
+
+
+    const datosPago = {
+
+        tipo: "pago_fundador",
+
+        estado: "pagado",
+
+        fundadorId,
+
+        fundadorNombre:
+            fundadorNombre ||
+            "Fundador",
+
+        monto:
+            Number(
+                montoPago.toFixed(2)
+            ),
+
+        metodo,
+
+        referencia,
+
+        observaciones,
+
+        comprobanteNumero:
+            `PF-${pagoId
+                .slice(-8)
+                .toUpperCase()}`,
+
+        registradoPor:
+            auth.currentUser?.uid ||
+            null,
+
+        registradoPorEmail:
+            auth.currentUser?.email ||
+            null,
+
+        creadoEn:
+            serverTimestamp(),
+
+        actualizadoEn:
+            serverTimestamp(),
+
+        registradoEn:
+            serverTimestamp()
+
+    };
+
+
+    try {
+
+        await setDoc(
+            referenciaMovimiento,
+            datosPago
+        );
+
+
+        mostrarNotificacion(
+            "Pago al fundador registrado correctamente.",
+            "exito"
+        );
+
+
+        return true;
+
+    }
+    catch (error) {
+
+        console.error(
+            "❌ Error registrando pago al fundador:",
+            error
+        );
+
+
+        mostrarNotificacion(
+            "No fue posible registrar el pago al fundador.",
+            "error"
+        );
+
+
+        return false;
+
+    }
+
+}
+
+
 
 function generarNumeroComprobantePago(idMovimiento) {
 
@@ -10987,6 +11239,8 @@ onAuthStateChanged(
             escucharPedidos();
 
             escucharMovimientosTiendas();
+
+            escucharPagosFundadores();
 
             await cargarConfiguracion();
 
