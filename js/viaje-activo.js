@@ -3104,40 +3104,118 @@ async function finalizarCompraTiendaActual() {
                     ).toFixed(2)
                 );
 
+// =================================================
+// PARTICIPACIÓN REAL DEL FUNDADOR
+// =================================================
+//
+// La participación se calcula sobre la comisión
+// REAL de la tienda, no sobre el subtotal original.
+//
+// Si el pedido pertenece a un fundador:
+//
+// comisión MOTI × porcentaje fundador
+//
+// Ejemplo:
+// comisión MOTI = $20
+// fundador = 100%
+// participación = $20
+//
+// Si la tienda finalmente genera $15:
+// participación = $15
+// =================================================
 
+const esFundadorPedido =
+    pedido.esFundador === true;
+
+
+const porcentajeFundador =
+    Number(
+        pedido
+            .configuracionAplicada
+            ?.comisionFundadorPorcentaje ??
+        0
+    );
+
+
+const montoFundador =
+    esFundadorPedido
+        ? Number(
+            (
+                montoComision *
+                porcentajeFundador /
+                100
+            ).toFixed(2)
+        )
+        : 0;
+
+            
             // =================================================
             // ACTUALIZAR COMISIÓN DE LA TIENDA
             // =================================================
 
             const comisionActualizada = {
 
-                ...(
-                    comisionAnterior ||
-                    {}
-                ),
+    ...(
+        comisionAnterior ||
+        {}
+    ),
 
-                tiendaId:
-                    tiendaId,
+    tiendaId:
+        tiendaId,
 
-                tiendaNombre:
-                    tienda.nombre ||
-                    tienda.nombreTienda ||
-                    comisionAnterior?.tiendaNombre ||
-                    "Tienda",
+    tiendaNombre:
+        tienda.nombre ||
+        tienda.nombreTienda ||
+        comisionAnterior?.tiendaNombre ||
+        "Tienda",
 
-                subtotal:
-                    subtotalVentaReal,
+    subtotal:
+        subtotalVentaReal,
 
-                porcentaje:
-                    porcentaje,
+    porcentaje:
+        porcentaje,
 
-                monto:
-                    montoComision,
+    monto:
+        montoComision,
 
-                estado:
-                    "pendiente_cobro_tienda"
+    // =============================================
+    // PARTICIPACIÓN DEL FUNDADOR
+    // =============================================
 
-            };
+    fundador: {
+
+        aplica:
+            esFundadorPedido,
+
+        fundadorId:
+            esFundadorPedido
+                ? pedido.fundadorId
+                : null,
+
+        fundadorNombre:
+            esFundadorPedido
+                ? pedido.fundadorNombre
+                : null,
+
+        porcentaje:
+            esFundadorPedido
+                ? porcentajeFundador
+                : 0,
+
+        monto:
+            montoFundador,
+
+        estado:
+            esFundadorPedido
+                ? "pendiente_cobro_tienda"
+                : "no_aplica"
+
+    },
+
+    estado:
+        "pendiente_cobro_tienda"
+
+};
 
 
             if (
@@ -3186,6 +3264,35 @@ async function finalizarCompraTiendaActual() {
                         )
                         .toFixed(2)
                 );
+
+            // =================================================
+// TOTAL DE PARTICIPACIÓN DEL FUNDADOR
+// =================================================
+
+const totalFundador =
+    Number(
+        comisionesTiendas
+            .reduce(
+                (
+                    total,
+                    comision
+                ) => {
+
+                    return (
+                        total +
+                        Number(
+                            comision
+                                .fundador
+                                ?.monto ||
+                            0
+                        )
+                    );
+
+                },
+                0
+            )
+            .toFixed(2)
+    );
 
 
             // =================================================
@@ -3306,15 +3413,39 @@ async function finalizarCompraTiendaActual() {
 
                     comisiones: {
 
-                        ...comisionesActuales,
+    ...comisionesActuales,
 
-                        tiendas:
-                            comisionesTiendas,
+    tiendas:
+        comisionesTiendas,
 
-                        totalTiendas:
-                            totalComisionesTiendas
+    totalTiendas:
+        totalComisionesTiendas,
 
-                    },
+    fundador: {
+
+        ...(comisionesActuales.fundador || {}),
+
+        monto:
+            totalFundador,
+
+        porcentaje:
+            pedido.esFundador === true
+                ? Number(
+                    pedido
+                        .configuracionAplicada
+                        ?.comisionFundadorPorcentaje ??
+                    0
+                )
+                : 0,
+
+        estado:
+            pedido.esFundador === true
+                ? "pendiente_cobro_tienda"
+                : "no_aplica"
+
+    }
+
+},
 
                     actualizadoEn:
                         serverTimestamp()
@@ -4943,6 +5074,43 @@ async function finalizarViaje() {
 
                                 monto:
                                     monto,
+
+                                // =============================================
+// PARTICIPACIÓN DEL FUNDADOR
+// =============================================
+
+fundadorId:
+    pedido.esFundador === true
+        ? pedido.fundadorId
+        : null,
+
+fundadorNombre:
+    pedido.esFundador === true
+        ? pedido.fundadorNombre
+        : null,
+
+fundadorEsRepartidor:
+    pedido.esFundador === true,
+
+participacionFundador:
+    pedido.esFundador === true
+        ? Number(
+            comision
+                .fundador
+                ?.monto ||
+            0
+        )
+        : 0,
+
+porcentajeFundador:
+    pedido.esFundador === true
+        ? Number(
+            comision
+                .fundador
+                ?.porcentaje ||
+            0
+        )
+        : 0,
 
                                 creadoEn:
                                     serverTimestamp(),
