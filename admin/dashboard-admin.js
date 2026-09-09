@@ -2431,25 +2431,39 @@ function crearTarjetaRepartidor(
     // =====================================================
 
     const ganancias =
-        pedidosEntregados.reduce(
-            (
-                total,
-                pedido
-            ) => {
+    pedidosEntregados.reduce(
+        (
+            total,
+            pedido
+        ) => {
 
-                return (
-                    total +
-                    Number(
-                        pedido.comisiones
-                            ?.repartidor ||
+            const comision =
+                pedido.comisiones
+                    ?.repartidor;
+
+
+            const monto =
+                typeof comision ===
+                "object"
+                    ? Number(
+                        comision?.monto ||
                         0
                     )
-                );
+                    : Number(
+                        comision ||
+                        pedido.costoEntrega ||
+                        0
+                    );
 
-            },
-            0
-        );
 
+            return (
+                total +
+                monto
+            );
+
+        },
+        0
+    );
 
     // =====================================================
     // VALORACIONES
@@ -3285,24 +3299,39 @@ function abrirModalUsuario(
     // =====================================================
 
     const ganancias =
-        pedidosCompletados.reduce(
-            (
-                total,
-                pedido
-            ) => {
+    pedidosCompletados.reduce(
+        (
+            total,
+            pedido
+        ) => {
 
-                return (
-                    total +
-                    Number(
-                        pedido.comisiones
-                            ?.repartidor ||
+            const comision =
+                pedido.comisiones
+                    ?.repartidor;
+
+
+            const monto =
+                typeof comision ===
+                "object"
+                    ? Number(
+                        comision?.monto ||
                         0
                     )
-                );
+                    : Number(
+                        comision ||
+                        pedido.costoEntrega ||
+                        0
+                    );
 
-            },
-            0
-        );
+
+            return (
+                total +
+                monto
+            );
+
+        },
+        0
+    );
 
 
     // =====================================================
