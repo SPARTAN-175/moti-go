@@ -3352,28 +3352,25 @@ const totalGenerado =
     </button>
 
 
-    ${
-        esFundador
-            ? `
+    ${esFundador ? `
+    <button
+        type="button"
+        class="btn-secundario"
+        data-pago-fundador="${escaparHTMLAdmin(repartidor.id)}"
+        data-fundador-nombre="${escaparHTMLAdmin(repartidor.nombre || repartidor.email || "Fundador")}"
+    >
+        💵 Registrar pago
+    </button>
 
-                <button
-                    type="button"
-                    class="btn-primary"
-                    data-pago-fundador="${escaparHTMLAdmin(
-                        repartidor.id
-                    )}"
-                    data-fundador-nombre="${escaparHTMLAdmin(
-                        repartidor.nombre ||
-                        repartidor.email ||
-                        "Fundador"
-                    )}"
-                >
-                    💵 Registrar pago
-                </button>
-
-            `
-            : ""
-    }
+    <button
+        type="button"
+        class="btn-secundario"
+        data-historial-fundador="${escaparHTMLAdmin(repartidor.id)}"
+        data-fundador-nombre="${escaparHTMLAdmin(repartidor.nombre || repartidor.email || "Fundador")}"
+    >
+        📋 Historial
+    </button>
+` : ""}
 
 </div>
 
@@ -3451,6 +3448,23 @@ function configurarBotonesRepartidores() {
             }
         );
 
+   document
+    .querySelectorAll("[data-historial-fundador]")
+    .forEach(boton => {
+        boton.addEventListener("click", evento => {
+            evento.preventDefault();
+            evento.stopPropagation();
+
+            const fundadorId = boton.dataset.historialFundador;
+            const fundadorNombre =
+                boton.dataset.fundadorNombre || "Fundador";
+
+            window.abrirHistorialPagosFundador(
+                fundadorId,
+                fundadorNombre
+            );
+        });
+    });
    
 }
 
@@ -8369,18 +8383,57 @@ if (
     try {
 
         await setDoc(
-            referenciaMovimiento,
-            datosPago
-        );
+    referenciaMovimiento,
+    datosPago
+);
 
 
-        mostrarNotificacion(
-            "Pago al fundador registrado correctamente.",
-            "exito"
-        );
+// Crear representación local inmediata
+// para poder abrir el comprobante
+// sin esperar al onSnapshot.
+
+const movimientoPago = {
+
+    id:
+        referenciaMovimiento.id,
+
+    ...datosPago,
+
+    creadoEn:
+        new Date(),
+
+    actualizadoEn:
+        new Date(),
+
+    registradoEn:
+        new Date()
+
+};
 
 
-        return true;
+mostrarNotificacion(
+    `Pago al fundador registrado correctamente. Comprobante ${datosPago.comprobanteNumero}.`,
+    "exito"
+);
+
+
+// Actualizar visualmente la cartera.
+
+renderizarCarteras();
+
+
+// Abrir comprobante oficial.
+
+setTimeout(() => {
+
+    mostrarComprobantePago(
+        movimientoPago
+    );
+
+}, 250);
+
+
+return true;
 
     }
     catch (error) {
@@ -8782,15 +8835,10 @@ const disponible =
                 );
 
 
-            if (monto > pendiente) {
-
-                monto =
-                    pendiente;
-
-                inputMonto.value =
-                    pendiente.toFixed(2);
-
-            }
+            if (monto > disponible) {
+    monto = disponible;
+    inputMonto.value = disponible.toFixed(2);
+}
 
 
             const saldo =
@@ -8911,6 +8959,341 @@ window.cerrarModalPagoFundador =
 
     };
 
+// ============================================================
+// HISTORIAL DE PAGOS DEL FUNDADOR
+// ============================================================
+
+window.abrirHistorialPagosFundador = function(
+    fundadorId,
+    fundadorNombre
+) {
+    const pagos = pagosFundadoresActuales
+        .filter(pago =>
+            pago.fundadorId === fundadorId &&
+            pago.estado === "pagado"
+        )
+        .sort((a, b) => {
+            const fechaA =
+                convertirFecha(a.creadoEn || a.registradoEn)?.getTime() || 0;
+
+            const fechaB =
+                convertirFecha(b.creadoEn || b.registradoEn)?.getTime() || 0;
+
+            return fechaB - fechaA;
+        });
+
+    document
+        .getElementById("modalHistorialPagosFundador")
+        ?.remove();
+
+    const modal = document.createElement("div");
+
+    modal.id = "modalHistorialPagosFundador";
+    modal.className = "modal historial-pagos-modal";
+    modal.setAttribute("aria-hidden", "false");
+
+    const pagosHTML = pagos.length
+        ? pagos.map(pago => {
+            const fecha = convertirFecha(
+                pago.creadoEn || pago.registradoEn
+            );
+
+            const fechaTexto = fecha
+                ? fecha.toLocaleDateString("es-MX", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric"
+                })
+                : "Fecha no disponible";
+
+            const horaTexto = fecha
+                ? fecha.toLocaleTimeString("es-MX", {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                })
+                : "";
+
+            const monto = Number(pago.monto || 0);
+
+            const metodo =
+                pago.metodoPago ||
+                pago.metodo ||
+                "Efectivo";
+
+            const referencia =
+                pago.referencia ||
+                "";
+
+            const folio =
+                pago.numeroComprobante ||
+                pago.folio ||
+                "Sin folio";
+
+            return `
+                <article
+                    class="historial-movimiento historial-movimiento-pago"
+                    data-pago-fundador-id="${escaparHTMLAdmin(pago.id || folio)}"
+                    tabindex="0"
+                    role="button"
+                >
+                    <div class="historial-movimiento-icono pago">
+                        👑
+                    </div>
+
+                    <div class="historial-movimiento-info">
+
+                        <div class="historial-movimiento-titulo">
+                            <div>
+                                <strong>Pago realizado</strong>
+
+                                <span>
+                                    ${fechaTexto}
+                                    ${horaTexto ? ` · ${horaTexto}` : ""}
+                                </span>
+                            </div>
+
+                            <strong class="historial-movimiento-monto pago">
+                                ${moneda(monto)}
+                            </strong>
+                        </div>
+
+                        <div class="historial-movimiento-detalles">
+                            <span>
+                                ${escaparHTMLAdmin(metodo)}
+                            </span>
+
+                            ${
+                                referencia
+                                    ? `
+                                        <span>
+                                            Ref. ${escaparHTMLAdmin(referencia)}
+                                        </span>
+                                    `
+                                    : ""
+                            }
+
+                            <span>
+                                Folio:
+                                ${escaparHTMLAdmin(folio)}
+                            </span>
+                        </div>
+
+                        <div class="historial-movimiento-footer">
+                            <span>
+                                ✓ Pago confirmado
+                            </span>
+
+                            <button
+                                type="button"
+                                class="btn-ver-comprobante"
+                                data-ver-pago-fundador="${escaparHTMLAdmin(
+                                    pago.id || ""
+                                )}"
+                            >
+                                Ver comprobante
+                                <span>→</span>
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div class="historial-movimiento-flecha">
+                        ›
+                    </div>
+                </article>
+            `;
+        }).join("")
+        : `
+            <div class="historial-vacio">
+                <div class="historial-vacio-icono">
+                    📋
+                </div>
+
+                <h4>Sin pagos realizados</h4>
+
+                <p>
+                    Todavía no se han registrado pagos para este fundador.
+                </p>
+            </div>
+        `;
+
+    modal.innerHTML = `
+        <div class="modal-contenido historial-pagos-contenido">
+
+            <div class="modal-cabecera historial-pagos-cabecera">
+
+                <div>
+                    <span class="historial-kicker">
+                        CUENTA DE FUNDADOR
+                    </span>
+
+                    <h3>
+                        Historial de pagos
+                    </h3>
+
+                    <p>
+                        ${escaparHTMLAdmin(fundadorNombre)}
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    class="modal-cerrar"
+                    data-cerrar-historial-fundador
+                    aria-label="Cerrar"
+                >
+                    ×
+                </button>
+
+            </div>
+
+            <div class="modal-cuerpo historial-pagos-cuerpo">
+
+                <div class="historial-seccion-header">
+                    <div>
+                        <strong>
+                            Pagos completados
+                        </strong>
+
+                        <span>
+                            ${pagos.length}
+                            ${pagos.length === 1 ? "pago" : "pagos"}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="historial-movimientos-lista">
+                    ${pagosHTML}
+                </div>
+
+            </div>
+
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    requestAnimationFrame(() => {
+        modal.classList.add("active");
+    });
+
+    // --------------------------------------------------------
+    // Cerrar
+    // --------------------------------------------------------
+
+    modal
+        .querySelector("[data-cerrar-historial-fundador]")
+        ?.addEventListener("click", () => {
+            window.cerrarHistorialPagosFundador();
+        });
+
+    modal.addEventListener("click", evento => {
+        if (evento.target === modal) {
+            window.cerrarHistorialPagosFundador();
+        }
+    });
+
+    // --------------------------------------------------------
+    // Abrir comprobante
+    // --------------------------------------------------------
+
+    modal
+        .querySelectorAll("[data-ver-pago-fundador]")
+        .forEach(boton => {
+
+            boton.addEventListener("click", evento => {
+                evento.preventDefault();
+                evento.stopPropagation();
+
+                const pagoId =
+                    boton.dataset.verPagoFundador;
+
+                const pago =
+                    pagosFundadoresActuales.find(
+                        item => item.id === pagoId
+                    );
+
+                if (!pago) {
+                    mostrarNotificacionAdmin(
+                        "No se encontró el comprobante.",
+                        "error"
+                    );
+                    return;
+                }
+
+                window.mostrarComprobantePago(pago);
+            });
+        });
+
+    // --------------------------------------------------------
+    // También permite tocar toda la tarjeta
+    // --------------------------------------------------------
+
+    modal
+        .querySelectorAll("[data-pago-fundador-id]")
+        .forEach(tarjeta => {
+
+            tarjeta.addEventListener("click", evento => {
+
+                if (
+                    evento.target.closest(
+                        "[data-ver-pago-fundador]"
+                    )
+                ) {
+                    return;
+                }
+
+                const pagoId =
+                    tarjeta.dataset.pagoFundadorId;
+
+                const pago =
+                    pagosFundadoresActuales.find(
+                        item =>
+                            (item.id || pago.numeroComprobante || pago.folio) ===
+                            pagoId
+                    );
+
+                if (!pago) {
+                    return;
+                }
+
+                window.mostrarComprobantePago(pago);
+            });
+
+            tarjeta.addEventListener("keydown", evento => {
+
+                if (
+                    evento.key !== "Enter" &&
+                    evento.key !== " "
+                ) {
+                    return;
+                }
+
+                evento.preventDefault();
+                tarjeta.click();
+            });
+        });
+};
+
+
+window.cerrarHistorialPagosFundador = function() {
+
+    const modal =
+        document.getElementById(
+            "modalHistorialPagosFundador"
+        );
+
+    if (!modal) {
+        return;
+    }
+
+    modal.classList.remove("active");
+
+    setTimeout(() => {
+        modal.remove();
+    }, 200);
+};
+
 
 function generarNumeroComprobantePago(idMovimiento) {
 
@@ -9014,9 +9397,16 @@ window.mostrarComprobantePago = function(movimiento) {
         );
 
 
+       const esPagoFundador =
+        movimiento.tipo === "pago_fundador";
+
     const tienda =
-        movimiento.tiendaNombre ||
-        "Tienda";
+        movimiento.tiendaNombre || "Tienda";
+
+    const nombreDestinatario =
+        esPagoFundador
+            ? (movimiento.fundadorNombre || "Fundador")
+            : tienda;
 
 
     const metodo =
@@ -9159,25 +9549,26 @@ window.mostrarComprobantePago = function(movimiento) {
 
                     <div class="comprobante-dato-principal">
 
-                        <span>
-                            TIENDA
-                        </span>
+    <span>
+        ${esPagoFundador ? "FUNDADOR" : "TIENDA"}
+    </span>
 
-                        <strong>
-                            ${escaparHTMLAdmin(
-                                tienda
-                            )}
-                        </strong>
+    <strong>
+        ${escaparHTMLAdmin(
+            nombreDestinatario
+        )}
+    </strong>
 
-                        <small>
-                            ID:
-                            ${escaparHTMLAdmin(
-                                movimiento.tiendaId ||
-                                "—"
-                            )}
-                        </small>
+    <small>
+        ID:
+        ${escaparHTMLAdmin(
+            esPagoFundador
+                ? (movimiento.fundadorId || "—")
+                : (movimiento.tiendaId || "—")
+        )}
+    </small>
 
-                    </div>
+</div>
 
 
                     <!-- FECHA -->
@@ -9205,8 +9596,10 @@ window.mostrarComprobantePago = function(movimiento) {
                     <div class="comprobante-total">
 
                         <span>
-                            PAGO RECIBIDO
-                        </span>
+    ${esPagoFundador
+        ? "PAGO AL FUNDADOR"
+        : "PAGO RECIBIDO"}
+</span>
 
                         <strong>
                             ${moneda(monto)}
