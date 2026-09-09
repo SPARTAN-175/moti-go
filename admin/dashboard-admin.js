@@ -2465,6 +2465,100 @@ function crearTarjetaRepartidor(
         0
     );
 
+
+       // =====================================================
+    // PARTICIPACIÓN COMO FUNDADOR
+    // =====================================================
+
+    const esFundador =
+        repartidor.esFundador === true;
+
+
+    const pedidosFundador =
+        pedidosEntregados.filter(
+            pedido =>
+                pedido.esFundador === true &&
+                (
+                    pedido.fundadorId === repartidor.id ||
+                    pedido.repartidorId === repartidor.id
+                )
+        );
+
+
+    const participacionFundador =
+        pedidosFundador.reduce(
+            (
+                total,
+                pedido
+            ) => {
+
+                const comisionFundador =
+                    pedido.comisiones
+                        ?.fundador;
+
+
+                const monto =
+                    Number(
+                        comisionFundador?.monto ||
+                        0
+                    );
+
+
+                return (
+                    total +
+                    monto
+                );
+
+            },
+            0
+        );
+
+
+    const participacionPendiente =
+        pedidosFundador.reduce(
+            (
+                total,
+                pedido
+            ) => {
+
+                const comisionFundador =
+                    pedido.comisiones
+                        ?.fundador;
+
+
+                const estado =
+                    comisionFundador?.estado ||
+                    "";
+
+
+                if (
+                    estado !==
+                    "cobrado"
+                ) {
+
+                    return (
+                        total +
+                        Number(
+                            comisionFundador?.monto ||
+                            0
+                        )
+                    );
+
+                }
+
+
+                return total;
+
+            },
+            0
+        );
+
+
+    const totalGenerado =
+        ganancias +
+        participacionFundador;
+
+   
     // =====================================================
     // VALORACIONES
     // =====================================================
