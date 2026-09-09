@@ -1218,33 +1218,240 @@ async function aceptarPedido(
         // ACEPTAR
         // =================================================
 
-        await updateDoc(
+        // =================================================
+// IDENTIFICAR SI EL REPARTIDOR ES FUNDADOR
+// =================================================
 
-            pedidoRef,
+const repartidorRef =
+    doc(
+        db,
+        "usuarios",
+        usuarioRepartidor.uid
+    );
 
-            {
+
+const repartidorSnapshot =
+    await getDoc(
+        repartidorRef
+    );
+
+
+if (
+    !repartidorSnapshot.exists()
+) {
+
+    throw new Error(
+        "No se encontró el perfil del repartidor."
+    );
+
+}
+
+
+const datosRepartidor =
+    repartidorSnapshot.data();
+
+
+const esFundador =
+    datosRepartidor.esFundador === true;
+
+
+// =================================================
+// PREPARAR COMISIONES DEL FUNDADOR
+// =================================================
+//
+// El porcentaje utilizado es el que quedó
+// congelado dentro del pedido.
+//
+// NO usamos nuevamente la configuración actual,
+// porque un pedido histórico no debe cambiar.
+// =================================================
+
+const comisionesActuales =
+    datosActuales.comisiones &&
+    typeof datosActuales.comisiones ===
+        "object"
+
+        ? datosActuales.comisiones
+
+        : {};
+
+
+const porcentajeFundador =
+    Number(
+        datosActuales
+            .configuracionAplicada
+            ?.comisionFundadorPorcentaje ??
+        0
+    );
+
+
+const comisionesTiendas =
+    Array.isArray(
+        comisionesActuales.tiendas
+    )
+        ? comisionesActuales.tiendas.map(
+            comision => {
+
+                const montoComision =
+                    Number(
+                        comision.monto ||
+                        0
+                    );
+
+
+                const montoFundador =
+                    esFundador
+                        ? Number(
+                            (
+                                montoComision *
+                                porcentajeFundador /
+                                100
+                            ).toFixed(2)
+                        )
+                        : 0;
+
+
+                return {
+
+                    ...comision,
+
+                    fundador: {
+
+                        aplica:
+                            esFundador,
+
+                        porcentaje:
+                            esFundador
+                                ? porcentajeFundador
+                                : 0,
+
+                        monto:
+                            montoFundador,
+
+                        estado:
+                            esFundador
+                                ? "pendiente_cobro_tienda"
+                                : "no_aplica"
+
+                    }
+
+                };
+
+            }
+        )
+        : [];
+
+
+const totalFundador =
+    Number(
+        comisionesTiendas
+            .reduce(
+                (
+                    total,
+                    comision
+                ) => {
+
+                    return (
+                        total +
+                        Number(
+                            comision
+                                .fundador
+                                ?.monto ||
+                            0
+                        )
+                    );
+
+                },
+                0
+            )
+            .toFixed(2)
+    );
+
+
+// =================================================
+// ACEPTAR PEDIDO
+// =================================================
+
+await updateDoc(
+
+    pedidoRef,
+
+    {
+
+        estado:
+            "asignado",
+
+        repartidorId:
+            usuarioRepartidor.uid,
+
+        repartidorNombre:
+            usuarioRepartidor.displayName ||
+            pedido.repartidorNombre ||
+            "",
+
+        // =========================================
+        // IDENTIDAD FINANCIERA DEL REPARTIDOR
+        // =========================================
+
+        esFundador:
+            esFundador,
+
+        repartidorEsFundador:
+            esFundador,
+
+        fundadorId:
+            esFundador
+                ? usuarioRepartidor.uid
+                : null,
+
+        fundadorNombre:
+            esFundador
+                ? (
+                    datosRepartidor.nombre ||
+                    usuarioRepartidor.displayName ||
+                    ""
+                )
+                : null,
+
+        // =========================================
+        // COMISIONES ACTUALIZADAS
+        // =========================================
+
+        comisiones: {
+
+            ...comisionesActuales,
+
+            tiendas:
+                comisionesTiendas,
+
+            fundador: {
+
+                monto:
+                    totalFundador,
+
+                porcentaje:
+                    esFundador
+                        ? porcentajeFundador
+                        : 0,
 
                 estado:
-                    "asignado",
-
-                repartidorId:
-                    usuarioRepartidor.uid,
-
-                repartidorNombre:
-                    usuarioRepartidor.displayName ||
-                    pedido.repartidorNombre ||
-                    "",
-
-                fechaAsignacion:
-                    serverTimestamp(),
-
-                actualizadoEn:
-                    serverTimestamp()
+                    esFundador
+                        ? "pendiente_cobro_tienda"
+                        : "no_aplica"
 
             }
 
-        );
+        },
 
+        fechaAsignacion:
+            serverTimestamp(),
+
+        actualizadoEn:
+            serverTimestamp()
+
+    }
+
+);
 
        pedidoActual =
 {
