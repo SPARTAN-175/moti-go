@@ -4488,6 +4488,96 @@ function escucharPagosFundadores() {
         );
 
 }
+
+/* =========================================================
+   PAGOS A FUNDADORES
+========================================================= */
+
+function escucharPagosFundadores() {
+
+    if (listenerPagosFundadores) {
+
+        listenerPagosFundadores();
+
+        listenerPagosFundadores =
+            null;
+
+    }
+
+
+    listenerPagosFundadores =
+        onSnapshot(
+
+            collection(
+                db,
+                "pagosFundadores"
+            ),
+
+            snapshot => {
+
+                pagosFundadoresActuales =
+                    snapshot.docs.map(
+                        documento => {
+
+                            return {
+
+                                id:
+                                    documento.id,
+
+                                ...documento.data()
+
+                            };
+
+                        }
+                    );
+
+
+                pagosFundadoresActuales.sort(
+                    (a, b) => {
+
+                        const fechaA =
+                            a.creadoEn?.seconds ||
+                            0;
+
+                        const fechaB =
+                            b.creadoEn?.seconds ||
+                            0;
+
+                        return fechaB -
+                            fechaA;
+
+                    }
+                );
+
+
+                console.log(
+                    "👑 MOTI GO: pagos de fundadores:",
+                    pagosFundadoresActuales
+                );
+
+
+                renderizarCarteras();
+
+                renderizarFinanzas();
+
+                actualizarResumen();
+
+            },
+
+            error => {
+
+                console.error(
+                    "❌ MOTI GO: error escuchando pagos de fundadores:",
+                    error
+                );
+
+            }
+
+        );
+
+}
+
+
 /* =========================================================
    PEDIDOS
 ========================================================= */
