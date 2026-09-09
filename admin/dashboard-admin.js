@@ -6130,14 +6130,6 @@ const disponibleMOTI =
     );
 
 
-const disponibleMOTI =
-    Math.max(
-        comisionesCobradas -
-        pagosFundadores,
-        0
-    );
-
-
     const comisionesPendientes =
         Math.max(
             comisionesGeneradas -
@@ -7697,7 +7689,7 @@ window.abrirModalPagoTienda = function(tiendaId) {
                                 id="pagoMonto"
                                 type="number"
                                 min="0.01"
-                                max="${disponible.toFixed(2)}"
+                                max="${pendiente.toFixed(2)}"
                                 step="0.01"
                                 required
                                 placeholder="0.00"
@@ -7894,11 +7886,11 @@ window.abrirModalPagoTienda = function(tiendaId) {
             }
 
 
-            const saldo =
-                Math.max(
-                    disponible - monto,
-                    0
-                );
+           const saldo =
+             Math.max(
+              pendiente - monto,
+              0
+             );
 
 
             if (saldoPosterior) {
