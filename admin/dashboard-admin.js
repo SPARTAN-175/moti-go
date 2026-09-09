@@ -2392,6 +2392,467 @@ function renderizarRepartidores() {
 
 }
 
+/* =========================================================
+   CARTERA REAL DEL FUNDADOR
+========================================================= */
+
+function calcularCarteraFundador(
+    fundadorId
+) {
+
+    const pedidosFundador =
+        pedidosActuales.filter(
+            pedido =>
+                pedido.estado === "entregado" &&
+                pedido.esFundador === true &&
+                (
+                    pedido.fundadorId === fundadorId ||
+                    pedido.repartidorId === fundadorId
+                )
+        );
+
+
+    /*
+     * Participación total generada
+     */
+
+    let participacionGenerada = 0;
+
+
+    pedidosFundador.forEach(
+        pedido => {
+
+            participacionGenerada +=
+                Number(
+                    pedido.comisiones
+                        ?.fundador
+                        ?.monto ||
+                    0
+                );
+
+        }
+    );
+
+
+    /*
+     * Participación correspondiente
+     * a comisiones que MOTI ya cobró
+     * de las tiendas.
+     *
+     * Se distribuye proporcionalmente
+     * cuando una tienda ha realizado
+     * pagos parciales.
+     */
+
+    let participacionCobrada =
+        0;
+
+
+    pedidosFundador.forEach(
+        pedido => {
+
+            const participacionPedido =
+                Number(
+                    pedido.comisiones
+                        ?.fundador
+                        ?.monto ||
+                    0
+                );
+
+
+            if (
+                participacionPedido <= 0
+            ) {
+
+                return;
+
+            }
+
+
+            const tiendas =
+                Array.isArray(
+                    pedido.comisiones?.tiendas
+                )
+                    ? pedido.comisiones.tiendas
+                    : [];
+
+
+            /*
+             * Si existen tiendas con información
+             * de participación, calculamos tienda
+             * por tienda.
+             */
+
+            if (tiendas.length > 0) {
+
+                let cobradoPedido = 0;
+
+
+                tiendas.forEach(
+                    tiendaComision => {
+
+                        const tiendaId =
+                            tiendaComision.tiendaId;
+
+
+                        const comisionGenerada =
+                            Number(
+                                tiendaComision.monto ||
+                                0
+                            );
+
+
+                        const porcentajeFundador =
+                            Number(
+                                tiendaComision.fundador
+                                    ?.porcentaje ||
+                                pedido.configuracionAplicada
+                                    ?.comisionFundadorPorcentaje ||
+                                0
+                            );
+
+
+                        const participacionTienda =
+                            Number(
+                                tiendaComision.fundador
+                                    ?.monto ||
+                                (
+                                    comisionGenerada *
+                                    porcentajeFundador /
+                                    100
+                                ) ||
+                                0
+                            );
+
+
+                        if (
+                            !tiendaId ||
+                            participacionTienda <= 0
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        const movimientos =
+                            movimientosTiendasActuales.filter(
+                                movimiento =>
+                                    movimiento.tiendaId ===
+                                    tiendaId
+                            );
+
+
+                        let generadoTienda = 0;
+                        let pagadoTienda = 0;
+
+
+                        movimientos.forEach(
+                            movimiento => {
+
+                                const monto =
+                                    Number(
+                                        movimiento.monto ||
+                                        0
+                                    );
+
+
+                                if (
+                                    movimiento.tipo ===
+                                    "comision"
+                                ) {
+
+                                    generadoTienda +=
+                                        monto;
+
+                                }
+
+
+                                if (
+                                    movimiento.tipo ===
+                                    "pago" &&
+                                    (
+                                        !movimiento.estado ||
+                                        movimiento.estado ===
+                                            "confirmado"
+                                    )
+                                ) {
+
+                                    pagadoTienda +=
+                                        monto;
+
+                                }
+
+                            }
+                        );
+
+
+                        if (
+                            generadoTienda <= 0
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        const porcentajeCobrado =
+                            Math.min(
+                                pagadoTienda /
+                                generadoTienda,
+                                1
+                            );
+
+
+                        cobradoPedido +=
+                            participacionTienda *
+                            porcentajeCobrado;
+
+                    }
+                );
+
+
+                /*
+                 * Evitamos superar la participación
+                 * real del pedido.
+                 */
+
+                participacionCobrada +=
+                    Math.min(
+                        cobradoPedido,
+                        participacionPedido
+                    );
+
+
+                return;
+
+            }
+
+
+            /*
+             * Compatibilidad con pedidos antiguos
+             * que todavía no tienen fundador dentro
+             * de cada tienda.
+             */
+
+            let comisionesPedido = 0;
+            let comisionesCobradasPedido = 0;
+
+
+            tiendas.forEach(
+                tienda => {
+
+                    comisionesPedido +=
+                        Number(
+                            tienda.monto ||
+                            0
+                        );
+
+                }
+            );
+
+
+            if (
+                comisionesPedido > 0
+            ) {
+
+                /*
+                 * Buscamos las tiendas involucradas
+                 * mediante los productos del pedido.
+                 */
+
+                const tiendasPedido =
+                    [
+                        ...new Set(
+                            (pedido.productos || [])
+                                .map(
+                                    producto =>
+                                        producto.tiendaId
+                                )
+                                .filter(Boolean)
+                        )
+                    ];
+
+
+                tiendasPedido.forEach(
+                    tiendaId => {
+
+                        const movimientos =
+                            movimientosTiendasActuales.filter(
+                                movimiento =>
+                                    movimiento.tiendaId ===
+                                    tiendaId
+                            );
+
+
+                        let generado = 0;
+                        let cobrado = 0;
+
+
+                        movimientos.forEach(
+                            movimiento => {
+
+                                const monto =
+                                    Number(
+                                        movimiento.monto ||
+                                        0
+                                    );
+
+
+                                if (
+                                    movimiento.tipo ===
+                                    "comision"
+                                ) {
+
+                                    generado +=
+                                        monto;
+
+                                }
+
+
+                                if (
+                                    movimiento.tipo ===
+                                    "pago" &&
+                                    (
+                                        !movimiento.estado ||
+                                        movimiento.estado ===
+                                            "confirmado"
+                                    )
+                                ) {
+
+                                    cobrado +=
+                                        monto;
+
+                                }
+
+                            }
+                        );
+
+
+                        if (
+                            generado > 0
+                        ) {
+
+                            comisionesCobradasPedido +=
+                                Math.min(
+                                    cobrado,
+                                    generado
+                                );
+
+                        }
+
+                    }
+                );
+
+
+                const proporcion =
+                    Math.min(
+                        comisionesCobradasPedido /
+                        comisionesPedido,
+                        1
+                    );
+
+
+                participacionCobrada +=
+                    participacionPedido *
+                    proporcion;
+
+            }
+
+        }
+    );
+
+
+    /*
+     * Pagos que MOTI ya hizo al fundador.
+     */
+
+    const participacionPagada =
+        pagosFundadoresActuales
+            .filter(
+                pago =>
+                    pago.fundadorId ===
+                        fundadorId &&
+                    pago.estado ===
+                        "pagado"
+            )
+            .reduce(
+                (
+                    total,
+                    pago
+                ) => {
+
+                    return (
+                        total +
+                        Number(
+                            pago.monto ||
+                            0
+                        )
+                    );
+
+                },
+                0
+            );
+
+
+    /*
+     * Lo que MOTI ya cobró y todavía
+     * está disponible para pagar.
+     */
+
+    const disponibleParaPago =
+        Math.max(
+            participacionCobrada -
+            participacionPagada,
+            0
+        );
+
+
+    /*
+     * Pendiente total de la participación,
+     * independientemente de si MOTI ya cobró
+     * o no a la tienda.
+     */
+
+    const pendienteTotal =
+        Math.max(
+            participacionGenerada -
+            participacionPagada,
+            0
+        );
+
+
+    return {
+
+        participacionGenerada:
+            Number(
+                participacionGenerada.toFixed(2)
+            ),
+
+        participacionCobrada:
+            Number(
+                participacionCobrada.toFixed(2)
+            ),
+
+        participacionPagada:
+            Number(
+                participacionPagada.toFixed(2)
+            ),
+
+        disponibleParaPago:
+            Number(
+                disponibleParaPago.toFixed(2)
+            ),
+
+        pendienteTotal:
+            Number(
+                pendienteTotal.toFixed(2)
+            )
+
+    };
+
+}
+
 
 function crearTarjetaRepartidor(
     repartidor
@@ -2488,78 +2949,52 @@ function crearTarjetaRepartidor(
         );
 
 
-    const participacionFundador =
-        pedidosFundador.reduce(
-            (
-                total,
-                pedido
-            ) => {
+// =====================================================
+// CARTERA DEL FUNDADOR
+// =====================================================
 
-                const comisionFundador =
-                    pedido.comisiones
-                        ?.fundador;
-
-
-                const monto =
-                    Number(
-                        comisionFundador?.monto ||
-                        0
-                    );
-
-
-                return (
-                    total +
-                    monto
-                );
-
-            },
-            0
-        );
+const carteraFundador =
+    esFundador
+        ? calcularCarteraFundador(
+            repartidor.id
+        )
+        : {
+            participacionGenerada: 0,
+            participacionCobrada: 0,
+            participacionPagada: 0,
+            disponibleParaPago: 0,
+            pendienteTotal: 0
+        };
 
 
-    const participacionPendiente =
-        pedidosFundador.reduce(
-            (
-                total,
-                pedido
-            ) => {
-
-                const comisionFundador =
-                    pedido.comisiones
-                        ?.fundador;
+const participacionFundador =
+    carteraFundador
+        .participacionGenerada;
 
 
-                const estado =
-                    comisionFundador?.estado ||
-                    "";
+const participacionCobrada =
+    carteraFundador
+        .participacionCobrada;
 
 
-                if (
-                    estado !==
-                    "cobrado"
-                ) {
-
-                    return (
-                        total +
-                        Number(
-                            comisionFundador?.monto ||
-                            0
-                        )
-                    );
-
-                }
+const participacionPagada =
+    carteraFundador
+        .participacionPagada;
 
 
-                return total;
-
-            },
-            0
-        );
+const participacionPendiente =
+    carteraFundador
+        .pendienteTotal;
 
 
-    const totalGenerado =
-        ganancias +
-        participacionFundador;
+const disponibleParaPago =
+    carteraFundador
+        .disponibleParaPago;
+
+
+const totalGenerado =
+    ganancias +
+    participacionFundador;
 
    
     // =====================================================
@@ -2796,7 +3231,7 @@ function crearTarjetaRepartidor(
             <div>
 
                 <span>
-                    🏆 Participación fundador
+                    🏆 Participación generada
                 </span>
 
                 <strong>
@@ -2811,7 +3246,37 @@ function crearTarjetaRepartidor(
             <div>
 
                 <span>
-                    ⏳ Pendiente de cobro
+                    💰 Cobrado por MOTI
+                </span>
+
+                <strong>
+                    ${moneda(
+                        participacionCobrada
+                    )}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    💵 Pagado al fundador
+                </span>
+
+                <strong>
+                    ${moneda(
+                        participacionPagada
+                    )}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    ⏳ Pendiente de pago
                 </span>
 
                 <strong>
@@ -2826,7 +3291,37 @@ function crearTarjetaRepartidor(
             <div>
 
                 <span>
-                    💵 Total generado
+                    🟢 Disponible para pagar
+                </span>
+
+                <strong>
+                    ${moneda(
+                        disponibleParaPago
+                    )}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    🚚 Ganancias por entregas
+                </span>
+
+                <strong>
+                    ${moneda(
+                        ganancias
+                    )}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    💎 Total generado
                 </span>
 
                 <strong>
@@ -5555,8 +6050,9 @@ function renderizarFinanzas() {
        CARTERA DE MOTI
     ===================================================== */
 
-    let comisionesGeneradas = 0;
-    let comisionesCobradas = 0;
+let comisionesGeneradas = 0;
+let comisionesCobradas = 0;
+let totalPagadoFundadores = 0;
 
 
     movimientosTiendasActuales.forEach(
@@ -5598,6 +6094,47 @@ function renderizarFinanzas() {
             }
 
         }
+    );
+
+   totalPagadoFundadores =
+    pagosFundadoresActuales
+        .filter(
+            pago =>
+                pago.estado ===
+                "pagado"
+        )
+        .reduce(
+            (
+                total,
+                pago
+            ) => {
+
+                return (
+                    total +
+                    Number(
+                        pago.monto ||
+                        0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+const disponibleMOTI =
+    Math.max(
+        comisionesCobradas -
+        totalPagadoFundadores,
+        0
+    );
+
+
+const disponibleMOTI =
+    Math.max(
+        comisionesCobradas -
+        pagosFundadores,
+        0
     );
 
 
@@ -5698,6 +6235,39 @@ function renderizarFinanzas() {
                 </strong>
 
             </div>
+
+            <!-- PAGADO A FUNDADORES -->
+
+<div class="admin-summary">
+
+    <span>
+        👑 Pagado a fundadores
+    </span>
+
+    <strong>
+        ${moneda(
+            totalPagadoFundadores
+        )}
+    </strong>
+
+</div>
+
+
+<!-- DISPONIBLE MOTI -->
+
+<div class="admin-summary">
+
+    <span>
+        💵 Disponible MOTI
+    </span>
+
+    <strong>
+        ${moneda(
+            disponibleMOTI
+        )}
+    </strong>
+
+</div>
 
 
         </div>
@@ -7127,7 +7697,7 @@ window.abrirModalPagoTienda = function(tiendaId) {
                                 id="pagoMonto"
                                 type="number"
                                 min="0.01"
-                                max="${pendiente.toFixed(2)}"
+                                max="${disponible.toFixed(2)}"
                                 step="0.01"
                                 required
                                 placeholder="0.00"
@@ -7326,7 +7896,7 @@ window.abrirModalPagoTienda = function(tiendaId) {
 
             const saldo =
                 Math.max(
-                    pendiente - monto,
+                    disponible - monto,
                     0
                 );
 
@@ -7681,6 +8251,34 @@ async function registrarPagoFundador({
     const montoPago =
         Number(monto);
 
+   const carteraFundador =
+    calcularCarteraFundador(
+        fundadorId
+    );
+
+
+const saldoDisponible =
+    Number(
+        carteraFundador
+            .disponibleParaPago ||
+        0
+    );
+
+
+if (
+    montoPago >
+    saldoDisponible + 0.001
+) {
+
+    mostrarNotificacion(
+        `El pago no puede superar el saldo disponible de ${moneda(saldoDisponible)}.`,
+        "error"
+    );
+
+    return false;
+
+}
+
 
     if (
         !Number.isFinite(montoPago) ||
@@ -7852,87 +8450,43 @@ window.abrirModalPagoFundador = function(
 
     }
 
-
-    /*
-     * Por ahora utilizamos la participación
-     * generada registrada en los pedidos.
-     *
-     * Después conectaremos este saldo con
-     * las comisiones efectivamente cobradas
-     * a las tiendas.
-     */
-
-    const pedidosFundador =
-        pedidosActuales.filter(
-            pedido =>
-                pedido.estado === "entregado" &&
-                pedido.esFundador === true &&
-                (
-                    pedido.fundadorId === fundadorId ||
-                    pedido.repartidorId === fundadorId
-                )
-        );
+    const carteraFundador =
+    calcularCarteraFundador(
+        fundadorId
+    );
 
 
-    const generado =
-        pedidosFundador.reduce(
-            (total, pedido) => {
-
-                return (
-                    total +
-                    Number(
-                        pedido.comisiones
-                            ?.fundador
-                            ?.monto ||
-                        0
-                    )
-                );
-
-            },
-            0
-        );
+const generado =
+    carteraFundador
+        .participacionGenerada;
 
 
-    const pagado =
-        pagosFundadoresActuales
-            .filter(
-                pago =>
-                    pago.fundadorId ===
-                    fundadorId &&
-                    pago.estado === "pagado"
-            )
-            .reduce(
-                (
-                    total,
-                    pago
-                ) => {
-
-                    return (
-                        total +
-                        Number(
-                            pago.monto ||
-                            0
-                        )
-                    );
-
-                },
-                0
-            );
+const cobrado =
+    carteraFundador
+        .participacionCobrada;
 
 
-    const pendiente =
-        Math.max(
-            generado - pagado,
-            0
-        );
+const pagado =
+    carteraFundador
+        .participacionPagada;
 
 
-    if (pendiente <= 0) {
+const pendiente =
+    carteraFundador
+        .pendienteTotal;
+
+
+const disponible =
+    carteraFundador
+        .disponibleParaPago;
+
+
+    if (disponible <= 0) {
 
         mostrarNotificacion(
-            "Este fundador no tiene saldo pendiente de pago.",
-            "info"
-        );
+    "Este fundador no tiene participación disponible para pago. MOTI todavía debe cobrar las comisiones correspondientes a las tiendas.",
+    "info"
+);
 
         return;
 
@@ -8010,6 +8564,31 @@ window.abrirModalPagoFundador = function(
 
                     </div>
 
+                    <div>
+
+    <span>
+        Cobrado por MOTI
+    </span>
+
+    <strong>
+        ${moneda(cobrado)}
+    </strong>
+
+</div>
+
+
+<div>
+
+    <span>
+        Disponible para pagar
+    </span>
+
+    <strong>
+        ${moneda(disponible)}
+    </strong>
+
+</div>
+
 
                     <div>
 
@@ -8060,9 +8639,9 @@ window.abrirModalPagoFundador = function(
                             type="number"
                             id="pagoFundadorMonto"
                             min="0.01"
-                            max="${pendiente.toFixed(2)}"
+                            max="${disponible.toFixed(2)}"
                             step="0.01"
-                            value="${pendiente.toFixed(2)}"
+                            value="${disponible.toFixed(2)}"
                             required
                         >
 
@@ -8224,7 +8803,7 @@ window.abrirModalPagoFundador = function(
 
             const saldo =
                 Math.max(
-                    pendiente - monto,
+                    disponible - monto,
                     0
                 );
 
