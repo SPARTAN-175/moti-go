@@ -3,34 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
-    <meta name="theme-color" content="#16a34a">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#111827">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="MOTI GO">
 
-    <title>MOTI GO — Repartidor</title>
-
-    <link rel="manifest" href="../manifest.json">
-    <link rel="icon" href="../assets/icons/icon-192.png">
+    <title>MOTI GO · Repartidor</title>
 
     <link rel="stylesheet" href="../css/conductor.css">
 
     <style>
-        /*
-         * ============================================================
-         * AJUSTES DE ESTRUCTURA DEL DASHBOARD
-         * ============================================================
-         *
-         * La apariencia principal se controla desde conductor.css.
-         * Aquí solamente dejamos pequeños ajustes estructurales.
-         */
-
         [hidden] {
             display: none !important;
         }
 
         .view {
-            width: 100%;
+            display: none;
+        }
+
+        .view.active {
+            display: block;
         }
 
         #singlePageViews {
@@ -38,1042 +30,947 @@
         }
 
         .side-badge {
-            min-width: 20px;
-            height: 20px;
-            padding: 0 6px;
+            min-width: 22px;
+            height: 22px;
+            padding: 0 7px;
             border-radius: 999px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
-            font-weight: 800;
-            margin-left: auto;
-            background: #16a34a;
-            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .quick-orders-button {
+            width: 100%;
+            border: 0;
+            cursor: pointer;
+            text-align: left;
+            font: inherit;
         }
     </style>
 </head>
 
 <body>
 
-<!-- ============================================================
-     HEADER
-     ============================================================ -->
-
-<header class="top-header">
-
-    <button
-        id="openMenu"
-        class="menu-button"
-        type="button"
-        aria-label="Abrir menú"
-    >
-        ☰
-    </button>
-
-    <div class="header-brand">
-        <span class="header-logo">M</span>
-
-        <div>
-            <div class="header-title">MOTI GO</div>
-            <div class="header-subtitle">Repartidor</div>
-        </div>
-    </div>
-
-    <div class="header-status">
-        <span id="statusIndicator" class="status-indicator available"></span>
-        <span id="headerStatusText">Disponible</span>
-    </div>
-
-</header>
-
-
-<!-- ============================================================
-     SIDEBAR
-     ============================================================ -->
-
-<aside id="sideMenu" class="side-menu">
-
-    <div class="side-menu-header">
+    <!-- =========================================================
+         HEADER
+    ========================================================== -->
+    <header class="app-header">
 
         <button
-            id="closeMenu"
-            class="close-menu"
+            id="openMenu"
+            class="menu-button"
             type="button"
-            aria-label="Cerrar menú"
-        >
-            ×
+            aria-label="Abrir menú">
+            ☰
         </button>
 
-        <div class="side-brand">
-            <div class="side-logo">M</div>
-
-            <div>
-                <strong>MOTI GO</strong>
-                <span>Repartidor</span>
-            </div>
+        <div class="header-brand">
+            <strong>MOTI GO</strong>
+            <span>Repartidor</span>
         </div>
 
-    </div>
-
-
-    <div class="side-user">
-
-        <div class="side-avatar">
-            <span id="sideUserInitial">R</span>
-        </div>
-
-        <div class="side-user-info">
-            <strong id="sideUserName">Repartidor</strong>
-            <span>Repartidor MOTI GO</span>
-        </div>
-
-    </div>
-
-
-    <nav class="side-navigation">
-
-        <button
-            type="button"
-            class="side-nav-item active"
-            data-view="inicio"
-        >
-            <span class="side-nav-icon">⌂</span>
-            <span>Inicio</span>
-        </button>
-
-
-        <button
-            type="button"
-            class="side-nav-item"
-            data-view="pedidos"
-        >
-            <span class="side-nav-icon">▣</span>
-            <span>Pedidos</span>
-
+        <div class="header-status">
             <span
-                id="availableOrdersBadge"
-                class="side-badge"
-                hidden
-            >
-                0
+                id="statusIndicator"
+                class="status-indicator"
+                aria-hidden="true">
             </span>
-        </button>
+
+            <span id="headerStatusText">
+                Disponible
+            </span>
+        </div>
+
+    </header>
 
 
-        <button
-            type="button"
-            class="side-nav-item"
-            data-view="cartera"
-        >
-            <span class="side-nav-icon">▤</span>
-            <span>Mi cartera</span>
-        </button>
+    <!-- =========================================================
+         SIDEBAR
+    ========================================================== -->
+    <aside
+        id="sideMenu"
+        class="side-menu"
+        aria-hidden="true">
+
+        <div class="side-menu-header">
+
+            <button
+                id="closeMenu"
+                class="close-menu"
+                type="button"
+                aria-label="Cerrar menú">
+                ×
+            </button>
+
+            <div class="side-brand">
+                <div class="side-brand-name">
+                    MOTI GO
+                </div>
+
+                <div class="side-brand-role">
+                    Repartidor
+                </div>
+            </div>
+
+        </div>
 
 
-        <button
-            type="button"
-            class="side-nav-item"
-            data-view="ganancias"
-        >
-            <span class="side-nav-icon">$</span>
-            <span>Ganancias</span>
-        </button>
+        <!-- Perfil resumido -->
+        <div class="side-profile">
+
+            <div
+                id="sideUserInitial"
+                class="side-user-initial">
+                ?
+            </div>
+
+            <div class="side-profile-info">
+                <div id="sideUserName">
+                    Repartidor
+                </div>
+
+                <span>
+                    Repartidor
+                </span>
+            </div>
+
+        </div>
 
 
-        <button
-            type="button"
-            class="side-nav-item"
-            data-view="zonas"
-        >
-            <span class="side-nav-icon">⌖</span>
-            <span>Mis zonas</span>
-        </button>
+        <!-- Navegación -->
+        <nav class="side-navigation">
 
+            <button
+                class="side-nav-item active"
+                type="button"
+                data-view="inicio">
 
-        <button
-            type="button"
-            class="side-nav-item"
-            data-view="historial"
-        >
-            <span class="side-nav-icon">◷</span>
-            <span>Historial</span>
-        </button>
-
-
-        <button
-            type="button"
-            class="side-nav-item"
-            data-view="perfil"
-        >
-            <span class="side-nav-icon">●</span>
-            <span>Mi perfil</span>
-        </button>
-
-    </nav>
-
-
-    <div class="side-menu-footer">
-
-        <button
-            id="logoutButton"
-            type="button"
-            class="side-nav-item logout-item"
-        >
-            <span class="side-nav-icon">↪</span>
-            <span>Cerrar sesión</span>
-        </button>
-
-    </div>
-
-</aside>
-
-
-<div id="menuOverlay" class="menu-overlay"></div>
-
-
-<!-- ============================================================
-     CONTENIDO PRINCIPAL
-     ============================================================ -->
-
-<main class="main-content">
-
-    <!-- ========================================================
-         INICIO
-         ======================================================== -->
-
-    <section id="homeView" class="home-view">
-
-        <!-- Bienvenida -->
-
-        <section class="welcome-section">
-
-            <div class="welcome-text">
-
-                <span class="welcome-small">
-                    ¡Hola!
+                <span class="side-nav-icon">
+                    ⌂
                 </span>
 
-                <h1>
-                    Buenos días,
-                    <span id="userName">Repartidor</span>
-                </h1>
+                <span class="side-nav-label">
+                    Inicio
+                </span>
 
-                <p id="statusDescription">
-                    Estás disponible para recibir pedidos.
-                </p>
+            </button>
 
-            </div>
 
-        </section>
+            <button
+                class="side-nav-item"
+                type="button"
+                data-view="pedidos">
 
+                <span class="side-nav-icon">
+                    🛵
+                </span>
 
-        <!-- ====================================================
-             DISPONIBILIDAD
-             ==================================================== -->
+                <span class="side-nav-label">
+                    Pedidos
+                </span>
 
-        <section class="availability-section">
+                <span
+                    id="availableOrdersBadge"
+                    class="side-badge"
+                    hidden>
+                    0
+                </span>
 
-            <div class="availability-card">
+            </button>
 
-                <div class="availability-info">
 
-                    <div
-                        id="statusIndicatorHome"
-                        class="availability-dot available"
-                    ></div>
+            <button
+                class="side-nav-item"
+                type="button"
+                data-view="ganancias">
 
-                    <div>
-                        <strong id="statusText">
-                            Disponible
-                        </strong>
+                <span class="side-nav-icon">
+                    $
+                </span>
 
-                        <span id="availabilityDescription">
-                            Puedes recibir nuevos pedidos
-                        </span>
-                    </div>
+                <span class="side-nav-label">
+                    Ganancias
+                </span>
 
-                </div>
+            </button>
 
 
-                <button
-                    id="statusToggle"
-                    type="button"
-                    class="availability-toggle"
-                    aria-label="Cambiar disponibilidad"
-                >
-                    <span></span>
-                </button>
+            <button
+                class="side-nav-item"
+                type="button"
+                data-view="zonas">
 
-            </div>
+                <span class="side-nav-icon">
+                    ◉
+                </span>
 
-        </section>
+                <span class="side-nav-label">
+                    Mis zonas
+                </span>
 
+            </button>
 
-        <!-- ====================================================
-             RESUMEN DEL DÍA
-             ==================================================== -->
 
-        <section class="today-section">
+            <button
+                class="side-nav-item"
+                type="button"
+                data-view="historial">
 
-            <div class="section-heading">
+                <span class="side-nav-icon">
+                    ◷
+                </span>
 
-                <div>
-                    <span class="section-kicker">
-                        RESUMEN
-                    </span>
+                <span class="side-nav-label">
+                    Historial
+                </span>
 
-                    <h2>Tu día</h2>
-                </div>
+            </button>
 
-                <span id="todayDate" class="today-date"></span>
 
-            </div>
+            <button
+                class="side-nav-item"
+                type="button"
+                data-view="perfil">
 
+                <span class="side-nav-icon">
+                    ●
+                </span>
 
-            <div class="today-grid">
+                <span class="side-nav-label">
+                    Mi perfil
+                </span>
 
-                <!-- Entregas -->
+            </button>
 
-                <article class="today-card">
+        </nav>
 
-                    <div class="today-card-icon">
-                        ✓
-                    </div>
 
-                    <div class="today-card-content">
+        <!-- Separador -->
+        <div class="side-menu-divider"></div>
 
-                        <span>
-                            Entregas hoy
-                        </span>
 
-                        <strong id="todayOrders">
-                            0
-                        </strong>
+        <!-- Cerrar sesión -->
+        <button
+            id="logoutButton"
+            class="side-nav-item logout-item"
+            type="button">
 
-                    </div>
+            <span class="side-nav-icon">
+                ↪
+            </span>
 
-                </article>
+            <span class="side-nav-label">
+                Cerrar sesión
+            </span>
 
+        </button>
 
-                <!-- Ganancias -->
+    </aside>
 
-                <article class="today-card">
 
-                    <div class="today-card-icon">
-                        $
-                    </div>
+    <!-- Overlay del menú -->
+    <div
+        id="menuOverlay"
+        class="menu-overlay"
+        hidden>
+    </div>
 
-                    <div class="today-card-content">
 
-                        <span>
-                            Ganancias
-                        </span>
+    <!-- =========================================================
+         CONTENIDO PRINCIPAL
+    ========================================================== -->
+    <main class="main-content">
 
-                        <strong id="todayEarnings">
-                            $0.00
-                        </strong>
-
-                    </div>
-
-                </article>
-
-            </div>
-
-        </section>
-
-
-        <!-- ====================================================
-             CARTERA
-             ==================================================== -->
-
-        <section class="wallet-section">
-
-            <div class="wallet-card">
-
-                <div class="wallet-header">
-
-                    <div>
-                        <span class="wallet-kicker">
-                            MI CARTERA
-                        </span>
-
-                        <h2>
-                            Saldo disponible
-                        </h2>
-                    </div>
-
-                    <div class="wallet-icon">
-                        $
-                    </div>
-
-                </div>
-
-
-                <div class="wallet-main">
-
-                    <strong id="walletBalance">
-                        $0.00
-                    </strong>
-
-                </div>
-
-
-                <div class="wallet-footer">
-
-                    <div>
-                        <span>Ganancias</span>
-                        <strong id="walletEarnings">$0.00</strong>
-                    </div>
-
-                    <div>
-                        <span>Comisiones</span>
-                        <strong id="walletFees">$0.00</strong>
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- ====================================================
-             PEDIDO ACTIVO
-             ==================================================== -->
-
-        <section class="active-order-section">
-
-            <div class="section-heading">
-
-                <div>
-                    <span class="section-kicker">
-                        OPERACIÓN
-                    </span>
-
-                    <h2>
-                        Pedido actual
-                    </h2>
-                </div>
-
-            </div>
-
-
-            <div id="activeTripCard" class="active-trip-card">
-
-                <div class="active-trip-empty">
-
-                    <div class="active-empty-icon">
-                        ✓
-                    </div>
-
-                    <strong>
-                        Sin pedido activo
-                    </strong>
-
-                    <p>
-                        Cuando aceptes un pedido,
-                        aparecerá aquí.
-                    </p>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- ====================================================
-             ACCESOS RÁPIDOS
-             ==================================================== -->
-
-        <section class="activity-section">
-
-            <div class="section-heading">
-
-                <div>
-                    <span class="section-kicker">
-                        ACCESOS
-                    </span>
-
-                    <h2>
-                        Acceso rápido
-                    </h2>
-                </div>
-
-            </div>
-
-
-            <div class="quick-access-grid">
-
-                <button
-                    type="button"
-                    class="quick-access-card"
-                    data-view="pedidos"
-                >
-                    <span class="quick-access-icon">▣</span>
-
-                    <span>
-                        <strong>Pedidos</strong>
-                        <small>
-                            Ver solicitudes
-                        </small>
-                    </span>
-
-                    <span class="quick-access-arrow">
-                        ›
-                    </span>
-                </button>
-
-
-                <button
-                    type="button"
-                    class="quick-access-card"
-                    data-view="ganancias"
-                >
-                    <span class="quick-access-icon">$</span>
-
-                    <span>
-                        <strong>Ganancias</strong>
-                        <small>
-                            Consultar ingresos
-                        </small>
-                    </span>
-
-                    <span class="quick-access-arrow">
-                        ›
-                    </span>
-                </button>
-
-
-                <button
-                    type="button"
-                    class="quick-access-card"
-                    data-view="historial"
-                >
-                    <span class="quick-access-icon">◷</span>
-
-                    <span>
-                        <strong>Historial</strong>
-                        <small>
-                            Tus entregas
-                        </small>
-                    </span>
-
-                    <span class="quick-access-arrow">
-                        ›
-                    </span>
-                </button>
-
-
-                <button
-                    type="button"
-                    class="quick-access-card"
-                    data-view="perfil"
-                >
-                    <span class="quick-access-icon">●</span>
-
-                    <span>
-                        <strong>Mi perfil</strong>
-                        <small>
-                            Tus datos
-                        </small>
-                    </span>
-
-                    <span class="quick-access-arrow">
-                        ›
-                    </span>
-                </button>
-
-            </div>
-
-        </section>
-
-    </section>
-
-
-    <!-- ========================================================
-         VISTAS INTERNAS
-         ======================================================== -->
-
-    <section id="singlePageViews" hidden>
-
-
-        <!-- ====================================================
-             PEDIDOS
-             ==================================================== -->
-
+        <!-- =====================================================
+             INICIO
+        ====================================================== -->
         <section
-            id="view-pedidos"
-            class="dashboard-view"
-            data-view-content="pedidos"
-            hidden
-        >
+            id="homeView"
+            class="home-view">
 
-            <div class="dashboard-view-header">
 
-                <div>
-                    <span class="section-kicker">
-                        MOTI GO
-                    </span>
+            <!-- Bienvenida -->
+            <section class="welcome-section">
+
+                <div class="welcome-content">
+
+                    <p class="welcome-small">
+                        Bienvenido
+                    </p>
 
                     <h1>
-                        Pedidos
+                        Buenos días,
+                        <span id="userName">
+                            Repartidor
+                        </span>
                     </h1>
 
-                    <p>
-                        Solicitudes disponibles para ti.
-                    </p>
-                </div>
-
-            </div>
-
-
-            <div id="pedidosContainer" class="dashboard-list">
-
-                <div class="empty-state">
-
-                    <div class="empty-state-icon">
-                        ✓
-                    </div>
-
-                    <strong>
-                        No hay pedidos disponibles
-                    </strong>
-
-                    <p>
-                        Las nuevas solicitudes aparecerán aquí.
+                    <p id="statusDescription">
+                        Estás disponible para recibir pedidos.
                     </p>
 
                 </div>
 
-            </div>
-
-        </section>
+            </section>
 
 
-        <!-- ====================================================
-             CARTERA
-             ==================================================== -->
+            <!-- =================================================
+                 ESTADO / DISPONIBILIDAD
+            ================================================== -->
+            <section class="availability-section">
 
-        <section
-            id="view-cartera"
-            class="dashboard-view"
-            data-view-content="cartera"
-            hidden
-        >
+                <div class="availability-header">
 
-            <div class="dashboard-view-header">
+                    <div class="availability-status">
 
-                <div>
-                    <span class="section-kicker">
-                        FINANZAS
-                    </span>
-
-                    <h1>
-                        Mi cartera
-                    </h1>
-
-                    <p>
-                        Consulta tu saldo y movimientos.
-                    </p>
-                </div>
-
-            </div>
-
-
-            <div id="carteraContainer" class="dashboard-content">
-
-                <div class="financial-main-card">
-
-                    <span>
-                        Saldo disponible
-                    </span>
-
-                    <strong id="carteraBalance">
-                        $0.00
-                    </strong>
-
-                </div>
-
-
-                <div class="financial-grid">
-
-                    <div class="financial-card">
-                        <span>Ganancias</span>
-                        <strong id="carteraGanancias">
-                            $0.00
-                        </strong>
-                    </div>
-
-                    <div class="financial-card">
-                        <span>Comisiones</span>
-                        <strong id="carteraComisiones">
-                            $0.00
-                        </strong>
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- ====================================================
-             GANANCIAS
-             ==================================================== -->
-
-        <section
-            id="view-ganancias"
-            class="dashboard-view"
-            data-view-content="ganancias"
-            hidden
-        >
-
-            <div class="dashboard-view-header">
-
-                <div>
-                    <span class="section-kicker">
-                        FINANZAS
-                    </span>
-
-                    <h1>
-                        Ganancias
-                    </h1>
-
-                    <p>
-                        Consulta lo generado por tus entregas.
-                    </p>
-                </div>
-
-            </div>
-
-
-            <div id="gananciasContainer" class="dashboard-content">
-
-                <div class="financial-main-card">
-
-                    <span>
-                        Ganancias acumuladas
-                    </span>
-
-                    <strong id="gananciasTotal">
-                        $0.00
-                    </strong>
-
-                </div>
-
-
-                <div
-                    id="gananciasFounderPanel"
-                    class="founder-panel"
-                    hidden
-                >
-
-                    <div class="founder-panel-header">
+                        <span
+                            id="statusIndicatorHome"
+                            class="status-indicator"
+                            aria-hidden="true">
+                        </span>
 
                         <div>
-                            <span>
-                                PARTICIPACIÓN
-                            </span>
-
-                            <strong>
-                                Participación como fundador
+                            <strong id="statusText">
+                                Disponible
                             </strong>
+
+                            <p id="availabilityDescription">
+                                Puedes recibir nuevos pedidos.
+                            </p>
                         </div>
 
                     </div>
 
 
-                    <div class="founder-panel-amount">
-                        $0.00
-                    </div>
+                    <button
+                        id="statusToggle"
+                        class="status-toggle"
+                        type="button">
 
-                    <p>
-                        Se muestra únicamente cuando corresponda
-                        participación sobre comisiones de tiendas.
-                    </p>
+                        Cambiar estado
 
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- ====================================================
-             ZONAS
-             ==================================================== -->
-
-        <section
-            id="view-zonas"
-            class="dashboard-view"
-            data-view-content="zonas"
-            hidden
-        >
-
-            <div class="dashboard-view-header">
-
-                <div>
-                    <span class="section-kicker">
-                        OPERACIÓN
-                    </span>
-
-                    <h1>
-                        Mis zonas
-                    </h1>
-
-                    <p>
-                        Consulta las zonas donde puedes trabajar.
-                    </p>
-                </div>
-
-            </div>
-
-
-            <div id="zonasContainer" class="dashboard-content">
-
-                <div class="empty-state">
-
-                    <div class="empty-state-icon">
-                        ⌖
-                    </div>
-
-                    <strong>
-                        Tus zonas
-                    </strong>
-
-                    <p>
-                        Aquí aparecerán las zonas asignadas
-                        a tu cuenta.
-                    </p>
+                    </button>
 
                 </div>
 
-            </div>
-
-        </section>
+            </section>
 
 
-        <!-- ====================================================
-             HISTORIAL
-             ==================================================== -->
+            <!-- =================================================
+                 RESUMEN DEL DÍA
+            ================================================== -->
+            <section class="today-section">
 
-        <section
-            id="view-historial"
-            class="dashboard-view"
-            data-view-content="historial"
-            hidden
-        >
-
-            <div class="dashboard-view-header">
-
-                <div>
-                    <span class="section-kicker">
-                        ACTIVIDAD
-                    </span>
-
-                    <h1>
-                        Historial
-                    </h1>
-
-                    <p>
-                        Consulta tus entregas realizadas.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div
-                id="historialContainer"
-                class="dashboard-list"
-            >
-
-                <div class="empty-state">
-
-                    <div class="empty-state-icon">
-                        ◷
-                    </div>
-
-                    <strong>
-                        Aún no tienes entregas
-                    </strong>
-
-                    <p>
-                        Tus entregas completadas aparecerán aquí.
-                    </p>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- ====================================================
-             PERFIL
-             ==================================================== -->
-
-        <section
-            id="view-perfil"
-            class="dashboard-view"
-            data-view-content="perfil"
-            hidden
-        >
-
-            <div class="dashboard-view-header">
-
-                <div>
-                    <span class="section-kicker">
-                        CUENTA
-                    </span>
-
-                    <h1>
-                        Mi perfil
-                    </h1>
-
-                    <p>
-                        Información de tu cuenta de repartidor.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div
-                id="perfilContainer"
-                class="profile-card"
-            >
-
-                <div class="profile-header">
-
-                    <div class="profile-avatar">
-                        <span id="profileInitial">
-                            R
-                        </span>
-                    </div>
+                <div class="section-heading">
 
                     <div>
-                        <strong id="profileName">
-                            Repartidor
+                        <p class="section-eyebrow">
+                            Resumen
+                        </p>
+
+                        <h2>
+                            Hoy
+                        </h2>
+                    </div>
+
+                    <span id="todayDate">
+                        —
+                    </span>
+
+                </div>
+
+
+                <div class="today-grid">
+
+                    <!-- Entregas -->
+                    <article class="summary-card">
+
+                        <div class="summary-card-icon">
+                            🛵
+                        </div>
+
+                        <div class="summary-card-content">
+
+                            <span>
+                                Entregas
+                            </span>
+
+                            <strong id="todayOrders">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </article>
+
+
+                    <!-- Ganancias -->
+                    <article class="summary-card">
+
+                        <div class="summary-card-icon">
+                            $
+                        </div>
+
+                        <div class="summary-card-content">
+
+                            <span>
+                                Ganancias hoy
+                            </span>
+
+                            <strong id="todayEarnings">
+                                $0.00
+                            </strong>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 PEDIDO ACTUAL
+            ================================================== -->
+            <section class="active-order-section">
+
+                <div class="section-heading">
+
+                    <div>
+                        <p class="section-eyebrow">
+                            Servicio
+                        </p>
+
+                        <h2>
+                            Pedido actual
+                        </h2>
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="activeTripCard"
+                    class="active-trip-card">
+
+                    <div class="empty-state">
+
+                        <div class="empty-state-icon">
+                            🛵
+                        </div>
+
+                        <h3>
+                            Sin pedido activo
+                        </h3>
+
+                        <p>
+                            Cuando aceptes un pedido,
+                            aquí aparecerán los detalles
+                            de tu entrega.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 ACCESO A PEDIDOS
+            ================================================== -->
+            <section class="quick-access-section">
+
+                <button
+                    class="quick-access-card quick-orders-button"
+                    type="button"
+                    data-view="pedidos">
+
+                    <div class="quick-access-icon">
+                        🛵
+                    </div>
+
+                    <div class="quick-access-content">
+
+                        <strong>
+                            Ver pedidos
                         </strong>
 
-                        <span id="profileRole">
-                            Repartidor MOTI GO
+                        <span>
+                            Consulta solicitudes disponibles
                         </span>
+
                     </div>
 
-                </div>
+                    <span class="quick-access-arrow">
+                        →
+                    </span>
 
+                </button>
 
-                <div class="profile-information">
-
-                    <div class="profile-row">
-                        <span>Nombre</span>
-                        <strong id="profileFullName">
-                            —
-                        </strong>
-                    </div>
-
-                    <div class="profile-row">
-                        <span>Correo</span>
-                        <strong id="profileEmail">
-                            —
-                        </strong>
-                    </div>
-
-                    <div class="profile-row">
-                        <span>Estado</span>
-                        <strong id="profileStatus">
-                            —
-                        </strong>
-                    </div>
-
-                </div>
-
-            </div>
+            </section>
 
         </section>
 
-    </section>
 
-</main>
+        <!-- =====================================================
+             VISTAS INTERNAS
+        ====================================================== -->
+        <section id="singlePageViews">
 
 
-<!-- ============================================================
-     MODAL / POPUP DE SOLICITUD
-     ============================================================ -->
+            <!-- =================================================
+                 PEDIDOS
+            ================================================== -->
+            <section
+                id="view-pedidos"
+                class="view">
 
-<div
-    id="requestPopup"
-    class="request-popup"
-    hidden
-    aria-hidden="true"
->
-    <div class="request-popup-content">
+                <div class="page-view-header">
 
-        <button
-            id="closeRequestPopup"
-            type="button"
-            class="request-popup-close"
-            aria-label="Cerrar"
-        >
-            ×
-        </button>
+                    <div>
+                        <p class="section-eyebrow">
+                            MOTI GO
+                        </p>
 
-        <div id="requestPopupBody"></div>
+                        <h1>
+                            Pedidos
+                        </h1>
+
+                        <p>
+                            Solicitudes disponibles para ti.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="pedidosContainer"
+                    class="page-view-container">
+
+                    <div class="loading-state">
+                        Cargando pedidos...
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 CARTERA
+                 
+                 Se conserva porque el JS actual todavía utiliza
+                 esta vista internamente. No aparece en el menú.
+            ================================================== -->
+            <section
+                id="view-cartera"
+                class="view">
+
+                <div class="page-view-header">
+
+                    <div>
+                        <p class="section-eyebrow">
+                            MOTI GO
+                        </p>
+
+                        <h1>
+                            Mi cartera
+                        </h1>
+
+                        <p>
+                            Resumen de tus movimientos.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="carteraContainer"
+                    class="page-view-container">
+
+                    <div class="wallet-summary">
+
+                        <div class="wallet-main-card">
+
+                            <span>
+                                Saldo
+                            </span>
+
+                            <strong id="carteraBalance">
+                                $0.00
+                            </strong>
+
+                        </div>
+
+
+                        <div class="wallet-detail-grid">
+
+                            <div>
+                                <span>
+                                    Ganancias
+                                </span>
+
+                                <strong id="carteraGanancias">
+                                    $0.00
+                                </strong>
+                            </div>
+
+
+                            <div>
+                                <span>
+                                    Comisiones
+                                </span>
+
+                                <strong id="carteraComisiones">
+                                    $0.00
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 GANANCIAS
+            ================================================== -->
+            <section
+                id="view-ganancias"
+                class="view">
+
+                <div class="page-view-header">
+
+                    <div>
+                        <p class="section-eyebrow">
+                            MOTI GO
+                        </p>
+
+                        <h1>
+                            Ganancias
+                        </h1>
+
+                        <p>
+                            Consulta el rendimiento de tus entregas.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="gananciasContainer"
+                    class="page-view-container">
+
+                    <div class="earnings-main-card">
+
+                        <span>
+                            Ganancias acumuladas
+                        </span>
+
+                        <strong id="gananciasTotal">
+                            $0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div
+                        id="gananciasFounderPanel"
+                        class="founder-panel"
+                        hidden>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 MIS ZONAS
+            ================================================== -->
+            <section
+                id="view-zonas"
+                class="view">
+
+                <div class="page-view-header">
+
+                    <div>
+                        <p class="section-eyebrow">
+                            MOTI GO
+                        </p>
+
+                        <h1>
+                            Mis zonas
+                        </h1>
+
+                        <p>
+                            Consulta las zonas disponibles para tu servicio.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="zonasContainer"
+                    class="page-view-container">
+
+                    <div class="loading-state">
+                        Cargando información...
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 HISTORIAL
+            ================================================== -->
+            <section
+                id="view-historial"
+                class="view">
+
+                <div class="page-view-header">
+
+                    <div>
+                        <p class="section-eyebrow">
+                            MOTI GO
+                        </p>
+
+                        <h1>
+                            Historial
+                        </h1>
+
+                        <p>
+                            Revisa tus entregas realizadas.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="historialContainer"
+                    class="page-view-container">
+
+                    <div class="loading-state">
+                        Cargando historial...
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =================================================
+                 MI PERFIL
+            ================================================== -->
+            <section
+                id="view-perfil"
+                class="view">
+
+                <div class="page-view-header">
+
+                    <div>
+                        <p class="section-eyebrow">
+                            MOTI GO
+                        </p>
+
+                        <h1>
+                            Mi perfil
+                        </h1>
+
+                        <p>
+                            Información de tu cuenta de repartidor.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="perfilContainer"
+                    class="page-view-container">
+
+
+                    <!-- Cabecera del perfil -->
+                    <div class="profile-header-card">
+
+                        <div
+                            id="profileInitial"
+                            class="profile-initial">
+                            ?
+                        </div>
+
+                        <div>
+
+                            <h2 id="profileName">
+                                Repartidor
+                            </h2>
+
+                            <p id="profileRole">
+                                Repartidor MOTI GO
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Datos -->
+                    <div class="profile-data-card">
+
+                        <div class="profile-data-row">
+
+                            <span>
+                                Nombre completo
+                            </span>
+
+                            <strong id="profileFullName">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="profile-data-row">
+
+                            <span>
+                                Correo electrónico
+                            </span>
+
+                            <strong id="profileEmail">
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="profile-data-row">
+
+                            <span>
+                                Estado
+                            </span>
+
+                            <strong id="profileStatus">
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </section>
+
+    </main>
+
+
+    <!-- =========================================================
+         POPUP DE SOLICITUD DE PEDIDO
+    ========================================================== -->
+    <div
+        id="requestPopup"
+        class="request-popup"
+        hidden>
+
+        <div class="request-popup-backdrop"></div>
+
+        <div class="request-popup-card">
+
+            <button
+                id="closeRequestPopup"
+                class="request-popup-close"
+                type="button"
+                aria-label="Cerrar">
+                ×
+            </button>
+
+            <div
+                id="requestPopupBody"
+                class="request-popup-body">
+            </div>
+
+        </div>
 
     </div>
-</div>
 
 
-<!-- ============================================================
-     SCRIPTS
-     ============================================================ -->
+    <!-- =========================================================
+         SCRIPTS
+    ========================================================== -->
 
-<script type="module" src="../js/logout.js"></script>
+    <!-- Cerrar sesión -->
+    <script
+        type="module"
+        src="../js/logout.js">
+    </script>
 
-<script type="module" src="../js/auth-guard.js"></script>
+    <!-- Protección de autenticación -->
+    <script
+        type="module"
+        src="../js/auth-guard.js">
+    </script>
 
-<script type="module" src="../js/user-data.js"></script>
+    <!-- Datos del usuario -->
+    <script
+        type="module"
+        src="../js/user-data.js">
+    </script>
 
-<script
-    type="module"
-    src="../js/dashboard-conductor.js"
-></script>
+    <!-- Dashboard del repartidor -->
+    <script
+        type="module"
+        src="../js/dashboard-conductor.js">
+    </script>
 
-<script
-    type="module"
-    src="../js/moti-go-repartidor.js"
-></script>
+    <!-- Motor operativo de MOTI GO -->
+    <script
+        type="module"
+        src="../js/moti-go-repartidor.js">
+    </script>
 
-<script
-    type="module"
-    src="../js/gps.js"
-></script>
+    <!-- GPS -->
+    <script
+        type="module"
+        src="../js/gps.js">
+    </script>
 
 
-<!-- ============================================================
-     SERVICE WORKER
-     ============================================================ -->
-
-<script>
-    if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-            navigator.serviceWorker.register("../service-worker.js")
-                .catch(error => {
-                    console.warn(
-                        "No se pudo registrar el Service Worker:",
-                        error
-                    );
-                });
-        });
-    }
-</script>
+    <!-- =========================================================
+         SERVICE WORKER / PWA
+    ========================================================== -->
+    <script>
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("../service-worker.js")
+                    .then(() => {
+                        console.log("MOTI GO: Service Worker registrado.");
+                    })
+                    .catch((error) => {
+                        console.error(
+                            "MOTI GO: Error registrando Service Worker:",
+                            error
+                        );
+                    });
+            });
+        }
+    </script>
 
 </body>
 </html>
