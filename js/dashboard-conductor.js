@@ -1736,6 +1736,14 @@ async function verificarViajeActivo() {
         return;
     }
 
+// =========================================
+// POR DEFECTO: OCULTAR PEDIDO ACTIVO
+// =========================================
+
+if (activeTripCard) {
+    activeTripCard.style.display = "none";
+}
+    
 
     try {
 
@@ -1764,16 +1772,14 @@ async function verificarViajeActivo() {
             usuarioDoc.data();
 
 
-        if (
-            !usuario.viajeActivo
-        ) {
+        if (!usuario.viajeActivo) {
 
-            activeTripCard.style.display =
-                "none";
+    if (activeTripCard) {
+        activeTripCard.style.display = "none";
+    }
 
-            return;
-
-        }
+    return;
+}
 
 
        // =========================================
@@ -1807,8 +1813,9 @@ if (
     );
 
 
-    activeTripCard.style.display =
-        "none";
+    if (activeTripCard) {
+    activeTripCard.style.display = "block";
+}
 
 
     return;
