@@ -2,34 +2,49 @@
 <html lang="es">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
         name="viewport"
-        content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+        content="width=device-width, initial-scale=1.0">
 
     <meta
         name="theme-color"
-        content="#ffffff">
+        content="#16a34a">
 
-    <meta
-        name="apple-mobile-web-app-capable"
-        content="yes">
+    <title>MOTI GO | Repartidor</title>
 
-    <meta
-        name="apple-mobile-web-app-status-bar-style"
-        content="default">
 
-    <meta
-        name="apple-mobile-web-app-title"
-        content="MOTI GO">
+    <!-- PWA -->
+    <link
+        rel="manifest"
+        href="../manifest.json">
 
-    <title>MOTI GO · Repartidor</title>
 
-    <!-- CSS PRINCIPAL -->
+    <!-- Fuentes -->
+    <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+
+    <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+
+
+    <!-- CSS -->
+    <link
+        rel="stylesheet"
+        href="../css/variables.css">
+
+    <link
+        rel="stylesheet"
+        href="../css/main.css">
+
     <link
         rel="stylesheet"
         href="../css/conductor.css">
+
 </head>
 
 
@@ -39,61 +54,13 @@
 
 
     <!-- =========================================================
-         HEADER
+         OVERLAY DEL MENÚ
     ========================================================== -->
 
-    <header class="top-header">
-
-        <!-- Botón menú -->
-        <button
-            id="openMenu"
-            class="menu-button"
-            type="button"
-            aria-label="Abrir menú">
-
-            <span class="material-symbols-outlined">
-                menu
-            </span>
-
-        </button>
-
-
-        <!-- Marca -->
-        <div class="header-brand">
-
-            <div class="header-logo">
-                MG
-            </div>
-
-            <div>
-                <div class="header-title">
-                    MOTI GO
-                </div>
-
-                <div class="header-subtitle">
-                    Repartidor
-                </div>
-            </div>
-
-        </div>
-
-
-        <!-- Estado -->
-        <div class="header-status">
-
-            <span
-                id="statusIndicator"
-                class="status-indicator"
-                aria-hidden="true">
-            </span>
-
-            <span id="headerStatusText">
-                Disponible
-            </span>
-
-        </div>
-
-    </header>
+    <div
+        id="menuOverlay"
+        class="menu-overlay">
+    </div>
 
 
 
@@ -103,15 +70,18 @@
 
     <aside
         id="sideMenu"
-        class="side-menu"
-        aria-hidden="true">
+        class="side-menu">
 
 
-        <!-- Cabecera -->
+        <!-- Marca -->
         <div class="side-menu-header">
 
             <div class="brand-mark">
-                MG
+
+                <span class="material-symbols-outlined">
+                    two_wheeler
+                </span>
+
             </div>
 
 
@@ -122,7 +92,7 @@
                 </strong>
 
                 <span>
-                    Panel del repartidor
+                    Repartidor
                 </span>
 
             </div>
@@ -144,15 +114,20 @@
 
 
 
-        <!-- Perfil -->
+        <!-- =====================================================
+             PERFIL DEL REPARTIDOR
+        ====================================================== -->
+
         <div class="side-profile">
 
-            <div
-                id="sideUserInitial"
-                class="side-avatar">
+            <div class="side-avatar">
 
-                <span class="material-symbols-outlined">
+                <span
+                    id="sideUserInitial"
+                    class="material-symbols-outlined">
+
                     person
+
                 </span>
 
             </div>
@@ -165,7 +140,7 @@
                 </strong>
 
                 <span>
-                    Repartidor
+                    Cuenta activa
                 </span>
 
             </div>
@@ -181,10 +156,11 @@
         <nav class="side-navigation">
 
 
-            <!-- Inicio -->
-            <button
-                class="side-link side-nav-item active"
-                type="button"
+            <!-- INICIO -->
+
+            <a
+                href="#"
+                class="side-link active"
                 data-view="inicio">
 
                 <span class="material-symbols-outlined">
@@ -195,18 +171,19 @@
                     Inicio
                 </span>
 
-            </button>
+            </a>
 
 
 
-            <!-- Pedidos -->
-            <button
-                class="side-link side-nav-item"
-                type="button"
+            <!-- PEDIDOS -->
+
+            <a
+                href="#"
+                class="side-link"
                 data-view="pedidos">
 
                 <span class="material-symbols-outlined">
-                    local_shipping
+                    package_2
                 </span>
 
                 <span>
@@ -217,35 +194,39 @@
                     id="availableOrdersBadge"
                     class="side-badge"
                     hidden>
+
                     0
+
                 </span>
 
-            </button>
+            </a>
 
 
 
-            <!-- Ganancias -->
-            <button
-                class="side-link side-nav-item"
-                type="button"
+            <!-- GANANCIAS -->
+
+            <a
+                href="#"
+                class="side-link"
                 data-view="ganancias">
 
                 <span class="material-symbols-outlined">
-                    payments
+                    monitoring
                 </span>
 
                 <span>
                     Ganancias
                 </span>
 
-            </button>
+            </a>
 
 
 
-            <!-- Mis zonas -->
-            <button
-                class="side-link side-nav-item"
-                type="button"
+            <!-- MIS ZONAS -->
+
+            <a
+                href="#"
+                class="side-link"
                 data-view="zonas">
 
                 <span class="material-symbols-outlined">
@@ -256,14 +237,15 @@
                     Mis zonas
                 </span>
 
-            </button>
+            </a>
 
 
 
-            <!-- Historial -->
-            <button
-                class="side-link side-nav-item"
-                type="button"
+            <!-- HISTORIAL -->
+
+            <a
+                href="#"
+                class="side-link"
                 data-view="historial">
 
                 <span class="material-symbols-outlined">
@@ -274,25 +256,8 @@
                     Historial
                 </span>
 
-            </button>
+            </a>
 
-
-
-            <!-- Perfil -->
-            <button
-                class="side-link side-nav-item"
-                type="button"
-                data-view="perfil">
-
-                <span class="material-symbols-outlined">
-                    person
-                </span>
-
-                <span>
-                    Mi perfil
-                </span>
-
-            </button>
 
         </nav>
 
@@ -304,9 +269,31 @@
 
         <div class="side-menu-bottom">
 
-            <button
-                id="logoutButton"
+
+            <!-- PERFIL -->
+
+            <a
+                href="#"
                 class="side-link"
+                data-view="perfil">
+
+                <span class="material-symbols-outlined">
+                    person
+                </span>
+
+                <span>
+                    Mi perfil
+                </span>
+
+            </a>
+
+
+
+            <!-- CERRAR SESIÓN -->
+
+            <button
+                id="btnLogout"
+                class="side-link side-logout"
                 type="button">
 
                 <span class="material-symbols-outlined">
@@ -319,17 +306,68 @@
 
             </button>
 
+
         </div>
 
     </aside>
 
 
 
-    <!-- Overlay -->
-    <div
-        id="menuOverlay"
-        class="menu-overlay">
-    </div>
+    <!-- =========================================================
+         HEADER
+    ========================================================== -->
+
+    <header class="go-header">
+
+
+        <!-- Menú -->
+
+        <button
+            id="openMenu"
+            class="icon-button"
+            type="button"
+            aria-label="Abrir menú">
+
+            <span class="material-symbols-outlined">
+                menu
+            </span>
+
+        </button>
+
+
+
+        <!-- Marca -->
+
+        <div class="go-brand">
+
+            <span class="material-symbols-outlined">
+                two_wheeler
+            </span>
+
+            <strong>
+                MOTI GO
+            </strong>
+
+        </div>
+
+
+
+        <!-- Avatar -->
+
+        <button
+            id="headerProfileButton"
+            class="header-avatar"
+            type="button"
+            aria-label="Mi perfil">
+
+            <span class="material-symbols-outlined">
+                person
+            </span>
+
+        </button>
+
+
+    </header>
 
 
 
@@ -337,11 +375,11 @@
          CONTENIDO PRINCIPAL
     ========================================================== -->
 
-    <main class="main-content">
+    <main class="go-main">
 
 
         <!-- =====================================================
-             INICIO
+             VISTA INICIO
         ====================================================== -->
 
         <section
@@ -355,76 +393,72 @@
 
             <section class="welcome-section">
 
-                <div class="welcome-text">
-
-                    <span class="welcome-small">
-                        Bienvenido
-                    </span>
+                <p class="eyebrow">
+                    Panel del repartidor
+                </p>
 
 
-                    <h1>
-                        Buenos días,
-                        <span id="userName">
-                            Repartidor
-                        </span>
-                    </h1>
+                <h1 id="userName">
+                    Hola...
+                </h1>
 
 
-                    <p id="statusDescription">
-                        Estás disponible para recibir pedidos.
-                    </p>
-
-                </div>
+                <p id="welcomeDescription">
+                    ¿Listo para recibir pedidos?
+                </p>
 
             </section>
 
 
 
             <!-- =================================================
-                 DISPONIBILIDAD
+                 ESTADO DEL SERVICIO
             ================================================== -->
 
             <section class="availability-section">
 
-                <div class="availability-card">
 
+                <div class="availability-heading">
 
-                    <div class="availability-info">
+                    <div>
 
-                        <span
-                            id="statusIndicatorHome"
-                            class="availability-dot available">
+                        <span class="section-label">
+                            ESTADO DEL SERVICIO
                         </span>
 
 
-                        <div>
-
-                            <strong id="statusText">
-                                Disponible
-                            </strong>
-
-                            <span id="availabilityDescription">
-                                Puedes recibir nuevos pedidos.
-                            </span>
-
-                        </div>
+                        <h2 id="statusButton">
+                            Disponible
+                        </h2>
 
                     </div>
 
 
-
-                    <!-- Toggle -->
-                    <button
-                        id="statusToggle"
-                        class="availability-toggle active"
-                        type="button"
-                        aria-label="Cambiar disponibilidad">
-
-                        <span></span>
-
-                    </button>
+                    <span
+                        id="statusIndicator"
+                        class="status-indicator">
+                    </span>
 
                 </div>
+
+
+                <p
+                    id="statusDescription"
+                    class="availability-description">
+
+                    Estás recibiendo solicitudes
+
+                </p>
+
+
+                <button
+                    id="statusToggle"
+                    class="availability-action"
+                    type="button">
+
+                    Cambiar disponibilidad
+
+                </button>
 
             </section>
 
@@ -439,76 +473,76 @@
 
                 <div class="section-heading">
 
-                    <span class="section-kicker">
-                        Resumen
+                    <span class="section-label">
+                        HOY
                     </span>
 
-                    <h2>
-                        Hoy
-                    </h2>
+
+                    <span
+                        id="todayDate"
+                        class="section-date">
+                    </span>
 
                 </div>
 
 
 
-                <!-- Ganancias -->
-                <div class="earnings-today-card">
-
-                    <span class="earnings-label">
-                        Ganancias hoy
-                    </span>
+                <div class="today-summary">
 
 
-                    <strong
-                        id="todayEarnings"
-                        class="earnings-amount">
+                    <!-- PEDIDOS -->
 
-                        $0.00
+                    <div class="summary-item">
 
-                    </strong>
-
-
-                    <div class="earnings-meta">
-
-                        <span>
-                            Por tus entregas
+                        <span class="material-symbols-outlined">
+                            package_2
                         </span>
 
-                        <span class="earnings-meta-dot"></span>
 
-                        <span id="todayDate">
-                            —
-                        </span>
+                        <div>
 
-                    </div>
+                            <strong id="todayOrders">
+                                0
+                            </strong>
 
-                </div>
+                            <span>
+                                pedidos
+                            </span>
 
-
-
-                <!-- Entregas -->
-                <div class="deliveries-summary">
-
-                    <div class="deliveries-summary-label">
-
-                        <strong>
-                            Entregas realizadas
-                        </strong>
-
-                        <span>
-                            Pedidos completados hoy
-                        </span>
+                        </div>
 
                     </div>
 
 
-                    <strong
-                        id="todayOrders"
-                        class="deliveries-summary-number">
 
-                        0
+                    <div class="summary-divider">
+                    </div>
 
-                    </strong>
+
+
+                    <!-- GANANCIAS -->
+
+                    <div class="summary-item">
+
+                        <span class="material-symbols-outlined">
+                            payments
+                        </span>
+
+
+                        <div>
+
+                            <strong id="todayEarnings">
+                                $0.00
+                            </strong>
+
+                            <span>
+                                ganancias hoy
+                            </span>
+
+                        </div>
+
+                    </div>
+
 
                 </div>
 
@@ -520,107 +554,222 @@
                  PEDIDO ACTUAL
             ================================================== -->
 
-            <section class="active-order-section">
+            <section
+                id="activeTripCard"
+                class="active-order-section">
 
 
                 <div class="section-heading">
 
-                    <span class="section-kicker">
-                        Servicio
+                    <span class="section-label">
+                        PEDIDO ACTUAL
                     </span>
 
-                    <h2>
-                        Pedido actual
-                    </h2>
+
+                    <span class="active-dot">
+                        EN CURSO
+                    </span>
 
                 </div>
 
 
 
+                <!-- Estado sin pedido -->
+
                 <div
-                    id="activeTripCard"
-                    class="active-trip-card">
+                    id="activeTripEmpty"
+                    class="active-trip-empty">
 
 
-                    <!-- Estado inicial -->
-                    <div class="active-trip-empty">
+                    <div class="active-empty-icon">
 
-                        <div class="active-empty-icon">
+                        <span class="material-symbols-outlined">
+                            package_2
+                        </span>
 
-                            <span class="material-symbols-outlined">
-                                local_shipping
-                            </span>
-
-                        </div>
+                    </div>
 
 
-                        <div>
+                    <div>
 
-                            <strong>
-                                Sin pedido activo
-                            </strong>
+                        <strong>
+                            Sin pedido activo
+                        </strong>
 
-                            <p>
-                                Cuando aceptes un pedido,
-                                aquí aparecerán los detalles
-                                de tu entrega.
-                            </p>
-
-                        </div>
+                        <p>
+                            Cuando aceptes un pedido,
+                            aquí aparecerán los detalles
+                            de tu entrega.
+                        </p>
 
                     </div>
 
                 </div>
+
+
+
+                <!-- Información del pedido -->
+
+                <div
+                    id="activeTripContent"
+                    class="active-order-content"
+                    hidden>
+
+
+                    <div class="active-order-icon">
+
+                        <span class="material-symbols-outlined">
+                            package_2
+                        </span>
+
+                    </div>
+
+
+                    <div class="active-order-info">
+
+                        <strong id="activePassenger">
+                        </strong>
+
+
+                        <span>
+                            Entrega
+                        </span>
+
+
+                        <p>
+
+                            <span class="material-symbols-outlined">
+                                location_on
+                            </span>
+
+                            <span id="activeDestination">
+                            </span>
+
+                        </p>
+
+
+                        <small id="activeStatus">
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Continuar -->
+
+                <button
+                    id="continueTrip"
+                    class="continue-order"
+                    type="button"
+                    hidden>
+
+                    Continuar entrega
+
+                    <span class="material-symbols-outlined">
+                        arrow_forward
+                    </span>
+
+                </button>
+
 
             </section>
 
 
 
             <!-- =================================================
-                 ACCESO A PEDIDOS
+                 ACCESOS RÁPIDOS
             ================================================== -->
 
-            <section>
+            <section class="activity-section">
 
-                <button
-                    class="quick-orders-button"
-                    type="button"
+
+                <div class="section-heading">
+
+                    <span class="section-label">
+                        ACCESOS
+                    </span>
+
+                </div>
+
+
+
+                <!-- PEDIDOS -->
+
+                <a
+                    href="#"
+                    class="activity-link"
                     data-view="pedidos">
 
+                    <div class="activity-icon">
 
-                    <div class="quick-orders-left">
-
-                        <div class="quick-orders-icon">
-
-                            <span class="material-symbols-outlined">
-                                local_shipping
-                            </span>
-
-                        </div>
-
-
-                        <div class="quick-orders-text">
-
-                            <strong>
-                                Ver pedidos
-                            </strong>
-
-                            <span>
-                                Consulta las solicitudes disponibles
-                            </span>
-
-                        </div>
+                        <span class="material-symbols-outlined">
+                            package_2
+                        </span>
 
                     </div>
 
 
-                    <span class="quick-orders-arrow">
-                        →
+                    <div>
+
+                        <strong>
+                            Pedidos disponibles
+                        </strong>
+
+                        <span>
+                            Revisa nuevas solicitudes
+                        </span>
+
+                    </div>
+
+
+                    <span class="material-symbols-outlined arrow">
+                        arrow_forward_ios
                     </span>
 
-                </button>
+                </a>
+
+
+
+                <!-- GANANCIAS -->
+
+                <a
+                    href="#"
+                    class="activity-link"
+                    data-view="ganancias">
+
+                    <div class="activity-icon">
+
+                        <span class="material-symbols-outlined">
+                            monitoring
+                        </span>
+
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            Mis ganancias
+                        </strong>
+
+                        <span>
+                            Consulta tus ingresos
+                        </span>
+
+                    </div>
+
+
+                    <span class="material-symbols-outlined arrow">
+                        arrow_forward_ios
+                    </span>
+
+                </a>
+
 
             </section>
+
 
         </section>
 
@@ -628,9 +777,11 @@
 
         <!-- =====================================================
              VISTAS INTERNAS
-        ====================================================== -->
+        ========================================================== -->
 
-        <div id="singlePageViews">
+        <section
+            id="singlePageViews"
+            hidden>
 
 
             <!-- =================================================
@@ -639,8 +790,9 @@
 
             <section
                 id="view-pedidos"
-                class="dashboard-view view"
+                class="dashboard-view"
                 hidden>
+
 
                 <div class="dashboard-view-header">
 
@@ -648,9 +800,11 @@
                         MOTI GO
                     </span>
 
+
                     <h1>
                         Pedidos
                     </h1>
+
 
                     <p>
                         Solicitudes disponibles para realizar.
@@ -663,108 +817,8 @@
                     id="pedidosContainer"
                     class="dashboard-content">
 
-                    <div class="empty-state">
-
-                        <div class="empty-state-icon">
-
-                            <span class="material-symbols-outlined">
-                                local_shipping
-                            </span>
-
-                        </div>
-
-                        <strong>
-                            Buscando pedidos
-                        </strong>
-
-                        <p>
-                            Las nuevas solicitudes aparecerán aquí.
-                        </p>
-
-                    </div>
-
                 </div>
 
-            </section>
-
-
-
-            <!-- =================================================
-                 CARTERA
-                 
-                 Se mantiene en el HTML para compatibilidad
-                 con el JS actual, pero NO aparece en el menú.
-            ================================================== -->
-
-            <section
-                id="view-cartera"
-                class="dashboard-view view"
-                hidden>
-
-                <div class="dashboard-view-header">
-
-                    <span class="section-kicker">
-                        MOTI GO
-                    </span>
-
-                    <h1>
-                        Mi cartera
-                    </h1>
-
-                    <p>
-                        Resumen de movimientos de tu cuenta.
-                    </p>
-
-                </div>
-
-
-                <div
-                    id="carteraContainer"
-                    class="dashboard-content">
-
-                    <div class="financial-main-card">
-
-                        <span>
-                            Saldo disponible
-                        </span>
-
-                        <strong id="carteraBalance">
-                            $0.00
-                        </strong>
-
-                    </div>
-
-
-                    <div class="financial-grid">
-
-                        <div class="financial-card">
-
-                            <span>
-                                Ganancias
-                            </span>
-
-                            <strong id="carteraGanancias">
-                                $0.00
-                            </strong>
-
-                        </div>
-
-
-                        <div class="financial-card">
-
-                            <span>
-                                Comisiones
-                            </span>
-
-                            <strong id="carteraComisiones">
-                                $0.00
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-                </div>
 
             </section>
 
@@ -776,8 +830,9 @@
 
             <section
                 id="view-ganancias"
-                class="dashboard-view view"
+                class="dashboard-view"
                 hidden>
+
 
                 <div class="dashboard-view-header">
 
@@ -785,9 +840,11 @@
                         MOTI GO
                     </span>
 
+
                     <h1>
                         Ganancias
                     </h1>
+
 
                     <p>
                         Consulta tus ganancias por entregas.
@@ -807,6 +864,7 @@
                             Ganancias acumuladas
                         </span>
 
+
                         <strong id="gananciasTotal">
                             $0.00
                         </strong>
@@ -814,13 +872,14 @@
                     </div>
 
 
-                    <!-- Participación fundador -->
                     <div
                         id="gananciasFounderPanel"
                         hidden>
                     </div>
 
+
                 </div>
+
 
             </section>
 
@@ -832,8 +891,9 @@
 
             <section
                 id="view-zonas"
-                class="dashboard-view view"
+                class="dashboard-view"
                 hidden>
+
 
                 <div class="dashboard-view-header">
 
@@ -841,12 +901,14 @@
                         MOTI GO
                     </span>
 
+
                     <h1>
                         Mis zonas
                     </h1>
 
+
                     <p>
-                        Zonas donde puedes realizar entregas.
+                        Consulta tus zonas de servicio.
                     </p>
 
                 </div>
@@ -856,27 +918,8 @@
                     id="zonasContainer"
                     class="dashboard-content">
 
-                    <div class="empty-state">
-
-                        <div class="empty-state-icon">
-
-                            <span class="material-symbols-outlined">
-                                location_on
-                            </span>
-
-                        </div>
-
-                        <strong>
-                            Zonas de servicio
-                        </strong>
-
-                        <p>
-                            La información de tus zonas aparecerá aquí.
-                        </p>
-
-                    </div>
-
                 </div>
+
 
             </section>
 
@@ -888,8 +931,9 @@
 
             <section
                 id="view-historial"
-                class="dashboard-view view"
+                class="dashboard-view"
                 hidden>
+
 
                 <div class="dashboard-view-header">
 
@@ -897,9 +941,11 @@
                         MOTI GO
                     </span>
 
+
                     <h1>
                         Historial
                     </h1>
+
 
                     <p>
                         Revisa tus entregas realizadas.
@@ -912,27 +958,8 @@
                     id="historialContainer"
                     class="dashboard-content">
 
-                    <div class="empty-state">
-
-                        <div class="empty-state-icon">
-
-                            <span class="material-symbols-outlined">
-                                history
-                            </span>
-
-                        </div>
-
-                        <strong>
-                            Sin entregas todavía
-                        </strong>
-
-                        <p>
-                            Tus entregas completadas aparecerán aquí.
-                        </p>
-
-                    </div>
-
                 </div>
+
 
             </section>
 
@@ -944,8 +971,9 @@
 
             <section
                 id="view-perfil"
-                class="dashboard-view view"
+                class="dashboard-view"
                 hidden>
+
 
                 <div class="dashboard-view-header">
 
@@ -953,12 +981,14 @@
                         MOTI GO
                     </span>
 
+
                     <h1>
                         Mi perfil
                     </h1>
 
+
                     <p>
-                        Información de tu cuenta.
+                        Información de tu cuenta de repartidor.
                     </p>
 
                 </div>
@@ -973,8 +1003,8 @@
 
 
                         <!-- Cabecera -->
-                        <div class="profile-header">
 
+                        <div class="profile-header">
 
                             <div
                                 id="profileInitial"
@@ -991,6 +1021,7 @@
                                     Repartidor
                                 </strong>
 
+
                                 <span id="profileRole">
                                     Repartidor MOTI GO
                                 </span>
@@ -1002,6 +1033,7 @@
 
 
                         <!-- Información -->
+
                         <div class="profile-information">
 
 
@@ -1010,6 +1042,7 @@
                                 <span>
                                     Nombre completo
                                 </span>
+
 
                                 <strong id="profileFullName">
                                     —
@@ -1025,6 +1058,7 @@
                                     Correo electrónico
                                 </span>
 
+
                                 <strong id="profileEmail">
                                     —
                                 </strong>
@@ -1039,6 +1073,7 @@
                                     Estado
                                 </span>
 
+
                                 <strong id="profileStatus">
                                     —
                                 </strong>
@@ -1050,52 +1085,40 @@
 
                     </div>
 
+
                 </div>
+
 
             </section>
 
 
-        </div>
+        </section>
+
 
     </main>
 
 
 
     <!-- =========================================================
-         POPUP DE SOLICITUD
+         POPUP DE NUEVO PEDIDO
     ========================================================== -->
 
-    <div
+    <section
         id="requestPopup"
         class="request-popup"
-        hidden>
+        style="display:none;">
 
 
-        <div class="request-popup-backdrop"></div>
-
-
-        <div class="request-popup-card">
-
-
-            <button
-                id="closeRequestPopup"
-                class="request-popup-close"
-                type="button"
-                aria-label="Cerrar">
-
-                ×
-
-            </button>
-
-
-            <div id="requestPopupBody">
-
-            </div>
-
-
+        <div class="request-popup-handle">
         </div>
 
-    </div>
+
+        <div
+            id="requestContent">
+        </div>
+
+
+    </section>
 
 
 
@@ -1143,41 +1166,6 @@
 </script>
 
 
-
-<!-- =========================================================
-     SERVICE WORKER
-========================================================== -->
-
-<script>
-
-    if ("serviceWorker" in navigator) {
-
-        window.addEventListener("load", () => {
-
-            navigator.serviceWorker
-                .register("../service-worker.js")
-                .then(() => {
-
-                    console.log(
-                        "MOTI GO: Service Worker registrado."
-                    );
-
-                })
-                .catch((error) => {
-
-                    console.error(
-                        "MOTI GO: Error registrando Service Worker:",
-                        error
-                    );
-
-                });
-
-        });
-
-    }
-
-</script>
-
-
 </body>
+
 </html>
