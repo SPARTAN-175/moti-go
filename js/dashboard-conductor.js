@@ -2133,6 +2133,85 @@ function renderizarPedidosDisponibles(
             "pedidosContainer"
         );
 
+        // =================================================
+    // CONTADOR
+    // =================================================
+
+    const contador =
+        document.getElementById(
+            "pedidosDisponiblesCount"
+        );
+
+    if (contador) {
+
+        contador.textContent =
+            pedidos.length;
+
+    }
+
+
+    // =================================================
+    // APLICAR FILTRO
+    // =================================================
+
+    let pedidosFiltrados =
+        Array.isArray(pedidos)
+            ? [...pedidos]
+            : [];
+
+
+    if (
+        filtroPedidosActual ===
+        "una"
+    ) {
+
+        pedidosFiltrados =
+            pedidosFiltrados.filter(
+                pedido => {
+
+                    const tiendas =
+                        Array.isArray(
+                            pedido.tiendas
+                        )
+                            ? pedido.tiendas.length
+                            : 0;
+
+                    return tiendas === 1;
+
+                }
+            );
+
+    }
+
+
+    if (
+        filtroPedidosActual ===
+        "varias"
+    ) {
+
+        pedidosFiltrados =
+            pedidosFiltrados.filter(
+                pedido => {
+
+                    const tiendas =
+                        Array.isArray(
+                            pedido.tiendas
+                        )
+                            ? pedido.tiendas.length
+                            : 0;
+
+                    return tiendas > 1;
+
+                }
+            );
+
+    }
+
+
+    pedidos =
+        pedidosFiltrados;
+    
+
 
     if (!container) {
         return;
@@ -2315,6 +2394,58 @@ function renderizarPedidosDisponibles(
 
 }
 
+
+// =========================================================
+// FILTROS DE PEDIDOS
+// =========================================================
+
+document
+    .querySelectorAll(
+        "[data-pedidos-filter]"
+    )
+    .forEach(
+        boton => {
+
+            boton.addEventListener(
+                "click",
+                () => {
+
+                    filtroPedidosActual =
+                        boton.dataset.pedidosFilter;
+
+                    // -----------------------------
+                    // ACTIVAR BOTÓN
+                    // -----------------------------
+
+                    document
+                        .querySelectorAll(
+                            "[data-pedidos-filter]"
+                        )
+                        .forEach(
+                            elemento => {
+
+                                elemento.classList.toggle(
+                                    "active",
+                                    elemento === boton
+                                );
+
+                            }
+                        );
+
+
+                    // -----------------------------
+                    // VOLVER A CARGAR
+                    // -----------------------------
+
+                    iniciarPedidosDisponibles();
+
+                }
+            );
+
+        }
+    );
+
+
 // =========================================================
 // ESCAPAR TEXTO
 // =========================================================
@@ -2348,6 +2479,15 @@ function escaparTexto(
         );
 
 }
+
+// =========================================================
+// FILTROS DEL DASHBOARD
+// =========================================================
+
+let filtroPedidosActual = "todos";
+
+let filtroGananciasActual = "todos";
+
 
 // =========================================================
 // VISTA DE GANANCIAS
@@ -2452,9 +2592,132 @@ function iniciarVistaGanancias() {
                 );
 
 
-                renderizarGanancias(
-                    pedidos
+                // =========================================================
+// APLICAR FILTRO DE GANANCIAS
+// =========================================================
+
+function aplicarFiltroGanancias(
+    pedidos
+) {
+
+    if (
+        !Array.isArray(pedidos)
+    ) {
+
+        return [];
+
+    }
+
+
+    if (
+        filtroGananciasActual ===
+        "todos"
+    ) {
+
+        return pedidos;
+
+    }
+
+
+    const ahora =
+        new Date();
+
+
+    const inicioHoy =
+        new Date(
+            ahora.getFullYear(),
+            ahora.getMonth(),
+            ahora.getDate(),
+            0,
+            0,
+            0,
+            0
+        );
+
+
+    let inicioPeriodo;
+
+
+    if (
+        filtroGananciasActual ===
+        "hoy"
+    ) {
+
+        inicioPeriodo =
+            inicioHoy;
+
+    }
+
+
+    if (
+        filtroGananciasActual ===
+        "7dias"
+    ) {
+
+        inicioPeriodo =
+            new Date(
+                ahora
+            );
+
+        inicioPeriodo.setDate(
+            inicioPeriodo.getDate() - 6
+        );
+
+        inicioPeriodo.setHours(
+            0,
+            0,
+            0,
+            0
+        );
+
+    }
+
+
+    if (
+        filtroGananciasActual ===
+        "30dias"
+    ) {
+
+        inicioPeriodo =
+            new Date(
+                ahora
+            );
+
+        inicioPeriodo.setDate(
+            inicioPeriodo.getDate() - 29
+        );
+
+        inicioPeriodo.setHours(
+            0,
+            0,
+            0,
+            0
+        );
+
+    }
+
+
+    return pedidos.filter(
+        pedido => {
+
+            const fecha =
+                obtenerFecha(
+                    pedido.fechaFinalizacion
                 );
+
+            return fecha >= inicioPeriodo;
+
+        }
+    );
+
+}
+                
+                
+                renderizarGanancias(
+    aplicarFiltroGanancias(
+        pedidos
+    )
+);
 
 
                 console.log(
@@ -2908,3 +3171,52 @@ function formatearFechaGanancia(
     );
 
 }
+
+
+// =========================================================
+// FILTROS DE GANANCIAS
+// =========================================================
+
+document
+    .querySelectorAll(
+        "[data-ganancias-filter]"
+    )
+    .forEach(
+        boton => {
+
+            boton.addEventListener(
+                "click",
+                () => {
+
+                    filtroGananciasActual =
+                        boton.dataset.gananciasFilter;
+
+
+                    document
+                        .querySelectorAll(
+                            "[data-ganancias-filter]"
+                        )
+                        .forEach(
+                            elemento => {
+
+                                elemento.classList.toggle(
+                                    "active",
+                                    elemento === boton
+                                );
+
+                            }
+                        );
+
+
+                    // Volver a solicitar los datos
+                    iniciarVistaGanancias();
+
+                }
+            );
+
+        }
+    );
+
+
+
+
