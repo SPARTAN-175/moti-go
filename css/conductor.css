@@ -1315,3 +1315,1012 @@ a {
         grid-template-columns: 1fr;
     }
 }
+
+/* =========================================================
+   MOTI GO — VISTAS INTERNAS: PEDIDOS Y GANANCIAS
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   CONTENEDOR GENERAL DE LAS VISTAS
+   --------------------------------------------------------- */
+
+#singlePageViews {
+    width: 100%;
+    animation: motiViewAppear 0.28s ease;
+}
+
+.dashboard-view {
+    width: 100%;
+    animation: motiViewAppear 0.28s ease;
+}
+
+@keyframes motiViewAppear {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ---------------------------------------------------------
+   ENCABEZADO DE VISTA
+   --------------------------------------------------------- */
+
+.inner-view-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.inner-view-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.inner-view-title-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #f1f5f9;
+    color: #1e293b;
+
+    font-size: 21px;
+    flex-shrink: 0;
+}
+
+.inner-view-title h2 {
+    margin: 0;
+    font-size: 25px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.4px;
+}
+
+.inner-view-title p {
+    margin: 4px 0 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+
+/* ---------------------------------------------------------
+   BOTÓN REGRESAR
+   --------------------------------------------------------- */
+
+.back-home-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 10px 15px;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+
+    background: #ffffff;
+    color: #334155;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.back-home-button:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(15, 23, 42, 0.06);
+}
+
+.back-home-button:active {
+    transform: translateY(0);
+}
+
+.back-home-button i {
+    font-size: 13px;
+}
+
+
+/* ---------------------------------------------------------
+   FILTROS
+   --------------------------------------------------------- */
+
+.dashboard-filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    margin-bottom: 20px;
+}
+
+.dashboard-filter {
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+
+    color: #64748b;
+
+    padding: 9px 15px;
+    border-radius: 999px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        all 0.2s ease;
+}
+
+.dashboard-filter:hover {
+    border-color: #cbd5e1;
+    color: #334155;
+    background: #f8fafc;
+}
+
+.dashboard-filter.active {
+    background: #0f172a;
+    border-color: #0f172a;
+    color: #ffffff;
+
+    box-shadow: 0 5px 14px rgba(15, 23, 42, 0.14);
+}
+
+
+/* =========================================================
+   PEDIDOS DISPONIBLES
+   ========================================================= */
+
+.pedidos-view-header {
+    margin-bottom: 18px;
+}
+
+.pedidos-counter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 30px;
+    height: 30px;
+
+    padding: 0 9px;
+
+    border-radius: 999px;
+
+    background: #f1f5f9;
+    color: #334155;
+
+    font-size: 13px;
+    font-weight: 800;
+}
+
+
+/* ---------------------------------------------------------
+   LISTA DE PEDIDOS
+   --------------------------------------------------------- */
+
+.pedidos-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+
+/* ---------------------------------------------------------
+   TARJETA DE PEDIDO
+   --------------------------------------------------------- */
+
+.pedido-disponible-card {
+    position: relative;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+
+    padding: 20px;
+
+    box-shadow:
+        0 4px 16px rgba(15, 23, 42, 0.05);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.pedido-disponible-card:hover {
+    transform: translateY(-2px);
+
+    border-color: #d8dee7;
+
+    box-shadow:
+        0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+
+/* ---------------------------------------------------------
+   CABECERA DE TARJETA
+   --------------------------------------------------------- */
+
+.pedido-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+
+    margin-bottom: 16px;
+}
+
+.pedido-card-folio {
+    color: #0f172a;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.pedido-card-time {
+    margin-top: 4px;
+
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+
+/* ---------------------------------------------------------
+   ETIQUETA DE TIENDAS
+   --------------------------------------------------------- */
+
+.pedido-card-stores {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 7px 10px;
+
+    border-radius: 9px;
+
+    background: #f8fafc;
+    color: #475569;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+.pedido-card-stores i {
+    font-size: 11px;
+}
+
+
+/* ---------------------------------------------------------
+   INFORMACIÓN DEL PEDIDO
+   --------------------------------------------------------- */
+
+.pedido-card-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+
+    margin-bottom: 18px;
+}
+
+.pedido-card-info-item {
+    padding: 11px 12px;
+
+    border-radius: 12px;
+
+    background: #f8fafc;
+}
+
+.pedido-card-info-label {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.pedido-card-info-value {
+    display: block;
+
+    color: #1e293b;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+/* ---------------------------------------------------------
+   DESTINO
+   --------------------------------------------------------- */
+
+.pedido-card-destination {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+
+    padding: 12px;
+
+    border-radius: 12px;
+
+    background: #f8fafc;
+
+    margin-bottom: 17px;
+}
+
+.pedido-card-destination-icon {
+    width: 30px;
+    height: 30px;
+
+    border-radius: 9px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #ffffff;
+    color: #475569;
+
+    flex-shrink: 0;
+}
+
+.pedido-card-destination-content {
+    min-width: 0;
+}
+
+.pedido-card-destination-label {
+    display: block;
+
+    color: #94a3b8;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+
+    margin-bottom: 3px;
+}
+
+.pedido-card-destination-text {
+    color: #334155;
+
+    font-size: 13px;
+    line-height: 1.4;
+
+    word-break: break-word;
+}
+
+
+/* ---------------------------------------------------------
+   PIE DE PEDIDO
+   --------------------------------------------------------- */
+
+.pedido-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding-top: 15px;
+
+    border-top: 1px solid #f1f5f9;
+}
+
+.pedido-card-earning-label {
+    display: block;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    margin-bottom: 2px;
+}
+
+.pedido-card-earning {
+    color: #0f172a;
+
+    font-size: 21px;
+    font-weight: 900;
+}
+
+.pedido-card-total {
+    text-align: right;
+}
+
+.pedido-card-total-label {
+    display: block;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+
+    margin-bottom: 2px;
+}
+
+.pedido-card-total-value {
+    color: #334155;
+
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   GANANCIAS
+   ========================================================= */
+
+.earnings-hero {
+    position: relative;
+    overflow: hidden;
+
+    background: linear-gradient(
+        135deg,
+        #0f172a 0%,
+        #1e293b 100%
+    );
+
+    border-radius: 22px;
+
+    padding: 28px 30px;
+
+    margin-bottom: 20px;
+
+    color: #ffffff;
+
+    box-shadow:
+        0 12px 30px rgba(15, 23, 42, 0.16);
+}
+
+.earnings-hero::after {
+    content: "";
+
+    position: absolute;
+
+    width: 180px;
+    height: 180px;
+
+    right: -65px;
+    top: -75px;
+
+    border-radius: 50%;
+
+    border: 30px solid rgba(255, 255, 255, 0.04);
+
+    pointer-events: none;
+}
+
+.earnings-hero-label {
+    position: relative;
+    z-index: 1;
+
+    color: #cbd5e1;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    margin-bottom: 7px;
+}
+
+#gananciasTotal {
+    position: relative;
+    z-index: 1;
+
+    margin: 0;
+
+    font-size: 42px;
+    line-height: 1;
+
+    font-weight: 900;
+
+    letter-spacing: -1.3px;
+}
+
+.earnings-hero-subtitle {
+    position: relative;
+    z-index: 1;
+
+    margin-top: 11px;
+
+    color: #94a3b8;
+
+    font-size: 13px;
+}
+
+#gananciasEntregas {
+    color: #e2e8f0;
+    font-weight: 800;
+}
+
+
+/* ---------------------------------------------------------
+   RESUMEN DEL PERIODO
+   --------------------------------------------------------- */
+
+.earnings-period-summary {
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 14px;
+
+    margin-bottom: 24px;
+}
+
+.earnings-summary-card {
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 16px;
+
+    padding: 17px 18px;
+
+    box-shadow:
+        0 3px 12px rgba(15, 23, 42, 0.04);
+}
+
+.earnings-summary-label {
+    color: #94a3b8;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 0.35px;
+
+    margin-bottom: 6px;
+}
+
+.earnings-summary-value {
+    color: #0f172a;
+
+    font-size: 22px;
+    font-weight: 900;
+}
+
+
+/* ---------------------------------------------------------
+   TÍTULO DE MOVIMIENTOS
+   --------------------------------------------------------- */
+
+.ganancias-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin: 4px 0 14px;
+}
+
+.ganancias-section-heading h3 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.ganancias-section-heading span {
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+/* ---------------------------------------------------------
+   CONTENEDOR DE MOVIMIENTOS
+   --------------------------------------------------------- */
+
+.ganancias-movimientos {
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+
+/* ---------------------------------------------------------
+   TARJETA DE MOVIMIENTO
+   --------------------------------------------------------- */
+
+.ganancia-movimiento-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 16px;
+
+    padding: 15px 17px;
+
+    box-shadow:
+        0 3px 12px rgba(15, 23, 42, 0.035);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.ganancia-movimiento-card:hover {
+    transform: translateY(-1px);
+
+    border-color: #d8dee7;
+
+    box-shadow:
+        0 7px 18px rgba(15, 23, 42, 0.07);
+}
+
+.ganancia-movimiento-left {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    min-width: 0;
+}
+
+.ganancia-movimiento-icon {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #f1f5f9;
+    color: #334155;
+
+    flex-shrink: 0;
+}
+
+.ganancia-movimiento-info {
+    min-width: 0;
+}
+
+.ganancia-movimiento-title {
+    color: #1e293b;
+
+    font-size: 14px;
+    font-weight: 800;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ganancia-movimiento-meta {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    margin-top: 4px;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+}
+
+.ganancia-movimiento-right {
+    text-align: right;
+
+    flex-shrink: 0;
+}
+
+.ganancia-movimiento-amount {
+    color: #0f172a;
+
+    font-size: 17px;
+    font-weight: 900;
+}
+
+.ganancia-movimiento-status {
+    display: inline-flex;
+
+    margin-top: 4px;
+
+    padding: 4px 8px;
+
+    border-radius: 999px;
+
+    background: #f1f5f9;
+
+    color: #64748b;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+
+/* ---------------------------------------------------------
+   SEPARADORES POR DÍA
+   --------------------------------------------------------- */
+
+.ganancias-dia {
+    margin-bottom: 8px;
+}
+
+.ganancias-dia-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 7px 2px;
+
+    margin-bottom: 7px;
+}
+
+.ganancias-dia-fecha {
+    color: #64748b;
+
+    font-size: 12px;
+    font-weight: 800;
+
+    text-transform: capitalize;
+}
+
+.ganancias-dia-total {
+    color: #334155;
+
+    font-size: 12px;
+    font-weight: 900;
+}
+
+
+/* ---------------------------------------------------------
+   ESTADO VACÍO
+   --------------------------------------------------------- */
+
+.dashboard-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 220px;
+
+    padding: 30px;
+
+    background: #ffffff;
+
+    border: 1px dashed #dbe1e8;
+
+    border-radius: 18px;
+
+    text-align: center;
+}
+
+.dashboard-empty-icon {
+    width: 52px;
+    height: 52px;
+
+    border-radius: 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #f8fafc;
+    color: #94a3b8;
+
+    font-size: 20px;
+
+    margin-bottom: 12px;
+}
+
+.dashboard-empty-state h3 {
+    margin: 0 0 5px;
+
+    color: #334155;
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.dashboard-empty-state p {
+    max-width: 330px;
+
+    margin: 0;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   RESPONSIVE — TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .pedidos-list {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE — CELULAR
+   ========================================================= */
+
+@media (max-width: 640px) {
+
+    .inner-view-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .inner-view-title {
+        width: 100%;
+    }
+
+    .back-home-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .inner-view-title h2 {
+        font-size: 22px;
+    }
+
+    .inner-view-title-icon {
+        width: 43px;
+        height: 43px;
+        border-radius: 12px;
+    }
+
+    .dashboard-filters {
+        gap: 7px;
+        margin-bottom: 16px;
+    }
+
+    .dashboard-filter {
+        flex: 1;
+        min-width: max-content;
+        padding: 9px 11px;
+        text-align: center;
+    }
+
+    .pedido-disponible-card {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .pedido-card-top {
+        margin-bottom: 13px;
+    }
+
+    .pedido-card-info {
+        gap: 8px;
+    }
+
+    .pedido-card-info-item {
+        padding: 10px;
+    }
+
+    .pedido-card-footer {
+        align-items: flex-end;
+    }
+
+    .pedido-card-earning {
+        font-size: 19px;
+    }
+
+    .earnings-hero {
+        padding: 25px 22px;
+        border-radius: 19px;
+    }
+
+    #gananciasTotal {
+        font-size: 36px;
+    }
+
+    .earnings-period-summary {
+        gap: 9px;
+    }
+
+    .earnings-summary-card {
+        padding: 14px;
+        border-radius: 14px;
+    }
+
+    .earnings-summary-value {
+        font-size: 19px;
+    }
+
+    .ganancia-movimiento-card {
+        padding: 13px;
+        border-radius: 14px;
+    }
+
+    .ganancia-movimiento-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+    }
+
+    .ganancia-movimiento-title {
+        font-size: 13px;
+    }
+
+    .ganancia-movimiento-amount {
+        font-size: 16px;
+    }
+
+}
+
+
+/* =========================================================
+   CELULAR MUY PEQUEÑO
+   ========================================================= */
+
+@media (max-width: 390px) {
+
+    .pedido-card-info {
+        grid-template-columns: 1fr;
+    }
+
+    .pedido-card-footer {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .pedido-card-total {
+        text-align: left;
+    }
+
+    .earnings-period-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .ganancia-movimiento-card {
+        align-items: flex-start;
+    }
+
+    .ganancia-movimiento-right {
+        margin-top: 2px;
+    }
+
+}
