@@ -2832,23 +2832,71 @@ function renderizarGanancias(
 
 
     // =========================================
-    // TOTAL
-    // =========================================
+// RESUMEN DE GANANCIAS
+// =========================================
 
-    const total =
-        document.getElementById(
-            "gananciasTotal"
+const total =
+    document.getElementById(
+        "gananciasTotal"
+    );
+
+if (total) {
+    total.textContent =
+        formatearDinero(
+            gananciasTotales
         );
+}
 
 
-    if (total) {
+// =========================================
+// ENTREGA
+// =========================================
 
-        total.textContent =
-            formatearDinero(
-                gananciasTotales
-            );
+const gananciasEntregas =
+    document.getElementById(
+        "gananciasEntregas"
+    );
 
-    }
+if (gananciasEntregas) {
+    gananciasEntregas.textContent =
+        formatearDinero(
+            gananciasTotales
+        );
+}
+
+
+// =========================================
+// PERIODO — ENTREGA
+// =========================================
+
+const gananciasPeriodoEntregas =
+    document.getElementById(
+        "gananciasPeriodoEntregas"
+    );
+
+if (gananciasPeriodoEntregas) {
+    gananciasPeriodoEntregas.textContent =
+        formatearDinero(
+            gananciasTotales
+        );
+}
+
+
+// =========================================
+// PERIODO — TOTAL GENERADO
+// =========================================
+
+const gananciasPeriodoTotal =
+    document.getElementById(
+        "gananciasPeriodoTotal"
+    );
+
+if (gananciasPeriodoTotal) {
+    gananciasPeriodoTotal.textContent =
+        formatearDinero(
+            gananciasTotales
+        );
+}
 
 
     // =========================================
