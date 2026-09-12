@@ -9398,15 +9398,15 @@ window.mostrarComprobantePago = function(movimiento) {
 
 
        const esPagoFundador =
-        movimiento.tipo === "pago_fundador";
+    movimiento.tipo === "pago_fundador";
 
-    const tienda =
-        movimiento.tiendaNombre || "Tienda";
+const tienda =
+    movimiento.tiendaNombre || "Tienda";
 
-    const nombreDestinatario =
-        esPagoFundador
-            ? (movimiento.fundadorNombre || "Fundador")
-            : tienda;
+const nombreDestinatario =
+    esPagoFundador
+        ? (movimiento.fundadorNombre || "Fundador")
+        : tienda;
 
 
     const metodo =
@@ -9923,6 +9923,14 @@ window.descargarComprobantePago = function() {
         : new Date().toLocaleString("es-MX");
 
 
+const esPagoFundador =
+    movimiento.tipo === "pago_fundador";
+
+const nombreDestinatario =
+    esPagoFundador
+        ? (movimiento.fundadorNombre || "Fundador")
+        : (movimiento.tiendaNombre || "Tienda");
+   
     const html = `
 
 <!DOCTYPE html>
@@ -10143,18 +10151,16 @@ body {
 
 
     <div class="campo">
+    <span>
+        ${esPagoFundador ? "FUNDADOR" : "TIENDA"}
+    </span>
 
-        <span>
-            TIENDA
-        </span>
-
-        <strong>
-            ${escaparHTMLAdmin(
-                movimiento.tiendaNombre
-            )}
-        </strong>
-
-    </div>
+    <strong>
+        ${escaparHTMLAdmin(
+            nombreDestinatario
+        )}
+    </strong>
+</div>
 
 
     <div class="campo">
@@ -10172,11 +10178,12 @@ body {
     </div>
 
 
-    <div class="total">
-
-        <span>
-            PAGO RECIBIDO
-        </span>
+   <div class="total">
+    <span>
+        ${esPagoFundador
+            ? "PAGO AL FUNDADOR"
+            : "PAGO RECIBIDO"}
+    </span>
 
         <strong>
             ${moneda(
