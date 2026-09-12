@@ -713,13 +713,13 @@
 
                     <div>
 
-                        <strong>
-                            Pedidos disponibles
-                        </strong>
+<strong>
+    Pedidos disponibles
+</strong>
 
-                        <span>
-                            Revisa nuevas solicitudes
-                        </span>
+<span>
+    Revisa las solicitudes asignadas
+</span>
 
                     </div>
 
@@ -776,323 +776,346 @@
 
 
         <!-- =====================================================
-             VISTAS INTERNAS
-        ========================================================== -->
+     VISTAS INTERNAS DEL REPARTIDOR
+====================================================== -->
 
-        <section
-            id="singlePageViews"
-            hidden>
+<section
+    id="singlePageViews"
+    hidden>
 
+    <!-- =================================================
+         PEDIDOS DISPONIBLES
+    ================================================== -->
 
-            <!-- =================================================
-                 PEDIDOS
-            ================================================== -->
+    <section
+        id="view-pedidos"
+        class="dashboard-view"
+        hidden>
 
-            <section
-                id="view-pedidos"
-                class="dashboard-view"
-                hidden>
+        <div class="inner-view-header">
 
+            <button
+                type="button"
+                class="back-home-button"
+                data-view="inicio">
 
-                <div class="dashboard-view-header">
+                <span class="material-symbols-outlined">
+                    arrow_back
+                </span>
 
-                    <span class="section-kicker">
-                        MOTI GO
-                    </span>
+                <span>
+                    Inicio
+                </span>
 
+            </button>
 
-                    <h1>
-                        Pedidos
-                    </h1>
 
+            <div class="inner-view-title">
 
-                    <p>
-                        Solicitudes disponibles para realizar.
-                    </p>
+                <span class="section-label">
+                    OPERACIÓN
+                </span>
 
-                </div>
+                <h2>
+                    Pedidos disponibles
+                </h2>
 
+                <p>
+                    Solicitudes que el sistema
+                    ha asignado para ti.
+                </p>
 
-                <div
-                    id="pedidosContainer"
-                    class="dashboard-content">
+            </div>
 
-                </div>
+        </div>
 
 
-            </section>
+        <!-- =============================================
+             RESUMEN
+        ============================================== -->
 
+        <div class="orders-overview">
 
+            <div>
 
-            <!-- =================================================
-                 GANANCIAS
-            ================================================== -->
+                <span>
+                    Solicitudes disponibles
+                </span>
 
-            <section
-                id="view-ganancias"
-                class="dashboard-view"
-                hidden>
+                <strong
+                    id="pedidosDisponiblesCount">
+                    0
+                </strong>
 
+            </div>
 
-                <div class="dashboard-view-header">
 
-                    <span class="section-kicker">
-                        MOTI GO
-                    </span>
+            <span
+                class="material-symbols-outlined">
+                notifications_active
+            </span>
 
+        </div>
 
-                    <h1>
-                        Ganancias
-                    </h1>
 
+        <!-- =============================================
+             FILTROS
+        ============================================== -->
 
-                    <p>
-                        Consulta tus ganancias por entregas.
-                    </p>
+        <div class="dashboard-filters">
 
-                </div>
+            <button
+                type="button"
+                class="dashboard-filter active"
+                data-pedidos-filter="todos">
 
+                Todos
 
-                <div
-                    id="gananciasContainer"
-                    class="dashboard-content">
+            </button>
 
 
-                    <div class="financial-main-card">
+            <button
+                type="button"
+                class="dashboard-filter"
+                data-pedidos-filter="una">
 
-                        <span>
-                            Ganancias acumuladas
-                        </span>
+                1 tienda
 
+            </button>
 
-                        <strong id="gananciasTotal">
-                            $0.00
-                        </strong>
 
-                    </div>
+            <button
+                type="button"
+                class="dashboard-filter"
+                data-pedidos-filter="varias">
 
+                2+ tiendas
 
-                    <div
-                        id="gananciasFounderPanel"
-                        hidden>
-                    </div>
+            </button>
 
+        </div>
 
-                </div>
 
+        <!-- =============================================
+             LISTA
+        ============================================== -->
 
-            </section>
+        <div
+            id="pedidosContainer"
+            class="pedidos-list">
 
+        </div>
 
+    </section>
 
-            <!-- =================================================
-                 MIS ZONAS
-            ================================================== -->
 
-            <section
-                id="view-zonas"
-                class="dashboard-view"
-                hidden>
 
+    <!-- =================================================
+         GANANCIAS
+    ================================================== -->
 
-                <div class="dashboard-view-header">
+    <section
+        id="view-ganancias"
+        class="dashboard-view"
+        hidden>
 
-                    <span class="section-kicker">
-                        MOTI GO
-                    </span>
+        <div class="inner-view-header">
 
+            <button
+                type="button"
+                class="back-home-button"
+                data-view="inicio">
 
-                    <h1>
-                        Mis zonas
-                    </h1>
+                <span class="material-symbols-outlined">
+                    arrow_back
+                </span>
 
+                <span>
+                    Inicio
+                </span>
 
-                    <p>
-                        Consulta tus zonas de servicio.
-                    </p>
+            </button>
 
-                </div>
 
+            <div class="inner-view-title">
 
-                <div
-                    id="zonasContainer"
-                    class="dashboard-content">
+                <span class="section-label">
+                    FINANZAS
+                </span>
 
-                </div>
+                <h2>
+                    Mis ganancias
+                </h2>
 
+                <p>
+                    Consulta todo lo que has generado
+                    con tus entregas.
+                </p>
 
-            </section>
+            </div>
 
+        </div>
 
 
-            <!-- =================================================
-                 HISTORIAL
-            ================================================== -->
+        <!-- =============================================
+             TOTAL DE GANANCIAS
+        ============================================== -->
 
-            <section
-                id="view-historial"
-                class="dashboard-view"
-                hidden>
+        <div class="earnings-hero">
 
+            <span class="material-symbols-outlined">
+                payments
+            </span>
 
-                <div class="dashboard-view-header">
 
-                    <span class="section-kicker">
-                        MOTI GO
-                    </span>
+            <span class="earnings-hero-label">
+                GANANCIAS TOTALES
+            </span>
 
 
-                    <h1>
-                        Historial
-                    </h1>
+            <strong
+                id="gananciasTotal">
+                $0.00
+            </strong>
 
 
-                    <p>
-                        Revisa tus entregas realizadas.
-                    </p>
+            <span
+                id="gananciasEntregas">
+                0 entregas completadas
+            </span>
 
-                </div>
+        </div>
 
 
-                <div
-                    id="historialContainer"
-                    class="dashboard-content">
+        <!-- =============================================
+             FILTROS DE PERIODO
+        ============================================== -->
 
-                </div>
+        <div class="earnings-filter-section">
 
+            <span class="section-label">
+                PERIODO
+            </span>
 
-            </section>
 
+            <div class="dashboard-filters">
 
+                <button
+                    type="button"
+                    class="dashboard-filter active"
+                    data-ganancias-filter="todos">
 
-            <!-- =================================================
-                 MI PERFIL
-            ================================================== -->
+                    Todo
 
-            <section
-                id="view-perfil"
-                class="dashboard-view"
-                hidden>
+                </button>
 
 
-                <div class="dashboard-view-header">
+                <button
+                    type="button"
+                    class="dashboard-filter"
+                    data-ganancias-filter="hoy">
 
-                    <span class="section-kicker">
-                        MOTI GO
-                    </span>
+                    Hoy
 
+                </button>
 
-                    <h1>
-                        Mi perfil
-                    </h1>
 
+                <button
+                    type="button"
+                    class="dashboard-filter"
+                    data-ganancias-filter="7dias">
 
-                    <p>
-                        Información de tu cuenta de repartidor.
-                    </p>
+                    7 días
 
-                </div>
+                </button>
 
 
-                <div
-                    id="perfilContainer"
-                    class="dashboard-content">
+                <button
+                    type="button"
+                    class="dashboard-filter"
+                    data-ganancias-filter="30dias">
 
+                    30 días
 
-                    <div class="profile-card">
+                </button>
 
+            </div>
 
-                        <!-- Cabecera -->
+        </div>
 
-                        <div class="profile-header">
 
-                            <div
-                                id="profileInitial"
-                                class="profile-avatar">
+        <!-- =============================================
+             RESUMEN DEL PERIODO
+        ============================================== -->
 
-                                ?
+        <div class="earnings-period-summary">
 
-                            </div>
+            <div>
 
+                <span>
+                    Entregas
+                </span>
 
-                            <div>
+                <strong
+                    id="gananciasPeriodoEntregas">
+                    0
+                </strong>
 
-                                <strong id="profileName">
-                                    Repartidor
-                                </strong>
+            </div>
 
 
-                                <span id="profileRole">
-                                    Repartidor MOTI GO
-                                </span>
+            <div>
 
-                            </div>
+                <span>
+                    Generado
+                </span>
 
-                        </div>
+                <strong
+                    id="gananciasPeriodoTotal">
+                    $0.00
+                </strong>
 
+            </div>
 
+        </div>
 
-                        <!-- Información -->
 
-                        <div class="profile-information">
+        <!-- =============================================
+             MOVIMIENTOS
+        ============================================== -->
 
+        <div class="earnings-list-header">
 
-                            <div class="profile-row">
+            <div>
 
-                                <span>
-                                    Nombre completo
-                                </span>
+                <span class="section-label">
+                    MOVIMIENTOS
+                </span>
 
+                <h3>
+                    Tus entregas
+                </h3>
 
-                                <strong id="profileFullName">
-                                    —
-                                </strong>
+            </div>
 
-                            </div>
+        </div>
 
 
+        <div
+            id="gananciasContainer"
+            class="ganancias-container">
 
-                            <div class="profile-row">
+            <div
+                id="gananciasMovimientos"
+                class="ganancias-movimientos">
 
-                                <span>
-                                    Correo electrónico
-                                </span>
+            </div>
 
+        </div>
 
-                                <strong id="profileEmail">
-                                    —
-                                </strong>
+    </section>
 
-                            </div>
-
-
-
-                            <div class="profile-row">
-
-                                <span>
-                                    Estado
-                                </span>
-
-
-                                <strong id="profileStatus">
-                                    —
-                                </strong>
-
-                            </div>
-
-
-                        </div>
-
-                    </div>
-
-
-                </div>
-
-
-            </section>
-
-
-        </section>
+</section>
 
 
     </main>
