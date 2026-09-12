@@ -132,6 +132,144 @@ menuOverlay.addEventListener(
     cerrarMenu
 );
 
+// =========================================================
+// NAVEGACIÓN INTERNA DEL DASHBOARD
+// =========================================================
+
+const homeView =
+    document.getElementById(
+        "homeView"
+    );
+
+const singlePageViews =
+    document.getElementById(
+        "singlePageViews"
+    );
+
+
+document
+    .querySelectorAll(
+        "[data-view]"
+    )
+    .forEach(
+        boton => {
+
+            boton.addEventListener(
+                "click",
+                event => {
+
+                    event.preventDefault();
+
+                    const vista =
+                        boton.dataset.view;
+
+
+                    // =====================================
+                    // INICIO
+                    // =====================================
+
+                    if (
+                        vista ===
+                        "inicio"
+                    ) {
+
+                        if (homeView) {
+                            homeView.hidden =
+                                false;
+                        }
+
+                        if (singlePageViews) {
+                            singlePageViews.hidden =
+                                true;
+                        }
+
+                        cerrarMenu();
+
+                        return;
+                    }
+
+
+                    // =====================================
+                    // VISTA INTERNA
+                    // =====================================
+
+                    if (singlePageViews) {
+
+                        singlePageViews.hidden =
+                            false;
+
+                    }
+
+
+                    if (homeView) {
+
+                        homeView.hidden =
+                            true;
+
+                    }
+
+
+                    document
+                        .querySelectorAll(
+                            ".dashboard-view"
+                        )
+                        .forEach(
+                            vistaElemento => {
+
+                                vistaElemento.hidden =
+                                    true;
+
+                            }
+                        );
+
+
+                    const vistaSeleccionada =
+                        document.getElementById(
+                            `view-${vista}`
+                        );
+
+
+                    if (
+                        vistaSeleccionada
+                    ) {
+
+                        vistaSeleccionada.hidden =
+                            false;
+
+                    }
+
+
+                    // =====================================
+                    // CARGAS ESPECÍFICAS
+                    // =====================================
+
+                    if (
+                        vista ===
+                        "pedidos"
+                    ) {
+
+                        iniciarPedidosDisponibles();
+
+                    }
+
+
+                    if (
+                        vista ===
+                        "ganancias"
+                    ) {
+
+                        iniciarVistaGanancias();
+
+                    }
+
+
+                    cerrarMenu();
+
+                }
+            );
+
+        }
+    );
 
 // =========================================
 // ESTADO
@@ -1880,5 +2018,893 @@ activeTripCard.style.display =
         );
 
     }
+
+}
+
+// =========================================================
+// PEDIDOS DISPONIBLES PARA ESTE REPARTIDOR
+// =========================================================
+
+let listenerPedidosDisponibles =
+    null;
+
+
+function iniciarPedidosDisponibles() {
+
+    const user =
+        auth.currentUser;
+
+
+    if (!user) {
+        return;
+    }
+
+
+    if (
+        listenerPedidosDisponibles
+    ) {
+
+        listenerPedidosDisponibles();
+
+        listenerPedidosDisponibles =
+            null;
+
+    }
+
+
+    const uid =
+        user.uid;
+
+
+    const pedidosQuery =
+        query(
+            collection(
+                db,
+                "pedidos"
+            ),
+
+            where(
+                "estado",
+                "==",
+                "solicitud_repartidor"
+            ),
+
+            where(
+                "repartidorId",
+                "==",
+                uid
+            )
+        );
+
+
+    listenerPedidosDisponibles =
+        onSnapshot(
+
+            pedidosQuery,
+
+            snapshot => {
+
+                const pedidos =
+                    snapshot.docs.map(
+                        pedidoDoc => ({
+                            id:
+                                pedidoDoc.id,
+
+                            ...pedidoDoc.data()
+                        })
+                    );
+
+
+                renderizarPedidosDisponibles(
+                    pedidos
+                );
+
+
+                console.log(
+                    "📦 MOTI GO — pedidos disponibles para este repartidor:",
+                    pedidos.length
+                );
+
+            },
+
+            error => {
+
+                console.error(
+                    "❌ MOTI GO — error cargando pedidos disponibles:",
+                    error
+                );
+
+            }
+
+        );
+
+}
+
+// =========================================================
+// RENDERIZAR PEDIDOS DISPONIBLES
+// =========================================================
+
+function renderizarPedidosDisponibles(
+    pedidos
+) {
+
+    const container =
+        document.getElementById(
+            "pedidosContainer"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    // =========================================
+    // SIN PEDIDOS
+    // =========================================
+
+    if (
+        !pedidos ||
+        pedidos.length === 0
+    ) {
+
+        container.innerHTML = `
+
+            <div class="empty-state">
+
+                <div class="empty-state-icon">
+                    ✓
+                </div>
+
+                <strong>
+                    No hay pedidos disponibles
+                </strong>
+
+                <p>
+                    Cuando el sistema te asigne
+                    una nueva solicitud aparecerá aquí.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    // =========================================
+    // PEDIDOS
+    // =========================================
+
+    container.innerHTML =
+        pedidos
+            .map(
+                pedido => {
+
+                    const productos =
+                        Array.isArray(
+                            pedido.productos
+                        )
+                            ? pedido.productos.length
+                            : 0;
+
+
+                    const tiendas =
+                        Array.isArray(
+                            pedido.tiendas
+                        )
+                            ? pedido.tiendas.length
+                            : 0;
+
+
+                    const ganancia =
+                        Number(
+                            pedido
+                                .comisiones
+                                ?.repartidor
+                                ?.monto
+                        ) || 0;
+
+
+                    const folio =
+                        pedido.folio ||
+                        pedido.id;
+
+
+                    return `
+
+                        <div class="dashboard-card">
+
+                            <div class="dashboard-card-title">
+
+                                <strong>
+                                    Pedido ${escaparTexto(
+                                        folio
+                                    )}
+                                </strong>
+
+                                <span class="badge badge-warning">
+                                    Nueva solicitud
+                                </span>
+
+                            </div>
+
+
+                            <div class="pedido-info">
+
+                                <div class="pedido-info-item">
+
+                                    <span>
+                                        Productos
+                                    </span>
+
+                                    <strong>
+                                        ${productos}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="pedido-info-item">
+
+                                    <span>
+                                        Tiendas
+                                    </span>
+
+                                    <strong>
+                                        ${tiendas}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="pedido-info-item">
+
+                                    <span>
+                                        Total cliente
+                                    </span>
+
+                                    <strong>
+                                        ${formatearDinero(
+                                            pedido.total
+                                        )}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="pedido-info-item">
+
+                                    <span>
+                                        Tu ganancia
+                                    </span>
+
+                                    <strong class="text-success">
+                                        ${formatearDinero(
+                                            ganancia
+                                        )}
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="pedido-total">
+
+                                <span>
+                                    Esperando respuesta
+                                </span>
+
+                                <strong>
+                                    ${formatearDinero(
+                                        ganancia
+                                    )}
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+// =========================================================
+// ESCAPAR TEXTO
+// =========================================================
+
+function escaparTexto(
+    valor
+) {
+
+    return String(
+        valor ?? ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+// =========================================================
+// VISTA DE GANANCIAS
+// =========================================================
+
+let listenerGanancias =
+    null;
+
+
+function iniciarVistaGanancias() {
+
+    const user =
+        auth.currentUser;
+
+
+    if (!user) {
+        return;
+    }
+
+
+    if (
+        listenerGanancias
+    ) {
+
+        listenerGanancias();
+
+        listenerGanancias =
+            null;
+
+    }
+
+
+    const uid =
+        user.uid;
+
+
+    const pedidosQuery =
+        query(
+            collection(
+                db,
+                "pedidos"
+            ),
+
+            where(
+                "repartidorId",
+                "==",
+                uid
+            )
+        );
+
+
+    listenerGanancias =
+        onSnapshot(
+
+            pedidosQuery,
+
+            snapshot => {
+
+                const pedidos =
+                    snapshot.docs
+                        .map(
+                            pedidoDoc => ({
+                                id:
+                                    pedidoDoc.id,
+
+                                ...pedidoDoc.data()
+                            })
+                        )
+                        .filter(
+                            pedido =>
+                                pedido.estado ===
+                                    "entregado" &&
+
+                                pedido.entregaConfirmada ===
+                                    true
+                        );
+
+
+                pedidos.sort(
+                    (
+                        a,
+                        b
+                    ) => {
+
+                        const fechaA =
+                            obtenerFecha(
+                                a.fechaFinalizacion
+                            );
+
+                        const fechaB =
+                            obtenerFecha(
+                                b.fechaFinalizacion
+                            );
+
+
+                        return (
+                            fechaB -
+                            fechaA
+                        );
+
+                    }
+                );
+
+
+                renderizarGanancias(
+                    pedidos
+                );
+
+
+                console.log(
+                    "💰 MOTI GO — movimientos de ganancias:",
+                    pedidos.length
+                );
+
+            },
+
+            error => {
+
+                console.error(
+                    "❌ MOTI GO — error cargando ganancias:",
+                    error
+                );
+
+            }
+
+        );
+
+}
+
+// =========================================================
+// OBTENER FECHA
+// =========================================================
+
+function obtenerFecha(
+    valor
+) {
+
+    if (
+        valor &&
+        typeof valor.toDate ===
+            "function"
+    ) {
+
+        return valor.toDate();
+
+    }
+
+
+    if (
+        valor instanceof Date
+    ) {
+
+        return valor;
+
+    }
+
+
+    if (valor) {
+
+        const fecha =
+            new Date(
+                valor
+            );
+
+
+        if (
+            !isNaN(
+                fecha.getTime()
+            )
+        ) {
+
+            return fecha;
+
+        }
+
+    }
+
+
+    return new Date(0);
+
+}
+
+// =========================================================
+// RENDERIZAR GANANCIAS
+// =========================================================
+
+function renderizarGanancias(
+    pedidos
+) {
+
+    const container =
+        document.getElementById(
+            "gananciasContainer"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    let gananciasTotales =
+        0;
+
+
+    pedidos.forEach(
+        pedido => {
+
+            gananciasTotales +=
+                Number(
+                    pedido
+                        .comisiones
+                        ?.repartidor
+                        ?.monto
+                ) || 0;
+
+        }
+    );
+
+
+    // =========================================
+    // TOTAL
+    // =========================================
+
+    const total =
+        document.getElementById(
+            "gananciasTotal"
+        );
+
+
+    if (total) {
+
+        total.textContent =
+            formatearDinero(
+                gananciasTotales
+            );
+
+    }
+
+
+    // =========================================
+    // AGRUPAR POR DÍA
+    // =========================================
+
+    const grupos =
+        {};
+
+
+    pedidos.forEach(
+        pedido => {
+
+            const fecha =
+                obtenerFecha(
+                    pedido.fechaFinalizacion
+                );
+
+
+            const clave =
+                fecha.toISOString()
+                    .slice(
+                        0,
+                        10
+                    );
+
+
+            if (
+                !grupos[clave]
+            ) {
+
+                grupos[clave] = {
+
+                    fecha,
+
+                    pedidos: [],
+
+                    total: 0
+
+                };
+
+            }
+
+
+            const ganancia =
+                Number(
+                    pedido
+                        .comisiones
+                        ?.repartidor
+                        ?.monto
+                ) || 0;
+
+
+            grupos[
+                clave
+            ].pedidos.push(
+                pedido
+            );
+
+
+            grupos[
+                clave
+            ].total +=
+                ganancia;
+
+        }
+    );
+
+
+    const dias =
+        Object.values(
+            grupos
+        ).sort(
+            (
+                a,
+                b
+            ) =>
+                b.fecha -
+                a.fecha
+        );
+
+
+    // =========================================
+    // CONTENEDOR DE MOVIMIENTOS
+    // =========================================
+
+    let movimientos =
+        document.getElementById(
+            "gananciasMovimientos"
+        );
+
+
+    if (!movimientos) {
+
+        movimientos =
+            document.createElement(
+                "div"
+            );
+
+        movimientos.id =
+            "gananciasMovimientos";
+
+
+        movimientos.className =
+            "dashboard-card";
+
+
+        container.appendChild(
+            movimientos
+        );
+
+    }
+
+
+    // =========================================
+    // SIN MOVIMIENTOS
+    // =========================================
+
+    if (
+        dias.length === 0
+    ) {
+
+        movimientos.innerHTML = `
+
+            <div class="dashboard-card-title">
+
+                <strong>
+                    Movimientos
+                </strong>
+
+            </div>
+
+
+            <div class="empty-state">
+
+                <div class="empty-state-icon">
+                    $
+                </div>
+
+                <strong>
+                    Aún no tienes ganancias
+                </strong>
+
+                <p>
+                    Tus entregas completadas
+                    aparecerán aquí.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    // =========================================
+    // GENERAR MOVIMIENTOS
+    // =========================================
+
+    let html = `
+
+        <div class="dashboard-card-title">
+
+            <strong>
+                Movimientos
+            </strong>
+
+        </div>
+
+    `;
+
+
+    dias.forEach(
+        grupo => {
+
+            html += `
+
+                <div
+                    class="ganancia-movimiento"
+                    style="
+                        margin-top:12px;
+                        padding-top:12px;
+                        border-top:1px solid #f0f1f3;
+                    "
+                >
+
+                    <div
+                        class="ganancia-movimiento-info"
+                    >
+
+                        <strong>
+                            ${formatearFechaGanancia(
+                                grupo.fecha
+                            )}
+                        </strong>
+
+                        <span>
+                            ${grupo.pedidos.length}
+                            ${
+                                grupo.pedidos.length === 1
+                                    ? " entrega"
+                                    : " entregas"
+                            }
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="ganancia-monto"
+                    >
+                        ${formatearDinero(
+                            grupo.total
+                        )}
+                    </div>
+
+                </div>
+
+            `;
+
+
+            grupo.pedidos.forEach(
+                pedido => {
+
+                    const ganancia =
+                        Number(
+                            pedido
+                                .comisiones
+                                ?.repartidor
+                                ?.monto
+                        ) || 0;
+
+
+                    const folio =
+                        pedido.folio ||
+                        pedido.id;
+
+
+                    const fecha =
+                        obtenerFecha(
+                            pedido.fechaFinalizacion
+                        );
+
+
+                    html += `
+
+                        <div
+                            class="ganancia-movimiento"
+                        >
+
+                            <div
+                                class="ganancia-movimiento-info"
+                            >
+
+                                <strong>
+                                    Pedido ${escaparTexto(
+                                        folio
+                                    )}
+                                </strong>
+
+                                <span>
+                                    Entrega completada ·
+                                    ${fecha.toLocaleTimeString(
+                                        "es-MX",
+                                        {
+                                            hour:
+                                                "2-digit",
+
+                                            minute:
+                                                "2-digit"
+                                        }
+                                    )}
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="ganancia-monto text-success"
+                            >
+                                +${formatearDinero(
+                                    ganancia
+                                )}
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            );
+
+        }
+    );
+
+
+    movimientos.innerHTML =
+        html;
+
+}
+
+// =========================================================
+// FECHA PARA GANANCIAS
+// =========================================================
+
+function formatearFechaGanancia(
+    fecha
+) {
+
+    return fecha.toLocaleDateString(
+        "es-MX",
+        {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+        }
+    );
 
 }
