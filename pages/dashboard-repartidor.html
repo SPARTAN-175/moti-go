@@ -5,31 +5,52 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <meta name="theme-color"
-          content="#16a34a">
+    <meta
+        name="theme-color"
+        content="#16a34a"
+    >
+
+    <meta
+        name="description"
+        content="Panel de repartidor MOTI GO"
+    >
 
     <title>MOTI GO | Repartidor</title>
 
-    <link rel="manifest"
-          href="../manifest.json">
+    <link
+        rel="manifest"
+        href="../manifest.json"
+    >
 
-    <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    >
 
-    <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+    <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+    >
 
-    <link rel="stylesheet"
-          href="../css/variables.css">
+    <link
+        rel="stylesheet"
+        href="../css/variables.css"
+    >
 
-    <link rel="stylesheet"
-          href="../css/main.css">
+    <link
+        rel="stylesheet"
+        href="../css/main.css"
+    >
 
-    <link rel="stylesheet"
-          href="../css/conductor.css">
+    <link
+        rel="stylesheet"
+        href="../css/conductor.css"
+    >
 
 </head>
 
@@ -39,23 +60,27 @@
 <div class="go-app">
 
 
-    <!-- =========================
-         OVERLAY MENU
-    ========================== -->
+    <!-- =====================================================
+         OVERLAY
+    ====================================================== -->
 
     <div
         id="menuOverlay"
-        class="menu-overlay">
-    </div>
+        class="menu-overlay"
+    ></div>
 
 
-    <!-- =========================
-         MENU LATERAL
-    ========================== -->
+
+    <!-- =====================================================
+         MENÚ LATERAL
+    ====================================================== -->
 
     <aside
         id="sideMenu"
-        class="side-menu">
+        class="side-menu"
+    >
+
+        <!-- ENCABEZADO DEL MENÚ -->
 
         <div class="side-menu-header">
 
@@ -67,9 +92,12 @@
 
             </div>
 
-            <div>
 
-                <strong>MOTI GO</strong>
+            <div class="side-brand-text">
+
+                <strong>
+                    MOTI GO
+                </strong>
 
                 <span>
                     Repartidor
@@ -77,10 +105,13 @@
 
             </div>
 
+
             <button
                 id="closeMenu"
                 class="icon-button"
-                type="button">
+                type="button"
+                aria-label="Cerrar menú"
+            >
 
                 <span class="material-symbols-outlined">
                     close
@@ -91,20 +122,21 @@
         </div>
 
 
+
+        <!-- PERFIL DEL REPARTIDOR -->
+
         <div class="side-profile">
 
             <div class="side-avatar">
 
-                <span
-                    class="material-symbols-outlined">
-
+                <span class="material-symbols-outlined">
                     person
-
                 </span>
 
             </div>
 
-            <div>
+
+            <div class="side-profile-info">
 
                 <strong id="sideUserName">
                     Repartidor
@@ -119,11 +151,18 @@
         </div>
 
 
-        <nav class="side-navigation">
+
+        <!-- NAVEGACIÓN -->
+
+        <nav
+            class="side-navigation"
+            aria-label="Navegación principal"
+        >
 
             <a
                 href="dashboard-repartidor.html"
-                class="side-link active">
+                class="side-link active"
+            >
 
                 <span class="material-symbols-outlined">
                     home
@@ -138,7 +177,8 @@
 
             <a
                 href="solicitudes.html"
-                class="side-link">
+                class="side-link"
+            >
 
                 <span class="material-symbols-outlined">
                     package_2
@@ -153,7 +193,8 @@
 
             <a
                 href="cartera-repartidor.html"
-                class="side-link">
+                class="side-link"
+            >
 
                 <span class="material-symbols-outlined">
                     account_balance_wallet
@@ -168,7 +209,8 @@
 
             <a
                 href="ganancias-repartidor.html"
-                class="side-link">
+                class="side-link"
+            >
 
                 <span class="material-symbols-outlined">
                     monitoring
@@ -183,7 +225,8 @@
 
             <a
                 href="zonas-repartidor.html"
-                class="side-link">
+                class="side-link"
+            >
 
                 <span class="material-symbols-outlined">
                     location_on
@@ -198,7 +241,8 @@
 
             <a
                 href="historial-conductor.html"
-                class="side-link">
+                class="side-link"
+            >
 
                 <span class="material-symbols-outlined">
                     history
@@ -213,11 +257,15 @@
         </nav>
 
 
+
+        <!-- PARTE INFERIOR -->
+
         <div class="side-menu-bottom">
 
             <a
                 href="perfil-conductor.html"
-                class="side-link">
+                class="side-link"
+            >
 
                 <span class="material-symbols-outlined">
                     person
@@ -233,7 +281,8 @@
             <button
                 id="btnLogout"
                 class="side-link side-logout"
-                type="button">
+                type="button"
+            >
 
                 <span class="material-symbols-outlined">
                     logout
@@ -250,22 +299,26 @@
     </aside>
 
 
-    <!-- =========================
-         HEADER
-    ========================== -->
+
+    <!-- =====================================================
+         ENCABEZADO PRINCIPAL
+    ====================================================== -->
 
     <header class="go-header">
 
         <button
             id="openMenu"
             class="icon-button"
-            type="button">
+            type="button"
+            aria-label="Abrir menú"
+        >
 
             <span class="material-symbols-outlined">
                 menu
             </span>
 
         </button>
+
 
 
         <div class="go-brand">
@@ -281,9 +334,12 @@
         </div>
 
 
+
         <a
             href="perfil-conductor.html"
-            class="header-avatar">
+            class="header-avatar"
+            aria-label="Mi perfil"
+        >
 
             <span class="material-symbols-outlined">
                 person
@@ -294,35 +350,50 @@
     </header>
 
 
-    <!-- =========================
-         CONTENIDO
-    ========================== -->
+
+    <!-- =====================================================
+         CONTENIDO PRINCIPAL
+    ====================================================== -->
 
     <main class="go-main">
 
 
+        <!-- =================================================
+             BIENVENIDA
+        ================================================== -->
+
         <section class="welcome-section">
 
-            <p class="eyebrow">
-                Panel del repartidor
-            </p>
+            <div class="welcome-content">
 
-            <h1 id="userName">
-                Hola...
-            </h1>
+                <span class="eyebrow">
+                    PANEL DEL REPARTIDOR
+                </span>
 
-            <p>
-                ¿Listo para recibir pedidos?
-            </p>
+
+                <h1 id="userName">
+                    Hola...
+                </h1>
+
+
+                <p>
+                    Administra tus entregas desde aquí.
+                </p>
+
+            </div>
 
         </section>
 
 
-        <!-- =====================
-             ESTADO
-        ====================== -->
 
-        <section class="availability-section">
+        <!-- =================================================
+             DISPONIBILIDAD
+        ================================================== -->
+
+        <section
+            class="availability-section"
+            aria-label="Estado del servicio"
+        >
 
             <div class="availability-heading">
 
@@ -332,33 +403,39 @@
                         ESTADO DEL SERVICIO
                     </span>
 
+
                     <h2 id="statusButton">
                         Disponible
                     </h2>
 
                 </div>
 
+
                 <span
                     id="statusIndicator"
-                    class="status-indicator">
-                </span>
+                    class="status-indicator"
+                ></span>
 
             </div>
 
 
             <p
                 id="statusDescription"
-                class="availability-description">
-
-                Estás recibiendo solicitudes
-
+                class="availability-description"
+            >
+                Estás recibiendo solicitudes.
             </p>
 
 
             <button
                 id="statusToggle"
                 class="availability-action"
-                type="button">
+                type="button"
+            >
+
+                <span class="material-symbols-outlined">
+                    sync
+                </span>
 
                 Cambiar disponibilidad
 
@@ -367,35 +444,52 @@
         </section>
 
 
-        <!-- =====================
-             RESUMEN
-        ====================== -->
 
-        <section class="today-section">
+        <!-- =================================================
+             RESUMEN DE HOY
+        ================================================== -->
+
+        <section
+            class="today-section"
+            aria-label="Resumen de hoy"
+        >
 
             <div class="section-heading">
 
-                <span class="section-label">
-                    HOY
-                </span>
+                <div>
+
+                    <span class="section-label">
+                        RESUMEN DE HOY
+                    </span>
+
+                </div>
+
 
                 <span
                     id="todayDate"
-                    class="section-date">
-                </span>
+                    class="section-date"
+                ></span>
 
             </div>
 
 
+
             <div class="today-summary">
+
+                <!-- PEDIDOS -->
 
                 <div class="summary-item">
 
-                    <span class="material-symbols-outlined">
-                        package_2
-                    </span>
+                    <div class="summary-icon">
 
-                    <div>
+                        <span class="material-symbols-outlined">
+                            package_2
+                        </span>
+
+                    </div>
+
+
+                    <div class="summary-data">
 
                         <strong id="todayOrders">
                             0
@@ -410,17 +504,25 @@
                 </div>
 
 
-                <div class="summary-divider">
-                </div>
 
+                <div class="summary-divider"></div>
+
+
+
+                <!-- GANANCIAS -->
 
                 <div class="summary-item">
 
-                    <span class="material-symbols-outlined">
-                        payments
-                    </span>
+                    <div class="summary-icon">
 
-                    <div>
+                        <span class="material-symbols-outlined">
+                            payments
+                        </span>
+
+                    </div>
+
+
+                    <div class="summary-data">
 
                         <strong id="todayEarnings">
                             $0.00
@@ -439,11 +541,15 @@
         </section>
 
 
-        <!-- =====================
-             CARTERA
-        ====================== -->
 
-        <section class="wallet-section">
+        <!-- =================================================
+             CARTERA
+        ================================================== -->
+
+        <section
+            class="wallet-section"
+            aria-label="Mi cartera"
+        >
 
             <div class="wallet-top">
 
@@ -454,30 +560,45 @@
                     </span>
 
                     <p>
-                        Saldo disponible
+                        Resumen de tu saldo
                     </p>
 
                 </div>
 
-                <span class="material-symbols-outlined">
-                    account_balance_wallet
-                </span>
+
+                <div class="wallet-icon">
+
+                    <span class="material-symbols-outlined">
+                        account_balance_wallet
+                    </span>
+
+                </div>
 
             </div>
 
 
-            <strong
-                id="walletBalance"
-                class="wallet-balance">
 
-                $0.00
+            <div class="wallet-main">
 
-            </strong>
+                <span>
+                    Saldo disponible
+                </span>
+
+
+                <strong
+                    id="walletBalance"
+                    class="wallet-balance"
+                >
+                    $0.00
+                </strong>
+
+            </div>
+
 
 
             <div class="wallet-details">
 
-                <div>
+                <div class="wallet-detail">
 
                     <span>
                         Ganancias
@@ -490,7 +611,7 @@
                 </div>
 
 
-                <div>
+                <div class="wallet-detail">
 
                     <span>
                         Comisiones MOTI
@@ -505,11 +626,15 @@
             </div>
 
 
+
             <a
                 href="cartera-repartidor.html"
-                class="wallet-link">
+                class="wallet-link"
+            >
 
-                Ver movimientos
+                <span>
+                    Ver movimientos
+                </span>
 
                 <span class="material-symbols-outlined">
                     arrow_forward
@@ -520,14 +645,17 @@
         </section>
 
 
-        <!-- =====================
+
+        <!-- =================================================
              PEDIDO ACTIVO
-        ====================== -->
+        ================================================== -->
 
         <section
             id="activeTripCard"
             class="active-order-section"
-            style="display:none;">
+            style="display:none;"
+            aria-label="Pedido activo"
+        >
 
             <div class="section-heading">
 
@@ -535,11 +663,13 @@
                     PEDIDO ACTIVO
                 </span>
 
+
                 <span class="active-dot">
                     EN CURSO
                 </span>
 
             </div>
+
 
 
             <div class="active-order-content">
@@ -553,28 +683,29 @@
                 </div>
 
 
+
                 <div class="active-order-info">
 
                     <strong id="activePassenger">
                     </strong>
 
+
                     <span>
-                        Entrega
+                        Entrega en curso
                     </span>
+
 
                     <p>
 
-                        <span
-                            class="material-symbols-outlined">
-
+                        <span class="material-symbols-outlined">
                             location_on
-
                         </span>
 
                         <span id="activeDestination">
                         </span>
 
                     </p>
+
 
                     <small id="activeStatus">
                     </small>
@@ -584,12 +715,16 @@
             </div>
 
 
+
             <button
                 id="continueTrip"
                 class="continue-order"
-                type="button">
+                type="button"
+            >
 
-                Continuar entrega
+                <span>
+                    Continuar entrega
+                </span>
 
                 <span class="material-symbols-outlined">
                     arrow_forward
@@ -600,24 +735,32 @@
         </section>
 
 
-        <!-- =====================
-             ACTIVIDAD
-        ====================== -->
 
-        <section class="activity-section">
+        <!-- =================================================
+             ACCESOS RÁPIDOS
+        ================================================== -->
+
+        <section
+            class="activity-section"
+            aria-label="Accesos rápidos"
+        >
 
             <div class="section-heading">
 
                 <span class="section-label">
-                    ACCESO RÁPIDO
+                    ACCESOS RÁPIDOS
                 </span>
 
             </div>
 
 
+
+            <!-- PEDIDOS -->
+
             <a
                 href="solicitudes.html"
-                class="activity-link">
+                class="activity-link"
+            >
 
                 <div class="activity-icon">
 
@@ -627,17 +770,19 @@
 
                 </div>
 
-                <div>
+
+                <div class="activity-text">
 
                     <strong>
                         Pedidos disponibles
                     </strong>
 
                     <span>
-                        Revisa nuevas solicitudes
+                        Revisa las solicitudes disponibles
                     </span>
 
                 </div>
+
 
                 <span class="material-symbols-outlined arrow">
                     arrow_forward_ios
@@ -646,9 +791,13 @@
             </a>
 
 
+
+            <!-- ZONAS -->
+
             <a
                 href="zonas-repartidor.html"
-                class="activity-link">
+                class="activity-link"
+            >
 
                 <div class="activity-icon">
 
@@ -658,7 +807,8 @@
 
                 </div>
 
-                <div>
+
+                <div class="activity-text">
 
                     <strong>
                         Mis zonas
@@ -670,6 +820,44 @@
 
                 </div>
 
+
+                <span class="material-symbols-outlined arrow">
+                    arrow_forward_ios
+                </span>
+
+            </a>
+
+
+
+            <!-- HISTORIAL -->
+
+            <a
+                href="historial-conductor.html"
+                class="activity-link"
+            >
+
+                <div class="activity-icon">
+
+                    <span class="material-symbols-outlined">
+                        history
+                    </span>
+
+                </div>
+
+
+                <div class="activity-text">
+
+                    <strong>
+                        Historial de entregas
+                    </strong>
+
+                    <span>
+                        Consulta tus pedidos anteriores
+                    </span>
+
+                </div>
+
+
                 <span class="material-symbols-outlined arrow">
                     arrow_forward_ios
                 </span>
@@ -679,25 +867,43 @@
         </section>
 
 
+
+        <!-- =================================================
+             ESPACIO INFERIOR
+        ================================================== -->
+
+        <div class="dashboard-footer">
+
+            <span class="material-symbols-outlined">
+                verified
+            </span>
+
+            <span>
+                Reparte con MOTI GO
+            </span>
+
+        </div>
+
+
     </main>
 
 
-    <!-- =========================
-         POPUP SOLICITUD
-    ========================== -->
+
+    <!-- =====================================================
+         POPUP DE SOLICITUD
+    ====================================================== -->
 
     <section
         id="requestPopup"
         class="request-popup"
-        style="display:none;">
+        style="display:none;"
+        aria-label="Nueva solicitud"
+    >
 
-        <div
-            class="request-popup-handle">
-        </div>
+        <div class="request-popup-handle"></div>
 
-        <div
-            id="requestContent">
-        </div>
+
+        <div id="requestContent"></div>
 
     </section>
 
@@ -705,28 +911,45 @@
 </div>
 
 
-<script type="module"
-        src="../js/logout.js">
-</script>
 
-<script type="module"
-        src="../js/auth-guard.js">
-</script>
+<!-- =====================================================
+     SCRIPTS
+====================================================== -->
 
-<script type="module"
-        src="../js/user-data.js">
-</script>
-
-<script type="module"
-        src="../js/dashboard-conductor.js">
-</script>
+<script
+    type="module"
+    src="../js/logout.js"
+></script>
 
 
-<script type="module" src="../js/moti-go-repartidor.js"></script>
-    
-<script type="module"
-        src="../js/gps.js">
-</script>
+<script
+    type="module"
+    src="../js/auth-guard.js"
+></script>
+
+
+<script
+    type="module"
+    src="../js/user-data.js"
+></script>
+
+
+<script
+    type="module"
+    src="../js/dashboard-conductor.js"
+></script>
+
+
+<script
+    type="module"
+    src="../js/moti-go-repartidor.js"
+></script>
+
+
+<script
+    type="module"
+    src="../js/gps.js"
+></script>
 
 
 </body>
