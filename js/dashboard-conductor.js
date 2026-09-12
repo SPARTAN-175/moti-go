@@ -723,6 +723,9 @@ function actualizarVista() {
 // ESTADÍSTICAS REALES DE HOY
 // =========================================
 
+let listenerEstadisticas = null;
+
+
 function cargarEstadisticas() {
 
     const user = auth.currentUser;
@@ -731,13 +734,62 @@ function cargarEstadisticas() {
         return;
     }
 
+
+    // =========================================
+    // EVITAR DUPLICAR LISTENER
+    // =========================================
+
+    if (listenerEstadisticas) {
+
+        listenerEstadisticas();
+
+        listenerEstadisticas = null;
+
+    }
+
+
     const uid = user.uid;
+
+
+    // =========================================
+    // FECHA DE HOY
+    // =========================================
+
+    const ahora = new Date();
+
+
+    const inicioHoy = new Date(
+        ahora.getFullYear(),
+        ahora.getMonth(),
+        ahora.getDate(),
+        0,
+        0,
+        0,
+        0
+    );
+
+
+    const finHoy = new Date(
+        ahora.getFullYear(),
+        ahora.getMonth(),
+        ahora.getDate(),
+        23,
+        59,
+        59,
+        999
+    );
+
+
+    // =========================================
+    // PEDIDOS DEL REPARTIDOR
+    // =========================================
 
     const pedidosRef =
         collection(
             db,
             "pedidos"
         );
+
 
     const q =
         query(
@@ -749,188 +801,186 @@ function cargarEstadisticas() {
             )
         );
 
-    onSnapshot(
-        q,
-        (snapshot) => {
 
-            let pedidosHoy = 0;
-            let gananciasHoy = 0;
+    listenerEstadisticas =
+        onSnapshot(
+            q,
 
-            const ahora =
-                new Date();
+            (snapshot) => {
 
-            const inicioHoy =
-                new Date(
-                    ahora.getFullYear(),
-                    ahora.getMonth(),
-                    ahora.getDate(),
-                    0,
-                    0,
-                    0,
-                    0
+                let pedidosHoy = 0;
+
+                let gananciasHoy = 0;
+
+
+                snapshot.forEach(
+                    (pedidoDoc) => {
+
+                        const pedido =
+                            pedidoDoc.data();
+
+
+                        // =================================
+                        // SOLO PEDIDOS ENTREGADOS
+                        // =================================
+
+                        if (
+                            pedido.estado !==
+                            "entregado"
+                        ) {
+                            return;
+                        }
+
+
+                        // =================================
+                        // ENTREGA CONFIRMADA
+                        // =================================
+
+                        if (
+                            pedido.entregaConfirmada !==
+                            true
+                        ) {
+                            return;
+                        }
+
+
+                        // =================================
+                        // FECHA DE FINALIZACIÓN
+                        // =================================
+
+                        let fechaFinalizacion =
+                            null;
+
+
+                        if (
+                            pedido.fechaFinalizacion &&
+                            typeof pedido.fechaFinalizacion.toDate ===
+                                "function"
+                        ) {
+
+                            fechaFinalizacion =
+                                pedido.fechaFinalizacion.toDate();
+
+                        }
+                        else if (
+                            pedido.fechaFinalizacion
+                        ) {
+
+                            fechaFinalizacion =
+                                new Date(
+                                    pedido.fechaFinalizacion
+                                );
+
+                        }
+
+
+                        // =================================
+                        // SIN FECHA = NO CONTAR
+                        // =================================
+
+                        if (
+                            !fechaFinalizacion ||
+                            isNaN(
+                                fechaFinalizacion.getTime()
+                            )
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        // =================================
+                        // SOLO HOY
+                        // =================================
+
+                        if (
+                            fechaFinalizacion < inicioHoy ||
+                            fechaFinalizacion > finHoy
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        // =================================
+                        // CONTAR PEDIDO
+                        // =================================
+
+                        pedidosHoy++;
+
+
+                        // =================================
+                        // GANANCIA DEL REPARTIDOR
+                        // =================================
+
+                        const gananciaRepartidor =
+                            Number(
+                                pedido
+                                    .comisiones
+                                    ?.repartidor
+                                    ?.monto
+                            ) || 0;
+
+
+                        gananciasHoy +=
+                            gananciaRepartidor;
+
+                    }
                 );
 
-            const finHoy =
-                new Date(
-                    ahora.getFullYear(),
-                    ahora.getMonth(),
-                    ahora.getDate(),
-                    23,
-                    59,
-                    59,
-                    999
+
+                // =========================================
+                // MOSTRAR PEDIDOS
+                // =========================================
+
+                if (todayOrders) {
+
+                    todayOrders.textContent =
+                        pedidosHoy;
+
+                }
+
+
+                // =========================================
+                // MOSTRAR GANANCIAS
+                // =========================================
+
+                if (todayEarnings) {
+
+                    todayEarnings.textContent =
+                        formatearDinero(
+                            gananciasHoy
+                        );
+
+                }
+
+
+                console.log(
+                    "📊 MOTI GO — DATOS REALES DE HOY",
+                    {
+                        repartidorId: uid,
+                        pedidosEncontrados:
+                            snapshot.size,
+                        pedidosHoy:
+                            pedidosHoy,
+                        gananciasHoy:
+                            gananciasHoy
+                    }
                 );
 
+            },
 
-            snapshot.forEach(
-                (pedidoDoc) => {
+            (error) => {
 
-                    const pedido =
-                        pedidoDoc.data();
-
-
-                    // =================================
-                    // SOLO PEDIDOS COMPLETADOS
-                    // =================================
-
-                    if (
-                        pedido.estado !==
-                        "entregado"
-                    ) {
-                        return;
-                    }
-
-
-                    if (
-                        pedido.entregaConfirmada !==
-                        true
-                    ) {
-                        return;
-                    }
-
-
-                    // =================================
-                    // FECHA DE FINALIZACIÓN
-                    // =================================
-
-                    let fechaFinalizacion =
-                        null;
-
-
-                    if (
-                        pedido.fechaFinalizacion &&
-                        typeof pedido.fechaFinalizacion.toDate ===
-                            "function"
-                    ) {
-
-                        fechaFinalizacion =
-                            pedido.fechaFinalizacion.toDate();
-
-                    }
-                    else if (
-                        pedido.fechaFinalizacion
-                    ) {
-
-                        fechaFinalizacion =
-                            new Date(
-                                pedido.fechaFinalizacion
-                            );
-
-                    }
-
-
-                    if (
-                        !fechaFinalizacion ||
-                        isNaN(
-                            fechaFinalizacion.getTime()
-                        )
-                    ) {
-                        return;
-                    }
-
-
-                    // =================================
-                    // SOLO LOS DE HOY
-                    // =================================
-
-                    if (
-                        fechaFinalizacion <
-                            inicioHoy ||
-                        fechaFinalizacion >
-                            finHoy
-                    ) {
-                        return;
-                    }
-
-
-                    // =================================
-                    // CONTAR PEDIDO
-                    // =================================
-
-                    pedidosHoy++;
-
-
-                    // =================================
-                    // GANANCIA REAL DEL REPARTIDOR
-                    // =================================
-
-                    const ganancia =
-                        Number(
-                            pedido
-                                .comisiones
-                                ?.repartidor
-                                ?.monto
-                        ) || 0;
-
-
-                    gananciasHoy +=
-                        ganancia;
-
-                }
-            );
-
-
-            // =================================
-            // MOSTRAR EN PANTALLA
-            // =================================
-
-            if (todayOrders) {
-
-                todayOrders.textContent =
-                    pedidosHoy;
+                console.error(
+                    "❌ MOTI GO — Error obteniendo estadísticas:",
+                    error
+                );
 
             }
-
-
-            if (todayEarnings) {
-
-                todayEarnings.textContent =
-                    formatearDinero(
-                        gananciasHoy
-                    );
-
-            }
-
-
-            console.log(
-                "📊 MOTI GO — estadísticas reales de hoy:",
-                {
-                    repartidorId: uid,
-                    pedidosHoy,
-                    gananciasHoy
-                }
-            );
-
-        },
-        (error) => {
-
-            console.error(
-                "❌ Error cargando estadísticas reales:",
-                error
-            );
-
-        }
-    );
+        );
 
 }
 
@@ -939,7 +989,7 @@ function cargarEstadisticas() {
 // CARTERA
 // =========================================
 
-function cargarCartera(
+/*function cargarCartera(
     datos
 ) {
 
@@ -975,7 +1025,7 @@ function cargarCartera(
             comisiones
         );
 
-}
+}*/
 
 
 // =========================================
