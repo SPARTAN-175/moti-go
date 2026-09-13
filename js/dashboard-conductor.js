@@ -2812,14 +2812,29 @@ function renderizarGanancias(
     }
 
 
-    let gananciasTotales =
-        0;
+    // =====================================================
+    // ACUMULADORES
+    // =====================================================
 
+    let gananciasEntregasTotal = 0;
+
+    let participacionFundadorTotal = 0;
+
+    let totalGenerado = 0;
+
+
+    // =====================================================
+    // RECORRER PEDIDOS
+    // =====================================================
 
     pedidos.forEach(
         pedido => {
 
-            gananciasTotales +=
+            // ---------------------------------------------
+            // GANANCIA POR ENTREGA
+            // ---------------------------------------------
+
+            const gananciaEntrega =
                 Number(
                     pedido
                         .comisiones
@@ -2827,84 +2842,213 @@ function renderizarGanancias(
                         ?.monto
                 ) || 0;
 
+
+            // ---------------------------------------------
+            // PARTICIPACIÓN COMO FUNDADOR
+            // ---------------------------------------------
+
+            const participacionFundador =
+                pedido.esFundador === true
+                    ? (
+                        Number(
+                            pedido
+                                .comisiones
+                                ?.fundador
+                                ?.monto
+                        ) || 0
+                    )
+                    : 0;
+
+
+            gananciasEntregasTotal +=
+                gananciaEntrega;
+
+
+            participacionFundadorTotal +=
+                participacionFundador;
+
+
+            totalGenerado +=
+                gananciaEntrega +
+                participacionFundador;
+
         }
     );
 
 
-    // =========================================
-// RESUMEN DE GANANCIAS
-// =========================================
+    // =====================================================
+    // RESUMEN PRINCIPAL
+    // =====================================================
 
-const total =
-    document.getElementById(
-        "gananciasTotal"
-    );
-
-if (total) {
-    total.textContent =
-        formatearDinero(
-            gananciasTotales
+    const total =
+        document.getElementById(
+            "gananciasTotal"
         );
-}
 
 
-// =========================================
-// ENTREGA
-// =========================================
+    if (total) {
 
-const gananciasEntregas =
-    document.getElementById(
-        "gananciasEntregas"
-    );
+        total.textContent =
+            formatearDinero(
+                totalGenerado
+            );
 
-if (gananciasEntregas) {
-    gananciasEntregas.textContent =
-        formatearDinero(
-            gananciasTotales
+    }
+
+
+    // =====================================================
+    // TOTAL DE ENTREGAS
+    // =====================================================
+
+    const gananciasEntregas =
+        document.getElementById(
+            "gananciasEntregas"
         );
-}
 
 
-// =========================================
-// PERIODO — ENTREGA
-// =========================================
+    if (gananciasEntregas) {
 
-const gananciasPeriodoEntregas =
-    document.getElementById(
-        "gananciasPeriodoEntregas"
-    );
+        gananciasEntregas.textContent =
+            formatearDinero(
+                gananciasEntregasTotal
+            );
 
-if (gananciasPeriodoEntregas) {
-    gananciasPeriodoEntregas.textContent =
-        formatearDinero(
-            gananciasTotales
+    }
+
+
+    // =====================================================
+    // PERIODO — ENTREGA
+    // =====================================================
+
+    const gananciasPeriodoEntregas =
+        document.getElementById(
+            "gananciasPeriodoEntregas"
         );
-}
 
 
-// =========================================
-// PERIODO — TOTAL GENERADO
-// =========================================
+    if (gananciasPeriodoEntregas) {
 
-const gananciasPeriodoTotal =
-    document.getElementById(
-        "gananciasPeriodoTotal"
-    );
+        gananciasPeriodoEntregas.textContent =
+            formatearDinero(
+                gananciasEntregasTotal
+            );
 
-if (gananciasPeriodoTotal) {
-    gananciasPeriodoTotal.textContent =
-        formatearDinero(
-            gananciasTotales
+    }
+
+
+    // =====================================================
+    // PERIODO — TOTAL GENERADO
+    // =====================================================
+
+    const gananciasPeriodoTotal =
+        document.getElementById(
+            "gananciasPeriodoTotal"
         );
-}
 
 
-    // =========================================
+    if (gananciasPeriodoTotal) {
+
+        gananciasPeriodoTotal.textContent =
+            formatearDinero(
+                totalGenerado
+            );
+
+    }
+
+
+    // =====================================================
+    // PARTICIPACIÓN FUNDADOR
+    //
+    // Si todavía no existe el elemento en HTML,
+    // lo creamos dinámicamente.
+    // =====================================================
+
+    let fundadorResumen =
+        document.getElementById(
+            "gananciasFundador"
+        );
+
+
+    if (!fundadorResumen) {
+
+        fundadorResumen =
+            document.createElement(
+                "div"
+            );
+
+        fundadorResumen.id =
+            "gananciasFundador";
+
+        fundadorResumen.className =
+            "ganancias-fundador-resumen";
+
+
+        const hero =
+            container.querySelector(
+                ".earnings-hero"
+            );
+
+
+        if (hero) {
+
+            hero.appendChild(
+                fundadorResumen
+            );
+
+        }
+
+    }
+
+
+    if (fundadorResumen) {
+
+        if (
+            participacionFundadorTotal > 0
+        ) {
+
+            fundadorResumen.innerHTML = `
+
+                <div class="ganancias-fundador-icon">
+                    👑
+                </div>
+
+                <div class="ganancias-fundador-info">
+
+                    <span>
+                        Participación MOTI
+                    </span>
+
+                    <strong>
+                        ${formatearDinero(
+                            participacionFundadorTotal
+                        )}
+                    </strong>
+
+                </div>
+
+            `;
+
+            fundadorResumen.style.display =
+                "flex";
+
+        }
+        else {
+
+            fundadorResumen.innerHTML = "";
+
+            fundadorResumen.style.display =
+                "none";
+
+        }
+
+    }
+
+
+    // =====================================================
     // AGRUPAR POR DÍA
-    // =========================================
+    // =====================================================
 
-    const grupos =
-        {};
+    const grupos = {};
 
 
     pedidos.forEach(
@@ -2934,6 +3078,10 @@ if (gananciasPeriodoTotal) {
 
                     pedidos: [],
 
+                    totalEntregas: 0,
+
+                    totalFundador: 0,
+
                     total: 0
 
                 };
@@ -2941,13 +3089,26 @@ if (gananciasPeriodoTotal) {
             }
 
 
-            const ganancia =
+            const gananciaEntrega =
                 Number(
                     pedido
                         .comisiones
                         ?.repartidor
                         ?.monto
                 ) || 0;
+
+
+            const participacionFundador =
+                pedido.esFundador === true
+                    ? (
+                        Number(
+                            pedido
+                                .comisiones
+                                ?.fundador
+                                ?.monto
+                        ) || 0
+                    )
+                    : 0;
 
 
             grupos[
@@ -2959,8 +3120,21 @@ if (gananciasPeriodoTotal) {
 
             grupos[
                 clave
+            ].totalEntregas +=
+                gananciaEntrega;
+
+
+            grupos[
+                clave
+            ].totalFundador +=
+                participacionFundador;
+
+
+            grupos[
+                clave
             ].total +=
-                ganancia;
+                gananciaEntrega +
+                participacionFundador;
 
         }
     );
@@ -2979,9 +3153,9 @@ if (gananciasPeriodoTotal) {
         );
 
 
-    // =========================================
+    // =====================================================
     // CONTENEDOR DE MOVIMIENTOS
-    // =========================================
+    // =====================================================
 
     let movimientos =
         document.getElementById(
@@ -2999,10 +3173,8 @@ if (gananciasPeriodoTotal) {
         movimientos.id =
             "gananciasMovimientos";
 
-
         movimientos.className =
             "dashboard-card";
-
 
         container.appendChild(
             movimientos
@@ -3011,9 +3183,9 @@ if (gananciasPeriodoTotal) {
     }
 
 
-    // =========================================
+    // =====================================================
     // SIN MOVIMIENTOS
-    // =========================================
+    // =====================================================
 
     if (
         dias.length === 0
@@ -3054,9 +3226,9 @@ if (gananciasPeriodoTotal) {
     }
 
 
-    // =========================================
+    // =====================================================
     // GENERAR MOVIMIENTOS
-    // =========================================
+    // =====================================================
 
     let html = `
 
@@ -3110,9 +3282,11 @@ if (gananciasPeriodoTotal) {
                     <div
                         class="ganancia-monto"
                     >
+
                         ${formatearDinero(
                             grupo.total
                         )}
+
                     </div>
 
                 </div>
@@ -3120,16 +3294,77 @@ if (gananciasPeriodoTotal) {
             `;
 
 
+            // =================================================
+            // RESUMEN DEL DÍA
+            // =================================================
+
+            html += `
+
+                <div
+                    style="
+                        display:flex;
+                        flex-wrap:wrap;
+                        gap:8px;
+                        margin:10px 0 4px;
+                    "
+                >
+
+                    <span
+                        class="badge"
+                    >
+                        🚚 Entregas:
+                        ${formatearDinero(
+                            grupo.totalEntregas
+                        )}
+                    </span>
+
+                    ${
+                        grupo.totalFundador > 0
+                            ? `
+                                <span
+                                    class="badge"
+                                >
+                                    👑 MOTI:
+                                    ${formatearDinero(
+                                        grupo.totalFundador
+                                    )}
+                                </span>
+                            `
+                            : ""
+                    }
+
+                </div>
+
+            `;
+
+
+            // =================================================
+            // PEDIDOS DEL DÍA
+            // =================================================
+
             grupo.pedidos.forEach(
                 pedido => {
 
-                    const ganancia =
+                    const gananciaEntrega =
                         Number(
                             pedido
                                 .comisiones
                                 ?.repartidor
                                 ?.monto
                         ) || 0;
+
+
+                    const participacionFundador =
+                        pedido.esFundador === true
+                            ? (
+                                Number(
+                                    pedido
+                                        .comisiones
+                                        ?.fundador
+                                        ?.monto
+                                ) || 0
+                            )
+                            : 0;
 
 
                     const folio =
@@ -3178,10 +3413,38 @@ if (gananciasPeriodoTotal) {
 
                             <div
                                 class="ganancia-monto text-success"
+                                style="
+                                    display:flex;
+                                    flex-direction:column;
+                                    align-items:flex-end;
+                                    gap:3px;
+                                "
                             >
-                                +${formatearDinero(
-                                    ganancia
-                                )}
+
+                                <span>
+                                    +${formatearDinero(
+                                        gananciaEntrega
+                                    )}
+                                </span>
+
+                                ${
+                                    participacionFundador > 0
+                                        ? `
+                                            <small
+                                                style="
+                                                    color:#8a6a16;
+                                                    font-weight:600;
+                                                "
+                                            >
+                                                👑 +
+                                                ${formatearDinero(
+                                                    participacionFundador
+                                                )}
+                                            </small>
+                                        `
+                                        : ""
+                                }
+
                             </div>
 
                         </div>
@@ -3199,7 +3462,6 @@ if (gananciasPeriodoTotal) {
         html;
 
 }
-
 // =========================================================
 // FECHA PARA GANANCIAS
 // =========================================================
