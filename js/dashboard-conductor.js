@@ -3026,7 +3026,7 @@ function renderizarGanancias(
 
         gananciasPeriodoTotal.textContent =
             formatearDinero(
-                gananciasTotales
+                gananciasFundadorTotal
             );
 
     }
