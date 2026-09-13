@@ -1115,6 +1115,185 @@
 
     </section>
 
+
+<!-- =================================================
+     HISTORIAL
+================================================== -->
+
+<section
+    id="view-historial"
+    class="dashboard-view"
+    hidden
+>
+
+    <!-- =============================================
+         ENCABEZADO
+    ============================================== -->
+
+    <div class="inner-view-header">
+
+        <button
+            type="button"
+            class="back-home-button"
+            data-view="inicio">
+
+            <span class="material-symbols-outlined">
+                arrow_back
+            </span>
+
+            <span>
+                Inicio
+            </span>
+
+        </button>
+
+
+        <div class="inner-view-title">
+
+            <span class="section-label">
+                ACTIVIDAD
+            </span>
+
+            <h2>
+                Historial
+            </h2>
+
+            <p>
+                Consulta tus entregas realizadas.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =============================================
+         RESUMEN
+    ============================================== -->
+
+    <div class="historial-resumen">
+
+        <div class="historial-resumen-item">
+
+            <span class="material-symbols-outlined">
+                done_all
+            </span>
+
+            <div>
+
+                <strong id="historialTotalEntregas">
+                    0
+                </strong>
+
+                <span>
+                    entregas
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="historial-resumen-divider">
+        </div>
+
+
+        <div class="historial-resumen-item">
+
+            <span class="material-symbols-outlined">
+                payments
+            </span>
+
+            <div>
+
+                <strong id="historialTotalGanancias">
+                    $0.00
+                </strong>
+
+                <span>
+                    ganancias
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =============================================
+         FILTROS
+    ============================================== -->
+
+    <div class="historial-filtros">
+
+        <button
+            type="button"
+            class="historial-filtro active"
+            data-historial-filter="todos">
+
+            Todos
+
+        </button>
+
+
+        <button
+            type="button"
+            class="historial-filtro"
+            data-historial-filter="completados">
+
+            Completados
+
+        </button>
+
+
+        <button
+            type="button"
+            class="historial-filtro"
+            data-historial-filter="cancelados">
+
+            Cancelados
+
+        </button>
+
+    </div>
+
+
+    <!-- =============================================
+         LISTA DE ENTREGAS
+    ============================================== -->
+
+    <div
+        id="historialContainer"
+        class="historial-list">
+
+        <div class="historial-vacio">
+
+            <div class="historial-vacio-icono">
+
+                <span class="material-symbols-outlined">
+                    history
+                </span>
+
+            </div>
+
+            <strong>
+                Aún no tienes entregas
+            </strong>
+
+            <p>
+                Tus entregas completadas aparecerán aquí.
+            </p>
+
+        </div>
+
+    </div>
+
+
+</section>
+
+    
+    
 </section>
 
 
