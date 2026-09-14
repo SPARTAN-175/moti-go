@@ -2771,3 +2771,76 @@ body {
         padding-right: 14px;
     }
 }
+
+
+/* =========================================================
+   MOTI GO — CONTENIDO CENTRADO COMO APP
+   ========================================================= */
+
+.go-main {
+    width: 100% !important;
+    max-width: 760px !important;
+    margin: 0 auto !important;
+    padding: 14px 18px 40px !important;
+    box-sizing: border-box;
+}
+
+#singlePageViews,
+.dashboard-view {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* El header sí permanece a todo el ancho */
+.go-header {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+}
+
+/* =========================================================
+   ESCRITORIO
+   ========================================================= */
+
+@media (min-width: 768px) {
+
+    .go-main {
+        width: 100% !important;
+        max-width: 760px !important;
+        margin: 0 auto !important;
+        padding: 30px 28px 60px !important;
+    }
+
+}
+
+
+/* =========================================================
+   CELULAR
+   ========================================================= */
+
+@media (max-width: 767px) {
+
+    .go-main {
+        width: 100% !important;
+        max-width: 760px !important;
+        margin: 0 auto !important;
+        padding: 14px 18px 40px !important;
+    }
+
+}
+
+
+/* =========================================================
+   CELULAR PEQUEÑO
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+    .go-main {
+        padding-left: 13px !important;
+        padding-right: 13px !important;
+    }
+
+}
