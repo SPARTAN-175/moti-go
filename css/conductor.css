@@ -2504,3 +2504,72 @@ a {
     }
 
 }
+
+
+
+/* =========================================================
+   MOTI GO — CORRECCIÓN DE PANTALLA DEL DASHBOARD
+   Aísla el dashboard de las reglas globales de main.css
+   ========================================================= */
+
+body:has(.go-app) {
+    display: block;
+    width: 100%;
+    min-height: 100vh;
+    padding: 0;
+}
+
+body:has(.go-app) .go-app {
+    width: 100%;
+    min-height: 100vh;
+}
+
+body:has(.go-app) .go-app .go-main {
+    width: min(1120px, calc(100% - 64px));
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 42px 0 70px;
+}
+
+/* Evita que las reglas generales de main.css
+   limiten accidentalmente el contenido */
+body:has(.go-app) .container {
+    width: auto;
+    max-width: none;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+}
+
+
+/* =========================================================
+   CELULAR
+   ========================================================= */
+
+@media (max-width: 799px) {
+
+    body:has(.go-app) {
+        padding: 0;
+    }
+
+    body:has(.go-app) .go-app .go-main {
+        width: 100%;
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 30px 20px 60px;
+    }
+}
+
+
+/* =========================================================
+   PANTALLAS GRANDES
+   ========================================================= */
+
+@media (min-width: 1200px) {
+
+    body:has(.go-app) .go-app .go-main {
+        width: min(1120px, calc(100% - 80px));
+        max-width: 1120px;
+    }
+}
