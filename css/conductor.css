@@ -121,8 +121,8 @@ a {
 
 .go-main {
     width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
+    max-width: none;
+    margin: 0;
     padding: 30px 20px 60px;
 }
 
@@ -1212,8 +1212,11 @@ a {
     }
 
     .go-main {
-        padding: 42px 30px 70px;
-    }
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 42px 30px 70px;
+}
 
     .welcome-section {
         margin-bottom: 36px;
