@@ -2333,21 +2333,59 @@ a {
    SOLO CORRECCIONES VISUALES
    ========================================================= */
 
+/* =========================================================
+   AJUSTE FINAL — CONTENIDO CENTRADO Y SIMÉTRICO
+   El header sigue ocupando todo el ancho.
+   El contenido conserva el ancho cómodo de la app cliente.
+   ========================================================= */
+
 html,
 body,
-.go-app,
-.go-header,
-.go-main,
+.go-app {
+    width: 100%;
+    min-width: 0;
+}
+
+.go-header {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+
+.go-main {
+    width: 100%;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 14px 18px 40px;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
 #singlePageViews,
 .dashboard-view {
     width: 100%;
     max-width: none;
+    margin-left: 0;
+    margin-right: 0;
     min-width: 0;
 }
 
-.go-main {
-    margin-left: 0;
-    margin-right: 0;
+@media (min-width: 800px) {
+    .go-main {
+        width: 100%;
+        max-width: 760px;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 30px 28px 60px;
+    }
+}
+
+@media (max-width: 380px) {
+    .go-main {
+        padding-left: 13px;
+        padding-right: 13px;
+    }
 }
 
 /* =========================================================
@@ -2704,143 +2742,3 @@ body,
     }
 }
 
-/* =========================================================
-   MOTI GO — CONTENIDO A TODO EL ANCHO
-   ÚLTIMO AJUSTE DE CONTENEDOR
-   ========================================================= */
-
-body {
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-.go-app {
-    width: 100vw !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-.go-header {
-    width: 100vw !important;
-    max-width: none !important;
-    margin: 0 !important;
-}
-
-.go-main {
-    width: 100vw !important;
-    max-width: none !important;
-    margin: 0 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-}
-
-/* Las vistas internas llegan hasta los extremos */
-#singlePageViews,
-.dashboard-view {
-    width: 100% !important;
-    max-width: none !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-}
-
-/* =========================================================
-   CONSERVAR RESPIRACIÓN INTERNA DEL CONTENIDO
-   ========================================================= */
-
-/*
-   El fondo ocupa toda la pantalla.
-   El contenido conserva su separación interior.
-*/
-
-#singlePageViews {
-    padding-left: 20px;
-    padding-right: 20px;
-}
-
-@media (min-width: 800px) {
-    #singlePageViews {
-        padding-left: 30px;
-        padding-right: 30px;
-    }
-}
-
-@media (max-width: 380px) {
-    #singlePageViews {
-        padding-left: 14px;
-        padding-right: 14px;
-    }
-}
-
-
-/* =========================================================
-   MOTI GO — CONTENIDO CENTRADO COMO APP
-   ========================================================= */
-
-.go-main {
-    width: 100% !important;
-    max-width: 760px !important;
-    margin: 0 auto !important;
-    padding: 14px 18px 40px !important;
-    box-sizing: border-box;
-}
-
-#singlePageViews,
-.dashboard-view {
-    width: 100% !important;
-    max-width: none !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-}
-
-/* El header sí permanece a todo el ancho */
-.go-header {
-    width: 100% !important;
-    max-width: none !important;
-    margin: 0 !important;
-}
-
-/* =========================================================
-   ESCRITORIO
-   ========================================================= */
-
-@media (min-width: 768px) {
-
-    .go-main {
-        width: 100% !important;
-        max-width: 760px !important;
-        margin: 0 auto !important;
-        padding: 30px 28px 60px !important;
-    }
-
-}
-
-
-/* =========================================================
-   CELULAR
-   ========================================================= */
-
-@media (max-width: 767px) {
-
-    .go-main {
-        width: 100% !important;
-        max-width: 760px !important;
-        margin: 0 auto !important;
-        padding: 14px 18px 40px !important;
-    }
-
-}
-
-
-/* =========================================================
-   CELULAR PEQUEÑO
-   ========================================================= */
-
-@media (max-width: 380px) {
-
-    .go-main {
-        padding-left: 13px !important;
-        padding-right: 13px !important;
-    }
-
-}
