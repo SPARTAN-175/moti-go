@@ -263,6 +263,16 @@ document
                     }
 
 
+                    if (
+                        vista ===
+                        "historial"
+                    ) {
+
+                        iniciarVistaHistorial();
+
+                    }
+
+
                     cerrarMenu();
 
                 }
@@ -3451,5 +3461,475 @@ document
     );
 
 
+// =========================================================
+// VISTA HISTORIAL
+// =========================================================
 
+let listenerHistorial = null;
+let historialPedidosCache = [];
+let filtroHistorialActual = "todos";
+
+
+function iniciarVistaHistorial() {
+
+    const user = auth.currentUser;
+
+    if (!user) {
+        return;
+    }
+
+    if (listenerHistorial) {
+        listenerHistorial();
+        listenerHistorial = null;
+    }
+
+    const uid = user.uid;
+
+    const pedidosQuery = query(
+        collection(db, "pedidos"),
+        where("repartidorId", "==", uid)
+    );
+
+    listenerHistorial = onSnapshot(
+        pedidosQuery,
+        snapshot => {
+
+            historialPedidosCache = snapshot.docs
+                .map(pedidoDoc => ({
+                    id: pedidoDoc.id,
+                    ...pedidoDoc.data()
+                }))
+                .filter(pedido => {
+
+                    const estado =
+                        normalizarEstadoHistorial(
+                            pedido.estado
+                        );
+
+                    return (
+                        estado === "entregado" ||
+                        estado === "cancelado"
+                    );
+
+                });
+
+            historialPedidosCache.sort(
+                (a, b) =>
+                    obtenerFechaHistorial(b) -
+                    obtenerFechaHistorial(a)
+            );
+
+            renderizarHistorial();
+
+        },
+        error => {
+
+            console.error(
+                "❌ MOTI GO — error cargando historial:",
+                error
+            );
+
+            const container =
+                document.getElementById(
+                    "historialContainer"
+                );
+
+            if (container) {
+
+                container.innerHTML = `
+                    <div class="historial-vacio historial-error">
+
+                        <div class="historial-vacio-icono">
+                            <span class="material-symbols-outlined">
+                                error_outline
+                            </span>
+                        </div>
+
+                        <strong>
+                            No se pudo cargar el historial
+                        </strong>
+
+                        <p>
+                            Intenta nuevamente en unos momentos.
+                        </p>
+
+                    </div>
+                `;
+
+            }
+
+        }
+    );
+
+}
+
+
+function normalizarEstadoHistorial(estado) {
+
+    const valor =
+        String(estado || "")
+            .trim()
+            .toLowerCase();
+
+    if (
+        valor === "entregado" ||
+        valor === "completado" ||
+        valor === "completed"
+    ) {
+
+        return "entregado";
+
+    }
+
+    if (
+        valor === "cancelado" ||
+        valor === "cancelada" ||
+        valor === "cancelled" ||
+        valor === "canceled" ||
+        valor === "rechazado" ||
+        valor === "rechazada"
+    ) {
+
+        return "cancelado";
+
+    }
+
+    return valor;
+
+}
+
+
+function obtenerFechaHistorial(pedido) {
+
+    const fecha =
+        pedido.fechaFinalizacion ||
+        pedido.fechaCancelacion ||
+        pedido.updatedAt ||
+        pedido.actualizadoEn ||
+        pedido.createdAt ||
+        pedido.creadoEn ||
+        pedido.fechaSolicitud;
+
+    return obtenerFecha(fecha);
+
+}
+
+
+function obtenerGananciaHistorial(pedido) {
+
+    return Number(
+        pedido
+            .comisiones
+            ?.repartidor
+            ?.monto
+    ) || 0;
+
+}
+
+
+function aplicarFiltroHistorial(pedidos) {
+
+    if (
+        filtroHistorialActual ===
+        "completados"
+    ) {
+
+        return pedidos.filter(
+            pedido =>
+                normalizarEstadoHistorial(
+                    pedido.estado
+                ) === "entregado"
+        );
+
+    }
+
+    if (
+        filtroHistorialActual ===
+        "cancelados"
+    ) {
+
+        return pedidos.filter(
+            pedido =>
+                normalizarEstadoHistorial(
+                    pedido.estado
+                ) === "cancelado"
+        );
+
+    }
+
+    return pedidos;
+
+}
+
+
+function renderizarHistorial() {
+
+    const container =
+        document.getElementById(
+            "historialContainer"
+        );
+
+    const totalEntregas =
+        document.getElementById(
+            "historialTotalEntregas"
+        );
+
+    const totalGanancias =
+        document.getElementById(
+            "historialTotalGanancias"
+        );
+
+    if (!container) {
+        return;
+    }
+
+    // El resumen siempre representa las entregas
+    // completadas y confirmadas.
+    const completados =
+        historialPedidosCache.filter(
+            pedido =>
+                normalizarEstadoHistorial(
+                    pedido.estado
+                ) === "entregado" &&
+                pedido.entregaConfirmada === true
+        );
+
+    const ganancias =
+        completados.reduce(
+            (total, pedido) =>
+                total +
+                obtenerGananciaHistorial(pedido),
+            0
+        );
+
+    if (totalEntregas) {
+        totalEntregas.textContent =
+            completados.length;
+    }
+
+    if (totalGanancias) {
+        totalGanancias.textContent =
+            formatearDinero(ganancias);
+    }
+
+    const pedidos =
+        aplicarFiltroHistorial(
+            historialPedidosCache
+        );
+
+    if (!pedidos.length) {
+
+        const mensaje =
+            filtroHistorialActual === "cancelados"
+                ? "No tienes pedidos cancelados"
+                : filtroHistorialActual === "completados"
+                    ? "Aún no tienes entregas completadas"
+                    : "Aún no tienes actividad";
+
+        const descripcion =
+            filtroHistorialActual === "cancelados"
+                ? "Los pedidos cancelados que correspondan a tu cuenta aparecerán aquí."
+                : "Tus entregas realizadas aparecerán aquí.";
+
+        container.innerHTML = `
+            <div class="historial-vacio">
+
+                <div class="historial-vacio-icono">
+                    <span class="material-symbols-outlined">
+                        history
+                    </span>
+                </div>
+
+                <strong>
+                    ${mensaje}
+                </strong>
+
+                <p>
+                    ${descripcion}
+                </p>
+
+            </div>
+        `;
+
+        return;
+    }
+
+    container.innerHTML =
+        pedidos
+            .map(renderizarItemHistorial)
+            .join("");
+
+}
+
+
+function renderizarItemHistorial(pedido) {
+
+    const estado =
+        normalizarEstadoHistorial(
+            pedido.estado
+        );
+
+    const completado =
+        estado === "entregado";
+
+    const fecha =
+        obtenerFechaHistorial(pedido);
+
+    const folio =
+        pedido.folio ||
+        pedido.id;
+
+    const ganancia =
+        obtenerGananciaHistorial(pedido);
+
+    const tiendas =
+        Array.isArray(pedido.tiendas)
+            ? pedido.tiendas
+            : [];
+
+    const numeroTiendas =
+        tiendas.length ||
+        (
+            Array.isArray(pedido.productos)
+                ? new Set(
+                    pedido.productos
+                        .map(
+                            producto =>
+                                producto.tiendaId
+                        )
+                        .filter(Boolean)
+                ).size
+                : 0
+        );
+
+    const textoTiendas =
+        numeroTiendas > 0
+            ? `${numeroTiendas} ${
+                numeroTiendas === 1
+                    ? "tienda"
+                    : "tiendas"
+            }`
+            : "Pedido";
+
+    const hora =
+        fecha.getTime() > 0
+            ? fecha.toLocaleTimeString(
+                "es-MX",
+                {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            )
+            : "--:--";
+
+    const fechaTexto =
+        fecha.getTime() > 0
+            ? fecha.toLocaleDateString(
+                "es-MX",
+                {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric"
+                }
+            )
+            : "Fecha no disponible";
+
+    const estadoTexto =
+        completado
+            ? "Completado"
+            : "Cancelado";
+
+    const icono =
+        completado
+            ? "done"
+            : "close";
+
+    const claseEstado =
+        completado
+            ? "historial-estado-completado"
+            : "historial-estado-cancelado";
+
+    return `
+        <article class="historial-item">
+
+            <div class="historial-icon ${claseEstado}">
+                <span class="material-symbols-outlined">
+                    ${icono}
+                </span>
+            </div>
+
+            <div class="historial-info">
+
+                <strong>
+                    Pedido ${escaparTexto(folio)}
+                </strong>
+
+                <span>
+                    ${escaparTexto(fechaTexto)}
+                    · ${hora}
+                    · ${escaparTexto(textoTiendas)}
+                </span>
+
+                <small class="${claseEstado}">
+                    ${estadoTexto}
+                </small>
+
+            </div>
+
+            <div class="historial-monto">
+
+                ${
+                    completado
+                        ? `+${formatearDinero(ganancia)}`
+                        : "—"
+                }
+
+            </div>
+
+        </article>
+    `;
+
+}
+
+
+// =========================================================
+// FILTROS DEL HISTORIAL
+// =========================================================
+
+document
+    .querySelectorAll(
+        "[data-historial-filter]"
+    )
+    .forEach(
+        boton => {
+
+            boton.addEventListener(
+                "click",
+                () => {
+
+                    filtroHistorialActual =
+                        boton.dataset.historialFilter;
+
+                    document
+                        .querySelectorAll(
+                            "[data-historial-filter]"
+                        )
+                        .forEach(
+                            elemento => {
+
+                                elemento.classList.toggle(
+                                    "active",
+                                    elemento === boton
+                                );
+
+                            }
+                        );
+
+                    renderizarHistorial();
+
+                }
+            );
+
+        }
+    );
 
