@@ -50,7 +50,7 @@ a {
    HEADER
    ========================================================= */
 
-.go-header {
+.go-app .go-header {
     position: sticky;
     top: 0;
     z-index: 100;
@@ -64,7 +64,7 @@ a {
     backdrop-filter: blur(12px);
 }
 
-.go-brand {
+.go-app .go-brand {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -73,7 +73,7 @@ a {
     color: #111827;
 }
 
-.go-brand .material-symbols-rounded {
+.go-app .go-brand .material-symbols-rounded {
     font-size: 28px;
 }
 
@@ -119,7 +119,7 @@ a {
    MAIN
    ========================================================= */
 
-.go-main {
+.go-app .go-main {
     width: 100%;
     max-width: 760px;
     margin: 0 auto;
@@ -905,63 +905,6 @@ a {
 
 
 /* =========================================================
-   VISTA ZONAS
-   ========================================================= */
-
-.zonas-container {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.zona-card {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 17px;
-    background: #fff;
-    border: 1px solid #e5e7eb;
-    border-radius: 18px;
-}
-
-.zona-icon {
-    width: 43px;
-    height: 43px;
-    flex: 0 0 43px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 13px;
-    background: #f3f4f6;
-    color: #374151;
-}
-
-.zona-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.zona-info strong {
-    display: block;
-    color: #111827;
-    font-size: 14px;
-}
-
-.zona-info span {
-    display: block;
-    margin-top: 3px;
-    color: #9ca3af;
-    font-size: 11px;
-}
-
-.zona-estado {
-    color: #16a34a;
-    font-size: 11px;
-    font-weight: 750;
-}
-
-
-/* =========================================================
    VISTA HISTORIAL
    ========================================================= */
 
@@ -1177,14 +1120,14 @@ a {
 
 @media (min-width: 800px) {
 
-    .go-header {
+    .go-app .go-header {
         width: 100%;
         height: 72px;
         padding: 0 28px;
         box-sizing: border-box;
     }
 
-    .go-main {
+    .go-app .go-main {
         width: 100%;
         max-width: 760px;
         margin: 0 auto;
@@ -1256,7 +1199,7 @@ a {
 
 @media (max-width: 380px) {
 
-    .go-main {
+    .go-app .go-main {
         width: 100%;
         max-width: 760px;
         margin: 0 auto;
@@ -1265,7 +1208,7 @@ a {
         box-sizing: border-box;
     }
 
-    .go-header {
+    .go-app .go-header {
         padding-left: 12px;
         padding-right: 12px;
     }
@@ -2151,6 +2094,215 @@ a {
 }
 
 
+
+/* =========================================================
+   HISTORIAL
+   ========================================================= */
+
+.historial-resumen {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 18px;
+    padding: 18px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+}
+
+.historial-resumen-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.historial-resumen-item > .material-symbols-outlined {
+    color: #475569;
+    font-size: 22px;
+}
+
+.historial-resumen-item strong {
+    display: block;
+    color: #0f172a;
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1.1;
+}
+
+.historial-resumen-item div span {
+    display: block;
+    margin-top: 3px;
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.historial-resumen-divider {
+    width: 1px;
+    height: 42px;
+    margin: 0 18px;
+    background: #e5e7eb;
+}
+
+.historial-filtros {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.historial-filtro {
+    padding: 9px 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    background: #ffffff;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.historial-filtro:hover {
+    border-color: #cbd5e1;
+    color: #334155;
+    background: #f8fafc;
+}
+
+.historial-filtro.active {
+    border-color: #0f172a;
+    background: #0f172a;
+    color: #ffffff;
+    box-shadow: 0 5px 14px rgba(15, 23, 42, 0.12);
+}
+
+.historial-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.historial-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+    padding: 15px 16px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.035);
+}
+
+.historial-icon {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.historial-icon .material-symbols-outlined {
+    font-size: 21px;
+}
+
+.historial-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.historial-info strong {
+    display: block;
+    overflow: hidden;
+    color: #1e293b;
+    font-size: 14px;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.historial-info span {
+    display: block;
+    margin-top: 3px;
+    overflow: hidden;
+    color: #94a3b8;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.historial-info small {
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.historial-estado-completado {
+    color: #15803d !important;
+}
+
+.historial-estado-cancelado {
+    color: #b91c1c !important;
+}
+
+.historial-monto {
+    flex: 0 0 auto;
+    color: #0f172a;
+    font-size: 15px;
+    font-weight: 900;
+    white-space: nowrap;
+}
+
+.historial-vacio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    padding: 30px 20px;
+    background: #ffffff;
+    border: 1px dashed #dbe1e8;
+    border-radius: 18px;
+    text-align: center;
+}
+
+.historial-vacio-icono {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    border-radius: 16px;
+    background: #f8fafc;
+    color: #94a3b8;
+}
+
+.historial-vacio-icono .material-symbols-outlined {
+    font-size: 24px;
+}
+
+.historial-vacio strong {
+    color: #334155;
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.historial-vacio p {
+    max-width: 340px;
+    margin: 5px 0 0;
+    color: #94a3b8;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
 /* =========================================================
    RESPONSIVE — TABLET
    ========================================================= */
@@ -2169,6 +2321,50 @@ a {
    ========================================================= */
 
 @media (max-width: 640px) {
+
+    .historial-resumen {
+        padding: 15px;
+    }
+
+    .historial-resumen-item {
+        gap: 9px;
+    }
+
+    .historial-resumen-item strong {
+        font-size: 18px;
+    }
+
+    .historial-resumen-divider {
+        margin: 0 12px;
+    }
+
+    .historial-filtro {
+        flex: 1;
+        min-width: max-content;
+        padding: 9px 11px;
+        text-align: center;
+    }
+
+    .historial-item {
+        padding: 13px;
+    }
+
+    .historial-icon {
+        width: 38px;
+        height: 38px;
+        flex-basis: 38px;
+        border-radius: 10px;
+    }
+
+    .historial-info strong {
+        font-size: 13px;
+    }
+
+    .historial-monto {
+        font-size: 14px;
+    }
+
+
 
     .inner-view-header {
         align-items: flex-start;
