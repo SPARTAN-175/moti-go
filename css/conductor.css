@@ -2327,3 +2327,97 @@ a {
     }
 
 }
+
+
+/* =========================================================
+   MOTI GO — FULL WIDTH FINAL
+   ========================================================= */
+
+/* El dashboard y su contenido aprovechan todo el ancho */
+.go-app,
+.go-main,
+#singlePageViews,
+.dashboard-view {
+    width: 100%;
+    max-width: none;
+}
+
+/* El área principal no queda centrada dentro de un ancho fijo */
+.go-main {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* Las vistas internas ocupan todo el espacio disponible */
+#singlePageViews {
+    display: block;
+}
+
+/* Las tarjetas y listas pueden crecer completamente */
+.dashboard-view,
+.pedidos-list,
+.pedidos-container,
+.ganancias-movimientos,
+.ganancias-lista,
+.zonas-container,
+.historial-container {
+    width: 100%;
+    max-width: none;
+}
+
+/* =========================================================
+   HEADER — CONSERVAR SEPARACIÓN DEL BOTÓN ☰
+   ========================================================= */
+
+.go-header {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+
+/* =========================================================
+   ESCRITORIO
+   ========================================================= */
+
+@media (min-width: 800px) {
+
+    .go-main {
+        width: 100%;
+        max-width: none;
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 30px;
+        padding-right: 30px;
+    }
+
+}
+
+/* =========================================================
+   CELULAR
+   ========================================================= */
+
+@media (max-width: 799px) {
+
+    .go-main {
+        width: 100%;
+        max-width: none;
+        margin-left: 0;
+        margin-right: 0;
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+}
+
+/* =========================================================
+   CELULAR MUY PEQUEÑO
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+    .go-main {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+}
