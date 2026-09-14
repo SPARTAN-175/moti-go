@@ -121,9 +121,12 @@ a {
 
 .go-main {
     width: 100%;
-    max-width: none;
-    margin: 0;
-    padding: 30px 20px 60px;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 14px 18px 40px;
+    box-sizing: border-box;
+    min-width: 0;
 }
 
 
@@ -1213,9 +1216,10 @@ a {
 
     .go-main {
     width: 100%;
-    max-width: none;
-    margin: 0;
-    padding: 42px 30px 70px;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 30px 28px 60px;
 }
 
     .welcome-section {
@@ -2329,21 +2333,26 @@ a {
 }
 
 /* =========================================================
-   MOTI GO — AJUSTE FINAL DE INTERFAZ
-   SOLO CORRECCIONES VISUALES
-   ========================================================= */
-
-/* =========================================================
-   AJUSTE FINAL — CONTENIDO CENTRADO Y SIMÉTRICO
-   El header sigue ocupando todo el ancho.
-   El contenido conserva el ancho cómodo de la app cliente.
+   MOTI GO — ESTRUCTURA FINAL DE ANCHO
+   =========================================================
+   Una sola regla maestra para evitar desplazamientos laterales.
+   Header y fondo = ancho completo.
+   Contenido = centrado y simétrico, igual al patrón de la app cliente.
    ========================================================= */
 
 html,
-body,
+body {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
 .go-app {
     width: 100%;
     min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 .go-header {
@@ -2353,6 +2362,7 @@ body,
 }
 
 .go-main {
+    display: block;
     width: 100%;
     max-width: 760px;
     margin-left: auto;
@@ -2364,11 +2374,13 @@ body,
 
 #singlePageViews,
 .dashboard-view {
+    display: block;
     width: 100%;
     max-width: none;
+    min-width: 0;
     margin-left: 0;
     margin-right: 0;
-    min-width: 0;
+    box-sizing: border-box;
 }
 
 @media (min-width: 800px) {
