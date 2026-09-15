@@ -2622,7 +2622,31 @@ body:has(.go-app) .container {
 }
 
 .perfil-mini-rating strong { color: #111827; font-size: 21px; font-weight: 800; }
-.perfil-mini-rating div { margin-top: 2px; color: #f59e0b; font-size: 15px; letter-spacing: 1px; white-space: nowrap; }
+.perfil-mini-rating div { margin-top: 2px; color: #d1d5db; font-size: 15px; letter-spacing: 1px; white-space: nowrap; }
+
+.perfil-estrellas {
+    position: relative;
+    display: inline-block;
+    line-height: 1;
+    letter-spacing: 1px;
+    overflow: hidden;
+}
+
+.perfil-estrellas-base,
+.perfil-estrellas-relleno {
+    display: block;
+    white-space: nowrap;
+}
+
+.perfil-estrellas-relleno {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 0%;
+    overflow: hidden;
+    color: #f59e0b;
+    transition: width .25s ease;
+}
 .perfil-mini-rating span { display: block; margin-top: 2px; color: #9ca3af; font-size: 9px; font-weight: 600; }
 
 .perfil-seccion { padding: 24px 28px 8px; }
