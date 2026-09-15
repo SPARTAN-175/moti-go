@@ -715,6 +715,155 @@ function escucharSolicitudesAsignadas() {
 
 
 // =====================================================
+// MAPA PROFESIONAL PARA LA SOLICITUD
+// =====================================================
+
+let motiGoLeafletPromise = null;
+
+function cargarLeafletParaSolicitud() {
+
+    if (
+        window.L
+    ) {
+        return Promise.resolve(window.L);
+    }
+
+    if (
+        motiGoLeafletPromise
+    ) {
+        return motiGoLeafletPromise;
+    }
+
+    motiGoLeafletPromise = new Promise((resolve, reject) => {
+
+        if (!document.getElementById("motiGoLeafletCSS")) {
+            const link = document.createElement("link");
+            link.id = "motiGoLeafletCSS";
+            link.rel = "stylesheet";
+            link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+            document.head.appendChild(link);
+        }
+
+        const scriptExistente =
+            document.getElementById("motiGoLeafletJS");
+
+        if (scriptExistente) {
+            scriptExistente.addEventListener("load", () => resolve(window.L));
+            scriptExistente.addEventListener("error", reject);
+            return;
+        }
+
+        const script = document.createElement("script");
+        script.id = "motiGoLeafletJS";
+        script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+        script.async = true;
+        script.onload = () => resolve(window.L);
+        script.onerror = reject;
+        document.head.appendChild(script);
+
+    }).catch(error => {
+
+        console.error(
+            "❌ MOTI GO: no se pudo cargar el mapa de la solicitud:",
+            error
+        );
+
+        motiGoLeafletPromise = null;
+        return null;
+
+    });
+
+    return motiGoLeafletPromise;
+}
+
+
+async function inicializarMapaSolicitud(
+    mapaId,
+    latitud,
+    longitud
+) {
+
+    const L =
+        await cargarLeafletParaSolicitud();
+
+    if (!L) {
+        return;
+    }
+
+    const contenedor =
+        document.getElementById(mapaId);
+
+    if (!contenedor || contenedor.dataset.mapaInicializado === "true") {
+        return;
+    }
+
+    try {
+
+        const mapa = L.map(
+            contenedor,
+            {
+                zoomControl: false,
+                attributionControl: true,
+                dragging: true,
+                scrollWheelZoom: false,
+                doubleClickZoom: true,
+                touchZoom: true,
+                tap: true
+            }
+        ).setView(
+            [latitud, longitud],
+            17
+        );
+
+        L.control.zoom({
+            position: "bottomright"
+        }).addTo(mapa);
+
+        L.tileLayer(
+            "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+            {
+                maxZoom: 20,
+                attribution: '&copy; OpenStreetMap &copy; CARTO'
+            }
+        ).addTo(mapa);
+
+        const icono = L.divIcon({
+            className: "moti-go-marcador-entrega",
+            html: `
+                <div class="moti-go-marcador-punto">
+                    <span class="material-symbols-outlined">
+                        location_on
+                    </span>
+                </div>
+            `,
+            iconSize: [42, 42],
+            iconAnchor: [21, 38],
+            popupAnchor: [0, -36]
+        });
+
+        L.marker(
+            [latitud, longitud],
+            { icon: icono }
+        )
+            .addTo(mapa)
+            .bindPopup("<strong>Entrega MOTI GO</strong><br>Ubicación del cliente");
+
+        contenedor.dataset.mapaInicializado = "true";
+
+        setTimeout(() => mapa.invalidateSize(), 80);
+
+    } catch (error) {
+
+        console.error(
+            "❌ MOTI GO: error inicializando el mapa de entrega:",
+            error
+        );
+
+    }
+}
+
+
+// =====================================================
 // MOSTRAR SOLICITUD
 // =====================================================
 
@@ -797,9 +946,8 @@ function mostrarSolicitudPedido(
         Number.isFinite(latitud) &&
         Number.isFinite(longitud);
 
-    const mapaUrl = tieneCoordenadas
-        ? `https://www.google.com/maps/search/?api=1&query=${latitud},${longitud}`
-        : "";
+    const mapaId =
+        `motiGoMapaSolicitud_${pedido.id.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
 
     const overlay =
         document.createElement(
@@ -892,20 +1040,23 @@ function mostrarSolicitudPedido(
                 </div>
 
                 ${tieneCoordenadas ? `
-                    <a
-                        class="moti-go-solicitud-mapa"
-                        href="${mapaUrl}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <span class="material-symbols-outlined">
-                            map
-                        </span>
-                        Ver ubicación en el mapa
-                        <span class="material-symbols-outlined">
-                            open_in_new
-                        </span>
-                    </a>
+                    <div class="moti-go-solicitud-mapa-contenedor">
+                        <div class="moti-go-solicitud-mapa-titulo">
+                            <span>
+                                <span class="material-symbols-outlined">
+                                    map
+                                </span>
+                                Ubicación de entrega
+                            </span>
+                            <small>GPS del cliente</small>
+                        </div>
+
+                        <div
+                            id="${mapaId}"
+                            class="moti-go-solicitud-mapa-real"
+                            aria-label="Mapa de ubicación de entrega"
+                        ></div>
+                    </div>
                 ` : `
                     <div class="moti-go-solicitud-mapa sin-ubicacion">
                         <span class="material-symbols-outlined">
@@ -1029,6 +1180,16 @@ function mostrarSolicitudPedido(
     );
 
     agregarEstilosSolicitud();
+
+    if (
+        tieneCoordenadas
+    ) {
+        inicializarMapaSolicitud(
+            mapaId,
+            latitud,
+            longitud
+        );
+    }
 
     const botonAceptar =
         overlay.querySelector(
@@ -2557,6 +2718,94 @@ function agregarEstilosSolicitud() {
             flex: 0 0 auto;
             font-size: 18px;
             color: #64748b;
+        }
+
+        .moti-go-solicitud-mapa-contenedor {
+            margin-top: 12px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            background: #f8fafc;
+        }
+
+        .moti-go-solicitud-mapa-titulo {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 9px 11px;
+            background: #ffffff;
+            border-bottom: 1px solid #eef2f7;
+        }
+
+        .moti-go-solicitud-mapa-titulo > span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #0f172a;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .moti-go-solicitud-mapa-titulo .material-symbols-outlined {
+            font-size: 17px;
+            color: #16a34a;
+        }
+
+        .moti-go-solicitud-mapa-titulo small {
+            color: #94a3b8;
+            font-size: 9px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .moti-go-solicitud-mapa-real {
+            width: 100%;
+            height: 168px;
+            background: #e2e8f0;
+        }
+
+        .moti-go-solicitud-mapa-real .leaflet-control-attribution {
+            font-size: 8px;
+        }
+
+        .moti-go-solicitud-mapa-real .leaflet-control-zoom {
+            margin-right: 8px;
+            margin-bottom: 8px;
+            border: 0;
+            box-shadow: 0 4px 14px rgba(15,23,42,.18);
+        }
+
+        .moti-go-solicitud-mapa-real .leaflet-control-zoom a {
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            color: #334155;
+            font-weight: 800;
+        }
+
+        .moti-go-marcador-entrega {
+            background: transparent;
+            border: 0;
+        }
+
+        .moti-go-marcador-punto {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            background: #16a34a;
+            border: 3px solid #ffffff;
+            box-shadow: 0 6px 18px rgba(15,23,42,.28);
+        }
+
+        .moti-go-marcador-punto .material-symbols-outlined {
+            transform: rotate(45deg);
+            color: #ffffff;
+            font-size: 22px;
         }
 
         .moti-go-solicitud-mapa {
