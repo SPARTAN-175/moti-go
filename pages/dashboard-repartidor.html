@@ -1283,24 +1283,61 @@
             <div class="inner-view-title">
                 <span class="section-label">CUENTA</span>
                 <h2>Mi perfil</h2>
-                <p>Consulta tus datos y la valoración de tu servicio.</p>
+                <p>Tu información como repartidor de MOTI GO.</p>
             </div>
         </div>
-        <div class="perfil-card repartidor-perfil-card">
-            <div class="perfil-avatar"><span class="material-symbols-rounded">person</span></div>
-            <h3 id="perfilRepartidorNombre">Repartidor</h3>
-            <p id="perfilRepartidorCorreo">—</p>
-            <div class="perfil-rating-resumen">
-                <div class="perfil-rating-score">
-                    <strong id="perfilRepartidorPromedio">0.0</strong>
-                    <span>/ 5</span>
+
+        <div class="repartidor-perfil-card">
+            <div class="perfil-presentacion">
+                <div class="perfil-avatar perfil-avatar-pro">
+                    <span id="perfilRepartidorInicial">R</span>
                 </div>
-                <div id="perfilRepartidorEstrellas" class="perfil-rating-stars" aria-label="Valoración promedio">☆☆☆☆☆</div>
-                <span id="perfilRepartidorCantidad" class="perfil-rating-count">Sin valoraciones todavía</span>
+
+                <div class="perfil-identidad">
+                    <h3 id="perfilRepartidorNombre">Repartidor</h3>
+                    <p id="perfilRepartidorCorreo">—</p>
+                    <span class="perfil-rol">Repartidor MOTI GO</span>
+                </div>
+
+                <div class="perfil-mini-rating" aria-label="Valoración promedio">
+                    <strong id="perfilRepartidorPromedio">0.0</strong>
+                    <div id="perfilRepartidorEstrellas">☆☆☆☆☆</div>
+                    <span id="perfilRepartidorCantidad">Sin valoraciones</span>
+                </div>
             </div>
-            <div class="perfil-datos">
-                <div class="perfil-dato"><span>Teléfono</span><strong id="perfilRepartidorTelefono">—</strong></div>
-                <div class="perfil-dato"><span>Localidad</span><strong id="perfilRepartidorLocalidad">—</strong></div>
+
+            <div class="perfil-seccion">
+                <div class="perfil-seccion-titulo">
+                    <span class="material-symbols-outlined">person</span>
+                    <strong>Información de la cuenta</strong>
+                </div>
+
+                <div class="perfil-grid">
+                    <div class="perfil-dato-pro">
+                        <span>Teléfono</span>
+                        <strong id="perfilRepartidorTelefono">—</strong>
+                    </div>
+                    <div class="perfil-dato-pro">
+                        <span>Localidad</span>
+                        <strong id="perfilRepartidorLocalidad">—</strong>
+                    </div>
+                    <div class="perfil-dato-pro">
+                        <span>Tipo de cuenta</span>
+                        <strong id="perfilRepartidorTipo">Repartidor</strong>
+                    </div>
+                    <div class="perfil-dato-pro">
+                        <span>Estado de servicio</span>
+                        <strong id="perfilRepartidorEstado">Disponible</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="perfil-nota">
+                <span class="material-symbols-outlined">verified_user</span>
+                <div>
+                    <strong>Cuenta de repartidor</strong>
+                    <p>Tu valoración se actualiza automáticamente con las opiniones de los clientes.</p>
+                </div>
             </div>
         </div>
     </section>
