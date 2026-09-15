@@ -386,10 +386,7 @@ function renderizarPerfilRepartidor(datos) {
     const promedio = Number(valoracion.promedio) || 0;
     const cantidad = Number(valoracion.cantidad) || 0;
 
-    const estrellas = Array.from(
-        { length: 5 },
-        (_, indice) => cantidad > 0 && indice < Math.round(promedio) ? "★" : "☆"
-    ).join("");
+    const porcentajeEstrellas = Math.max(0, Math.min(100, (promedio / 5) * 100));
 
     const nombreLimpio = String(nombre).trim();
     const inicial = nombreLimpio
@@ -416,6 +413,7 @@ function renderizarPerfilRepartidor(datos) {
         estado: document.getElementById("perfilRepartidorEstado"),
         promedio: document.getElementById("perfilRepartidorPromedio"),
         estrellas: document.getElementById("perfilRepartidorEstrellas"),
+        estrellasRelleno: document.getElementById("perfilRepartidorEstrellasRelleno"),
         cantidad: document.getElementById("perfilRepartidorCantidad")
     };
 
@@ -427,9 +425,124 @@ function renderizarPerfilRepartidor(datos) {
     if (elementos.tipo) elementos.tipo.textContent = tipoCuenta;
     if (elementos.estado) elementos.estado.textContent = estadoTexto;
     if (elementos.promedio) elementos.promedio.textContent = promedio.toFixed(1);
-    if (elementos.estrellas) elementos.estrellas.textContent = estrellas;
+    if (elementos.estrellasRelleno) {
+        elementos.estrellasRelleno.style.width = `${porcentajeEstrellas}%`;
+    }
+    if (elementos.estrellas) {
+        elementos.estrellas.setAttribute(
+            "aria-label",
+            cantidad > 0
+                ? `${promedio.toFixed(1)} de 5 estrellas`
+                : "Sin valoraciones"
+        );
+    }
     if (elementos.cantidad) {
         elementos.cantidad.textContent = cantidad === 0
+            ? "Sin valoraciones"
+            : cantidad === 1
+                ? "1 valoración"
+                : `${cantidad} valoraciones`;
+    }
+}
+
+
+// =========================================
+// VALORACIÓN REAL DEL REPARTIDOR
+// =========================================
+let listenerValoracionesRepartidor = null;
+
+function escucharValoracionesRepartidor(uid) {
+    if (!uid) return;
+
+    if (listenerValoracionesRepartidor) {
+        listenerValoracionesRepartidor();
+        listenerValoracionesRepartidor = null;
+    }
+
+    const pedidosQuery = query(
+        collection(db, "pedidos"),
+        where("repartidorId", "==", uid)
+    );
+
+    listenerValoracionesRepartidor = onSnapshot(
+        pedidosQuery,
+        snapshot => {
+            let suma = 0;
+            let cantidad = 0;
+
+            snapshot.forEach(pedidoDoc => {
+                const pedido = pedidoDoc.data() || {};
+
+                if (
+                    pedido.estado !== "entregado" ||
+                    pedido.entregaConfirmada !== true
+                ) {
+                    return;
+                }
+
+                const estrellas = Number(
+                    pedido.calificacionRepartidor?.estrellas
+                );
+
+                if (Number.isFinite(estrellas) && estrellas >= 1 && estrellas <= 5) {
+                    suma += estrellas;
+                    cantidad += 1;
+                }
+            });
+
+            const promedio = cantidad > 0 ? suma / cantidad : 0;
+
+            renderizarValoracionPerfil({
+                promedio,
+                cantidad
+            });
+        },
+        error => {
+            console.error(
+                "❌ MOTI GO: no se pudieron cargar las valoraciones del repartidor:",
+                error
+            );
+        }
+    );
+}
+
+function renderizarValoracionPerfil(valoracion = {}) {
+    const promedio = Number(valoracion.promedio) || 0;
+    const cantidad = Number(valoracion.cantidad) || 0;
+    const porcentaje = Math.max(0, Math.min(100, (promedio / 5) * 100));
+
+    const promedioElemento = document.getElementById(
+        "perfilRepartidorPromedio"
+    );
+    const estrellasBase = document.getElementById(
+        "perfilRepartidorEstrellas"
+    );
+    const estrellasRelleno = document.getElementById(
+        "perfilRepartidorEstrellasRelleno"
+    );
+    const cantidadElemento = document.getElementById(
+        "perfilRepartidorCantidad"
+    );
+
+    if (promedioElemento) {
+        promedioElemento.textContent = promedio.toFixed(1);
+    }
+
+    if (estrellasBase) {
+        estrellasBase.setAttribute(
+            "aria-label",
+            cantidad > 0
+                ? `${promedio.toFixed(1)} de 5 estrellas`
+                : "Sin valoraciones"
+        );
+    }
+
+    if (estrellasRelleno) {
+        estrellasRelleno.style.width = `${porcentaje}%`;
+    }
+
+    if (cantidadElemento) {
+        cantidadElemento.textContent = cantidad === 0
             ? "Sin valoraciones"
             : cantidad === 1
                 ? "1 valoración"
@@ -587,7 +700,12 @@ escucharEstadoRepartidor(
 
             cargarCartera(
                 datos
-            );*/
+            );
+
+            // =============================
+            // VALORACIÓN DEL REPARTIDOR
+            // =============================
+            escucharValoracionesRepartidor(user.uid);*/
 
 
             // =============================
