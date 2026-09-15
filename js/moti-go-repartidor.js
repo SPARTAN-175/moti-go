@@ -726,110 +726,214 @@ function mostrarSolicitudPedido(
         !pedido ||
         !pedido.id
     ) {
-
         return;
-
     }
-
 
     if (
         solicitudesActivas.has(
             pedido.id
         )
     ) {
-
         return;
-
     }
-
 
     console.log(
         "🔔 MOTI GO - NUEVA SOLICITUD:",
         pedido
     );
 
-
     const cantidadProductos =
-        Array.isArray(
-            pedido.productos
-        )
-            ? pedido.productos.length
+        Array.isArray(pedido.productos)
+            ? pedido.productos.reduce(
+                (total, producto) =>
+                    total + Number(producto.cantidad || 0),
+                0
+            )
             : 0;
-
 
     const cantidadTiendas =
-        Array.isArray(
-            pedido.tiendas
-        )
+        Array.isArray(pedido.tiendas)
             ? pedido.tiendas.length
-            : 0;
+            : Number(
+                pedido.comisiones?.repartidor?.numeroTiendas || 0
+            );
 
-
-    const total =
+    const gananciaRepartidor =
         Number(
-            pedido.total || 0
+            pedido.comisiones?.repartidor?.monto ||
+            0
         );
 
+    const distanciaKm =
+        Number(
+            pedido.comisiones?.repartidor?.distanciaKm ||
+            pedido.comisiones?.repartidor?.distanciaKmTarificada ||
+            0
+        );
 
-    // =================================================
-    // CREAR MODAL
-    // =================================================
+    const distanciaTexto =
+        Number.isFinite(distanciaKm) && distanciaKm > 0
+            ? `${distanciaKm.toFixed(1)} km`
+            : "No disponible";
+
+    const destino =
+        pedido.destino ||
+        pedido.ubicacionEntrega ||
+        {};
+
+    const localidad =
+        destino.localidad ||
+        destino.nombre ||
+        "Ubicación de entrega";
+
+    const referencia =
+        destino.referencia ||
+        "Sin referencia adicional";
+
+    const latitud = Number(destino.latitud);
+    const longitud = Number(destino.longitud);
+
+    const tieneCoordenadas =
+        Number.isFinite(latitud) &&
+        Number.isFinite(longitud);
+
+    const mapaUrl = tieneCoordenadas
+        ? `https://www.google.com/maps/search/?api=1&query=${latitud},${longitud}`
+        : "";
 
     const overlay =
         document.createElement(
             "div"
         );
 
-
     overlay.className =
         "moti-go-solicitud-overlay";
 
-
     overlay.dataset.pedidoId =
         pedido.id;
-
 
     overlay.innerHTML = `
 
         <div class="moti-go-solicitud-modal">
 
-            <div class="moti-go-solicitud-icono">
-                <span class="material-symbols-outlined">
-                    shopping_bag
-                </span>
-            </div>
+            <div class="moti-go-solicitud-cabecera">
 
-            <div class="moti-go-solicitud-titulo">
-                Nuevo pedido
-            </div>
-
-            <div class="moti-go-solicitud-folio">
-                ${escaparHTML(
-                    pedido.folio ||
-                    "Pedido MOTI GO"
-                )}
-            </div>
-
-            <div class="moti-go-solicitud-info">
-
-                <div class="moti-go-solicitud-dato">
-
+                <div class="moti-go-solicitud-icono">
                     <span class="material-symbols-outlined">
-                        inventory_2
+                        delivery_dining
+                    </span>
+                </div>
+
+                <div class="moti-go-solicitud-cabecera-texto">
+                    <span class="moti-go-solicitud-etiqueta">
+                        NUEVA SOLICITUD
+                    </span>
+
+                    <div class="moti-go-solicitud-titulo">
+                        Pedido MOTI GO
+                    </div>
+
+                    <div class="moti-go-solicitud-folio">
+                        ${escaparHTML(
+                            pedido.folio ||
+                            pedido.id.slice(0, 8)
+                        )}
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="moti-go-solicitud-ganancia">
+
+                <div>
+                    <span class="material-symbols-outlined">
+                        payments
                     </span>
 
                     <div>
-                        <small>Productos</small>
+                        <small>Tu ganancia por entrega</small>
                         <strong>
-                            ${cantidadProductos}
+                            $${gananciaRepartidor.toFixed(2)}
                         </strong>
                     </div>
-
                 </div>
 
+                <span class="moti-go-solicitud-ganancia-badge">
+                    Servicio
+                </span>
 
-                <div class="moti-go-solicitud-dato">
+            </div>
 
+
+            <div class="moti-go-solicitud-destino">
+
+                <div class="moti-go-solicitud-destino-titulo">
+                    <span class="material-symbols-outlined">
+                        location_on
+                    </span>
+
+                    <div>
+                        <small>ENTREGA</small>
+                        <strong>
+                            ${escaparHTML(localidad)}
+                        </strong>
+                    </div>
+                </div>
+
+                <div class="moti-go-solicitud-referencia">
+                    <span class="material-symbols-outlined">
+                        info
+                    </span>
+
+                    <span>
+                        ${escaparHTML(referencia)}
+                    </span>
+                </div>
+
+                ${tieneCoordenadas ? `
+                    <a
+                        class="moti-go-solicitud-mapa"
+                        href="${mapaUrl}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <span class="material-symbols-outlined">
+                            map
+                        </span>
+                        Ver ubicación en el mapa
+                        <span class="material-symbols-outlined">
+                            open_in_new
+                        </span>
+                    </a>
+                ` : `
+                    <div class="moti-go-solicitud-mapa sin-ubicacion">
+                        <span class="material-symbols-outlined">
+                            location_off
+                        </span>
+                        Ubicación GPS no disponible
+                    </div>
+                `}
+
+            </div>
+
+
+            <div class="moti-go-solicitud-resumen">
+
+                <div class="moti-go-solicitud-resumen-item">
+                    <span class="material-symbols-outlined">
+                        route
+                    </span>
+
+                    <div>
+                        <small>Distancia</small>
+                        <strong>
+                            ${distanciaTexto}
+                        </strong>
+                    </div>
+                </div>
+
+                <div class="moti-go-solicitud-resumen-item">
                     <span class="material-symbols-outlined">
                         store
                     </span>
@@ -840,45 +944,51 @@ function mostrarSolicitudPedido(
                             ${cantidadTiendas}
                         </strong>
                     </div>
+                </div>
 
+                <div class="moti-go-solicitud-resumen-item">
+                    <span class="material-symbols-outlined">
+                        inventory_2
+                    </span>
+
+                    <div>
+                        <small>Productos</small>
+                        <strong>
+                            ${cantidadProductos}
+                        </strong>
+                    </div>
                 </div>
 
             </div>
 
 
-            <div class="moti-go-solicitud-total">
+            <div class="moti-go-solicitud-nota">
+                <span class="material-symbols-outlined">
+                    payments
+                </span>
 
-                <span>Total del pedido</span>
-
-                <strong>
-                    $${total.toFixed(2)}
-                </strong>
-
+                <p>
+                    El cobro de entrega corresponde a tu ganancia por este servicio.
+                </p>
             </div>
 
 
             <div class="moti-go-solicitud-tiempo">
 
                 <div class="moti-go-solicitud-tiempo-texto">
-
                     <span>
-                        Tiempo para responder
+                        Responde antes de que termine el tiempo
                     </span>
 
-                    <strong
-                        class="moti-go-contador"
-                    >
-                        ${TIEMPO_SOLICITUD}
+                    <strong class="moti-go-contador">
+                        ${TIEMPO_SOLICITUD}s
                     </strong>
-
                 </div>
 
                 <div class="moti-go-barra-tiempo">
-
                     <div
                         class="moti-go-barra-tiempo-progreso"
                     ></div>
-
                 </div>
 
             </div>
@@ -891,28 +1001,21 @@ function mostrarSolicitudPedido(
                     class="moti-go-btn-rechazar"
                     data-accion="rechazar"
                 >
-
                     <span class="material-symbols-outlined">
                         close
                     </span>
-
                     Rechazar
-
                 </button>
-
 
                 <button
                     type="button"
                     class="moti-go-btn-aceptar"
                     data-accion="aceptar"
                 >
-
                     <span class="material-symbols-outlined">
-                        check
+                        check_circle
                     </span>
-
                     Aceptar pedido
-
                 </button>
 
             </div>
@@ -921,96 +1024,60 @@ function mostrarSolicitudPedido(
 
     `;
 
-
     document.body.appendChild(
         overlay
     );
 
-
     agregarEstilosSolicitud();
-
-
-    // =================================================
-    // BOTONES
-    // =================================================
 
     const botonAceptar =
         overlay.querySelector(
             '[data-accion="aceptar"]'
         );
 
-
     const botonRechazar =
         overlay.querySelector(
             '[data-accion="rechazar"]'
         );
 
-
     botonAceptar.addEventListener(
         "click",
         () => {
-
-            aceptarPedido(
-                pedido
-            );
-
+            aceptarPedido(pedido);
         }
     );
-
 
     botonRechazar.addEventListener(
         "click",
         () => {
-
-            rechazarPedido(
-                pedido
-            );
-
+            rechazarPedido(pedido);
         }
     );
 
-
-    // =================================================
-    // TEMPORIZADOR
-    // =================================================
-
     let segundos =
         TIEMPO_SOLICITUD;
-
 
     const contador =
         overlay.querySelector(
             ".moti-go-contador"
         );
 
-
     const barra =
         overlay.querySelector(
             ".moti-go-barra-tiempo-progreso"
         );
 
-
     const intervalo =
         setInterval(
             () => {
-
                 segundos--;
 
-
-                if (
-                    contador
-                ) {
-
+                if (contador) {
                     contador.textContent =
-                        segundos;
-
+                        `${Math.max(0, segundos)}s`;
                 }
 
-
-                if (
-                    barra
-                ) {
-
+                if (barra) {
                     const porcentaje =
                         Math.max(
                             0,
@@ -1019,47 +1086,25 @@ function mostrarSolicitudPedido(
                             100
                         );
 
-
                     barra.style.width =
                         `${porcentaje}%`;
-
                 }
 
-
-                if (
-                    segundos <= 0
-                ) {
-
-                    clearInterval(
-                        intervalo
-                    );
-
-
-                    expirarSolicitud(
-                        pedido
-                    );
-
+                if (segundos <= 0) {
+                    clearInterval(intervalo);
+                    expirarSolicitud(pedido);
                 }
-
             },
             1000
         );
 
-
     solicitudesActivas.set(
-
         pedido.id,
-
         {
-
             pedido,
-
             overlay,
-
             intervalo
-
         }
-
     );
 
 }
@@ -2366,6 +2411,262 @@ function agregarEstilosSolicitud() {
 
         }
 
+
+
+        /* =============================================
+           REDISEÑO PROFESIONAL - SOLICITUD
+        ============================================== */
+
+        .moti-go-solicitud-modal {
+            width: min(470px, 100%);
+            max-height: min(92vh, 760px);
+            overflow-y: auto;
+            padding: 22px;
+            border-radius: 26px;
+        }
+
+        .moti-go-solicitud-cabecera {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .moti-go-solicitud-icono {
+            flex: 0 0 58px;
+            width: 58px;
+            height: 58px;
+            margin: 0;
+            border-radius: 18px;
+        }
+
+        .moti-go-solicitud-cabecera-texto {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .moti-go-solicitud-etiqueta {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .12em;
+            color: #16a34a;
+        }
+
+        .moti-go-solicitud-titulo {
+            text-align: left;
+            font-size: 21px;
+        }
+
+        .moti-go-solicitud-folio {
+            text-align: left;
+            margin-top: 2px;
+        }
+
+        .moti-go-solicitud-ganancia {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 18px;
+            padding: 16px;
+            border: 1px solid #dcfce7;
+            border-radius: 18px;
+            background: #f0fdf4;
+        }
+
+        .moti-go-solicitud-ganancia > div {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            min-width: 0;
+        }
+
+        .moti-go-solicitud-ganancia > div > .material-symbols-outlined {
+            font-size: 28px;
+            color: #16a34a;
+        }
+
+        .moti-go-solicitud-ganancia small,
+        .moti-go-solicitud-destino small,
+        .moti-go-solicitud-resumen-item small {
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .moti-go-solicitud-ganancia strong {
+            display: block;
+            margin-top: 1px;
+            font-size: 25px;
+            color: #15803d;
+        }
+
+        .moti-go-solicitud-ganancia-badge {
+            padding: 6px 9px;
+            border-radius: 999px;
+            background: #dcfce7;
+            color: #15803d;
+            font-size: 10px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .moti-go-solicitud-destino {
+            margin-top: 12px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            background: #fff;
+        }
+
+        .moti-go-solicitud-destino-titulo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .moti-go-solicitud-destino-titulo > .material-symbols-outlined {
+            font-size: 27px;
+            color: #ef4444;
+        }
+
+        .moti-go-solicitud-destino-titulo strong {
+            display: block;
+            margin-top: 2px;
+            font-size: 16px;
+            color: #0f172a;
+        }
+
+        .moti-go-solicitud-referencia {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-top: 11px;
+            padding-top: 11px;
+            border-top: 1px solid #f1f5f9;
+            color: #475569;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .moti-go-solicitud-referencia .material-symbols-outlined {
+            flex: 0 0 auto;
+            font-size: 18px;
+            color: #64748b;
+        }
+
+        .moti-go-solicitud-mapa {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: #f8fafc;
+            color: #2563eb;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .moti-go-solicitud-mapa .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+        .moti-go-solicitud-mapa .material-symbols-outlined:last-child {
+            margin-left: auto;
+            font-size: 16px;
+        }
+
+        .moti-go-solicitud-mapa.sin-ubicacion {
+            color: #94a3b8;
+        }
+
+        .moti-go-solicitud-resumen {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .moti-go-solicitud-resumen-item {
+            min-width: 0;
+            padding: 12px 10px;
+            border-radius: 15px;
+            background: #f8fafc;
+        }
+
+        .moti-go-solicitud-resumen-item > .material-symbols-outlined {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 20px;
+            color: #475569;
+        }
+
+        .moti-go-solicitud-resumen-item strong {
+            display: block;
+            margin-top: 2px;
+            color: #0f172a;
+            font-size: 15px;
+        }
+
+        .moti-go-solicitud-nota {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 13px;
+            background: #f8fafc;
+            color: #64748b;
+        }
+
+        .moti-go-solicitud-nota .material-symbols-outlined {
+            flex: 0 0 auto;
+            margin-top: 1px;
+            font-size: 18px;
+            color: #64748b;
+        }
+
+        .moti-go-solicitud-nota p {
+            margin: 0;
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        .moti-go-solicitud-tiempo {
+            margin-top: 15px;
+        }
+
+        .moti-go-solicitud-botones {
+            margin-top: 17px;
+        }
+
+        @media (max-width: 480px) {
+            .moti-go-solicitud-overlay {
+                align-items: flex-end;
+                padding: 10px;
+            }
+
+            .moti-go-solicitud-modal {
+                width: 100%;
+                max-height: 92vh;
+                padding: 18px;
+                border-radius: 24px;
+            }
+
+            .moti-go-solicitud-resumen {
+                gap: 6px;
+            }
+
+            .moti-go-solicitud-resumen-item {
+                padding: 10px 8px;
+            }
+        }
 
         .moti-go-solicitud-botones button:active {
 
