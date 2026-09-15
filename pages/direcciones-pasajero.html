@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#16a34a"
+    >
+
+    <title>MOTI GO | Mis direcciones</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/variables.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/main.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/pasajero.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/direcciones-pasajero.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+</head>
+
+<body>
+
+<div class="go-app direcciones-app">
+
+    <header class="go-header">
+
+        <a
+            href="dashboard-cliente.html"
+            class="header-button"
+            aria-label="Volver"
+        >
+            <span class="material-symbols-outlined">arrow_back</span>
+        </a>
+
+        <div class="brand">
+            <span class="material-symbols-outlined">two_wheeler</span>
+
+            <div>
+                <strong>MOTI GO</strong>
+                <span>Mis direcciones</span>
+            </div>
+        </div>
+
+        <button
+            type="button"
+            id="btnNuevaDireccionHeader"
+            class="header-button"
+            aria-label="Agregar dirección"
+        >
+            <span class="material-symbols-outlined">add</span>
+        </button>
+
+    </header>
+
+    <main class="direcciones-main">
+
+        <section class="direcciones-hero">
+            <div class="direcciones-hero-icon">
+                <span class="material-symbols-outlined">location_on</span>
+            </div>
+
+            <div>
+                <span class="direcciones-kicker">ENTREGA</span>
+                <h1>Mis direcciones</h1>
+                <p>
+                    Guarda tus lugares habituales y elige dónde recibir cada pedido.
+                </p>
+            </div>
+        </section>
+
+        <section class="ubicacion-actual-card">
+
+            <div class="ubicacion-actual-icon">
+                <span class="material-symbols-outlined">my_location</span>
+            </div>
+
+            <div class="ubicacion-actual-copy">
+                <strong>Usar mi ubicación actual</strong>
+                <span>
+                    Utiliza el GPS del teléfono para este pedido. No se guarda automáticamente.
+                </span>
+            </div>
+
+            <button
+                type="button"
+                id="btnUsarUbicacionActual"
+                class="btn-principal-direccion"
+            >
+                Usar GPS
+            </button>
+
+        </section>
+
+        <section class="direcciones-section">
+
+            <div class="direcciones-section-head">
+                <div>
+                    <span class="direcciones-kicker">GUARDADAS</span>
+                    <h2>Tus lugares</h2>
+                </div>
+
+                <button
+                    type="button"
+                    id="btnNuevaDireccion"
+                    class="btn-agregar-direccion"
+                >
+                    <span class="material-symbols-outlined">add</span>
+                    Agregar
+                </button>
+            </div>
+
+            <div
+                id="direccionesEstado"
+                class="direcciones-estado"
+            >
+                Cargando tus direcciones...
+            </div>
+
+            <div
+                id="direccionesLista"
+                class="direcciones-lista"
+            ></div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<!-- MODAL EDITAR / AGREGAR -->
+
+<div
+    id="modalDireccion"
+    class="direccion-modal"
+    aria-hidden="true"
+>
+
+    <div class="direccion-modal-backdrop"></div>
+
+    <section
+        class="direccion-modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="direccionModalTitulo"
+    >
+
+        <div class="direccion-modal-header">
+
+            <div>
+                <span class="direcciones-kicker">UBICACIÓN DE ENTREGA</span>
+                <h2 id="direccionModalTitulo">Nueva dirección</h2>
+            </div>
+
+            <button
+                type="button"
+                id="btnCerrarDireccion"
+                class="direccion-modal-close"
+                aria-label="Cerrar"
+            >
+                <span class="material-symbols-outlined">close</span>
+            </button>
+
+        </div>
+
+        <div class="direccion-form">
+
+            <div class="direccion-tipo-grid">
+
+                <button type="button" class="tipo-direccion activo" data-tipo="casa">
+                    <span class="material-symbols-outlined">home</span>
+                    <span>Casa</span>
+                </button>
+
+                <button type="button" class="tipo-direccion" data-tipo="trabajo">
+                    <span class="material-symbols-outlined">work</span>
+                    <span>Trabajo</span>
+                </button>
+
+                <button type="button" class="tipo-direccion" data-tipo="otro">
+                    <span class="material-symbols-outlined">location_on</span>
+                    <span>Otro</span>
+                </button>
+
+            </div>
+
+            <label class="direccion-label">
+                <span>Nombre de la dirección</span>
+                <input
+                    id="direccionNombre"
+                    type="text"
+                    maxlength="40"
+                    placeholder="Ej. Casa"
+                    autocomplete="off"
+                >
+            </label>
+
+            <label class="direccion-label">
+                <span>Localidad</span>
+                <input
+                    id="direccionLocalidad"
+                    type="text"
+                    maxlength="80"
+                    placeholder="Ej. Ostuacán"
+                    autocomplete="address-level2"
+                >
+            </label>
+
+            <label class="direccion-label">
+                <span>Referencia para el repartidor</span>
+                <textarea
+                    id="direccionReferencia"
+                    maxlength="180"
+                    rows="3"
+                    placeholder="Ej. Portón verde, frente a la tienda..."
+                ></textarea>
+            </label>
+
+            <div class="mapa-direccion-wrap">
+
+                <div class="mapa-direccion-head">
+                    <div>
+                        <strong>Ubicación exacta</strong>
+                        <span>Mueve el pin o usa tu GPS para guardar las coordenadas.</span>
+                    </div>
+
+                    <button
+                        type="button"
+                        id="btnGPSModal"
+                        class="btn-gps-modal"
+                    >
+                        <span class="material-symbols-outlined">my_location</span>
+                        GPS
+                    </button>
+                </div>
+
+                <div
+                    id="mapaDireccion"
+                    class="mapa-direccion"
+                ></div>
+
+                <div
+                    id="coordenadasDireccion"
+                    class="coordenadas-direccion"
+                >
+                    Selecciona una ubicación en el mapa.
+                </div>
+
+            </div>
+
+            <label class="direccion-default">
+
+                <input
+                    id="direccionPredeterminada"
+                    type="checkbox"
+                >
+
+                <span>
+                    <strong>Usar como dirección predeterminada</strong>
+                    <small>Será la opción seleccionada inicialmente al pedir.</small>
+                </span>
+
+            </label>
+
+            <div class="direccion-modal-actions">
+
+                <button
+                    type="button"
+                    id="btnCancelarDireccion"
+                    class="btn-secundario-direccion"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="button"
+                    id="btnGuardarDireccion"
+                    class="btn-guardar-direccion"
+                >
+                    <span class="material-symbols-outlined">check</span>
+                    Guardar dirección
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+<script
+    type="module"
+    src="../js/auth-guard.js"
+></script>
+
+<script
+    type="module"
+    src="../js/direcciones-pasajero.js"
+></script>
+
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+></script>
+
+</body>
+</html>
