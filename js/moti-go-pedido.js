@@ -1850,6 +1850,8 @@ async function renderizarRevisionPedido(
 
         </section>
 
+    `;
+
 
     // =================================================
     // RESUMEN
