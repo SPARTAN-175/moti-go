@@ -3,7 +3,7 @@ import { auth, db } from "./firebase-config.js";
 import {
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
-  
+ 
 import {
     doc,
     getDoc,
@@ -377,31 +377,64 @@ requestContent.addEventListener(
 
 function renderizarPerfilRepartidor(datos) {
     const nombre = datos?.nombre || "Repartidor";
-    const correo = datos?.email || "Sin correo";
+    const correo = datos?.email || auth.currentUser?.email || "Sin correo";
     const telefono = datos?.telefono || datos?.celular || "No registrado";
     const localidad = datos?.localidad || datos?.municipio || "No registrada";
+    const estadoServicio = datos?.estadoServicio || "disponible";
+
     const valoracion = datos?.valoracionRepartidor || {};
     const promedio = Number(valoracion.promedio) || 0;
     const cantidad = Number(valoracion.cantidad) || 0;
-    const estrellas = cantidad > 0 ? Array.from({ length: 5 }, (_, indice) => indice < Math.round(promedio) ? "★" : "☆").join("") : "☆☆☆☆☆";
+
+    const estrellas = Array.from(
+        { length: 5 },
+        (_, indice) => cantidad > 0 && indice < Math.round(promedio) ? "★" : "☆"
+    ).join("");
+
+    const nombreLimpio = String(nombre).trim();
+    const inicial = nombreLimpio
+        ? nombreLimpio.charAt(0).toUpperCase()
+        : "R";
+
+    const tipoCuenta = datos?.esFundador === true
+        ? "Repartidor · Fundador"
+        : "Repartidor";
+
+    const estadoTexto = {
+        disponible: "Disponible",
+        no_disponible: "No disponible",
+        ocupado: "En servicio"
+    }[estadoServicio] || "Disponible";
 
     const elementos = {
+        inicial: document.getElementById("perfilRepartidorInicial"),
         nombre: document.getElementById("perfilRepartidorNombre"),
         correo: document.getElementById("perfilRepartidorCorreo"),
         telefono: document.getElementById("perfilRepartidorTelefono"),
         localidad: document.getElementById("perfilRepartidorLocalidad"),
+        tipo: document.getElementById("perfilRepartidorTipo"),
+        estado: document.getElementById("perfilRepartidorEstado"),
         promedio: document.getElementById("perfilRepartidorPromedio"),
         estrellas: document.getElementById("perfilRepartidorEstrellas"),
         cantidad: document.getElementById("perfilRepartidorCantidad")
     };
 
+    if (elementos.inicial) elementos.inicial.textContent = inicial;
     if (elementos.nombre) elementos.nombre.textContent = nombre;
     if (elementos.correo) elementos.correo.textContent = correo;
     if (elementos.telefono) elementos.telefono.textContent = telefono;
     if (elementos.localidad) elementos.localidad.textContent = localidad;
+    if (elementos.tipo) elementos.tipo.textContent = tipoCuenta;
+    if (elementos.estado) elementos.estado.textContent = estadoTexto;
     if (elementos.promedio) elementos.promedio.textContent = promedio.toFixed(1);
     if (elementos.estrellas) elementos.estrellas.textContent = estrellas;
-    if (elementos.cantidad) elementos.cantidad.textContent = cantidad === 0 ? "Sin valoraciones todavía" : cantidad === 1 ? "1 valoración recibida" : `${cantidad} valoraciones recibidas`;
+    if (elementos.cantidad) {
+        elementos.cantidad.textContent = cantidad === 0
+            ? "Sin valoraciones"
+            : cantidad === 1
+                ? "1 valoración"
+                : `${cantidad} valoraciones`;
+    }
 }
 
 
