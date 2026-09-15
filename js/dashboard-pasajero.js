@@ -12632,16 +12632,49 @@ function mostrarCalificacionRepartidor(pedido) {
             guardar.disabled = true;
             guardar.textContent = "Guardando...";
 
-            await updateDoc(
-                doc(db, "pedidos", pedido.id),
-                {
-                    calificacionRepartidor: {
-                        estrellas: seleccion,
-                        creadoEn: serverTimestamp()
-                    },
-                    actualizadoEn: serverTimestamp()
+            const pedidoRef = doc(db, "pedidos", pedido.id);
+            const repartidorId = pedido.repartidorId || null;
+
+            if (!repartidorId) {
+                throw new Error("El pedido no tiene repartidor asignado.");
+            }
+
+            const repartidorRef = doc(db, "usuarios", repartidorId);
+
+            await runTransaction(db, async transaction => {
+                const pedidoSnap = await transaction.get(pedidoRef);
+                if (!pedidoSnap.exists()) throw new Error("El pedido ya no existe.");
+
+                const pedidoActual = pedidoSnap.data() || {};
+                if (pedidoActual.calificacionRepartidor?.estrellas || pedidoActual.valoracionRepartidor?.estrellas) {
+                    throw new Error("Este pedido ya fue calificado.");
                 }
-            );
+
+                const repartidorSnap = await transaction.get(repartidorRef);
+                const datosRepartidor = repartidorSnap.exists() ? (repartidorSnap.data() || {}) : {};
+                const anterior = datosRepartidor.valoracionRepartidor || {};
+                const cantidadAnterior = Number(anterior.cantidad) || 0;
+                const sumaAnterior = Number(anterior.suma) || 0;
+                const nuevaCantidad = cantidadAnterior + 1;
+                const nuevaSuma = sumaAnterior + seleccion;
+                const nuevoPromedio = Number((nuevaSuma / nuevaCantidad).toFixed(2));
+                const marcaTiempo = serverTimestamp();
+
+                transaction.update(pedidoRef, {
+                    calificacionRepartidor: { estrellas: seleccion, creadoEn: marcaTiempo },
+                    valoracionRepartidor: { estrellas: seleccion, creadoEn: marcaTiempo },
+                    actualizadoEn: marcaTiempo
+                });
+
+                transaction.set(repartidorRef, {
+                    valoracionRepartidor: {
+                        promedio: nuevoPromedio,
+                        cantidad: nuevaCantidad,
+                        suma: nuevaSuma,
+                        actualizadoEn: marcaTiempo
+                    }
+                }, { merge: true });
+            });
 
             modal.remove();
 
@@ -13117,6 +13150,8 @@ function mostrarTicketPedido(
 
                 if (!ticket) return;
 
+                let ticketImagen = null;
+
                 try {
 
                     boton.disabled = true;
@@ -13125,16 +13160,42 @@ function mostrarTicketPedido(
 
                     await cargarHtml2CanvasMotiGo();
 
+                    ticketImagen = ticket.cloneNode(true);
+
+                    ticketImagen.querySelectorAll(
+                        "#guardarTicketMotiGo, #cerrarTicketMotiGo, .moti-go-ticket-descargar, .moti-go-ticket-close"
+                    ).forEach(elemento => elemento.remove());
+
+                    ticketImagen.style.position = "absolute";
+                    ticketImagen.style.left = "-100000px";
+                    ticketImagen.style.top = "0";
+                    ticketImagen.style.width = `${ticket.getBoundingClientRect().width}px`;
+                    ticketImagen.style.maxHeight = "none";
+                    ticketImagen.style.height = "auto";
+                    ticketImagen.style.overflow = "visible";
+                    ticketImagen.style.borderRadius = "0";
+                    ticketImagen.style.boxShadow = "none";
+                    ticketImagen.style.background = "#ffffff";
+
+                    document.body.appendChild(ticketImagen);
+
                     const canvas =
                         await window.html2canvas(
-                            ticket,
+                            ticketImagen,
                             {
                                 backgroundColor: "#ffffff",
                                 scale: Math.min(3, window.devicePixelRatio || 2),
                                 useCORS: true,
-                                logging: false
+                                logging: false,
+                                width: ticketImagen.scrollWidth,
+                                height: ticketImagen.scrollHeight,
+                                windowWidth: ticketImagen.scrollWidth,
+                                windowHeight: ticketImagen.scrollHeight
                             }
                         );
+
+                    ticketImagen.remove();
+                    ticketImagen = null;
 
                     const enlace =
                         document.createElement("a");
@@ -13171,6 +13232,10 @@ function mostrarTicketPedido(
 
                 }
                 finally {
+
+                    if (ticketImagen?.isConnected) {
+                        ticketImagen.remove();
+                    }
 
                     boton.disabled = false;
                     boton.textContent =
