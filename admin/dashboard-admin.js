@@ -36,6 +36,15 @@ import {
 
 
 /* =========================================================
+   VALORACIÓN DE REPARTIDORES
+========================================================= */
+
+function obtenerValoracionRepartidorPedido(pedido) {
+    return pedido?.valoracionRepartidor || pedido?.calificacionRepartidor || null;
+}
+
+
+/* =========================================================
    ELEMENTOS PRINCIPALES
 ========================================================= */
 
@@ -3005,8 +3014,7 @@ const totalGenerado =
         pedidosEntregados
             .map(
                 pedido =>
-                    pedido
-                        .valoracionRepartidor
+                    obtenerValoracionRepartidorPedido(pedido)
             )
             .filter(
                 valoracion =>
@@ -4070,8 +4078,7 @@ function abrirModalUsuario(
             ? pedidosCompletados
                 .map(
                     pedido =>
-                        pedido
-                            .valoracionRepartidor
+                        obtenerValoracionRepartidorPedido(pedido)
                 )
                 .filter(
                     valoracion =>
