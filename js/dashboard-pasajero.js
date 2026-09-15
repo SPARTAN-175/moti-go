@@ -54,6 +54,8 @@ let tiendaSeleccionadaId = null;
 
 let perfilCliente = null;
 
+let destinoSeleccionadoMotiGo = null;
+
 let pedidoActivoClienteId = null;
 let listenerPedidoActivoCliente = null;
 
@@ -330,6 +332,10 @@ async function cargarContextoCliente() {
 
     perfilCliente =
     usuario;
+
+    cargarDestinoSeleccionadoMotiGo();
+
+    renderizarDestinoEntregaMotiGo();
 
     console.log(
         "👤 Perfil cliente:",
@@ -4464,8 +4470,755 @@ function escaparHTML(
 
 
 // =====================================================
+// DESTINO DE ENTREGA MOTI GO
+// =====================================================
+
+function coordenadasValidasDestinoMotiGo(lat, lng) {
+
+    return (
+        Number.isFinite(Number(lat)) &&
+        Number.isFinite(Number(lng))
+    );
+
+}
+
+
+function cargarDestinoSeleccionadoMotiGo() {
+
+    try {
+
+        const guardado =
+            sessionStorage.getItem(
+                "motiGoDestinoSeleccionado"
+            );
+
+        if (!guardado) {
+
+            destinoSeleccionadoMotiGo =
+                null;
+
+            return;
+
+        }
+
+        const destino =
+            JSON.parse(
+                guardado
+            );
+
+        if (
+            !destino ||
+            !coordenadasValidasDestinoMotiGo(
+                destino.latitud,
+                destino.longitud
+            )
+        ) {
+
+            destinoSeleccionadoMotiGo =
+                null;
+
+            return;
+
+        }
+
+        destinoSeleccionadoMotiGo = {
+
+            ...destino,
+
+            latitud:
+                Number(destino.latitud),
+
+            longitud:
+                Number(destino.longitud)
+
+        };
+
+    }
+    catch (error) {
+
+        console.error(
+            "❌ MOTI GO: destino guardado inválido:",
+            error
+        );
+
+        destinoSeleccionadoMotiGo =
+            null;
+
+    }
+
+}
+
+
+function obtenerDestinoBaseMotiGo() {
+
+    if (
+        destinoSeleccionadoMotiGo &&
+        coordenadasValidasDestinoMotiGo(
+            destinoSeleccionadoMotiGo.latitud,
+            destinoSeleccionadoMotiGo.longitud
+        )
+    ) {
+
+        return destinoSeleccionadoMotiGo;
+
+    }
+
+    if (
+        perfilCliente &&
+        coordenadasValidasDestinoMotiGo(
+            perfilCliente.latitud,
+            perfilCliente.longitud
+        )
+    ) {
+
+        return {
+
+            tipo: "actual",
+
+            nombre: "Mi ubicación actual",
+
+            localidad:
+                perfilCliente.localidad ||
+                perfilCliente.municipio ||
+                "",
+
+            referencia:
+                perfilCliente.referencia ||
+                "",
+
+            latitud:
+                Number(perfilCliente.latitud),
+
+            longitud:
+                Number(perfilCliente.longitud)
+
+        };
+
+    }
+
+    return null;
+
+}
+
+
+function renderizarDestinoEntregaMotiGo() {
+
+    if (!locationText) return;
+
+    const destino =
+        obtenerDestinoBaseMotiGo();
+
+    if (!destino) {
+
+        locationText.textContent =
+            "Selecciona dónde entregar";
+
+        return;
+
+    }
+
+    const nombre =
+        destino.nombre ||
+        (
+            destino.tipo === "actual"
+                ? "Mi ubicación actual"
+                : "Dirección guardada"
+        );
+
+    const localidad =
+        destino.localidad ||
+        "";
+
+    locationText.textContent =
+        localidad
+            ? `${nombre} · ${localidad}`
+            : nombre;
+
+}
+
+
+function guardarDestinoEnSesionMotiGo(destino) {
+
+    if (
+        !destino ||
+        !coordenadasValidasDestinoMotiGo(
+            destino.latitud,
+            destino.longitud
+        )
+    ) {
+
+        return false;
+
+    }
+
+    destinoSeleccionadoMotiGo = {
+
+        ...destino,
+
+        latitud:
+            Number(destino.latitud),
+
+        longitud:
+            Number(destino.longitud)
+
+    };
+
+    sessionStorage.setItem(
+        "motiGoDestinoSeleccionado",
+        JSON.stringify(
+            destinoSeleccionadoMotiGo
+        )
+    );
+
+    if (perfilCliente) {
+
+        perfilCliente = {
+
+            ...perfilCliente,
+
+            latitud:
+                destinoSeleccionadoMotiGo.latitud,
+
+            longitud:
+                destinoSeleccionadoMotiGo.longitud,
+
+            localidad:
+                destinoSeleccionadoMotiGo.localidad ||
+                perfilCliente.localidad ||
+                perfilCliente.municipio ||
+                "",
+
+            referencia:
+                destinoSeleccionadoMotiGo.referencia ||
+                ""
+
+        };
+
+    }
+
+    renderizarDestinoEntregaMotiGo();
+
+    return true;
+
+}
+
+
+function limpiarDestinoGuardadoMotiGo() {
+
+    destinoSeleccionadoMotiGo =
+        null;
+
+    sessionStorage.removeItem(
+        "motiGoDestinoSeleccionado"
+    );
+
+    renderizarDestinoEntregaMotiGo();
+
+}
+
+
+async function obtenerDireccionesGuardadasMotiGo() {
+
+    const user =
+        auth.currentUser;
+
+    if (!user) return [];
+
+    try {
+
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "usuarios",
+                    user.uid,
+                    "direcciones"
+                )
+            );
+
+        const direcciones =
+            snapshot.docs.map(
+                documento => ({
+                    id: documento.id,
+                    ...documento.data()
+                })
+            ).filter(
+                direccion =>
+                    coordenadasValidasDestinoMotiGo(
+                        direccion.latitud,
+                        direccion.longitud
+                    )
+            );
+
+        direcciones.sort(
+            (a, b) => {
+
+                if (
+                    a.predeterminada === true &&
+                    b.predeterminada !== true
+                ) return -1;
+
+                if (
+                    a.predeterminada !== true &&
+                    b.predeterminada === true
+                ) return 1;
+
+                return String(
+                    a.nombre || ""
+                ).localeCompare(
+                    String(
+                        b.nombre || ""
+                    ),
+                    "es"
+                );
+
+            }
+        );
+
+        return direcciones;
+
+    }
+    catch (error) {
+
+        console.error(
+            "❌ MOTI GO: error cargando direcciones guardadas:",
+            error
+        );
+
+        return [];
+
+    }
+
+}
+
+
+function crearModalSelectorDestinoMotiGo() {
+
+    if (
+        document.getElementById(
+            "motiGoSelectorDestino"
+        )
+    ) {
+
+        return document.getElementById(
+            "motiGoSelectorDestino"
+        );
+
+    }
+
+    const modal =
+        document.createElement("div");
+
+    modal.id =
+        "motiGoSelectorDestino";
+
+    modal.className =
+        "moti-go-selector-destino";
+
+    modal.innerHTML = `
+
+        <div class="moti-go-selector-backdrop"></div>
+
+        <section
+            class="moti-go-selector-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="motiGoSelectorTitulo"
+        >
+
+            <header class="moti-go-selector-header">
+
+                <div>
+                    <span>ENTREGA</span>
+                    <h2 id="motiGoSelectorTitulo">
+                        ¿Dónde entregamos?
+                    </h2>
+                    <p>
+                        Elige una dirección guardada o usa tu ubicación actual.
+                    </p>
+                </div>
+
+                <button
+                    type="button"
+                    id="motiGoCerrarSelectorDestino"
+                    aria-label="Cerrar"
+                >
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+
+            </header>
+
+            <div class="moti-go-selector-body">
+
+                <button
+                    type="button"
+                    id="motiGoUsarGPSSelector"
+                    class="moti-go-destino-opcion moti-go-destino-actual"
+                >
+                    <span class="moti-go-destino-icon">
+                        <span class="material-symbols-outlined">my_location</span>
+                    </span>
+
+                    <span class="moti-go-destino-copy">
+                        <strong>Mi ubicación actual</strong>
+                        <small>Usar el GPS del teléfono para este pedido.</small>
+                    </span>
+
+                    <span class="material-symbols-outlined">
+                        chevron_right
+                    </span>
+                </button>
+
+                <div class="moti-go-selector-divider">
+                    <span>O ELIGE UNA GUARDADA</span>
+                </div>
+
+                <div id="motiGoDireccionesSelector">
+                    <div class="moti-go-selector-loading">
+                        Cargando direcciones...
+                    </div>
+                </div>
+
+                <a
+                    href="direcciones-pasajero.html"
+                    class="moti-go-administrar-direcciones"
+                >
+                    <span class="material-symbols-outlined">settings</span>
+                    Administrar mis direcciones
+                </a>
+
+            </div>
+
+        </section>
+    `;
+
+    document.body.appendChild(
+        modal
+    );
+
+    const cerrar =
+        () => {
+
+            modal.classList.remove(
+                "activo"
+            );
+
+        };
+
+    document
+        .getElementById(
+            "motiGoCerrarSelectorDestino"
+        )
+        ?.addEventListener(
+            "click",
+            cerrar
+        );
+
+    modal
+        .querySelector(
+            ".moti-go-selector-backdrop"
+        )
+        ?.addEventListener(
+            "click",
+            cerrar
+        );
+
+    document
+        .getElementById(
+            "motiGoUsarGPSSelector"
+        )
+        ?.addEventListener(
+            "click",
+            usarUbicacionActualSelectorMotiGo
+        );
+
+    return modal;
+
+}
+
+
+async function abrirSelectorDestinoMotiGo() {
+
+    const modal =
+        crearModalSelectorDestinoMotiGo();
+
+    const contenedor =
+        document.getElementById(
+            "motiGoDireccionesSelector"
+        );
+
+    if (!modal || !contenedor) return;
+
+    modal.classList.add(
+        "activo"
+    );
+
+    contenedor.innerHTML =
+        `<div class="moti-go-selector-loading">
+            Cargando direcciones...
+        </div>`;
+
+    const direcciones =
+        await obtenerDireccionesGuardadasMotiGo();
+
+    if (!direcciones.length) {
+
+        contenedor.innerHTML = `
+            <div class="moti-go-selector-empty">
+                <span class="material-symbols-outlined">location_off</span>
+                <strong>Aún no tienes direcciones guardadas</strong>
+                <small>Guarda una desde “Mis direcciones” para usarla aquí.</small>
+            </div>
+        `;
+
+        return;
+
+    }
+
+    contenedor.innerHTML =
+        direcciones.map(
+            direccion => {
+
+                const seleccionada =
+                    destinoSeleccionadoMotiGo?.direccionId ===
+                    direccion.id;
+
+                return `
+                    <button
+                        type="button"
+                        class="moti-go-destino-opcion ${seleccionada ? "seleccionada" : ""}"
+                        data-direccion-id="${String(direccion.id).replace(/"/g, "&quot;")}"
+                    >
+
+                        <span class="moti-go-destino-icon">
+                            <span class="material-symbols-outlined">
+                                ${
+                                    direccion.tipo === "trabajo"
+                                        ? "work"
+                                        : direccion.tipo === "otro"
+                                            ? "location_on"
+                                            : "home"
+                                }
+                            </span>
+                        </span>
+
+                        <span class="moti-go-destino-copy">
+                            <strong>
+                                ${String(
+                                    direccion.nombre ||
+                                    "Dirección"
+                                ).replace(/[&<>"']/g, "")}
+                            </strong>
+
+                            <small>
+                                ${String(
+                                    direccion.localidad ||
+                                    "Ubicación guardada"
+                                ).replace(/[&<>"']/g, "")}
+                                ${
+                                    direccion.referencia
+                                        ? ` · ${String(
+                                            direccion.referencia
+                                        ).replace(/[&<>"']/g, "")}`
+                                        : ""
+                                }
+                            </small>
+                        </span>
+
+                        <span class="material-symbols-outlined">
+                            ${
+                                seleccionada
+                                    ? "radio_button_checked"
+                                    : "radio_button_unchecked"
+                            }
+                        </span>
+
+                    </button>
+                `;
+
+            }
+        ).join("");
+
+    contenedor
+        .querySelectorAll(
+            "[data-direccion-id]"
+        )
+        .forEach(
+            boton => {
+
+                boton.addEventListener(
+                    "click",
+                    () => {
+
+                        const direccion =
+                            direcciones.find(
+                                item =>
+                                    item.id ===
+                                    boton.dataset.direccionId
+                            );
+
+                        if (!direccion) return;
+
+                        guardarDestinoEnSesionMotiGo({
+
+                            tipo: "guardada",
+
+                            direccionId:
+                                direccion.id,
+
+                            nombre:
+                                direccion.nombre ||
+                                "Dirección guardada",
+
+                            tipoDireccion:
+                                direccion.tipo ||
+                                "otro",
+
+                            localidad:
+                                direccion.localidad ||
+                                "",
+
+                            referencia:
+                                direccion.referencia ||
+                                "",
+
+                            latitud:
+                                Number(
+                                    direccion.latitud
+                                ),
+
+                            longitud:
+                                Number(
+                                    direccion.longitud
+                                )
+
+                        });
+
+                        modal.classList.remove(
+                            "activo"
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+function usarUbicacionActualSelectorMotiGo() {
+
+    if (!("geolocation" in navigator)) {
+
+        alert(
+            "Este dispositivo no permite obtener la ubicación."
+        );
+
+        return;
+
+    }
+
+    const boton =
+        document.getElementById(
+            "motiGoUsarGPSSelector"
+        );
+
+    if (boton) {
+
+        boton.disabled = true;
+
+    }
+
+    navigator.geolocation.getCurrentPosition(
+
+        position => {
+
+            const destino = {
+
+                tipo: "actual",
+
+                nombre: "Mi ubicación actual",
+
+                localidad:
+                    perfilCliente?.localidad ||
+                    perfilCliente?.municipio ||
+                    "",
+
+                referencia:
+                    perfilCliente?.referencia ||
+                    "",
+
+                latitud:
+                    position.coords.latitude,
+
+                longitud:
+                    position.coords.longitude
+
+            };
+
+            guardarDestinoEnSesionMotiGo(
+                destino
+            );
+
+            if (boton) {
+
+                boton.disabled = false;
+
+            }
+
+            const modal =
+                document.getElementById(
+                    "motiGoSelectorDestino"
+                );
+
+            modal?.classList.remove(
+                "activo"
+            );
+
+        },
+
+        error => {
+
+            console.error(
+                "❌ MOTI GO: error GPS:",
+                error
+            );
+
+            alert(
+                "No pudimos obtener tu ubicación actual. Activa el GPS e intenta nuevamente."
+            );
+
+            if (boton) {
+
+                boton.disabled = false;
+
+            }
+
+        },
+
+        {
+            enableHighAccuracy: true,
+            maximumAge: 5000,
+            timeout: 12000
+        }
+
+    );
+
+}
+
+
+window.motiGoAbrirSelectorDestino =
+    abrirSelectorDestinoMotiGo;
+
+window.motiGoObtenerDestinoSeleccionado =
+    obtenerDestinoBaseMotiGo;
+
+
+// =====================================================
 // GPS
 // =====================================================
+
 
 if (
     "geolocation" in navigator
@@ -6812,6 +7565,56 @@ document.addEventListener(
                     abrirPanelMisPedidos();
 
                 }
+            );
+
+        }
+
+        // -------------------------------------------------
+        // SELECCIONAR UBICACIÓN DE ENTREGA
+        // -------------------------------------------------
+
+        const selectorEntrega =
+            document.getElementById(
+                "deliveryLocationSelector"
+            );
+
+        if (selectorEntrega) {
+
+            const abrirSelector =
+                event => {
+
+                    if (
+                        event &&
+                        event.type === "keydown" &&
+                        event.key !== "Enter" &&
+                        event.key !== " "
+                    ) {
+
+                        return;
+
+                    }
+
+                    if (
+                        event &&
+                        event.type === "keydown"
+                    ) {
+
+                        event.preventDefault();
+
+                    }
+
+                    abrirSelectorDestinoMotiGo();
+
+                };
+
+            selectorEntrega.addEventListener(
+                "click",
+                abrirSelector
+            );
+
+            selectorEntrega.addEventListener(
+                "keydown",
+                abrirSelector
             );
 
         }
@@ -13907,5 +14710,252 @@ if (
     document.head.appendChild(
         estilosTicket
     );
+
+}
+
+
+/* =====================================================
+   SELECTOR DE DESTINO — MOTI GO
+===================================================== */
+
+#deliveryLocationSelector {
+    cursor: pointer;
+    transition: transform .16s ease, box-shadow .16s ease;
+}
+
+#deliveryLocationSelector:hover {
+    box-shadow: 0 7px 22px rgba(15, 23, 42, .08);
+    transform: translateY(-1px);
+}
+
+.moti-go-selector-destino {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease, visibility .2s ease;
+}
+
+.moti-go-selector-destino.activo {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.moti-go-selector-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, .58);
+    backdrop-filter: blur(5px);
+}
+
+.moti-go-selector-card {
+    position: relative;
+    width: min(520px, 100%);
+    max-height: min(720px, calc(100vh - 36px));
+    overflow: auto;
+    border-radius: 23px;
+    background: #fff;
+    box-shadow: 0 30px 80px rgba(15, 23, 42, .28);
+}
+
+.moti-go-selector-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 20px 20px 14px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.moti-go-selector-header > div > span {
+    color: #16a34a;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .12em;
+}
+
+.moti-go-selector-header h2 {
+    margin: 4px 0 0;
+    color: #0f172a;
+    font-size: 20px;
+}
+
+.moti-go-selector-header p {
+    margin: 4px 0 0;
+    color: #64748b;
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+#motiGoCerrarSelectorDestino {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 12px;
+    background: #f1f5f9;
+    color: #475569;
+    cursor: pointer;
+}
+
+.moti-go-selector-body {
+    padding: 15px 17px 19px;
+}
+
+.moti-go-destino-opcion {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 15px;
+    background: #fff;
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+    transition: .16s ease;
+}
+
+.moti-go-destino-opcion:hover,
+.moti-go-destino-opcion.seleccionada {
+    border-color: #86efac;
+    background: #f0fdf4;
+}
+
+.moti-go-destino-actual {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+}
+
+.moti-go-destino-icon {
+    width: 39px;
+    height: 39px;
+    flex: 0 0 39px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.moti-go-destino-icon .material-symbols-outlined {
+    font-size: 20px;
+}
+
+.moti-go-destino-copy {
+    min-width: 0;
+    flex: 1;
+}
+
+.moti-go-destino-copy strong,
+.moti-go-destino-copy small {
+    display: block;
+}
+
+.moti-go-destino-copy strong {
+    color: #0f172a;
+    font-size: 12px;
+}
+
+.moti-go-destino-copy small {
+    margin-top: 3px;
+    overflow: hidden;
+    color: #64748b;
+    font-size: 9px;
+    line-height: 1.4;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.moti-go-selector-divider {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 16px 0 10px;
+    color: #94a3b8;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: .1em;
+}
+
+.moti-go-selector-divider::before,
+.moti-go-selector-divider::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: #e2e8f0;
+}
+
+.moti-go-selector-loading,
+.moti-go-selector-empty {
+    padding: 18px 12px;
+    text-align: center;
+    color: #64748b;
+    font-size: 10px;
+}
+
+.moti-go-selector-empty .material-symbols-outlined {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 28px;
+    color: #94a3b8;
+}
+
+.moti-go-selector-empty strong,
+.moti-go-selector-empty small {
+    display: block;
+}
+
+.moti-go-selector-empty strong {
+    color: #334155;
+    font-size: 11px;
+}
+
+.moti-go-selector-empty small {
+    margin-top: 3px;
+    line-height: 1.4;
+}
+
+.moti-go-administrar-direcciones {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 11px;
+    padding: 11px;
+    border-radius: 12px;
+    background: #f8fafc;
+    color: #475569;
+    text-decoration: none;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.moti-go-administrar-direcciones .material-symbols-outlined {
+    font-size: 16px;
+}
+
+@media (max-width: 620px) {
+
+    .moti-go-selector-destino {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .moti-go-selector-card {
+        width: 100%;
+        max-height: 90vh;
+        border-radius: 22px 22px 0 0;
+    }
 
 }
