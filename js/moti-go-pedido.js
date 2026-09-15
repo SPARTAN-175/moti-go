@@ -1809,6 +1809,49 @@ async function renderizarRevisionPedido(
 
 
     // =================================================
+    // REFERENCIA DE ENTREGA
+    // =================================================
+
+    const referenciaInicial =
+        pedidoCliente?.referencia ||
+        "";
+
+    html += `
+
+        <section
+            class="moti-go-referencia-entrega"
+        >
+
+            <div class="moti-go-referencia-cabecera">
+
+                <span
+                    class="material-symbols-outlined"
+                >
+                    edit_location_alt
+                </span>
+
+                <div>
+                    <strong>Referencia de entrega</strong>
+                    <span>Ayuda al repartidor a encontrar tu domicilio.</span>
+                </div>
+
+            </div>
+
+            <textarea
+                id="motiGoReferenciaEntrega"
+                maxlength="180"
+                rows="2"
+                placeholder="Ej. Casa con portón verde, frente a la tienda..."
+            >${escaparHTMLPedido(referenciaInicial)}</textarea>
+
+            <div class="moti-go-referencia-ayuda">
+                Puedes indicar colores, negocios cercanos, cruces o cualquier punto visible.
+            </div>
+
+        </section>
+
+
+    // =================================================
     // RESUMEN
     // =================================================
 
@@ -2533,6 +2576,27 @@ async function reservarInventarioPedido(
 async function prepararConfirmacionPedido() {
 
     cargarCarritoPedido();
+
+    // =====================================================
+    // TOMAR LA REFERENCIA ESCRITA POR EL CLIENTE
+    // =====================================================
+
+    const campoReferencia =
+        document.getElementById(
+            "motiGoReferenciaEntrega"
+        );
+
+    if (
+        campoReferencia &&
+        pedidoCliente
+    ) {
+
+        pedidoCliente.referencia =
+            campoReferencia.value
+                .trim()
+                .slice(0, 180);
+
+    }
 
 
     const productosPedido =
@@ -4216,6 +4280,80 @@ function agregarEstilosPanelPedido() {
 
         }
 
+
+        /* =============================================
+           REFERENCIA DE ENTREGA
+        ============================================== */
+
+        .moti-go-referencia-entrega {
+            margin-top: 14px;
+            padding: 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            background: #ffffff;
+        }
+
+        .moti-go-referencia-cabecera {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .moti-go-referencia-cabecera > .material-symbols-outlined {
+            flex: 0 0 auto;
+            font-size: 22px;
+            color: #16a34a;
+        }
+
+        .moti-go-referencia-cabecera strong {
+            display: block;
+            color: #0f172a;
+            font-size: 14px;
+        }
+
+        .moti-go-referencia-cabecera span:not(.material-symbols-outlined) {
+            display: block;
+            margin-top: 2px;
+            color: #64748b;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        #motiGoReferenciaEntrega {
+            display: block;
+            width: 100%;
+            min-height: 68px;
+            margin-top: 11px;
+            padding: 11px 12px;
+            box-sizing: border-box;
+            resize: vertical;
+            border: 1px solid #cbd5e1;
+            border-radius: 13px;
+            outline: none;
+            background: #f8fafc;
+            color: #0f172a;
+            font: inherit;
+            font-size: 13px;
+            line-height: 1.45;
+            transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+        }
+
+        #motiGoReferenciaEntrega::placeholder {
+            color: #94a3b8;
+        }
+
+        #motiGoReferenciaEntrega:focus {
+            border-color: #16a34a;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(22,163,74,.10);
+        }
+
+        .moti-go-referencia-ayuda {
+            margin-top: 6px;
+            color: #94a3b8;
+            font-size: 10px;
+            line-height: 1.4;
+        }
 
         .moti-go-pago-pedido span {
 
