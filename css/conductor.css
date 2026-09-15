@@ -2573,3 +2573,15 @@ body:has(.go-app) .container {
         max-width: 1120px;
     }
 }
+
+
+/* =========================================================
+   VALORACIÓN DEL REPARTIDOR — PERFIL
+   ========================================================= */
+.repartidor-perfil-card { max-width: 620px; margin: 0 auto; }
+.perfil-rating-resumen { margin-top: 22px; padding: 20px 16px; border: 1px solid #f0f1f3; border-radius: 18px; background: #fafafa; }
+.perfil-rating-score { display:flex; align-items:baseline; justify-content:center; gap:4px; }
+.perfil-rating-score strong { color:#111827; font-size:36px; line-height:1; font-weight:800; }
+.perfil-rating-score span { color:#9ca3af; font-size:14px; font-weight:700; }
+.perfil-rating-stars { margin-top:8px; color:#f59e0b; font-size:25px; letter-spacing:2px; }
+.perfil-rating-count { display:block; margin-top:7px; color:#9ca3af; font-size:12px; }
