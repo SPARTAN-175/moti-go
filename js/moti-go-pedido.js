@@ -4784,6 +4784,11 @@ function obtenerDestinoClienteMotiGo() {
    DESTINO DE ENTREGA — REVISIÓN DEL PEDIDO
 ===================================================== */
 
+
+
+const estilosDestinoPedido = document.createElement("style");
+
+estilosDestinoPedido.textContent = `
 .moti-go-destino-entrega {
     margin: 14px 0;
     padding: 13px;
@@ -4862,3 +4867,9 @@ function obtenerDestinoClienteMotiGo() {
     font-size: 9px;
     font-weight: 700;
 }
+
+`;
+
+document.head.appendChild(
+    estilosDestinoPedido
+);
