@@ -372,6 +372,40 @@ requestContent.addEventListener(
 
 
 // =========================================
+// PERFIL DEL REPARTIDOR
+// =========================================
+
+function renderizarPerfilRepartidor(datos) {
+    const nombre = datos?.nombre || "Repartidor";
+    const correo = datos?.email || "Sin correo";
+    const telefono = datos?.telefono || datos?.celular || "No registrado";
+    const localidad = datos?.localidad || datos?.municipio || "No registrada";
+    const valoracion = datos?.valoracionRepartidor || {};
+    const promedio = Number(valoracion.promedio) || 0;
+    const cantidad = Number(valoracion.cantidad) || 0;
+    const estrellas = cantidad > 0 ? Array.from({ length: 5 }, (_, indice) => indice < Math.round(promedio) ? "★" : "☆").join("") : "☆☆☆☆☆";
+
+    const elementos = {
+        nombre: document.getElementById("perfilRepartidorNombre"),
+        correo: document.getElementById("perfilRepartidorCorreo"),
+        telefono: document.getElementById("perfilRepartidorTelefono"),
+        localidad: document.getElementById("perfilRepartidorLocalidad"),
+        promedio: document.getElementById("perfilRepartidorPromedio"),
+        estrellas: document.getElementById("perfilRepartidorEstrellas"),
+        cantidad: document.getElementById("perfilRepartidorCantidad")
+    };
+
+    if (elementos.nombre) elementos.nombre.textContent = nombre;
+    if (elementos.correo) elementos.correo.textContent = correo;
+    if (elementos.telefono) elementos.telefono.textContent = telefono;
+    if (elementos.localidad) elementos.localidad.textContent = localidad;
+    if (elementos.promedio) elementos.promedio.textContent = promedio.toFixed(1);
+    if (elementos.estrellas) elementos.estrellas.textContent = estrellas;
+    if (elementos.cantidad) elementos.cantidad.textContent = cantidad === 0 ? "Sin valoraciones todavía" : cantidad === 1 ? "1 valoración recibida" : `${cantidad} valoraciones recibidas`;
+}
+
+
+// =========================================
 // AUTENTICACIÓN
 // =========================================
 
@@ -407,6 +441,9 @@ onAuthStateChanged(
 
             const datos =
                 docSnap.data();
+
+
+            renderizarPerfilRepartidor(datos);
 
 
             // =============================
@@ -658,6 +695,9 @@ function escucharEstadoRepartidor(
 
                 const datos =
                     snapshot.data();
+
+
+                renderizarPerfilRepartidor(datos);
 
 
 // =========================================
