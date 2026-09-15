@@ -14718,6 +14718,11 @@ if (
    SELECTOR DE DESTINO — MOTI GO
 ===================================================== */
 
+
+
+const estilosSelectorDestino = document.createElement("style");
+
+estilosSelectorDestino.textContent = `
 #deliveryLocationSelector {
     cursor: pointer;
     transition: transform .16s ease, box-shadow .16s ease;
@@ -14959,3 +14964,9 @@ if (
     }
 
 }
+
+`;
+
+document.head.appendChild(
+    estilosSelectorDestino
+);
