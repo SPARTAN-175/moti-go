@@ -1809,10 +1809,84 @@ async function renderizarRevisionPedido(
 
 
     // =================================================
+    // DESTINO DE ENTREGA
+    // =================================================
+
+    const destinoInicial =
+        obtenerDestinoClienteMotiGo();
+
+    const nombreDestinoInicial =
+        destinoInicial?.nombre ||
+        (
+            destinoInicial?.tipo === "actual"
+                ? "Mi ubicación actual"
+                : "Dirección de entrega"
+        );
+
+    const localidadDestinoInicial =
+        destinoInicial?.localidad ||
+        "Ubicación GPS";
+
+    const referenciaDestinoInicial =
+        destinoInicial?.referencia ||
+        "Sin referencia adicional.";
+
+    html += `
+
+        <section class="moti-go-destino-entrega">
+
+            <div class="moti-go-destino-entrega-cabecera">
+
+                <div class="moti-go-destino-entrega-icono">
+                    <span class="material-symbols-outlined">
+                        location_on
+                    </span>
+                </div>
+
+                <div class="moti-go-destino-entrega-info">
+
+                    <span>ENTREGAR EN</span>
+
+                    <strong>
+                        ${escaparHTMLPedido(
+                            nombreDestinoInicial
+                        )}
+                    </strong>
+
+                    <small>
+                        ${escaparHTMLPedido(
+                            localidadDestinoInicial
+                        )}
+                    </small>
+
+                    <p>
+                        ${escaparHTMLPedido(
+                            referenciaDestinoInicial
+                        )}
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    id="motiGoCambiarDestino"
+                    class="moti-go-cambiar-destino"
+                >
+                    Cambiar
+                </button>
+
+            </div>
+
+        </section>
+
+    `;
+
+    // =================================================
     // REFERENCIA DE ENTREGA
     // =================================================
 
     const referenciaInicial =
+        obtenerDestinoClienteMotiGo()?.referencia ||
         pedidoCliente?.referencia ||
         "";
 
@@ -1941,6 +2015,38 @@ async function renderizarRevisionPedido(
 
     contenido.innerHTML =
         html;
+
+    const cambiarDestino =
+        document.getElementById(
+            "motiGoCambiarDestino"
+        );
+
+    if (cambiarDestino) {
+
+        cambiarDestino.addEventListener(
+            "click",
+            () => {
+
+                if (
+                    typeof window.motiGoAbrirSelectorDestino ===
+                    "function"
+                ) {
+
+                    window.motiGoAbrirSelectorDestino();
+
+                }
+                else {
+
+                    alert(
+                        "Abre “Mis direcciones” para seleccionar otro destino."
+                    );
+
+                }
+
+            }
+        );
+
+    }
 
 
     // =================================================
@@ -4532,12 +4638,89 @@ function generarCodigoEntrega() {
 function obtenerDestinoClienteMotiGo() {
 
     // =================================================
-    // VALIDAR PERFIL DEL CLIENTE
+    // 1. DESTINO ELEGIDO POR EL CLIENTE
     // =================================================
 
-    if (
-        !pedidoCliente
-    ) {
+    try {
+
+        const guardado =
+            sessionStorage.getItem(
+                "motiGoDestinoSeleccionado"
+            );
+
+        if (guardado) {
+
+            const seleccionado =
+                JSON.parse(
+                    guardado
+                );
+
+            const latitud =
+                Number(
+                    seleccionado?.latitud
+                );
+
+            const longitud =
+                Number(
+                    seleccionado?.longitud
+                );
+
+            if (
+                Number.isFinite(latitud) &&
+                Number.isFinite(longitud)
+            ) {
+
+                return {
+
+                    latitud,
+
+                    longitud,
+
+                    localidad:
+                        seleccionado.localidad ||
+                        pedidoCliente?.localidad ||
+                        pedidoCliente?.municipio ||
+                        "",
+
+                    referencia:
+                        seleccionado.referencia ||
+                        pedidoCliente?.referencia ||
+                        "",
+
+                    tipo:
+                        seleccionado.tipo ||
+                        "guardada",
+
+                    nombre:
+                        seleccionado.nombre ||
+                        "Dirección de entrega",
+
+                    direccionId:
+                        seleccionado.direccionId ||
+                        null
+
+                };
+
+            }
+
+        }
+
+    }
+    catch (error) {
+
+        console.warn(
+            "⚠️ MOTI GO: no se pudo leer el destino seleccionado:",
+            error
+        );
+
+    }
+
+
+    // =================================================
+    // 2. FALLBACK: UBICACIÓN ACTUAL DEL PERFIL
+    // =================================================
+
+    if (!pedidoCliente) {
 
         console.warn(
             "⚠️ MOTI GO: no se recibió el perfil del cliente."
@@ -4547,34 +4730,19 @@ function obtenerDestinoClienteMotiGo() {
 
     }
 
-
-    // =================================================
-    // OBTENER COORDENADAS ACTUALES
-    // =================================================
-
     const latitud =
         Number(
             pedidoCliente.latitud
         );
-
 
     const longitud =
         Number(
             pedidoCliente.longitud
         );
 
-
-    // =================================================
-    // VALIDAR COORDENADAS
-    // =================================================
-
     if (
-        !Number.isFinite(
-            latitud
-        ) ||
-        !Number.isFinite(
-            longitud
-        )
+        !Number.isFinite(latitud) ||
+        !Number.isFinite(longitud)
     ) {
 
         console.error(
@@ -4586,36 +4754,111 @@ function obtenerDestinoClienteMotiGo() {
 
     }
 
+    return {
 
-    // =================================================
-    // CONSTRUIR UBICACIÓN DE ENTREGA
-    // =================================================
+        latitud,
 
-    const destino = {
-
-        latitud:
-            latitud,
-
-        longitud:
-            longitud,
+        longitud,
 
         localidad:
             pedidoCliente.localidad ||
+            pedidoCliente.municipio ||
             "",
 
         referencia:
             pedidoCliente.referencia ||
-            ""
+            "",
+
+        tipo: "actual",
+
+        nombre: "Mi ubicación actual",
+
+        direccionId: null
 
     };
 
-
-    console.log(
-        "📍 MOTI GO - UBICACIÓN DE ENTREGA DEL CLIENTE:",
-        destino
-    );
+}
 
 
-    return destino;
+/* =====================================================
+   DESTINO DE ENTREGA — REVISIÓN DEL PEDIDO
+===================================================== */
 
+.moti-go-destino-entrega {
+    margin: 14px 0;
+    padding: 13px;
+    border: 1px solid #bbf7d0;
+    border-radius: 16px;
+    background: #f0fdf4;
+}
+
+.moti-go-destino-entrega-cabecera {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.moti-go-destino-entrega-icono {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 11px;
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.moti-go-destino-entrega-icono .material-symbols-outlined {
+    font-size: 20px;
+}
+
+.moti-go-destino-entrega-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.moti-go-destino-entrega-info > span,
+.moti-go-destino-entrega-info > strong,
+.moti-go-destino-entrega-info > small {
+    display: block;
+}
+
+.moti-go-destino-entrega-info > span {
+    color: #15803d;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: .1em;
+}
+
+.moti-go-destino-entrega-info > strong {
+    margin-top: 2px;
+    color: #14532d;
+    font-size: 13px;
+}
+
+.moti-go-destino-entrega-info > small {
+    margin-top: 2px;
+    color: #4b6354;
+    font-size: 9px;
+}
+
+.moti-go-destino-entrega-info > p {
+    margin: 5px 0 0;
+    color: #64748b;
+    font-size: 9px;
+    line-height: 1.4;
+}
+
+.moti-go-cambiar-destino {
+    flex: 0 0 auto;
+    padding: 7px 9px;
+    border: 1px solid #bbf7d0;
+    border-radius: 9px;
+    background: #fff;
+    color: #15803d;
+    cursor: pointer;
+    font: inherit;
+    font-size: 9px;
+    font-weight: 700;
 }
