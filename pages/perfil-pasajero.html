@@ -5,171 +5,836 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
-    <title>MOTI | Mi Perfil</title>
+    <title>MOTI GO | Mi perfil</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,0,0"
+        rel="stylesheet">
 
-    <link rel="stylesheet"
-          href="../css/variables.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
 
-    <link rel="stylesheet"
-          href="../css/main.css">
+    <link
+        rel="stylesheet"
+        href="../css/variables.css">
 
-    <link rel="stylesheet"
-          href="../css/perfil-pasajero.css">
+    <link
+        rel="stylesheet"
+        href="../css/main.css">
+
+    <link
+        rel="stylesheet"
+        href="../css/perfil-pasajero.css">
 
 </head>
 
+
 <body>
 
-    <div class="container">
+<div class="perfil-page">
 
-        <h2>Mi Perfil</h2>
+    <!-- =====================================================
+         CABECERA
+    ====================================================== -->
 
-        <!-- Tarjeta Principal -->
+    <header class="perfil-topbar">
 
-        <div class="profile-header">
+        <div>
 
-            <h3 id="profileName">
-    Cargando...
-            </h3>
+            <span class="perfil-kicker">
+                CUENTA
+            </span>
+
+            <h1>
+                Mi perfil
+            </h1>
 
             <p>
-                Usuario de MOTI
+                Administra tu información y seguridad.
             </p>
 
-            <span class="status">
+        </div>
 
-                🟢 Cuenta Activa
+        <a
+            href="dashboard-cliente.html"
+            class="perfil-back">
 
+            <span class="material-symbols-outlined">
+                arrow_back
+            </span>
+
+            Volver
+
+        </a>
+
+    </header>
+
+
+    <!-- =====================================================
+         PERFIL PRINCIPAL
+    ====================================================== -->
+
+    <section class="perfil-hero">
+
+        <div class="perfil-avatar">
+
+            <span id="profileInitial">
+                —
             </span>
 
         </div>
 
-        <!-- Información -->
 
-        <div class="card">
+        <div class="perfil-hero-info">
 
-            <h4>Información Personal</h4>
+            <span class="perfil-account-label">
+                CUENTA MOTI GO
+            </span>
 
-            <div class="info-item">
+            <h2 id="profileName">
+                Cargando...
+            </h2>
 
-                <span>Nombre</span>
+            <p>
+                Cliente
+            </p>
 
-                <strong id="infoName">
-    Cargando...
-                </strong>
+        </div>
+
+
+        <div class="perfil-status">
+
+            <span class="perfil-status-dot"></span>
+
+            Cuenta activa
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         INFORMACIÓN
+    ====================================================== -->
+
+    <section class="perfil-card">
+
+        <div class="perfil-card-heading">
+
+            <div>
+
+                <span class="material-symbols-outlined">
+                    person
+                </span>
+
+                <div>
+
+                    <h3>
+                        Información personal
+                    </h3>
+
+                    <p>
+                        Datos asociados a tu cuenta.
+                    </p>
+
+                </div>
 
             </div>
 
-            <div class="info-item">
 
-                <span>Teléfono</span>
+            <button
+                id="btnEditarPerfil"
+                type="button"
+                class="perfil-action-small">
 
-                <strong id="infoPhone">
-    Cargando...
-                </strong>
+                <span class="material-symbols-outlined">
+                    edit
+                </span>
+
+                Editar
+
+            </button>
+
+        </div>
+
+
+        <div class="perfil-info-grid">
+
+
+            <div class="perfil-info-item">
+
+                <span class="material-symbols-outlined">
+                    person
+                </span>
+
+                <div>
+
+                    <small>
+                        Nombre
+                    </small>
+
+                    <strong id="infoName">
+                        Cargando...
+                    </strong>
+
+                </div>
 
             </div>
 
-            <div class="info-item">
 
-                <span>Municipio</span>
+            <div class="perfil-info-item">
 
-                <strong id="infoMunicipio">
-    Cargando...
-                </strong>
+                <span class="material-symbols-outlined">
+                    mail
+                </span>
+
+                <div>
+
+                    <small>
+                        Correo electrónico
+                    </small>
+
+                    <strong id="infoEmail">
+                        Cargando...
+                    </strong>
+
+                </div>
 
             </div>
 
-            <div class="info-item">
 
-                <span>Localidad</span>
+            <div class="perfil-info-item">
 
-                <strong id="infoLocalidad">
-    Cargando...
-                </strong>
+                <span class="material-symbols-outlined">
+                    phone
+                </span>
+
+                <div>
+
+                    <small>
+                        Teléfono
+                    </small>
+
+                    <strong id="infoPhone">
+                        Cargando...
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="perfil-info-item">
+
+                <span class="material-symbols-outlined">
+                    location_city
+                </span>
+
+                <div>
+
+                    <small>
+                        Municipio
+                    </small>
+
+                    <strong id="infoMunicipio">
+                        Cargando...
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="perfil-info-item">
+
+                <span class="material-symbols-outlined">
+                    home_pin
+                </span>
+
+                <div>
+
+                    <small>
+                        Localidad
+                    </small>
+
+                    <strong id="infoLocalidad">
+                        Cargando...
+                    </strong>
+
+                </div>
 
             </div>
 
         </div>
 
-        <!-- Acciones -->
+    </section>
 
-        <div class="menu-grid">
 
-            <a href="#"
-               class="menu-card">
+    <!-- =====================================================
+         SEGURIDAD
+    ====================================================== -->
 
-                ✏️
+    <section class="perfil-card">
+
+        <div class="perfil-card-heading">
+
+            <div>
+
+                <span class="material-symbols-outlined">
+                    security
+                </span>
+
+                <div>
+
+                    <h3>
+                        Seguridad
+                    </h3>
+
+                    <p>
+                        Protege el acceso a tu cuenta.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="perfil-security-row">
+
+            <div class="perfil-security-icon">
+
+                <span class="material-symbols-outlined">
+                    lock
+                </span>
+
+            </div>
+
+
+            <div class="perfil-security-info">
+
+                <strong>
+                    Contraseña
+                </strong>
+
+                <span>
+                    Mantén tu contraseña actualizada.
+                </span>
+
+            </div>
+
+
+            <button
+                id="btnCambiarPassword"
+                type="button"
+                class="perfil-security-button">
+
+                Cambiar contraseña
+
+            </button>
+
+        </div>
+
+
+        <div class="perfil-security-row">
+
+            <div class="perfil-security-icon">
+
+                <span class="material-symbols-outlined">
+                    mark_email_read
+                </span>
+
+            </div>
+
+
+            <div class="perfil-security-info">
+
+                <strong>
+                    Recuperación de cuenta
+                </strong>
+
+                <span>
+                    Tu correo electrónico sirve para recuperar tu contraseña.
+                </span>
+
+            </div>
+
+
+            <button
+                id="btnRecuperarPassword"
+                type="button"
+                class="perfil-security-button secondary">
+
+                Enviar enlace
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         AVISO DE EDICIÓN
+    ====================================================== -->
+
+    <section
+        id="perfilEdicionAviso"
+        class="perfil-edit-notice">
+
+        <span class="material-symbols-outlined">
+            schedule
+        </span>
+
+        <div>
+
+            <strong>
+                Actualización de información
+            </strong>
+
+            <p id="perfilEdicionAvisoTexto">
+                Puedes modificar tus datos personales de forma ocasional.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         TÉRMINOS
+    ====================================================== -->
+
+    <section class="perfil-card perfil-legal">
+
+        <div>
+
+            <span class="material-symbols-outlined">
+                description
+            </span>
+
+            <div>
+
+                <h3>
+                    Términos y condiciones
+                </h3>
 
                 <p>
-
-                    Editar Información
-
+                    Consulta las condiciones de uso de MOTI GO.
                 </p>
 
-            </a>
+            </div>
 
-            <a href="#"
-               class="menu-card">
+        </div>
 
-                🔒
 
-                <p>
+        <button
+            id="btnTerminos"
+            type="button">
 
-                    Cambiar Contraseña
+            Ver términos
 
-                </p>
+            <span class="material-symbols-outlined">
+                chevron_right
+            </span>
 
-            </a>
+        </button>
 
-            <a href="#"
-               class="menu-card">
+    </section>
 
-                📄
 
-                <p>
+    <!-- =====================================================
+         CERRAR SESIÓN
+    ====================================================== -->
 
-                    Términos
+    <button
+        id="btnLogout"
+        type="button"
+        class="perfil-logout">
 
-                </p>
+        <span class="material-symbols-outlined">
+            logout
+        </span>
 
-            </a>
+        Cerrar sesión
 
-            <a href="#"
-   id="btnLogout"
-   class="menu-card logout">
+    </button>
 
-    🚪
 
-    <p>
-        Cerrar Sesión
-    </p>
+</div>
 
-</a>
+
+<!-- =========================================================
+     MODAL EDITAR PERFIL
+========================================================= -->
+
+<div
+    id="modalEditarPerfil"
+    class="perfil-modal"
+    hidden>
+
+    <div class="perfil-modal-box">
+
+        <button
+            id="cerrarModalEditar"
+            type="button"
+            class="perfil-modal-close">
+
+            <span class="material-symbols-outlined">
+                close
+            </span>
+
+        </button>
+
+
+        <span class="perfil-modal-kicker">
+            INFORMACIÓN PERSONAL
+        </span>
+
+        <h2>
+            Editar información
+        </h2>
+
+        <p class="perfil-modal-description">
+            Mantén tus datos actualizados para que podamos
+            identificarte correctamente.
+        </p>
+
+
+        <form id="formEditarPerfil">
+
+
+            <label>
+                Nombre completo
+
+                <input
+                    id="editarNombre"
+                    type="text"
+                    maxlength="100"
+                    autocomplete="name"
+                    required>
+
+            </label>
+
+
+            <label>
+                Teléfono
+
+                <input
+                    id="editarTelefono"
+                    type="tel"
+                    maxlength="15"
+                    autocomplete="tel"
+                    required>
+
+            </label>
+
+
+            <label>
+                Municipio
+
+                <input
+                    id="editarMunicipio"
+                    type="text"
+                    value="Ostuacán"
+                    readonly>
+
+            </label>
+
+
+            <label>
+                Localidad
+
+                <input
+                    id="editarLocalidad"
+                    type="text"
+                    required>
+
+            </label>
+
+
+            <div class="perfil-form-note">
+
+                <span class="material-symbols-outlined">
+                    info
+                </span>
+
+                <span>
+                    Por seguridad, los datos personales solo pueden
+                    modificarse una vez cada 24 horas.
+                </span>
+
+            </div>
+
+
+            <div class="perfil-modal-actions">
+
+                <button
+                    id="cancelarEditarPerfil"
+                    type="button"
+                    class="perfil-btn-secondary">
+
+                    Cancelar
+
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="perfil-btn-primary">
+
+                    Guardar cambios
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     MODAL CAMBIAR CONTRASEÑA
+========================================================= -->
+
+<div
+    id="modalPassword"
+    class="perfil-modal"
+    hidden>
+
+    <div class="perfil-modal-box">
+
+        <button
+            id="cerrarModalPassword"
+            type="button"
+            class="perfil-modal-close">
+
+            <span class="material-symbols-outlined">
+                close
+            </span>
+
+        </button>
+
+
+        <span class="perfil-modal-kicker">
+            SEGURIDAD
+        </span>
+
+        <h2>
+            Cambiar contraseña
+        </h2>
+
+        <p class="perfil-modal-description">
+            Introduce tu contraseña actual y después establece
+            una nueva.
+        </p>
+
+
+        <form id="formPassword">
+
+
+            <label>
+                Contraseña actual
+
+                <input
+                    id="passwordActual"
+                    type="password"
+                    autocomplete="current-password"
+                    required>
+
+            </label>
+
+
+            <label>
+                Nueva contraseña
+
+                <input
+                    id="passwordNueva"
+                    type="password"
+                    minlength="8"
+                    autocomplete="new-password"
+                    required>
+
+            </label>
+
+
+            <label>
+                Confirmar nueva contraseña
+
+                <input
+                    id="passwordConfirmacion"
+                    type="password"
+                    minlength="8"
+                    autocomplete="new-password"
+                    required>
+
+            </label>
+
+
+            <div class="perfil-form-note">
+
+                <span class="material-symbols-outlined">
+                    shield
+                </span>
+
+                <span>
+                    La nueva contraseña debe tener al menos 8 caracteres.
+                </span>
+
+            </div>
+
+
+            <div class="perfil-modal-actions">
+
+                <button
+                    id="cancelarPassword"
+                    type="button"
+                    class="perfil-btn-secondary">
+
+                    Cancelar
+
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="perfil-btn-primary">
+
+                    Actualizar contraseña
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     MODAL TÉRMINOS
+========================================================= -->
+
+<div
+    id="modalTerminos"
+    class="perfil-modal"
+    hidden>
+
+    <div class="perfil-modal-box terms-box">
+
+        <button
+            id="cerrarModalTerminos"
+            type="button"
+            class="perfil-modal-close">
+
+            <span class="material-symbols-outlined">
+                close
+            </span>
+
+        </button>
+
+
+        <span class="perfil-modal-kicker">
+            MOTI GO
+        </span>
+
+        <h2>
+            Términos y condiciones
+        </h2>
+
+
+        <div class="terms-content">
+
+            <h3>
+                Uso de la plataforma
+            </h3>
+
+            <p>
+                MOTI GO proporciona una plataforma para facilitar
+                compras y servicios de entrega dentro de las zonas
+                disponibles.
+            </p>
+
+
+            <h3>
+                Información del usuario
+            </h3>
+
+            <p>
+                El usuario debe proporcionar información verdadera
+                y mantenerla actualizada.
+            </p>
+
+
+            <h3>
+                Seguridad
+            </h3>
+
+            <p>
+                Cada usuario es responsable de mantener segura su
+                contraseña y de utilizar un correo electrónico al
+                que tenga acceso.
+            </p>
+
+
+            <h3>
+                Servicios
+            </h3>
+
+            <p>
+                Las condiciones específicas de cada pedido,
+                establecimiento y servicio se mostrarán antes
+                de confirmar la operación.
+            </p>
+
+        </div>
+
+
+        <div class="perfil-modal-actions">
+
+            <button
+                id="cerrarTerminos"
+                type="button"
+                class="perfil-btn-primary">
+
+                Entendido
+
+            </button>
 
         </div>
 
     </div>
 
+</div>
 
-    <script type="module"
-        src="../js/logout.js">
+
+<script
+    type="module"
+    src="../js/logout.js">
 </script>
 
-    <script type="module"
-        src="../js/auth-guard.js">
+<script
+    type="module"
+    src="../js/auth-guard.js">
 </script>
 
-<script type="module"
-        src="../js/perfil-pasajero.js">
+<script
+    type="module"
+    src="../js/perfil-pasajero.js">
 </script>
-    
+
+
 </body>
 
 </html>
