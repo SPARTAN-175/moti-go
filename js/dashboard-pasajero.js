@@ -9777,54 +9777,77 @@ function actualizarPanelSeguimientoPedido(
                         );
 
 
-                    const importe =
-                        cantidad *
-                        precio;
+                    const noEncontrado =
+    (
+        item.estadoCompra ===
+        "no_disponible"
+    ) ||
+    (
+        item.estado ===
+        "no_disponible"
+    );
 
 
-                    productosTiendaHTML += `
-
-                        <div
-                            class="moti-producto-linea"
-                        >
-
-                            <div
-                                class="moti-producto-cantidad"
-                            >
-                                ${cantidad}×
-                            </div>
+const importe =
+    noEncontrado
+        ? 0
+        : cantidad * precio;
 
 
-                            <div
-                                class="moti-producto-nombre"
-                            >
+productosTiendaHTML += `
 
-                                <strong>
-                                    ${escaparHTML(
-                                        nombre
-                                    )}
-                                </strong>
+    <div
+        class="
+            moti-producto-linea
+            ${
+                noEncontrado
+                    ? "moti-producto-no-encontrado"
+                    : ""
+            }
+        "
+    >
 
-                                <small>
-                                    ${formatearPrecio(
-                                        precio
-                                    )} c/u
-                                </small>
-
-                            </div>
+        <div
+            class="moti-producto-cantidad"
+        >
+            ${cantidad}×
+        </div>
 
 
-                            <strong
-                                class="moti-producto-importe"
-                            >
-                                ${formatearPrecio(
-                                    importe
-                                )}
-                            </strong>
+        <div
+            class="moti-producto-nombre"
+        >
 
-                        </div>
+            <strong>
+                ${escaparHTML(
+                    nombre
+                )}
+            </strong>
 
-                    `;
+            <small>
+                ${
+                    noEncontrado
+                        ? "No encontrado"
+                        : `${formatearPrecio(
+                            precio
+                        )} c/u`
+                }
+            </small>
+
+        </div>
+
+
+        <strong
+            class="moti-producto-importe"
+        >
+            ${formatearPrecio(
+                importe
+            )}
+        </strong>
+
+    </div>
+
+`;
 
                 }
             );
