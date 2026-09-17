@@ -103,7 +103,22 @@ async function cargarLocalidadesPerfil() {
     }
 
 }
+/* =========================================================
+   INICIAR LOCALIDADES
+========================================================= */
 
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        console.log(
+            "📍 MOTI GO: iniciando carga de localidades..."
+        );
+
+        cargarLocalidadesPerfil();
+
+    }
+);
 
 /* =========================================================
    NORMALIZAR TEXTO
