@@ -138,11 +138,16 @@ function prepararAutocompletadoLocalidadPerfil() {
             "editarLocalidad"
         );
 
+    const datalist =
+        document.getElementById(
+            "listaLocalidadesPerfil"
+        );
 
-    if (!campo) {
+
+    if (!campo || !datalist) {
 
         console.warn(
-            "⚠️ MOTI GO: no existe #editarLocalidad."
+            "⚠️ MOTI GO: no se encontró el campo o datalist de localidades."
         );
 
         return;
@@ -150,192 +155,26 @@ function prepararAutocompletadoLocalidadPerfil() {
     }
 
 
-    /* Evitar duplicar el sistema */
-    if (
-        campo.dataset.autocompletado ===
-        "true"
-    ) {
-
-        return;
-
-    }
-
-
-    campo.dataset.autocompletado =
-        "true";
-
-
     /*
-       Quitamos el datalist nativo.
-       La búsqueda la controlaremos
-       nosotros para que se vea
-       como una lista profesional.
+       Mantener el datalist del HTML.
+       NO quitar el atributo list.
     */
 
-    campo.removeAttribute(
-        "list"
+    campo.setAttribute(
+        "list",
+        "listaLocalidadesPerfil"
     );
 
 
     /*
-       Contenedor de sugerencias
+       Llenar las localidades obtenidas
+       desde Firestore.
     */
 
-    const contenedor =
-        document.createElement(
-            "div"
-        );
-
-
-    contenedor.className =
-        "moti-localidades-sugerencias";
-
-
-    contenedor.style.position =
-        "absolute";
-
-    contenedor.style.left =
-        "0";
-
-    contenedor.style.right =
-        "0";
-
-    contenedor.style.top =
-        "calc(100% + 6px)";
-
-    contenedor.style.background =
-        "#ffffff";
-
-    contenedor.style.border =
-        "1px solid #e2e8f0";
-
-    contenedor.style.borderRadius =
-        "14px";
-
-    contenedor.style.boxShadow =
-        "0 12px 30px rgba(15,23,42,.12)";
-
-    contenedor.style.overflow =
-        "hidden";
-
-    contenedor.style.zIndex =
-        "99999";
-
-    contenedor.style.display =
-        "none";
-
-
-    /*
-       El input debe tener un
-       contenedor con posición relativa.
-    */
-
-    const padre =
-        campo.parentElement;
-
-
-    if (padre) {
-
-        const posicionActual =
-            getComputedStyle(
-                padre
-            ).position;
-
-
-        if (
-            posicionActual ===
-                "static" ||
-            !posicionActual
-        ) {
-
-            padre.style.position =
-                "relative";
-
-        }
-
-
-        padre.appendChild(
-            contenedor
-        );
-
-    }
-
-
-    function ocultarSugerencias() {
-
-        contenedor.innerHTML =
-            "";
-
-        contenedor.style.display =
-            "none";
-
-    }
-
-
-    function mostrarSugerencias(
-        coincidencias
-    ) {
-
-        contenedor.innerHTML =
-            "";
-
-
-        if (
-            !coincidencias.length
-        ) {
-
-            ocultarSugerencias();
-
-            return;
-
-        }
-
-
-        coincidencias
-            .slice(0, 8)
-            .forEach(
+    datalist.innerHTML =
+        localidadesDisponibles
+            .map(
                 localidad => {
-
-                    const boton =
-                        document.createElement(
-                            "button"
-                        );
-
-
-                    boton.type =
-                        "button";
-
-
-                    boton.style.width =
-                        "100%";
-
-                    boton.style.display =
-                        "block";
-
-                    boton.style.textAlign =
-                        "left";
-
-                    boton.style.border =
-                        "0";
-
-                    boton.style.background =
-                        "#ffffff";
-
-                    boton.style.padding =
-                        "13px 15px";
-
-                    boton.style.cursor =
-                        "pointer";
-
-                    boton.style.fontSize =
-                        "14px";
-
-                    boton.style.fontWeight =
-                        "600";
-
-                    boton.style.color =
-                        "#172033";
-
 
                     const nombre =
                         String(
@@ -344,261 +183,140 @@ function prepararAutocompletadoLocalidadPerfil() {
                         ).trim();
 
 
-                    boton.textContent =
-                        nombre;
+                    if (!nombre) {
+                        return "";
+                    }
 
 
-                    boton.addEventListener(
-                        "mouseenter",
-                        () => {
-
-                            boton.style.background =
-                                "#f0fdf4";
-
-                        }
-                    );
-
-
-                    boton.addEventListener(
-                        "mouseleave",
-                        () => {
-
-                            boton.style.background =
-                                "#ffffff";
-
-                        }
-                    );
-
-
-                    boton.addEventListener(
-                        "mousedown",
-                        event => {
-
-                            /*
-                               mousedown evita que
-                               el blur del input cierre
-                               la lista antes de seleccionar.
-                            */
-
-                            event.preventDefault();
-
-                        }
-                    );
-
-
-                    boton.addEventListener(
-                        "click",
-                        () => {
-
-                            campo.value =
-                                nombre;
-
-
-                            /*
-                               Guardamos temporalmente
-                               la localidad seleccionada.
-                            */
-
-                            campo.dataset.localidadId =
-                                localidad.id || "";
-
-
-                            campo.dataset.localidadNombre =
-                                nombre;
-
-
-                            campo.dataset.localidadLatitud =
-                                localidad.latitud ??
-                                localidad.latitude ??
-                                "";
-
-
-                            campo.dataset.localidadLongitud =
-                                localidad.longitud ??
-                                localidad.longitude ??
-                                "";
-
-
-                            ocultarSugerencias();
-
-
-                        }
-                    );
-
-
-                    contenedor.appendChild(
-                        boton
-                    );
+                    return `
+                        <option
+                            value="${nombre.replace(
+                                /"/g,
+                                "&quot;"
+                            )}"
+                        ></option>
+                    `;
 
                 }
-            );
+            )
+            .join("");
 
 
-        contenedor.style.display =
-            "block";
+    console.log(
+        "✅ MOTI GO: autocompletado de localidad preparado:",
+        localidadesDisponibles.length,
+        "localidades"
+    );
 
-    }
 
+    /*
+       Cuando el usuario escribe,
+       limpiamos una selección anterior
+       si empieza a modificar el texto.
+    */
 
     campo.addEventListener(
         "input",
         () => {
 
             const texto =
-                normalizarTextoPerfil(
-                    campo.value
-                );
+                campo.value.trim();
 
 
             /*
-               Si borró el campo,
-               limpiamos selección anterior.
+               Si el usuario está escribiendo
+               algo diferente a la localidad
+               previamente seleccionada,
+               eliminamos los datos anteriores.
             */
 
-            delete campo.dataset.localidadId;
-            delete campo.dataset.localidadNombre;
-            delete campo.dataset.localidadLatitud;
-            delete campo.dataset.localidadLongitud;
+            const nombreSeleccionado =
+                campo.dataset.localidadNombre ||
+                "";
 
 
             if (
-                texto.length === 0
+                nombreSeleccionado &&
+                texto !== nombreSeleccionado
             ) {
 
-                ocultarSugerencias();
+                delete campo.dataset.localidadId;
 
-                return;
+                delete campo.dataset.localidadNombre;
 
-            }
+                delete campo.dataset.localidadLatitud;
 
-
-            const coincidencias =
-                localidadesDisponibles
-                    .filter(
-                        localidad => {
-
-                            const nombre =
-                                normalizarTextoPerfil(
-                                    localidad.nombre
-                                );
-
-
-                            return nombre.includes(
-                                texto
-                            );
-
-                        }
-                    );
-
-
-            mostrarSugerencias(
-                coincidencias
-            );
-
-        }
-    );
-
-
-    campo.addEventListener(
-        "focus",
-        () => {
-
-            const texto =
-                normalizarTextoPerfil(
-                    campo.value
-                );
-
-
-            if (
-                texto.length > 0
-            ) {
-
-                const coincidencias =
-                    localidadesDisponibles
-                        .filter(
-                            localidad =>
-                                normalizarTextoPerfil(
-                                    localidad.nombre
-                                ).includes(
-                                    texto
-                                )
-                        );
-
-
-                mostrarSugerencias(
-                    coincidencias
-                );
+                delete campo.dataset.localidadLongitud;
 
             }
-
-        }
-    );
-
-
-    campo.addEventListener(
-        "blur",
-        () => {
-
-            /*
-               Pequeño retraso para permitir
-               seleccionar una opción.
-            */
-
-            setTimeout(
-                () => {
-
-                    ocultarSugerencias();
-
-                },
-                180
-            );
 
         }
     );
 
 
     /*
-       Si el usuario ya tenía una localidad,
-       la dejamos como valor normal.
+       Cuando el usuario selecciona
+       una localidad del datalist,
+       guardamos sus datos completos.
     */
 
-    if (
-        campo.value.trim()
-    ) {
+    campo.addEventListener(
+        "change",
+        () => {
 
-        const existente =
-            localidadesDisponibles.find(
-                localidad =>
-                    normalizarTextoPerfil(
-                        localidad.nombre
-                    ) ===
-                    normalizarTextoPerfil(
-                        campo.value
-                    )
-            );
+            const texto =
+                campo.value.trim();
 
 
-        if (existente) {
+            const localidadEncontrada =
+                localidadesDisponibles.find(
+                    localidad =>
+                        String(
+                            localidad.nombre ||
+                            ""
+                        )
+                            .trim()
+                            .toLowerCase() ===
+                        texto.toLowerCase()
+                );
+
+
+            if (!localidadEncontrada) {
+
+                return;
+
+            }
+
 
             campo.dataset.localidadId =
-                existente.id || "";
+                localidadEncontrada.id ||
+                "";
+
 
             campo.dataset.localidadNombre =
-                existente.nombre || "";
+                localidadEncontrada.nombre ||
+                "";
+
 
             campo.dataset.localidadLatitud =
-                existente.latitud ??
-                existente.latitude ??
+                localidadEncontrada.latitud ??
+                localidadEncontrada.latitude ??
                 "";
+
 
             campo.dataset.localidadLongitud =
-                existente.longitud ??
-                existente.longitude ??
+                localidadEncontrada.longitud ??
+                localidadEncontrada.longitude ??
                 "";
 
-        }
 
-    }
+            console.log(
+                "📍 MOTI GO: localidad seleccionada:",
+                localidadEncontrada
+            );
+
+        }
+    );
 
 }
 
