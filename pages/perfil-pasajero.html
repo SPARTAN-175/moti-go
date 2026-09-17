@@ -549,14 +549,20 @@
 
 
             <label>
-                Localidad
+    Localidad
 
-                <input
-                    id="editarLocalidad"
-                    type="text"
-                    required>
+    <input
+        id="editarLocalidad"
+        type="text"
+        list="listaLocalidadesPerfil"
+        maxlength="100"
+        autocomplete="off"
+        placeholder="Escribe tu localidad..."
+        required>
 
-            </label>
+    <datalist id="listaLocalidadesPerfil"></datalist>
+
+</label>
 
 
             <div class="perfil-form-note">
