@@ -32,10 +32,579 @@ let datosUsuario = null;
 let localidadesDisponibles = [];
 
 /* =========================================================
-   LOCALIDADES — FIREBASE + AUTOCOMPLETADO
+   LOCALIDADES — AUTOCOMPLETADO
+   MISMO SISTEMA UTILIZADO EN MOTI
 ========================================================= */
 
-async function cargarLocalidadesPerfil() {
+let localidadesDisponibles = [];
+let localidadSeleccionadaPerfil = null;
+
+
+/* =========================================================
+   PREPARAR BÚSQUEDA DE LOCALIDADES
+========================================================= */
+
+function prepararBusquedaLocalidadPerfil() {
+
+    const campo =
+        document.getElementById(
+            "editarLocalidad"
+        );
+
+
+    if (!campo) {
+
+        console.warn(
+            "⚠️ MOTI GO: no existe #editarLocalidad"
+        );
+
+        return;
+
+    }
+
+
+    /*
+       Crear lista de resultados
+       dinámicamente, igual que MOTI.
+    */
+
+    let lista =
+        document.getElementById(
+            "listaLocalidadesPerfil"
+        );
+
+
+    if (!lista) {
+
+        lista =
+            document.createElement(
+                "div"
+            );
+
+        lista.id =
+            "listaLocalidadesPerfil";
+
+
+        lista.style.display =
+            "none";
+
+        lista.style.position =
+            "absolute";
+
+        lista.style.left =
+            "0";
+
+        lista.style.right =
+            "0";
+
+        lista.style.top =
+            "100%";
+
+        lista.style.zIndex =
+            "99999";
+
+        lista.style.background =
+            "#ffffff";
+
+        lista.style.border =
+            "1px solid #dfe5eb";
+
+        lista.style.borderRadius =
+            "12px";
+
+        lista.style.boxShadow =
+            "0 10px 25px rgba(0,0,0,.10)";
+
+        lista.style.maxHeight =
+            "240px";
+
+        lista.style.overflowY =
+            "auto";
+
+
+        const padre =
+            campo.parentElement;
+
+
+        if (padre) {
+
+            const posicion =
+                getComputedStyle(
+                    padre
+                ).position;
+
+
+            if (
+                posicion ===
+                "static"
+            ) {
+
+                padre.style.position =
+                    "relative";
+
+            }
+
+
+            padre.appendChild(
+                lista
+            );
+
+        }
+
+    }
+
+
+    /*
+       IMPORTANTE:
+       ya no usamos datalist.
+    */
+
+    campo.removeAttribute(
+        "list"
+    );
+
+
+    /*
+       Buscar mientras escribe.
+    */
+
+    campo.addEventListener(
+        "input",
+        buscarLocalidadesPerfil
+    );
+
+
+    /*
+       Si ya tenía una localidad,
+       recuperar sus datos desde Firebase.
+    */
+
+    if (
+        campo.value.trim()
+    ) {
+
+        cargarLocalidadActualPerfil(
+            campo.value.trim()
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   BUSCAR LOCALIDADES
+========================================================= */
+
+async function buscarLocalidadesPerfil() {
+
+    const campo =
+        document.getElementById(
+            "editarLocalidad"
+        );
+
+    const lista =
+        document.getElementById(
+            "listaLocalidadesPerfil"
+        );
+
+
+    if (!campo || !lista) {
+
+        return;
+
+    }
+
+
+    const texto =
+        campo.value
+            .trim()
+            .toLowerCase();
+
+
+    /*
+       Si está vacío o tiene menos
+       de 2 caracteres, ocultar.
+    */
+
+    if (
+        texto.length < 2
+    ) {
+
+        lista.innerHTML =
+            "";
+
+        lista.style.display =
+            "none";
+
+        localidadSeleccionadaPerfil =
+            null;
+
+        return;
+
+    }
+
+
+    /*
+       Limpiar resultados anteriores.
+    */
+
+    lista.innerHTML =
+        "";
+
+
+    lista.style.display =
+        "none";
+
+
+    try {
+
+        console.log(
+            "📍 MOTI GO: buscando localidad:",
+            texto
+        );
+
+
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "destinos"
+                )
+            );
+
+
+        const encontrados =
+            [];
+
+
+        snapshot.forEach(
+            destinoDoc => {
+
+                const destino =
+                    destinoDoc.data();
+
+
+                const nombre =
+                    String(
+                        destino.nombre ||
+                        ""
+                    )
+                        .trim();
+
+
+                const municipio =
+                    String(
+                        destino.municipio ||
+                        ""
+                    )
+                        .trim();
+
+
+                /*
+                   Solo localidades activas
+                   del municipio Ostuacán.
+                */
+
+                if (
+                    destino.activo === false
+                ) {
+
+                    return;
+
+                }
+
+
+                if (
+                    municipio
+                        .toLowerCase() !==
+                    "ostuacán"
+                ) {
+
+                    return;
+
+                }
+
+
+                if (
+                    nombre
+                        .toLowerCase()
+                        .includes(texto)
+                ) {
+
+                    encontrados.push({
+
+                        id:
+                            destinoDoc.id,
+
+                        ...destino
+
+                    });
+
+                }
+
+            }
+        );
+
+
+        /*
+           No hubo resultados.
+        */
+
+        if (
+            encontrados.length === 0
+        ) {
+
+            lista.style.display =
+                "none";
+
+            return;
+
+        }
+
+
+        /*
+           Guardar resultados.
+        */
+
+        localidadesDisponibles =
+            encontrados;
+
+
+        /*
+           Mostrar lista.
+        */
+
+        lista.style.display =
+            "block";
+
+
+        encontrados
+            .slice(0, 10)
+            .forEach(
+                destino => {
+
+                    const item =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    item.className =
+                        "item-destino";
+
+
+                    item.textContent =
+                        destino.nombre;
+
+
+                    /*
+                       Estilo visual.
+                    */
+
+                    item.style.padding =
+                        "13px 15px";
+
+                    item.style.cursor =
+                        "pointer";
+
+                    item.style.fontSize =
+                        "14px";
+
+                    item.style.fontWeight =
+                        "500";
+
+                    item.style.color =
+                        "#172033";
+
+                    item.style.borderBottom =
+                        "1px solid #f0f2f4";
+
+                    item.style.background =
+                        "#ffffff";
+
+
+                    item.addEventListener(
+                        "mouseenter",
+                        () => {
+
+                            item.style.background =
+                                "#f3f8f5";
+
+                        }
+                    );
+
+
+                    item.addEventListener(
+                        "mouseleave",
+                        () => {
+
+                            item.style.background =
+                                "#ffffff";
+
+                        }
+                    );
+
+
+                    /*
+                       Seleccionar localidad.
+                    */
+
+                    item.addEventListener(
+                        "click",
+                        () => {
+
+                            seleccionarLocalidadPerfil(
+                                destino
+                            );
+
+                        }
+                    );
+
+
+                    lista.appendChild(
+                        item
+                    );
+
+                }
+            );
+
+
+        console.log(
+            "📍 MOTI GO: resultados encontrados:",
+            encontrados.length
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "❌ MOTI GO: error buscando localidades:",
+            error
+        );
+
+        lista.innerHTML =
+            "";
+
+        lista.style.display =
+            "none";
+
+    }
+
+}
+
+
+/* =========================================================
+   SELECCIONAR LOCALIDAD
+========================================================= */
+
+function seleccionarLocalidadPerfil(
+    destino
+) {
+
+    const campo =
+        document.getElementById(
+            "editarLocalidad"
+        );
+
+    const lista =
+        document.getElementById(
+            "listaLocalidadesPerfil"
+        );
+
+
+    if (!campo) {
+
+        return;
+
+    }
+
+
+    localidadSeleccionadaPerfil =
+        destino;
+
+
+    /*
+       Mostrar nombre seleccionado.
+    */
+
+    campo.value =
+        destino.nombre;
+
+
+    /*
+       Guardar los datos completos
+       temporalmente en el input.
+    */
+
+    campo.dataset.localidadId =
+        destino.id || "";
+
+
+    campo.dataset.localidadNombre =
+        destino.nombre || "";
+
+
+    campo.dataset.localidadLatitud =
+        destino.latitud ??
+        "";
+
+
+    campo.dataset.localidadLongitud =
+        destino.longitud ??
+        "";
+
+
+    /*
+       Guardar también en el array
+       para que el bloque de guardado
+       que ya tienes pueda encontrarlo.
+    */
+
+    localidadesDisponibles = [
+        destino
+    ];
+
+
+    /*
+       Ocultar resultados.
+    */
+
+    if (lista) {
+
+        lista.innerHTML =
+            "";
+
+        lista.style.display =
+            "none";
+
+    }
+
+
+    console.log(
+        "📍 MOTI GO: localidad seleccionada:",
+        destino
+    );
+
+}
+
+
+/* =========================================================
+   RECUPERAR LOCALIDAD ACTUAL
+========================================================= */
+
+async function cargarLocalidadActualPerfil(
+    nombreLocalidad
+) {
+
+    if (
+        !nombreLocalidad
+    ) {
+
+        return;
+
+    }
+
 
     try {
 
@@ -48,18 +617,15 @@ async function cargarLocalidadesPerfil() {
             );
 
 
-        localidadesDisponibles =
-            snapshot.docs
-                .map(
-                    destinoDoc => ({
-                        id:
-                            destinoDoc.id,
+        const encontrada =
+            snapshot.docs.find(
+                destinoDoc => {
 
-                        ...destinoDoc.data()
-                    })
-                )
-                .filter(
-                    destino =>
+                    const destino =
+                        destinoDoc.data();
+
+
+                    return (
                         destino.activo !== false &&
                         String(
                             destino.municipio ||
@@ -67,277 +633,46 @@ async function cargarLocalidadesPerfil() {
                         )
                             .trim()
                             .toLowerCase() ===
-                        "ostuacán"
-                )
-                .sort(
-                    (a, b) =>
+                        "ostuacán" &&
                         String(
-                            a.nombre ||
+                            destino.nombre ||
                             ""
-                        ).localeCompare(
-                            String(
-                                b.nombre ||
-                                ""
-                            ),
-                            "es"
                         )
-                );
+                            .trim()
+                            .toLowerCase() ===
+                        nombreLocalidad
+                            .trim()
+                            .toLowerCase()
+                    );
+
+                }
+            );
 
 
-        console.log(
-            "📍 MOTI GO: localidades cargadas:",
-            localidadesDisponibles.length
-        );
+        if (
+            encontrada
+        ) {
 
+            seleccionarLocalidadPerfil({
 
-        prepararAutocompletadoLocalidadPerfil();
+                id:
+                    encontrada.id,
+
+                ...encontrada.data()
+
+            });
+
+        }
 
     }
     catch (error) {
 
         console.error(
-            "❌ MOTI GO: error cargando localidades del perfil:",
+            "❌ MOTI GO: no se pudo recuperar la localidad actual:",
             error
         );
 
     }
-
-}
-
-/* =========================================================
-   CARGAR LOCALIDADES AL INICIAR
-========================================================= */
-
-cargarLocalidadesPerfil();
-/* =========================================================
-   INICIAR LOCALIDADES
-========================================================= */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        console.log(
-            "📍 MOTI GO: iniciando carga de localidades..."
-        );
-
-        cargarLocalidadesPerfil();
-
-    }
-);
-
-/* =========================================================
-   NORMALIZAR TEXTO
-========================================================= */
-
-function normalizarTextoPerfil(
-    texto
-) {
-
-    return String(
-        texto || ""
-    )
-        .normalize("NFD")
-        .replace(
-            /[\u0300-\u036f]/g,
-            ""
-        )
-        .toLowerCase()
-        .trim();
-
-}
-
-
-/* =========================================================
-   AUTOCOMPLETADO DE LOCALIDAD
-========================================================= */
-
-function prepararAutocompletadoLocalidadPerfil() {
-
-    const campo =
-        document.getElementById(
-            "editarLocalidad"
-        );
-
-    const datalist =
-        document.getElementById(
-            "listaLocalidadesPerfil"
-        );
-
-
-    if (!campo || !datalist) {
-
-        console.warn(
-            "⚠️ MOTI GO: no se encontró el campo o datalist de localidades."
-        );
-
-        return;
-
-    }
-
-
-    /*
-       Mantener el datalist del HTML.
-       NO quitar el atributo list.
-    */
-
-    campo.setAttribute(
-        "list",
-        "listaLocalidadesPerfil"
-    );
-
-
-    /*
-       Llenar las localidades obtenidas
-       desde Firestore.
-    */
-
-    datalist.innerHTML =
-        localidadesDisponibles
-            .map(
-                localidad => {
-
-                    const nombre =
-                        String(
-                            localidad.nombre ||
-                            ""
-                        ).trim();
-
-
-                    if (!nombre) {
-                        return "";
-                    }
-
-
-                    return `
-                        <option
-                            value="${nombre.replace(
-                                /"/g,
-                                "&quot;"
-                            )}"
-                        ></option>
-                    `;
-
-                }
-            )
-            .join("");
-
-
-    console.log(
-        "✅ MOTI GO: autocompletado de localidad preparado:",
-        localidadesDisponibles.length,
-        "localidades"
-    );
-
-
-    /*
-       Cuando el usuario escribe,
-       limpiamos una selección anterior
-       si empieza a modificar el texto.
-    */
-
-    campo.addEventListener(
-        "input",
-        () => {
-
-            const texto =
-                campo.value.trim();
-
-
-            /*
-               Si el usuario está escribiendo
-               algo diferente a la localidad
-               previamente seleccionada,
-               eliminamos los datos anteriores.
-            */
-
-            const nombreSeleccionado =
-                campo.dataset.localidadNombre ||
-                "";
-
-
-            if (
-                nombreSeleccionado &&
-                texto !== nombreSeleccionado
-            ) {
-
-                delete campo.dataset.localidadId;
-
-                delete campo.dataset.localidadNombre;
-
-                delete campo.dataset.localidadLatitud;
-
-                delete campo.dataset.localidadLongitud;
-
-            }
-
-        }
-    );
-
-
-    /*
-       Cuando el usuario selecciona
-       una localidad del datalist,
-       guardamos sus datos completos.
-    */
-
-    campo.addEventListener(
-        "change",
-        () => {
-
-            const texto =
-                campo.value.trim();
-
-
-            const localidadEncontrada =
-                localidadesDisponibles.find(
-                    localidad =>
-                        String(
-                            localidad.nombre ||
-                            ""
-                        )
-                            .trim()
-                            .toLowerCase() ===
-                        texto.toLowerCase()
-                );
-
-
-            if (!localidadEncontrada) {
-
-                return;
-
-            }
-
-
-            campo.dataset.localidadId =
-                localidadEncontrada.id ||
-                "";
-
-
-            campo.dataset.localidadNombre =
-                localidadEncontrada.nombre ||
-                "";
-
-
-            campo.dataset.localidadLatitud =
-                localidadEncontrada.latitud ??
-                localidadEncontrada.latitude ??
-                "";
-
-
-            campo.dataset.localidadLongitud =
-                localidadEncontrada.longitud ??
-                localidadEncontrada.longitude ??
-                "";
-
-
-            console.log(
-                "📍 MOTI GO: localidad seleccionada:",
-                localidadEncontrada
-            );
-
-        }
-    );
 
 }
 
