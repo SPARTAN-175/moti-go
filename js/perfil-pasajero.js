@@ -13,7 +13,9 @@ import {
     doc,
     getDoc,
     updateDoc,
-    serverTimestamp
+    serverTimestamp,
+    collection,
+    getDocs
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 
@@ -27,6 +29,106 @@ const BLOQUEO_PERFIL_MS =
 
 let usuarioActual = null;
 let datosUsuario = null;
+let localidadesDisponibles = [];
+
+/* =========================================================
+   LOCALIDADES — FIREBASE
+========================================================= */
+
+async function cargarLocalidadesPerfil() {
+
+    try {
+
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "destinos"
+                )
+            );
+
+
+        localidadesDisponibles =
+            snapshot.docs
+                .map(
+                    destinoDoc => ({
+                        id:
+                            destinoDoc.id,
+
+                        ...destinoDoc.data()
+                    })
+                )
+                .filter(
+                    destino =>
+                        destino.activo !== false &&
+                        String(
+                            destino.municipio ||
+                            ""
+                        ).trim()
+                            .toLowerCase() ===
+                        "ostuacán"
+                )
+                .sort(
+                    (a, b) =>
+                        String(
+                            a.nombre ||
+                            ""
+                        ).localeCompare(
+                            String(
+                                b.nombre ||
+                                ""
+                            ),
+                            "es"
+                        )
+                );
+
+
+        const datalist =
+            document.getElementById(
+                "listaLocalidadesPerfil"
+            );
+
+
+        if (!datalist) return;
+
+
+        datalist.innerHTML =
+            localidadesDisponibles
+                .map(
+                    localidad => `
+                        <option
+                            value="${String(
+                                localidad.nombre ||
+                                ""
+                            )
+                            .replace(
+                                /"/g,
+                                "&quot;"
+                            )}">
+                        </option>
+                    `
+                )
+                .join("");
+
+
+        console.log(
+            "📍 MOTI GO: localidades cargadas para perfil:",
+            localidadesDisponibles.length
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "❌ MOTI GO: error cargando localidades del perfil:",
+            error
+        );
+
+    }
+
+}
+
+cargarLocalidadesPerfil();
 
 
 /* =========================================================
@@ -745,6 +847,33 @@ if (formEditarPerfil) {
                 return;
 
             }
+            const localidadEncontrada =
+    localidadesDisponibles.find(
+        destino =>
+            String(
+                destino.nombre ||
+                ""
+            ).trim()
+                .toLowerCase() ===
+            localidad.toLowerCase()
+    );
+
+
+if (!localidadEncontrada) {
+
+    mostrarMensaje(
+        "Selecciona una localidad válida de la lista."
+    );
+
+    document
+        .getElementById(
+            "editarLocalidad"
+        )
+        ?.focus();
+
+    return;
+
+}
 
 
             try {
@@ -758,44 +887,72 @@ if (formEditarPerfil) {
 
 
                 await updateDoc(
-                    referencia,
-                    {
+    referencia,
+    {
 
-                        nombre,
+        nombre,
 
-                        telefono,
+        telefono,
 
-                        municipio:
-                            municipio ||
-                            "Ostuacán",
+        municipio:
+            municipio ||
+            "Ostuacán",
 
-                        localidad,
+        localidad:
+            localidadEncontrada.nombre,
 
-                        ultimaActualizacionPerfil:
-                            serverTimestamp()
+        localidadId:
+            localidadEncontrada.id,
 
-                    }
-                );
+        localidadLatitud:
+            localidadEncontrada.latitud ??
+            localidadEncontrada.latitude ??
+            null,
+
+        localidadLongitud:
+            localidadEncontrada.longitud ??
+            localidadEncontrada.longitude ??
+            null,
+
+        ultimaActualizacionPerfil:
+            serverTimestamp()
+
+    }
+);
 
 
                 datosUsuario = {
 
-                    ...datosUsuario,
+    ...datosUsuario,
 
-                    nombre,
+    nombre,
 
-                    telefono,
+    telefono,
 
-                    municipio:
-                        municipio ||
-                        "Ostuacán",
+    municipio:
+        municipio ||
+        "Ostuacán",
 
-                    localidad,
+    localidad:
+        localidadEncontrada.nombre,
 
-                    ultimaActualizacionPerfil:
-                        Date.now()
+    localidadId:
+        localidadEncontrada.id,
 
-                };
+    localidadLatitud:
+        localidadEncontrada.latitud ??
+        localidadEncontrada.latitude ??
+        null,
+
+    localidadLongitud:
+        localidadEncontrada.longitud ??
+        localidadEncontrada.longitude ??
+        null,
+
+    ultimaActualizacionPerfil:
+        Date.now()
+
+};
 
 
                 renderizarPerfil(
