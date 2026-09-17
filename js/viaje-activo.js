@@ -3317,42 +3317,57 @@ const totalFundador =
 
 
             productosActualizados.forEach(
-                producto => {
+    producto => {
 
-                    const procesado =
-                        producto.inventarioProcesado === true;
-
-
-                    const cantidad =
-                        procesado
-
-                            ? Number(
-                                producto.cantidadComprada
-                            ) || 0
-
-                            : Number(
-                                producto.cantidad ??
-                                producto.qty ??
-                                producto.cantidadSolicitada ??
-                                1
-                            ) || 0;
+        const procesado =
+            producto.inventarioProcesado === true;
 
 
-                    const precio =
-                        Number(
-                            producto.precio ??
-                            producto.precioUnitario ??
-                            producto.precioVenta ??
-                            0
-                        ) || 0;
+        const estadoCompra =
+            producto.estadoCompra ||
+            producto.estado ||
+            "";
 
 
-                    subtotalPedidoReal +=
-                        cantidad *
-                        precio;
+        const noDisponible =
+            estadoCompra ===
+            "no_disponible";
 
-                }
-            );
+
+        const cantidad =
+            noDisponible
+
+                ? 0
+
+                : procesado
+
+                    ? Number(
+                        producto.cantidadComprada
+                    ) || 0
+
+                    : Number(
+                        producto.cantidad ??
+                        producto.qty ??
+                        producto.cantidadSolicitada ??
+                        1
+                    ) || 0;
+
+
+        const precio =
+            Number(
+                producto.precio ??
+                producto.precioUnitario ??
+                producto.precioVenta ??
+                0
+            ) || 0;
+
+
+        subtotalPedidoReal +=
+            cantidad *
+            precio;
+
+    }
+);
 
 
             subtotalPedidoReal =
