@@ -26,162 +26,66 @@
 
 <body>
 
-    <div class="container">
-
-        <h2>Mi Cuenta</h2>
-
-        <!-- Tarjeta principal -->
-
-        <div class="profile-header">
-
-            <h3 id="profileName">
-    Cargando...
-            </h3>
-
-            <p>🧪 Participante Beta</p>
-            <div class="info-item">
-
-    <span>Estado actual</span>
-
-    <strong id="serviceStatus">
-
-        Cargando...
-
-    </strong>
-
-            </div>
-
-            <span
-    id="accountStatus"
-    class="status">
-
-    Cuenta Activa
-
-            </span>
-
+<div class="perfil-conductor-page">
+  <main class="perfil-conductor-main">
+    <header class="perfil-hero">
+      <div class="perfil-avatar" id="profileInitial">C</div>
+      <div class="perfil-hero-info">
+        <span class="perfil-eyebrow">Mi cuenta</span>
+        <h1 id="profileName">Cargando...</h1>
+        <p><span class="perfil-dot"></span> Repartidor MOTI GO</p>
+      </div>
+      <div class="perfil-rating" aria-label="Valoración del repartidor">
+        <div class="rating-stars" id="perfilRepartidorEstrellas">
+          <span class="rating-stars-base">★★★★★</span>
+          <span class="rating-stars-fill" id="perfilRepartidorEstrellasRelleno">★★★★★</span>
         </div>
+        <strong id="perfilRepartidorPromedio">0.0</strong>
+        <small id="perfilRepartidorCantidad">Sin calificaciones</small>
+      </div>
+    </header>
 
-        <!-- Datos personales -->
+    <section class="status-card">
+      <div><span class="section-kicker">Estado del servicio</span><strong id="serviceStatus">Cargando...</strong></div>
+      <span id="accountStatus" class="account-badge">Cuenta activa</span>
+    </section>
 
-        <div class="card">
+    <section class="profile-card">
+      <div class="card-heading"><div><span class="section-kicker">Datos de la cuenta</span><h2>Información personal</h2></div><span class="heading-icon">👤</span></div>
+      <div class="info-grid">
+        <div class="info-box"><span>Nombre</span><strong id="infoName">Cargando...</strong></div>
+        <div class="info-box"><span>Correo electrónico</span><strong id="infoEmail">Cargando...</strong></div>
+        <div class="info-box"><span>Teléfono</span><strong id="infoPhone">Cargando...</strong></div>
+        <div class="info-box"><span>Municipio</span><strong id="infoMunicipio">Ostuacán</strong></div>
+        <div class="info-box"><span>Localidad</span><strong id="infoLocalidad">Sin localidad configurada</strong></div>
+      </div>
+    </section>
 
-            <h4>Información Personal</h4>
+    <section class="profile-card">
+      <div class="card-heading"><div><span class="section-kicker">Vehículo registrado</span><h2>Información de la unidad</h2></div><span class="heading-icon">🏍️</span></div>
+      <div class="info-grid unit-grid">
+        <div class="info-box"><span>Placa</span><strong id="infoPlaca">Cargando...</strong></div>
+        <div class="info-box"><span>Número económico</span><strong id="infoEconomico">#12</strong></div>
+      </div>
+    </section>
 
-            <div class="info-item">
+    <section class="actions-section">
+      <span class="section-kicker">Administrar cuenta</span>
+      <div class="action-grid">
+        <button type="button" id="btnEditarPerfil" class="action-card"><span class="action-icon">✏️</span><span><strong>Editar información</strong><small>Actualiza tus datos y localidad</small></span><b>›</b></button>
+        <button type="button" id="btnCambiarPassword" class="action-card"><span class="action-icon">🔒</span><span><strong>Cambiar contraseña</strong><small>Protege el acceso a tu cuenta</small></span><b>›</b></button>
+        <button type="button" id="btnRecuperarPassword" class="action-card"><span class="action-icon">📧</span><span><strong>Recuperar contraseña</strong><small>Recibe un enlace en tu correo</small></span><b>›</b></button>
+        <a href="terminos-repartidor.html" class="action-card"><span class="action-icon">📄</span><span><strong>Términos y condiciones</strong><small>Consulta las condiciones para repartidores</small></span><b>›</b></a>
+      </div>
+      <button type="button" id="btnLogout" class="logout-button">Cerrar sesión</button>
+    </section>
+  </main>
+</div>
 
-                <span>Nombre</span>
+<div id="modalEditarPerfil" class="modal-overlay" hidden><div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="tituloEditarPerfil"><div class="modal-head"><div><span class="section-kicker">Mis datos</span><h3 id="tituloEditarPerfil">Editar información</h3></div><button type="button" id="btnCerrarEditarPerfil" class="modal-close">×</button></div><p class="modal-note">Por seguridad, los datos personales pueden modificarse una vez cada 24 horas.</p><label>Nombre completo<input id="editarNombre" type="text" autocomplete="name"></label><label>Teléfono<input id="editarTelefono" type="tel" autocomplete="tel" inputmode="tel"></label><label>Localidad<div class="localidad-field"><input id="editarLocalidad" type="text" autocomplete="off" placeholder="Escribe para buscar tu localidad"><div id="listaLocalidadesPerfilConductor" class="localidad-results"></div></div></label><p id="mensajeLocalidadPerfil" class="field-message"></p><label>Placa<input id="editarPlaca" type="text" autocomplete="off"></label><div class="modal-actions"><button type="button" class="btn-secondary btn-cerrar-editar">Cancelar</button><button type="button" id="btnGuardarPerfil" class="btn-primary">Guardar cambios</button></div></div></div>
 
-                <strong id="infoName">
-    Cargando...
-                </strong>
+<div id="modalPasswordConductor" class="modal-overlay" hidden><div class="modal-card small" role="dialog" aria-modal="true"><div class="modal-head"><div><span class="section-kicker">Seguridad</span><h3>Cambiar contraseña</h3></div><button type="button" id="btnCerrarPasswordConductor" class="modal-close">×</button></div><p class="modal-note">Necesitarás tu contraseña actual para confirmar el cambio.</p><label>Contraseña actual<input id="passwordActualConductor" type="password" autocomplete="current-password"></label><label>Nueva contraseña<input id="passwordNuevaConductor" type="password" autocomplete="new-password"></label><label>Confirmar nueva contraseña<input id="passwordNueva2Conductor" type="password" autocomplete="new-password"></label><div class="modal-actions"><button type="button" id="btnCerrarPasswordConductor2" class="btn-secondary">Cancelar</button><button type="button" id="btnGuardarPasswordConductor" class="btn-primary">Actualizar contraseña</button></div></div></div>
 
-            </div>
-
-            <div class="info-item">
-
-                <span>Teléfono</span>
-
-                <strong id="infoPhone">
-    Cargando...
-                </strong>
-
-            </div>
-
-            <div class="info-item">
-
-                <span>Municipio</span>
-
-                <strong id="infoMunicipio">
-    Cargando...
-                </strong>
-
-            </div>
-
-            <div class="info-item">
-
-                <span>Localidad</span>
-
-                <strong id="infoLocalidad">
-    Cargando...
-                </strong>
-
-            </div>
-
-        </div>
-
-        <!-- Unidad -->
-
-        <div class="card">
-
-            <h4>Información de la Unidad</h4>
-
-            <div class="info-item">
-
-                <span>Placa</span>
-
-                <strong id="infoPlaca">
-    Cargando...
-                </strong>
-
-            </div>
-
-            <div class="info-item">
-
-                <span>N° Económico</span>
-
-                <strong>#12</strong>
-
-            </div>
-
-        </div>
-
-        <!-- Acciones -->
-
-        <div class="menu-grid">
-
-            <a href="#" id="btnEditarPerfil" class="menu-card">
-
-                ✏️
-
-                <p>Editar Información</p>
-
-            </a>
-
-            <a href="#" id="btnCambiarPassword" class="menu-card">
-
-                🔒
-
-                <p>Cambiar Contraseña</p>
-
-            </a>
-
-            <a href="terminos-repartidor.html" class="menu-card">
-
-                📄
-
-                <p>Términos</p>
-
-            </a>
-
-           <a href="#"
-   id="btnLogout"
-   class="menu-card logout">
-
-    🚪
-
-    <p>
-        Cerrar Sesión
-    </p>
-
-</a>
-
-        </div>
-
-    </div>
-
-<div id="modalEditarPerfil" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;padding:20px;overflow:auto;"><div style="max-width:520px;margin:40px auto;background:#fff;border-radius:20px;padding:25px"><h3>Editar información</h3><label>Nombre</label><input id="editarNombre" type="text"><label>Teléfono</label><input id="editarTelefono" type="tel"><label>Localidad</label><input id="editarLocalidad" type="text" autocomplete="off" placeholder="Escribe para buscar tu localidad"><div id="listaLocalidadesPerfilConductor" style="position:relative"></div><label>Placa</label><input id="editarPlaca" type="text"><p id="mensajeLocalidadPerfil" style="font-size:13px;color:#64748b"></p><button id="btnGuardarPerfil" type="button">Guardar cambios</button><button id="btnCerrarEditarPerfil" type="button">Cancelar</button></div></div>
-<div id="modalPasswordConductor" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:10000;padding:20px"><div style="max-width:480px;margin:60px auto;background:#fff;border-radius:20px;padding:25px"><h3>Cambiar contraseña</h3><input id="passwordActualConductor" type="password" placeholder="Contraseña actual"><input id="passwordNuevaConductor" type="password" placeholder="Nueva contraseña"><input id="passwordNueva2Conductor" type="password" placeholder="Confirmar nueva contraseña"><button id="btnGuardarPasswordConductor" type="button">Actualizar contraseña</button><button id="btnCerrarPasswordConductor" type="button">Cancelar</button></div></div>
-    
 <script type="module"
         src="../js/logout.js">
 </script>
