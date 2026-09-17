@@ -40,6 +40,20 @@ let localidadSeleccionadaPerfil = null;
 
 
 /* =========================================================
+   NORMALIZAR TEXTO PARA BÚSQUEDA DE LOCALIDADES
+========================================================= */
+
+function normalizarTextoPerfil(texto = "") {
+
+    return String(texto)
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+}
+
+
+/* =========================================================
    PREPARAR BÚSQUEDA DE LOCALIDADES
 ========================================================= */
 
