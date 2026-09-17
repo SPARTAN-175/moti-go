@@ -87,6 +87,9 @@ const cartItems =
 const cartTotal =
     document.getElementById("cartTotal");
 
+const menuCartBadge =
+    document.getElementById("menuCartBadge");
+
 const searchInput =
     document.getElementById("buscarProducto");
 
@@ -2773,7 +2776,17 @@ function actualizarCarrito() {
             }`;
 
     }
+    
+// =================================================
+// CONTADOR DEL MENÚ LATERAL
+// =================================================
 
+if (menuCartBadge) {
+
+    menuCartBadge.textContent =
+        totalProductos;
+
+}
 
     // =================================================
     // TOTAL PRODUCTOS
