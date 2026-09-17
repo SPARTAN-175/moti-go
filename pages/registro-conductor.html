@@ -1,103 +1,199 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Registro de Repartidor | MOTI GO</title>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,500,600,700" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/variables.css">
-<link rel="stylesheet" href="../css/main.css">
-<link rel="stylesheet" href="../css/auth.css">
-<style>
-.auth-field-note{display:block;margin-top:5px;color:#64748b;font-size:11px;line-height:1.45}
-#municipio[readonly]{background:#f8fafc}
-.moti-localidad-wrap{position:relative}
-.moti-localidad-list{position:absolute;z-index:1000;left:0;right:0;top:100%;margin-top:5px;background:#fff;border:1px solid #dbe5df;border-radius:12px;box-shadow:0 12px 28px rgba(15,23,42,.12);overflow:hidden;display:none}
-.moti-localidad-item{display:block;width:100%;border:0;background:#fff;text-align:left;padding:11px 13px;cursor:pointer;color:#1f2937;font:inherit}
-.moti-localidad-item:hover{background:#f0fdf4;color:#15803d}
-.moti-localidad-empty{padding:11px 13px;color:#64748b;font-size:12px}
-.checkbox-group{display:flex;align-items:flex-start;gap:9px;margin:12px 0}
-.checkbox-group input{margin-top:3px;flex:0 0 auto}
-.checkbox-group label{font-size:12px;line-height:1.45}
-.checkbox-group a{color:#15803d;font-weight:600}
-#btnRegistroConductor:disabled{opacity:.55;cursor:not-allowed}
-</style>
-</head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Registro Repartidor | MOTI GO</title>
+
+    <!-- Fuente -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <!-- Material Symbols -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
+    <!-- Estilos -->
+    <link rel="stylesheet"
+          href="../css/variables.css">
+
+    <link rel="stylesheet"
+          href="../css/main.css">
+
+    <link rel="stylesheet"
+          href="../css/auth.css">
+
+<style>.auth-field-note{display:block;margin-top:3px;color:#94A3B8;font-size:11px}#municipio[readonly]{background:#F8FAFC}</style></head>
+
 <body>
-<div class="container">
-<span class="material-symbols-outlined logo-icon">two_wheeler</span>
-<h1 class="logo-text">Repartidor</h1>
-<p class="slogan">Regístrate para ofrecer tus servicios en MOTI GO</p>
 
-<form class="login-form" id="registroConductorForm">
-<div class="input-group">
-<label>Nombre completo</label>
-<input type="text" id="nombre" autocomplete="name" maxlength="100" placeholder="Ingresa tu nombre completo" required>
-</div>
+    <div class="container">
 
-<div class="input-group">
-<label>Correo electrónico</label>
-<input type="email" id="email" autocomplete="email" inputmode="email" maxlength="160" placeholder="Ej. repartidor@gmail.com" required>
-<small class="auth-field-note">Será tu correo real para iniciar sesión, recuperar tu contraseña y recibir comunicaciones.</small>
-</div>
+        <span class="material-symbols-outlined logo-icon">
+         two_wheeler
+         </span>
 
-<div class="input-group">
-<label>Teléfono</label>
-<input type="tel" id="telefono" autocomplete="tel" inputmode="tel" maxlength="15" placeholder="Ej. 9611234567" required>
-</div>
+        <h1 class="logo-text">
+         Conductor
+        </h1>
 
-<div class="input-group">
-<label>Municipio</label>
-<input type="text" id="municipio" value="Ostuacán" readonly>
-</div>
+        <p class="slogan">
+         Regístrate para ofrecer tus servicios en MOTI GO
+        </p>
 
-<div class="input-group moti-localidad-wrap">
-<label>Localidad</label>
-<input type="text" id="localidad" autocomplete="off" maxlength="100" placeholder="Escribe para buscar tu localidad" required>
-<div id="listaLocalidades" class="moti-localidad-list"></div>
-<small class="auth-field-note">Escribe al menos 2 letras y selecciona una localidad de la lista.</small>
-</div>
+        <form class="login-form">
 
-<div class="input-group">
-<label>Placa de unidad</label>
-<input type="text" id="placa" autocomplete="off" maxlength="20" placeholder="Ingresa la placa de tu unidad" required>
-</div>
+            <!-- Nombre -->
+            <div class="input-group">
 
-<div class="input-group">
-<label>Contraseña</label>
-<input type="password" id="password" autocomplete="new-password" minlength="8" placeholder="Mínimo 8 caracteres" required>
-</div>
+                <label>
+                    Nombre completo
+                </label>
 
-<div class="input-group">
-<label>Confirmar contraseña</label>
-<input type="password" id="confirmPassword" autocomplete="new-password" minlength="8" placeholder="Repite tu contraseña" required>
+               <input
+    type="text"
+    id="nombre"
+    placeholder="Ingresa tu nombre">
+
+            </div>
+
+            <!-- Correo electrónico -->
+            <div class="input-group">
+
+                <label>
+                    Correo electrónico
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    autocomplete="email"
+                    inputmode="email"
+                    placeholder="Ej. repartidor@gmail.com"
+                    required>
+
+                <small class="auth-field-note">
+                    Lo usaremos para recuperar tu contraseña y comunicarnos contigo.
+                </small>
+
+            </div>
+
+            <!-- Teléfono -->
+            <div class="input-group">
+
+                <label>
+                    Teléfono
+                </label>
+
+                <input
+    type="tel"
+    id="telefono"
+    placeholder="9611234567">
+
+            </div>
+           <!-- Placa de unidad -->
+            <div class="input-group">
+
+                <label>
+                    Placa de unidad
+                </label>
+
+                <input
+    type="text"
+    id="placa"
+    placeholder="Ingresa la placa de tu unidad">
+
+            </div>
+
+            <!-- Contraseña -->
+            <div class="input-group">
+
+                <label>
+                    Contraseña
+                </label>
+
+                <input
+    type="password"
+    id="password"
+    placeholder="********">
+
+            </div>
+
+            <!-- Confirmar -->
+            <div class="input-group">
+
+                <label>
+                    Confirmar contraseña
+                </label>
+
+                <input
+    type="password"
+    id="confirmPassword"
+    placeholder="********">
+
+            </div>
+
+            <div class="checkbox-group">
+
+    <input
+        type="checkbox"
+        id="mayorEdad">
+
+    <label for="mayorEdad">
+        Declaro ser mayor de edad
+    </label>
+
 </div>
 
 <div class="checkbox-group">
-<input type="checkbox" id="mayorEdad">
-<label for="mayorEdad">Declaro ser mayor de edad.</label>
+
+    <input
+        type="checkbox"
+        id="informacion">
+
+    <label for="informacion">
+        Declaro que la información proporcionada es correcta
+    </label>
+
 </div>
 
 <div class="checkbox-group">
-<input type="checkbox" id="informacion">
-<label for="informacion">Declaro que la información proporcionada es correcta y me comprometo a mantenerla actualizada.</label>
+
+    <input
+        type="checkbox"
+        id="terminos">
+
+    <label for="terminos">
+        Acepto los términos y condiciones
+    </label>
+
 </div>
 
-<div class="checkbox-group">
-<input type="checkbox" id="terminos">
-<label for="terminos">
-He leído y acepto los
-<a href="./terminos-repartidor.html" target="_blank" rel="noopener">Términos y Condiciones para Repartidores de MOTI GO</a>
-y el <a href="./aviso-privacidad.html" target="_blank" rel="noopener">Aviso de Privacidad</a>.
-</label>
-</div>
+            <!-- Botón -->
+           <button
+    type="button"
+    id="btnRegistroConductor"
+    class="btn-primary">
 
-<button type="button" id="btnRegistroConductor" class="btn-primary" disabled>
-Solicitar registro
+    Solicitar registro
+
 </button>
-</form>
-</div>
-<script type="module" src="../js/registro-conductor.js"></script>
+
+        </form>
+
+    </div>
+
+
+
+
+    <script type="module"
+        src="../js/registro-conductor.js">
+</script>
 </body>
+
 </html>

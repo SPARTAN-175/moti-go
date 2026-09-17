@@ -1,97 +1,199 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MOTI GO | Mi perfil</title>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400,500,600,700" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/variables.css">
-<link rel="stylesheet" href="../css/main.css">
-<link rel="stylesheet" href="../css/perfil-conductor.css">
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>MOTI | Mi Cuenta</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="../css/variables.css">
+
+    <link rel="stylesheet"
+          href="../css/main.css">
+
+    <link rel="stylesheet"
+          href="../css/perfil-conductor.css">
+
 </head>
+
 <body>
-<div class="repartidor-profile-page">
-<header class="rp-topbar">
-<div><span class="rp-kicker">CUENTA MOTI GO</span><h1>Mi perfil</h1><p>Administra tu información, unidad y seguridad.</p></div>
-<a href="dashboard-repartidor.html" class="rp-back"><span class="material-symbols-outlined">arrow_back</span>Volver</a>
-</header>
 
-<section class="rp-hero">
-<div class="rp-avatar"><span id="profileInitial">—</span></div>
-<div class="rp-hero-info"><span>CUENTA DE REPARTIDOR</span><h2 id="profileName">Cargando...</h2><p id="profileEmail">Cargando...</p></div>
-<div class="rp-status"><span class="rp-dot"></span><span id="accountStatus">Cuenta activa</span></div>
-</section>
+    <div class="container">
 
-<section class="rp-card">
-<div class="rp-heading"><div><span class="material-symbols-outlined">person</span><div><h3>Información personal</h3><p>Datos asociados a tu cuenta.</p></div></div><button id="btnEditarPerfil" type="button" class="rp-small-btn"><span class="material-symbols-outlined">edit</span>Editar</button></div>
-<div class="rp-grid">
-<div class="rp-item"><span class="material-symbols-outlined">person</span><div><small>Nombre</small><strong id="infoName">—</strong></div></div>
-<div class="rp-item"><span class="material-symbols-outlined">mail</span><div><small>Correo electrónico</small><strong id="infoEmail">—</strong></div></div>
-<div class="rp-item"><span class="material-symbols-outlined">phone</span><div><small>Teléfono</small><strong id="infoPhone">—</strong></div></div>
-<div class="rp-item"><span class="material-symbols-outlined">location_city</span><div><small>Municipio</small><strong id="infoMunicipio">—</strong></div></div>
-<div class="rp-item"><span class="material-symbols-outlined">home_pin</span><div><small>Localidad</small><strong id="infoLocalidad">—</strong></div></div>
-</div>
-</section>
+        <h2>Mi Cuenta</h2>
 
-<section class="rp-card">
-<div class="rp-heading"><div><span class="material-symbols-outlined">two_wheeler</span><div><h3>Información de la unidad</h3><p>Datos utilizados para tu operación.</p></div></div></div>
-<div class="rp-grid">
-<div class="rp-item"><span class="material-symbols-outlined">confirmation_number</span><div><small>Placa</small><strong id="infoPlaca">—</strong></div></div>
-<div class="rp-item"><span class="material-symbols-outlined">badge</span><div><small>Rol</small><strong>Repartidor</strong></div></div>
-<div class="rp-item"><span class="material-symbols-outlined">delivery_dining</span><div><small>Estado de servicio</small><strong id="serviceStatus">—</strong></div></div>
-</div>
-</section>
+        <!-- Tarjeta principal -->
 
-<section id="perfilEdicionAviso" class="rp-notice"><span class="material-symbols-outlined">schedule</span><div><strong>Actualización de información</strong><p id="perfilEdicionAvisoTexto">Puedes modificar tus datos personales de forma ocasional.</p></div></section>
+        <div class="profile-header">
 
-<section class="rp-card">
-<div class="rp-heading"><div><span class="material-symbols-outlined">security</span><div><h3>Seguridad</h3><p>Protege el acceso a tu cuenta.</p></div></div></div>
-<div class="rp-security-row"><div class="rp-security-icon"><span class="material-symbols-outlined">lock</span></div><div><strong>Contraseña</strong><span>Mantén tu contraseña actualizada.</span></div><button id="btnCambiarPassword" type="button">Cambiar contraseña</button></div>
-<div class="rp-security-row"><div class="rp-security-icon"><span class="material-symbols-outlined">mark_email_read</span></div><div><strong>Recuperación</strong><span>Envía un enlace al correo de tu cuenta.</span></div><button id="btnRecuperarPassword" type="button">Enviar enlace</button></div>
-</section>
+            <h3 id="profileName">
+    Cargando...
+            </h3>
 
-<section class="rp-card rp-legal">
-<div><span class="material-symbols-outlined">description</span><div><h3>Términos para repartidores</h3><p>Consulta la versión aceptada durante tu registro.</p></div></div>
-<button id="btnTerminos" type="button">Ver términos <span class="material-symbols-outlined">chevron_right</span></button>
-</section>
+            <p>🧪 Participante Beta</p>
+            <div class="info-item">
 
-<button id="btnLogout" type="button" class="rp-logout"><span class="material-symbols-outlined">logout</span>Cerrar sesión</button>
-</div>
+    <span>Estado actual</span>
 
-<div id="modalEditarPerfil" class="rp-modal" hidden><div class="rp-modal-box">
-<button id="cerrarModalEditar" type="button" class="rp-close"><span class="material-symbols-outlined">close</span></button>
-<span class="rp-kicker">INFORMACIÓN PERSONAL</span><h2>Editar información</h2><p class="rp-desc">Mantén tus datos actualizados para la operación de MOTI GO.</p>
-<form id="formEditarPerfil">
-<label>Nombre completo<input id="editarNombre" maxlength="100" autocomplete="name" required></label>
-<label>Teléfono<input id="editarTelefono" type="tel" maxlength="15" autocomplete="tel" required></label>
-<label>Municipio<input id="editarMunicipio" value="Ostuacán" readonly></label>
-<label class="rp-localidad-wrap">Localidad<input id="editarLocalidad" autocomplete="off" maxlength="100" placeholder="Escribe para buscar..." required><div id="listaLocalidadesPerfil" class="rp-localidad-list"></div></label>
-<label>Placa de unidad<input id="editarPlaca" maxlength="20" autocomplete="off" required></label>
-<div class="rp-form-note"><span class="material-symbols-outlined">info</span><span>Por seguridad, estos datos pueden modificarse una vez cada 24 horas.</span></div>
-<div class="rp-actions"><button id="cancelarEditarPerfil" type="button" class="rp-secondary">Cancelar</button><button type="submit" class="rp-primary">Guardar cambios</button></div>
-</form></div></div>
+    <strong id="serviceStatus">
 
-<div id="modalPassword" class="rp-modal" hidden><div class="rp-modal-box">
-<button id="cerrarModalPassword" type="button" class="rp-close"><span class="material-symbols-outlined">close</span></button>
-<span class="rp-kicker">SEGURIDAD</span><h2>Cambiar contraseña</h2><p class="rp-desc">Confirma tu contraseña actual y establece una nueva.</p>
-<form id="formPassword">
-<label>Contraseña actual<input id="passwordActual" type="password" autocomplete="current-password" required></label>
-<label>Nueva contraseña<input id="passwordNueva" type="password" minlength="8" autocomplete="new-password" required></label>
-<label>Confirmar nueva contraseña<input id="passwordConfirmacion" type="password" minlength="8" autocomplete="new-password" required></label>
-<div class="rp-form-note"><span class="material-symbols-outlined">shield</span><span>La nueva contraseña debe tener al menos 8 caracteres.</span></div>
-<div class="rp-actions"><button id="cancelarPassword" type="button" class="rp-secondary">Cancelar</button><button type="submit" class="rp-primary">Actualizar contraseña</button></div>
-</form></div></div>
+        Cargando...
 
-<div id="modalTerminos" class="rp-modal" hidden><div class="rp-modal-box rp-terms-box">
-<button id="cerrarModalTerminos" type="button" class="rp-close"><span class="material-symbols-outlined">close</span></button>
-<span class="rp-kicker">MOTI GO</span><h2>Términos para repartidores</h2>
-<div class="rp-terms-content"><p>La versión aceptada durante tu registro es la <strong id="versionTerminos">1.0</strong>.</p><p>Puedes consultar el documento completo para conocer las reglas sobre pedidos, compras, efectivo, entregas, ubicación, conducta y seguridad.</p></div>
-<div class="rp-actions"><button id="cerrarTerminos" type="button" class="rp-primary">Entendido</button><a class="rp-secondary rp-link-btn" href="./terminos-repartidor.html" target="_blank" rel="noopener">Abrir documento completo</a></div>
-</div></div>
+    </strong>
 
-<script type="module" src="../js/logout.js"></script>
-<script type="module" src="../js/auth-guard.js"></script>
-<script type="module" src="../js/perfil-conductor.js"></script>
+            </div>
+
+            <span
+    id="accountStatus"
+    class="status">
+
+    Cuenta Activa
+
+            </span>
+
+        </div>
+
+        <!-- Datos personales -->
+
+        <div class="card">
+
+            <h4>Información Personal</h4>
+
+            <div class="info-item">
+
+                <span>Nombre</span>
+
+                <strong id="infoName">
+    Cargando...
+                </strong>
+
+            </div>
+
+            <div class="info-item">
+
+                <span>Teléfono</span>
+
+                <strong id="infoPhone">
+    Cargando...
+                </strong>
+
+            </div>
+
+            <div class="info-item">
+
+                <span>Municipio</span>
+
+                <strong id="infoMunicipio">
+    Cargando...
+                </strong>
+
+            </div>
+
+            <div class="info-item">
+
+                <span>Localidad</span>
+
+                <strong id="infoLocalidad">
+    Cargando...
+                </strong>
+
+            </div>
+
+        </div>
+
+        <!-- Unidad -->
+
+        <div class="card">
+
+            <h4>Información de la Unidad</h4>
+
+            <div class="info-item">
+
+                <span>Placa</span>
+
+                <strong id="infoPlaca">
+    Cargando...
+                </strong>
+
+            </div>
+
+            <div class="info-item">
+
+                <span>N° Económico</span>
+
+                <strong>#12</strong>
+
+            </div>
+
+        </div>
+
+        <!-- Acciones -->
+
+        <div class="menu-grid">
+
+            <a href="#" id="btnEditarPerfil" class="menu-card">
+
+                ✏️
+
+                <p>Editar Información</p>
+
+            </a>
+
+            <a href="#" id="btnCambiarPassword" class="menu-card">
+
+                🔒
+
+                <p>Cambiar Contraseña</p>
+
+            </a>
+
+            <a href="terminos-repartidor.html" class="menu-card">
+
+                📄
+
+                <p>Términos</p>
+
+            </a>
+
+           <a href="#"
+   id="btnLogout"
+   class="menu-card logout">
+
+    🚪
+
+    <p>
+        Cerrar Sesión
+    </p>
+
+</a>
+
+        </div>
+
+    </div>
+
+<div id="modalEditarPerfil" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;padding:20px;overflow:auto;"><div style="max-width:520px;margin:40px auto;background:#fff;border-radius:20px;padding:25px"><h3>Editar información</h3><label>Nombre</label><input id="editarNombre" type="text"><label>Teléfono</label><input id="editarTelefono" type="tel"><label>Localidad</label><input id="editarLocalidad" type="text" autocomplete="off" placeholder="Escribe para buscar tu localidad"><div id="listaLocalidadesPerfilConductor" style="position:relative"></div><label>Placa</label><input id="editarPlaca" type="text"><p id="mensajeLocalidadPerfil" style="font-size:13px;color:#64748b"></p><button id="btnGuardarPerfil" type="button">Guardar cambios</button><button id="btnCerrarEditarPerfil" type="button">Cancelar</button></div></div>
+<div id="modalPasswordConductor" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:10000;padding:20px"><div style="max-width:480px;margin:60px auto;background:#fff;border-radius:20px;padding:25px"><h3>Cambiar contraseña</h3><input id="passwordActualConductor" type="password" placeholder="Contraseña actual"><input id="passwordNuevaConductor" type="password" placeholder="Nueva contraseña"><input id="passwordNueva2Conductor" type="password" placeholder="Confirmar nueva contraseña"><button id="btnGuardarPasswordConductor" type="button">Actualizar contraseña</button><button id="btnCerrarPasswordConductor" type="button">Cancelar</button></div></div>
+    
+<script type="module"
+        src="../js/logout.js">
+</script>
+    
+<script type="module"
+        src="../js/auth-guard.js">
+</script>
+
+<script type="module"
+        src="../js/perfil-conductor.js">
+</script>
+
 </body>
+
 </html>
