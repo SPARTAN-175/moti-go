@@ -36,7 +36,6 @@ let localidadesDisponibles = [];
    MISMO SISTEMA UTILIZADO EN MOTI
 ========================================================= */
 
-let localidadesDisponibles = [];
 let localidadSeleccionadaPerfil = null;
 
 
@@ -64,8 +63,13 @@ function prepararBusquedaLocalidadPerfil() {
 
 
     /*
-       Crear lista de resultados
-       dinámicamente, igual que MOTI.
+       Si el HTML ya tiene un <datalist>
+       con este ID, lo reemplazamos por
+       una lista visual propia.
+
+       Esto es importante porque el sistema
+       de MOTI utiliza una lista dinámica,
+       no el desplegable nativo del navegador.
     */
 
     let lista =
@@ -73,6 +77,36 @@ function prepararBusquedaLocalidadPerfil() {
             "listaLocalidadesPerfil"
         );
 
+
+    if (
+        lista &&
+        lista.tagName &&
+        lista.tagName.toLowerCase() ===
+            "datalist"
+    ) {
+
+        const nuevaLista =
+            document.createElement(
+                "div"
+            );
+
+        nuevaLista.id =
+            "listaLocalidadesPerfil";
+
+        lista.replaceWith(
+            nuevaLista
+        );
+
+        lista =
+            nuevaLista;
+
+    }
+
+
+    /*
+       Si por alguna razón todavía no existe,
+       la creamos.
+    */
 
     if (!lista) {
 
@@ -85,65 +119,11 @@ function prepararBusquedaLocalidadPerfil() {
             "listaLocalidadesPerfil";
 
 
-        lista.style.display =
-            "none";
-
-        lista.style.position =
-            "absolute";
-
-        lista.style.left =
-            "0";
-
-        lista.style.right =
-            "0";
-
-        lista.style.top =
-            "100%";
-
-        lista.style.zIndex =
-            "99999";
-
-        lista.style.background =
-            "#ffffff";
-
-        lista.style.border =
-            "1px solid #dfe5eb";
-
-        lista.style.borderRadius =
-            "12px";
-
-        lista.style.boxShadow =
-            "0 10px 25px rgba(0,0,0,.10)";
-
-        lista.style.maxHeight =
-            "240px";
-
-        lista.style.overflowY =
-            "auto";
-
-
         const padre =
             campo.parentElement;
 
 
         if (padre) {
-
-            const posicion =
-                getComputedStyle(
-                    padre
-                ).position;
-
-
-            if (
-                posicion ===
-                "static"
-            ) {
-
-                padre.style.position =
-                    "relative";
-
-            }
-
 
             padre.appendChild(
                 lista
@@ -155,13 +135,103 @@ function prepararBusquedaLocalidadPerfil() {
 
 
     /*
-       IMPORTANTE:
-       ya no usamos datalist.
+       Estilos de la lista.
+    */
+
+    lista.style.display =
+        "none";
+
+    lista.style.position =
+        "absolute";
+
+    lista.style.left =
+        "0";
+
+    lista.style.right =
+        "0";
+
+    lista.style.top =
+        "calc(100% + 5px)";
+
+    lista.style.zIndex =
+        "99999";
+
+    lista.style.background =
+        "#ffffff";
+
+    lista.style.border =
+        "1px solid #dfe5eb";
+
+    lista.style.borderRadius =
+        "12px";
+
+    lista.style.boxShadow =
+        "0 10px 25px rgba(0,0,0,.10)";
+
+    lista.style.maxHeight =
+        "240px";
+
+    lista.style.overflowY =
+        "auto";
+
+
+    /*
+       El padre necesita posición relativa
+       para que la lista quede justo debajo
+       del campo.
+    */
+
+    const padre =
+        campo.parentElement;
+
+
+    if (padre) {
+
+        const posicion =
+            getComputedStyle(
+                padre
+            ).position;
+
+
+        if (
+            posicion ===
+            "static"
+        ) {
+
+            padre.style.position =
+                "relative";
+
+        }
+
+    }
+
+
+    /*
+       No utilizamos el datalist nativo.
     */
 
     campo.removeAttribute(
         "list"
     );
+
+
+    /*
+       Evitar registrar el evento
+       más de una vez.
+    */
+
+    if (
+        campo.dataset.motiLocalidadPreparada ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+
+    campo.dataset.motiLocalidadPreparada =
+        "true";
 
 
     /*
@@ -175,8 +245,34 @@ function prepararBusquedaLocalidadPerfil() {
 
 
     /*
-       Si ya tenía una localidad,
-       recuperar sus datos desde Firebase.
+       Cerrar resultados al perder el foco.
+    */
+
+    campo.addEventListener(
+        "blur",
+        () => {
+
+            setTimeout(
+                () => {
+
+                    if (lista) {
+
+                        lista.style.display =
+                            "none";
+
+                    }
+
+                },
+                180
+            );
+
+        }
+    );
+
+
+    /*
+       Si ya existe una localidad en el perfil,
+       recuperar sus datos.
     */
 
     if (
@@ -216,15 +312,34 @@ async function buscarLocalidadesPerfil() {
     }
 
 
+    const textoOriginal =
+        campo.value.trim();
+
+
     const texto =
-        campo.value
-            .trim()
-            .toLowerCase();
+        normalizarTextoPerfil(
+            textoOriginal
+        );
 
 
     /*
-       Si está vacío o tiene menos
-       de 2 caracteres, ocultar.
+       Al modificar el texto,
+       la selección anterior deja de ser válida.
+    */
+
+    localidadSeleccionadaPerfil =
+        null;
+
+
+    delete campo.dataset.localidadId;
+    delete campo.dataset.localidadNombre;
+    delete campo.dataset.localidadLatitud;
+    delete campo.dataset.localidadLongitud;
+
+
+    /*
+       Con menos de 2 caracteres
+       no hacemos búsqueda.
     */
 
     if (
@@ -237,21 +352,13 @@ async function buscarLocalidadesPerfil() {
         lista.style.display =
             "none";
 
-        localidadSeleccionadaPerfil =
-            null;
-
         return;
 
     }
 
 
-    /*
-       Limpiar resultados anteriores.
-    */
-
     lista.innerHTML =
         "";
-
 
     lista.style.display =
         "none";
@@ -261,7 +368,7 @@ async function buscarLocalidadesPerfil() {
 
         console.log(
             "📍 MOTI GO: buscando localidad:",
-            texto
+            textoOriginal
         );
 
 
@@ -289,25 +396,33 @@ async function buscarLocalidadesPerfil() {
                     String(
                         destino.nombre ||
                         ""
-                    )
-                        .trim();
+                    ).trim();
 
 
                 const municipio =
                     String(
                         destino.municipio ||
                         ""
+                    ).trim();
+
+
+                if (
+                    destino.activo ===
+                    false
+                ) {
+
+                    return;
+
+                }
+
+
+                if (
+                    normalizarTextoPerfil(
+                        municipio
+                    ) !==
+                    normalizarTextoPerfil(
+                        "Ostuacán"
                     )
-                        .trim();
-
-
-                /*
-                   Solo localidades activas
-                   del municipio Ostuacán.
-                */
-
-                if (
-                    destino.activo === false
                 ) {
 
                     return;
@@ -316,20 +431,11 @@ async function buscarLocalidadesPerfil() {
 
 
                 if (
-                    municipio
-                        .toLowerCase() !==
-                    "ostuacán"
-                ) {
-
-                    return;
-
-                }
-
-
-                if (
-                    nombre
-                        .toLowerCase()
-                        .includes(texto)
+                    normalizarTextoPerfil(
+                        nombre
+                    ).includes(
+                        texto
+                    )
                 ) {
 
                     encontrados.push({
@@ -347,47 +453,60 @@ async function buscarLocalidadesPerfil() {
         );
 
 
-        /*
-           No hubo resultados.
-        */
+        encontrados.sort(
+            (a, b) =>
+                String(
+                    a.nombre ||
+                    ""
+                ).localeCompare(
+                    String(
+                        b.nombre ||
+                        ""
+                    ),
+                    "es",
+                    {
+                        sensitivity:
+                            "base"
+                    }
+                )
+        );
+
+
+        localidadesDisponibles =
+            encontrados;
+
 
         if (
-            encontrados.length === 0
+            encontrados.length ===
+            0
         ) {
 
-            lista.style.display =
-                "none";
+            console.log(
+                "📍 MOTI GO: no se encontraron localidades para:",
+                textoOriginal
+            );
 
             return;
 
         }
 
 
-        /*
-           Guardar resultados.
-        */
-
-        localidadesDisponibles =
-            encontrados;
-
-
-        /*
-           Mostrar lista.
-        */
-
-        lista.style.display =
-            "block";
-
-
         encontrados
-            .slice(0, 10)
+            .slice(
+                0,
+                10
+            )
             .forEach(
                 destino => {
 
                     const item =
                         document.createElement(
-                            "div"
+                            "button"
                         );
+
+
+                    item.type =
+                        "button";
 
 
                     item.className =
@@ -398,15 +517,20 @@ async function buscarLocalidadesPerfil() {
                         destino.nombre;
 
 
-                    /*
-                       Estilo visual.
-                    */
+                    item.style.display =
+                        "block";
+
+                    item.style.width =
+                        "100%";
 
                     item.style.padding =
                         "13px 15px";
 
                     item.style.cursor =
                         "pointer";
+
+                    item.style.fontFamily =
+                        "inherit";
 
                     item.style.fontSize =
                         "14px";
@@ -416,6 +540,12 @@ async function buscarLocalidadesPerfil() {
 
                     item.style.color =
                         "#172033";
+
+                    item.style.textAlign =
+                        "left";
+
+                    item.style.border =
+                        "0";
 
                     item.style.borderBottom =
                         "1px solid #f0f2f4";
@@ -447,8 +577,20 @@ async function buscarLocalidadesPerfil() {
 
 
                     /*
-                       Seleccionar localidad.
+                       Evitar que el blur del
+                       input cierre la lista
+                       antes de seleccionar.
                     */
+
+                    item.addEventListener(
+                        "mousedown",
+                        event => {
+
+                            event.preventDefault();
+
+                        }
+                    );
+
 
                     item.addEventListener(
                         "click",
@@ -470,6 +612,10 @@ async function buscarLocalidadesPerfil() {
             );
 
 
+        lista.style.display =
+            "block";
+
+
         console.log(
             "📍 MOTI GO: resultados encontrados:",
             encontrados.length
@@ -482,6 +628,7 @@ async function buscarLocalidadesPerfil() {
             "❌ MOTI GO: error buscando localidades:",
             error
         );
+
 
         lista.innerHTML =
             "";
@@ -524,51 +671,44 @@ function seleccionarLocalidadPerfil(
         destino;
 
 
-    /*
-       Mostrar nombre seleccionado.
-    */
-
     campo.value =
-        destino.nombre;
+        destino.nombre ||
+        "";
 
-
-    /*
-       Guardar los datos completos
-       temporalmente en el input.
-    */
 
     campo.dataset.localidadId =
-        destino.id || "";
+        destino.id ||
+        "";
 
 
     campo.dataset.localidadNombre =
-        destino.nombre || "";
+        destino.nombre ||
+        "";
 
 
     campo.dataset.localidadLatitud =
         destino.latitud ??
+        destino.latitude ??
         "";
 
 
     campo.dataset.localidadLongitud =
         destino.longitud ??
+        destino.longitude ??
         "";
 
 
     /*
-       Guardar también en el array
-       para que el bloque de guardado
-       que ya tienes pueda encontrarlo.
+       Dejamos también el destino
+       en localidadesDisponibles para
+       que el guardado actual del perfil
+       pueda encontrarlo.
     */
 
     localidadesDisponibles = [
         destino
     ];
 
-
-    /*
-       Ocultar resultados.
-    */
 
     if (lista) {
 
@@ -617,6 +757,12 @@ async function cargarLocalidadActualPerfil(
             );
 
 
+        const nombreBuscado =
+            normalizarTextoPerfil(
+                nombreLocalidad
+            );
+
+
         const encontrada =
             snapshot.docs.find(
                 destinoDoc => {
@@ -627,22 +773,16 @@ async function cargarLocalidadActualPerfil(
 
                     return (
                         destino.activo !== false &&
-                        String(
-                            destino.municipio ||
-                            ""
-                        )
-                            .trim()
-                            .toLowerCase() ===
-                        "ostuacán" &&
-                        String(
-                            destino.nombre ||
-                            ""
-                        )
-                            .trim()
-                            .toLowerCase() ===
-                        nombreLocalidad
-                            .trim()
-                            .toLowerCase()
+                        normalizarTextoPerfil(
+                            destino.municipio
+                        ) ===
+                        normalizarTextoPerfil(
+                            "Ostuacán"
+                        ) &&
+                        normalizarTextoPerfil(
+                            destino.nombre
+                        ) ===
+                        nombreBuscado
                     );
 
                 }
@@ -653,14 +793,52 @@ async function cargarLocalidadActualPerfil(
             encontrada
         ) {
 
-            seleccionarLocalidadPerfil({
+            const destino = {
 
                 id:
                     encontrada.id,
 
                 ...encontrada.data()
 
-            });
+            };
+
+
+            localidadSeleccionadaPerfil =
+                destino;
+
+
+            localidadesDisponibles = [
+                destino
+            ];
+
+
+            const campo =
+                document.getElementById(
+                    "editarLocalidad"
+                );
+
+
+            if (campo) {
+
+                campo.dataset.localidadId =
+                    destino.id ||
+                    "";
+
+                campo.dataset.localidadNombre =
+                    destino.nombre ||
+                    "";
+
+                campo.dataset.localidadLatitud =
+                    destino.latitud ??
+                    destino.latitude ??
+                    "";
+
+                campo.dataset.localidadLongitud =
+                    destino.longitud ??
+                    destino.longitude ??
+                    "";
+
+            }
 
         }
 
@@ -675,6 +853,40 @@ async function cargarLocalidadActualPerfil(
     }
 
 }
+
+
+/* =========================================================
+   INICIAR AUTOCOMPLETADO
+========================================================= */
+
+function iniciarAutocompletadoLocalidadPerfil() {
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            prepararBusquedaLocalidadPerfil,
+            {
+                once:
+                    true
+            }
+        );
+
+    }
+    else {
+
+        prepararBusquedaLocalidadPerfil();
+
+    }
+
+}
+
+
+iniciarAutocompletadoLocalidadPerfil();
+
 
 /* =========================================================
    ELEMENTOS
