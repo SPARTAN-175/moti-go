@@ -32,7 +32,7 @@ let datosUsuario = null;
 let localidadesDisponibles = [];
 
 /* =========================================================
-   LOCALIDADES — FIREBASE
+   LOCALIDADES — FIREBASE + AUTOCOMPLETADO
 ========================================================= */
 
 async function cargarLocalidadesPerfil() {
@@ -64,7 +64,8 @@ async function cargarLocalidadesPerfil() {
                         String(
                             destino.municipio ||
                             ""
-                        ).trim()
+                        )
+                            .trim()
                             .toLowerCase() ===
                         "ostuacán"
                 )
@@ -83,38 +84,13 @@ async function cargarLocalidadesPerfil() {
                 );
 
 
-        const datalist =
-            document.getElementById(
-                "listaLocalidadesPerfil"
-            );
-
-
-        if (!datalist) return;
-
-
-        datalist.innerHTML =
-            localidadesDisponibles
-                .map(
-                    localidad => `
-                        <option
-                            value="${String(
-                                localidad.nombre ||
-                                ""
-                            )
-                            .replace(
-                                /"/g,
-                                "&quot;"
-                            )}">
-                        </option>
-                    `
-                )
-                .join("");
-
-
         console.log(
-            "📍 MOTI GO: localidades cargadas para perfil:",
+            "📍 MOTI GO: localidades cargadas:",
             localidadesDisponibles.length
         );
+
+
+        prepararAutocompletadoLocalidadPerfil();
 
     }
     catch (error) {
@@ -128,8 +104,503 @@ async function cargarLocalidadesPerfil() {
 
 }
 
-cargarLocalidadesPerfil();
 
+/* =========================================================
+   NORMALIZAR TEXTO
+========================================================= */
+
+function normalizarTextoPerfil(
+    texto
+) {
+
+    return String(
+        texto || ""
+    )
+        .normalize("NFD")
+        .replace(
+            /[\u0300-\u036f]/g,
+            ""
+        )
+        .toLowerCase()
+        .trim();
+
+}
+
+
+/* =========================================================
+   AUTOCOMPLETADO DE LOCALIDAD
+========================================================= */
+
+function prepararAutocompletadoLocalidadPerfil() {
+
+    const campo =
+        document.getElementById(
+            "editarLocalidad"
+        );
+
+
+    if (!campo) {
+
+        console.warn(
+            "⚠️ MOTI GO: no existe #editarLocalidad."
+        );
+
+        return;
+
+    }
+
+
+    /* Evitar duplicar el sistema */
+    if (
+        campo.dataset.autocompletado ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+
+    campo.dataset.autocompletado =
+        "true";
+
+
+    /*
+       Quitamos el datalist nativo.
+       La búsqueda la controlaremos
+       nosotros para que se vea
+       como una lista profesional.
+    */
+
+    campo.removeAttribute(
+        "list"
+    );
+
+
+    /*
+       Contenedor de sugerencias
+    */
+
+    const contenedor =
+        document.createElement(
+            "div"
+        );
+
+
+    contenedor.className =
+        "moti-localidades-sugerencias";
+
+
+    contenedor.style.position =
+        "absolute";
+
+    contenedor.style.left =
+        "0";
+
+    contenedor.style.right =
+        "0";
+
+    contenedor.style.top =
+        "calc(100% + 6px)";
+
+    contenedor.style.background =
+        "#ffffff";
+
+    contenedor.style.border =
+        "1px solid #e2e8f0";
+
+    contenedor.style.borderRadius =
+        "14px";
+
+    contenedor.style.boxShadow =
+        "0 12px 30px rgba(15,23,42,.12)";
+
+    contenedor.style.overflow =
+        "hidden";
+
+    contenedor.style.zIndex =
+        "99999";
+
+    contenedor.style.display =
+        "none";
+
+
+    /*
+       El input debe tener un
+       contenedor con posición relativa.
+    */
+
+    const padre =
+        campo.parentElement;
+
+
+    if (padre) {
+
+        const posicionActual =
+            getComputedStyle(
+                padre
+            ).position;
+
+
+        if (
+            posicionActual ===
+                "static" ||
+            !posicionActual
+        ) {
+
+            padre.style.position =
+                "relative";
+
+        }
+
+
+        padre.appendChild(
+            contenedor
+        );
+
+    }
+
+
+    function ocultarSugerencias() {
+
+        contenedor.innerHTML =
+            "";
+
+        contenedor.style.display =
+            "none";
+
+    }
+
+
+    function mostrarSugerencias(
+        coincidencias
+    ) {
+
+        contenedor.innerHTML =
+            "";
+
+
+        if (
+            !coincidencias.length
+        ) {
+
+            ocultarSugerencias();
+
+            return;
+
+        }
+
+
+        coincidencias
+            .slice(0, 8)
+            .forEach(
+                localidad => {
+
+                    const boton =
+                        document.createElement(
+                            "button"
+                        );
+
+
+                    boton.type =
+                        "button";
+
+
+                    boton.style.width =
+                        "100%";
+
+                    boton.style.display =
+                        "block";
+
+                    boton.style.textAlign =
+                        "left";
+
+                    boton.style.border =
+                        "0";
+
+                    boton.style.background =
+                        "#ffffff";
+
+                    boton.style.padding =
+                        "13px 15px";
+
+                    boton.style.cursor =
+                        "pointer";
+
+                    boton.style.fontSize =
+                        "14px";
+
+                    boton.style.fontWeight =
+                        "600";
+
+                    boton.style.color =
+                        "#172033";
+
+
+                    const nombre =
+                        String(
+                            localidad.nombre ||
+                            ""
+                        ).trim();
+
+
+                    boton.textContent =
+                        nombre;
+
+
+                    boton.addEventListener(
+                        "mouseenter",
+                        () => {
+
+                            boton.style.background =
+                                "#f0fdf4";
+
+                        }
+                    );
+
+
+                    boton.addEventListener(
+                        "mouseleave",
+                        () => {
+
+                            boton.style.background =
+                                "#ffffff";
+
+                        }
+                    );
+
+
+                    boton.addEventListener(
+                        "mousedown",
+                        event => {
+
+                            /*
+                               mousedown evita que
+                               el blur del input cierre
+                               la lista antes de seleccionar.
+                            */
+
+                            event.preventDefault();
+
+                        }
+                    );
+
+
+                    boton.addEventListener(
+                        "click",
+                        () => {
+
+                            campo.value =
+                                nombre;
+
+
+                            /*
+                               Guardamos temporalmente
+                               la localidad seleccionada.
+                            */
+
+                            campo.dataset.localidadId =
+                                localidad.id || "";
+
+
+                            campo.dataset.localidadNombre =
+                                nombre;
+
+
+                            campo.dataset.localidadLatitud =
+                                localidad.latitud ??
+                                localidad.latitude ??
+                                "";
+
+
+                            campo.dataset.localidadLongitud =
+                                localidad.longitud ??
+                                localidad.longitude ??
+                                "";
+
+
+                            ocultarSugerencias();
+
+
+                        }
+                    );
+
+
+                    contenedor.appendChild(
+                        boton
+                    );
+
+                }
+            );
+
+
+        contenedor.style.display =
+            "block";
+
+    }
+
+
+    campo.addEventListener(
+        "input",
+        () => {
+
+            const texto =
+                normalizarTextoPerfil(
+                    campo.value
+                );
+
+
+            /*
+               Si borró el campo,
+               limpiamos selección anterior.
+            */
+
+            delete campo.dataset.localidadId;
+            delete campo.dataset.localidadNombre;
+            delete campo.dataset.localidadLatitud;
+            delete campo.dataset.localidadLongitud;
+
+
+            if (
+                texto.length === 0
+            ) {
+
+                ocultarSugerencias();
+
+                return;
+
+            }
+
+
+            const coincidencias =
+                localidadesDisponibles
+                    .filter(
+                        localidad => {
+
+                            const nombre =
+                                normalizarTextoPerfil(
+                                    localidad.nombre
+                                );
+
+
+                            return nombre.includes(
+                                texto
+                            );
+
+                        }
+                    );
+
+
+            mostrarSugerencias(
+                coincidencias
+            );
+
+        }
+    );
+
+
+    campo.addEventListener(
+        "focus",
+        () => {
+
+            const texto =
+                normalizarTextoPerfil(
+                    campo.value
+                );
+
+
+            if (
+                texto.length > 0
+            ) {
+
+                const coincidencias =
+                    localidadesDisponibles
+                        .filter(
+                            localidad =>
+                                normalizarTextoPerfil(
+                                    localidad.nombre
+                                ).includes(
+                                    texto
+                                )
+                        );
+
+
+                mostrarSugerencias(
+                    coincidencias
+                );
+
+            }
+
+        }
+    );
+
+
+    campo.addEventListener(
+        "blur",
+        () => {
+
+            /*
+               Pequeño retraso para permitir
+               seleccionar una opción.
+            */
+
+            setTimeout(
+                () => {
+
+                    ocultarSugerencias();
+
+                },
+                180
+            );
+
+        }
+    );
+
+
+    /*
+       Si el usuario ya tenía una localidad,
+       la dejamos como valor normal.
+    */
+
+    if (
+        campo.value.trim()
+    ) {
+
+        const existente =
+            localidadesDisponibles.find(
+                localidad =>
+                    normalizarTextoPerfil(
+                        localidad.nombre
+                    ) ===
+                    normalizarTextoPerfil(
+                        campo.value
+                    )
+            );
+
+
+        if (existente) {
+
+            campo.dataset.localidadId =
+                existente.id || "";
+
+            campo.dataset.localidadNombre =
+                existente.nombre || "";
+
+            campo.dataset.localidadLatitud =
+                existente.latitud ??
+                existente.latitude ??
+                "";
+
+            campo.dataset.localidadLongitud =
+                existente.longitud ??
+                existente.longitude ??
+                "";
+
+        }
+
+    }
+
+}
 
 /* =========================================================
    ELEMENTOS
