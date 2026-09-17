@@ -1948,6 +1948,12 @@ async function cambiarDisponibilidadProducto(
             }
 
         );
+        productosPedido =
+    productosActualizados;
+
+
+actualizarResumenPedido();
+        
 
 
         console.log(
@@ -2044,13 +2050,26 @@ function actualizarResumenPedido() {
                     );
 
 
-                return (
-                    acumulado +
-                    (
-                        precio *
-                        cantidadProducto
-                    )
-                );
+                const estadoCompra =
+    producto.estadoCompra ||
+    producto.estado ||
+    "pendiente";
+
+
+const noDisponible =
+    estadoCompra ===
+    "no_disponible";
+
+
+return (
+    acumulado +
+    (
+        noDisponible
+            ? 0
+            : precio *
+              cantidadProducto
+    )
+);
 
             },
 
