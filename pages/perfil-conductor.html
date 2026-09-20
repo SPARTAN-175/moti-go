@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOTI GO | Mi perfil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/variables.css">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/perfil-conductor.css">
+</head>
+<body>
+    <main class="perfil-conductor-page">
+        <section class="perfil-hero">
+            <div class="perfil-avatar" id="perfilAvatar">R</div>
+            <div class="perfil-hero-info">
+                <span class="perfil-kicker">MOTI GO</span>
+                <h1 id="profileName">Cargando...</h1>
+                <p>Repartidor</p>
+                <span id="accountStatus" class="perfil-status">Cuenta activa</span>
+            </div>
+            <div class="perfil-rating-card" aria-label="Calificación del repartidor">
+                <div class="perfil-rating-number" id="perfilRepartidorPromedio">—</div>
+                <div id="perfilRepartidorEstrellas" class="perfil-estrellas" aria-label="Sin calificaciones">
+                    <span class="perfil-estrellas-base">★★★★★</span>
+                    <span id="perfilRepartidorEstrellasRelleno" class="perfil-estrellas-relleno">★★★★★</span>
+                </div>
+                <small id="perfilRepartidorCantidad">Sin calificaciones</small>
+            </div>
+        </section>
+
+        <section class="perfil-grid">
+            <article class="perfil-card perfil-card-wide">
+                <div class="perfil-card-title">
+                    <div>
+                        <span class="perfil-card-eyebrow">CUENTA</span>
+                        <h2>Información personal</h2>
+                    </div>
+                    <span class="perfil-icon">◉</span>
+                </div>
+                <div class="perfil-info-grid">
+                    <div class="perfil-info-item"><span>Nombre completo</span><strong id="infoName">—</strong></div>
+                    <div class="perfil-info-item"><span>Correo electrónico</span><strong id="infoEmail">—</strong></div>
+                    <div class="perfil-info-item"><span>Teléfono</span><strong id="infoPhone">—</strong></div>
+                    <div class="perfil-info-item"><span>Municipio</span><strong id="infoMunicipio">Ostuacán</strong></div>
+                    <div class="perfil-info-item"><span>Localidad</span><strong id="infoLocalidad">Sin localidad configurada</strong></div>
+                </div>
+            </article>
+
+            <article class="perfil-card">
+                <div class="perfil-card-title">
+                    <div>
+                        <span class="perfil-card-eyebrow">UNIDAD</span>
+                        <h2>Datos del vehículo</h2>
+                    </div>
+                    <span class="perfil-icon">▣</span>
+                </div>
+                <div class="perfil-info-grid perfil-info-grid-single">
+                    <div class="perfil-info-item"><span>Placa</span><strong id="infoPlaca">—</strong></div>
+                </div>
+                <p class="perfil-note">Los datos de la unidad que no se solicitan durante el registro no se muestran como información ficticia.</p>
+            </article>
+
+            <article class="perfil-card">
+                <div class="perfil-card-title">
+                    <div>
+                        <span class="perfil-card-eyebrow">SERVICIO</span>
+                        <h2>Estado actual</h2>
+                    </div>
+                    <span class="perfil-icon">●</span>
+                </div>
+                <div class="servicio-estado">
+                    <span class="estado-dot"></span>
+                    <strong id="serviceStatus">Cargando...</strong>
+                </div>
+                <p class="perfil-note">El estado se actualiza de acuerdo con la operación de MOTI GO.</p>
+            </article>
+
+            <article class="perfil-card">
+                <div class="perfil-card-title">
+                    <div>
+                        <span class="perfil-card-eyebrow">REGISTRO</span>
+                        <h2>Cuenta y condiciones</h2>
+                    </div>
+                    <span class="perfil-icon">✓</span>
+                </div>
+                <div class="perfil-info-grid perfil-info-grid-single">
+                    <div class="perfil-info-item"><span>Verificación</span><strong id="infoVerificacion">Pendiente</strong></div>
+                    <div class="perfil-info-item"><span>Términos aceptados</span><strong id="infoTerminos">Pendiente</strong></div>
+                    <div class="perfil-info-item"><span>Versión aceptada</span><strong id="infoVersionTerminos">—</strong></div>
+                </div>
+            </article>
+        </section>
+
+        <section class="perfil-actions">
+            <button type="button" id="btnEditarPerfil" class="perfil-action perfil-action-primary"><span>✎</span><div><strong>Editar información</strong><small>Actualiza tus datos personales y localidad</small></div></button>
+            <button type="button" id="btnCambiarPassword" class="perfil-action"><span>🔒</span><div><strong>Cambiar contraseña</strong><small>Actualiza tu contraseña de acceso</small></div></button>
+            <button type="button" id="btnRecuperarPassword" class="perfil-action"><span>↻</span><div><strong>Recuperar cuenta</strong><small>Recibe un enlace en tu correo</small></div></button>
+            <a href="terminos-repartidor.html" class="perfil-action"><span>▤</span><div><strong>Términos y condiciones</strong><small>Consulta las condiciones para repartidores</small></div></a>
+            <a href="#" id="btnLogout" class="perfil-action perfil-action-danger"><span>↪</span><div><strong>Cerrar sesión</strong><small>Salir de tu cuenta</small></div></a>
+        </section>
+    </main>
+
+    <div id="modalEditarPerfil" class="perfil-modal" style="display:none;">
+        <div class="perfil-modal-card">
+            <div class="perfil-modal-head"><div><span class="perfil-card-eyebrow">MI PERFIL</span><h3>Editar información</h3></div><button type="button" id="btnCerrarEditarPerfil" class="perfil-modal-close">×</button></div>
+            <p class="perfil-modal-note">Por seguridad, la información personal puede actualizarse una vez cada 24 horas.</p>
+            <label>Nombre completo<input id="editarNombre" type="text" autocomplete="name"></label>
+            <label>Teléfono<input id="editarTelefono" type="tel" autocomplete="tel"></label>
+            <label>Localidad<input id="editarLocalidad" type="text" autocomplete="off" placeholder="Escribe para buscar tu localidad"></label>
+            <div id="listaLocalidadesPerfilConductor" class="lista-localidades-conductor"></div>
+            <p id="mensajeLocalidadPerfil" class="localidad-mensaje"></p>
+            <label>Placa<input id="editarPlaca" type="text" autocomplete="off"></label>
+            <div class="perfil-modal-actions"><button type="button" id="btnCerrarEditarPerfilSecundario" class="perfil-btn perfil-btn-secondary">Cancelar</button><button type="button" id="btnGuardarPerfil" class="perfil-btn perfil-btn-primary">Guardar cambios</button></div>
+        </div>
+    </div>
+
+    <div id="modalPasswordConductor" class="perfil-modal" style="display:none;">
+        <div class="perfil-modal-card perfil-modal-small">
+            <div class="perfil-modal-head"><div><span class="perfil-card-eyebrow">SEGURIDAD</span><h3>Cambiar contraseña</h3></div><button type="button" id="btnCerrarPasswordConductor" class="perfil-modal-close">×</button></div>
+            <p class="perfil-modal-note">Necesitarás tu contraseña actual para confirmar el cambio.</p>
+            <label>Contraseña actual<input id="passwordActualConductor" type="password" autocomplete="current-password"></label>
+            <label>Nueva contraseña<input id="passwordNuevaConductor" type="password" autocomplete="new-password"></label>
+            <label>Confirmar nueva contraseña<input id="passwordNueva2Conductor" type="password" autocomplete="new-password"></label>
+            <div class="perfil-modal-actions"><button type="button" id="btnCerrarPasswordConductorSecundario" class="perfil-btn perfil-btn-secondary">Cancelar</button><button type="button" id="btnGuardarPasswordConductor" class="perfil-btn perfil-btn-primary">Actualizar</button></div>
+        </div>
+    </div>
+
+    <script type="module" src="../js/logout.js"></script>
+    <script type="module" src="../js/auth-guard.js"></script>
+    <script type="module" src="../js/perfil-conductor.js"></script>
+</body>
+</html>
