@@ -1414,3 +1414,19 @@ body.menu-open {
 #storeSelector:disabled {
     opacity: .6;
 }
+
+/* =====================================================
+   MOTI GO - CATÁLOGOS DE VENTA VARIABLE
+   Solo afecta productos que usan unidad distinta de pieza.
+   ===================================================== */
+.moti-precio-unidad {
+    font-size: .72em;
+    font-weight: 600;
+    margin-left: 3px;
+    opacity: .78;
+}
+
+.product-item:has(.moti-precio-unidad) .quantity-value {
+    min-width: 58px;
+    text-align: center;
+}
