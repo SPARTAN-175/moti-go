@@ -86,6 +86,62 @@ let pedidoTiendas =
 let pedidoCliente =
     null;
 
+// =====================================================
+// PROTECCIÓN CONTRA PEDIDOS DUPLICADOS
+// =====================================================
+// Cada apertura de "Revisar pedido" recibe un identificador
+// de intento. Todos los clics/reintentos de esa misma revisión
+// usan el mismo documento de Firestore.
+// =====================================================
+
+let pedidoConfirmacionEnCurso =
+    false;
+
+let pedidoIdempotenciaActual =
+    null;
+
+
+function generarIdempotenciaPedido() {
+
+    if (
+        globalThis.crypto &&
+        typeof globalThis.crypto.randomUUID ===
+        "function"
+    ) {
+
+        return globalThis.crypto.randomUUID();
+
+    }
+
+
+    return (
+        Date.now().toString(36) +
+        "_" +
+        Math.random().toString(36).slice(2, 12)
+    );
+
+}
+
+
+function obtenerIdPedidoIdempotente(uid) {
+
+    if (!pedidoIdempotenciaActual) {
+
+        pedidoIdempotenciaActual =
+            generarIdempotenciaPedido();
+
+    }
+
+
+    return (
+        "motigo_" +
+        String(uid || "usuario") +
+        "_" +
+        pedidoIdempotenciaActual
+    );
+
+}
+
 
   function inicializarMotiGoPedido() {
 
@@ -318,13 +374,7 @@ function obtenerProductosDelCarrito(
                         ? Number(
                             item.existencia
                         )
-                        : null,
-
-                unidadVenta: item.unidadVenta || producto?.unidadVenta || "pieza",
-                incrementoVenta: Number(item.incrementoVenta ?? producto?.incrementoVenta ?? 1),
-                cantidadMinimaVenta: Number(item.cantidadMinimaVenta ?? producto?.cantidadMinimaVenta ?? 1),
-                tipoVenta: item.tipoVenta || producto?.tipoVenta || "unidad",
-                tipoCatalogo: item.tipoCatalogo || producto?.tipoCatalogo || tienda?.tipoCatalogo || "estandar"
+                        : null
 
             });
 
@@ -1134,6 +1184,17 @@ window.abrirRevisionPedido = async function (
         return;
 
     }
+
+
+    // =================================================
+    // NUEVO INTENTO DE CONFIRMACIÓN
+    // =====================================================
+
+    pedidoIdempotenciaActual =
+        generarIdempotenciaPedido();
+
+    pedidoConfirmacionEnCurso =
+        false;
 
 
     // =================================================
@@ -2689,6 +2750,42 @@ async function reservarInventarioPedido(
 
 async function prepararConfirmacionPedido() {
 
+    // =====================================================
+    // BLOQUEO INMEDIATO DEL BOTÓN
+    // =====================================================
+
+    if (pedidoConfirmacionEnCurso) {
+
+        console.warn(
+            "⚠️ MOTI GO: confirmación ya en curso; se ignora el segundo intento."
+        );
+
+        return;
+
+    }
+
+
+    pedidoConfirmacionEnCurso =
+        true;
+
+
+    const botonConfirmar =
+        document.getElementById(
+            "motiGoPedidoConfirmar"
+        );
+
+
+    if (botonConfirmar) {
+
+        botonConfirmar.disabled =
+            true;
+
+        botonConfirmar.textContent =
+            "Confirmando...";
+
+    }
+
+
     cargarCarritoPedido();
 
     // =====================================================
@@ -3613,9 +3710,10 @@ try {
 
 const referenciaPedido =
     doc(
-        collection(
-            db,
-            "pedidos"
+        db,
+        "pedidos",
+        obtenerIdPedidoIdempotente(
+            usuario.uid
         )
     );
 
@@ -3647,31 +3745,99 @@ const pedidoParaFirebase = {
 };
 
 
-await runTransaction(
-    db,
-    async transaction => {
+const resultadoPersistencia =
+    await runTransaction(
+        db,
+        async transaction => {
 
-        // =============================================
-        // RESERVAR PRODUCTOS
-        // =============================================
+            // =============================================
+            // VERIFICAR SI ESTE INTENTO YA CREÓ EL PEDIDO
+            // =============================================
 
-        await reservarInventarioPedido(
-            transaction,
-            productosPedido
-        );
+            const pedidoExistente =
+                await transaction.get(
+                    referenciaPedido
+                );
 
 
-        // =============================================
-        // CREAR PEDIDO
-        // =============================================
+            if (
+                pedidoExistente.exists()
+            ) {
 
-        transaction.set(
-            referenciaPedido,
-            pedidoParaFirebase
+                console.warn(
+                    "⚠️ MOTI GO: este intento ya tenía un pedido creado; se evita duplicarlo:",
+                    referenciaPedido.id
+                );
+
+                return {
+                    creadoAhora: false
+                };
+
+            }
+
+
+            // =============================================
+            // RESERVAR PRODUCTOS
+            // =============================================
+
+            await reservarInventarioPedido(
+                transaction,
+                productosPedido
+            );
+
+
+            // =============================================
+            // CREAR PEDIDO
+            // =============================================
+
+            transaction.set(
+                referenciaPedido,
+                pedidoParaFirebase
+            );
+
+
+            return {
+                creadoAhora: true
+            };
+
+        }
+    );
+
+
+if (
+    !resultadoPersistencia?.creadoAhora
+) {
+
+    // El pedido ya existe. NO reservar otra vez y NO iniciar
+    // nuevamente el motor de asignación/dispatcher.
+
+    pedidoConfirmacionEnCurso =
+        false;
+
+    pedidoIdempotenciaActual =
+        null;
+
+    cerrarRevisionPedido();
+
+    if (
+        typeof window.motiGoEscucharPedidoActivo ===
+        "function"
+    ) {
+
+        window.motiGoEscucharPedidoActivo(
+            referenciaPedido.id
         );
 
     }
-);
+
+    console.log(
+        "♻️ MOTI GO: se reutiliza el pedido existente; no se creó un duplicado:",
+        referenciaPedido.id
+    );
+
+    return;
+
+}
 
 
 console.log(
@@ -3903,10 +4069,40 @@ iniciarDispatcher(
 
     }
 );
+
+// El pedido ya existe en Firestore. El intento actual queda
+// cerrado para que una nueva apertura de revisión genere otro
+// token, pero nunca otro pedido por un doble clic/reintento.
+pedidoConfirmacionEnCurso =
+    false;
+
+pedidoIdempotenciaActual =
+    null;
+
 }
 catch (
     error
 ) {
+
+    // Si hubo un error antes de completar la creación,
+    // permitimos reintentar usando el mismo token. Si el
+    // pedido sí alcanzó a guardarse en Firebase pero la
+    // respuesta se perdió, el siguiente intento encontrará
+    // el documento existente y no lo duplicará.
+    pedidoConfirmacionEnCurso =
+        false;
+
+
+    if (botonConfirmar) {
+
+        botonConfirmar.disabled =
+            false;
+
+        botonConfirmar.textContent =
+            "Confirmar pedido";
+
+    }
+
 
     console.error(
         "❌ MOTI GO: ERROR CREANDO PEDIDO:",
