@@ -847,7 +847,7 @@ if (formRegistroTienda) {
                             {
 
                                 tipo:
-                                    "tienda",
+                                    negocio",
 
                                 tiendaId,
 
