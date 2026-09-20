@@ -2047,6 +2047,22 @@ function crearProductoElemento(
             producto.id
         );
 
+    const unidadVenta =
+        producto.unidadVenta ||
+        inventario.unidadVenta ||
+        "pieza";
+
+    const incrementoVenta =
+        Number(producto.incrementoVenta ?? inventario.incrementoVenta ?? (unidadVenta === "kg" ? 0.25 : 1)) || 1;
+
+    const cantidadMinimaVenta =
+        Number(producto.cantidadMinimaVenta ?? inventario.cantidadMinimaVenta ?? (unidadVenta === "kg" ? 0.25 : 1)) || 1;
+
+    const catalogoVariable =
+        producto.tipoCatalogo !== "estandar" ||
+        inventario.tipoVenta === "peso" ||
+        unidadVenta !== "pieza";
+
 
     const existencia =
         Number(
@@ -2103,9 +2119,8 @@ function crearProductoElemento(
 
 
             <b>
-                ${formatearPrecio(
-                    precio
-                )}
+                ${formatearPrecio(precio)}
+                ${catalogoVariable ? `<small class="moti-precio-unidad">/ ${escaparHTML(unidadVenta)}</small>` : ""}
             </b>
 
 
@@ -2142,7 +2157,7 @@ function crearProductoElemento(
                 class="quantity-value"
                 data-product-id="${producto.id}"
             >
-                ${cantidad}
+                ${catalogoVariable ? Number(cantidad).toFixed(2) : cantidad}
             </span>
 
 
@@ -2402,6 +2417,14 @@ function cambiarCantidad(
             0
         );
 
+    const producto = productos.find(
+        item => item.id === productoId
+    );
+
+    const unidadVenta = producto?.unidadVenta || inventario.unidadVenta || "pieza";
+    const incrementoVenta = Number(producto?.incrementoVenta ?? inventario.incrementoVenta ?? (unidadVenta === "kg" ? 0.25 : 1)) || 1;
+    const cantidadMinimaVenta = Number(producto?.cantidadMinimaVenta ?? inventario.cantidadMinimaVenta ?? (unidadVenta === "kg" ? 0.25 : 1)) || 1;
+
 
     const existencia =
         Number(
@@ -2432,9 +2455,15 @@ function cambiarCantidad(
             : 0;
 
 
-    const nuevaCantidad =
+    let nuevaCantidad =
         cantidadActual +
-        cambio;
+        (cambio * incrementoVenta);
+
+    if (cambio > 0 && cantidadActual <= 0) {
+        nuevaCantidad = cantidadMinimaVenta;
+    }
+
+    nuevaCantidad = Number(nuevaCantidad.toFixed(3));
 
 
     // =================================================
@@ -2476,14 +2505,6 @@ function cambiarCantidad(
 
    else {
 
-    const producto =
-        productos.find(
-            item =>
-                item.id ===
-                productoId
-        );
-
-
     carrito[
         clave
     ] = {
@@ -2511,7 +2532,13 @@ function cambiarCantidad(
             "Tienda",
 
         existencia:
-            existencia
+            existencia,
+
+        unidadVenta,
+        incrementoVenta,
+        cantidadMinimaVenta,
+        tipoVenta: inventario.tipoVenta || producto?.tipoVenta || "unidad",
+        tipoCatalogo: inventario.tipoCatalogo || producto?.tipoCatalogo || tiendaSeleccionada?.tipoCatalogo || "estandar"
 
     };
 
@@ -2607,10 +2634,12 @@ function actualizarCantidadesVisibles() {
                 elemento.dataset.productId;
 
 
-            elemento.textContent =
-                obtenerCantidad(
-                    productoId
-                );
+            const producto = productos.find(item => item.id === productoId);
+            const inventario = inventarios.find(item => item.productoId === productoId);
+            const unidad = producto?.unidadVenta || inventario?.unidadVenta || "pieza";
+            const variable = producto?.tipoCatalogo !== "estandar" || inventario?.tipoVenta === "peso" || unidad !== "pieza";
+            const valor = obtenerCantidad(productoId);
+            elemento.textContent = variable ? Number(valor).toFixed(2) : valor;
 
         }
     );

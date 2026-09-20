@@ -2053,11 +2053,48 @@ async function procesarCatalogo() {
 // ANALIZAR FILAS
 // =========================================================
 
+function detectarTipoCatalogo(filas = []) {
+    let carne = 0, fruta = 0, variable = 0;
+    for (const fila of filas) {
+        const nombre = normalizarTexto(obtenerValor(fila, ["Producto", "producto", "Nombre", "nombre", "Descripción", "Descripcion"]));
+        const departamento = normalizarTexto(obtenerValor(fila, ["Departamento", "departamento", "Categoría", "Categoria", "categoria"]));
+        const tipoVenta = normalizarTexto(obtenerValor(fila, ["Tipo de Venta", "TipoVenta", "tipoVenta"]));
+        const unidad = normalizarTexto(obtenerValor(fila, ["Unidad de Venta", "UnidadVenta", "unidadVenta", "Unidad", "unidad"]));
+        const texto = `${nombre} ${departamento}`;
+        if (/carn|res|cerdo|pollo|ave|embut|choriz|salch|tocino|costilla|bistec|milanesa|molida|carne/.test(texto)) carne++;
+        if (/frut|verd|hortal|legum|tomate|jitomate|cebolla|papa|zanah|platano|mango|limon|manzana|aguacate|cilantro/.test(texto)) fruta++;
+        if (["peso", "pesable"].includes(tipoVenta) || ["kg", "kilo", "kilogramo", "g", "gramo"].includes(unidad)) variable++;
+    }
+    const total = filas.length || 1;
+    const tieneCarne = carne / total >= 0.25;
+    const tieneFruta = fruta / total >= 0.25;
+    if (tieneCarne && tieneFruta) return "mixto_variable";
+    if (tieneCarne && (variable / total >= 0.10 || carne >= 3)) return "carniceria";
+    if (tieneFruta && (variable / total >= 0.10 || fruta >= 3)) return "fruteria";
+    if (variable / total >= 0.15) return "mixto_variable";
+    return "estandar";
+}
+
+function normalizarUnidadVenta(valor, tipoVenta = "") {
+    const unidad = normalizarTexto(valor);
+    const tipo = normalizarTexto(tipoVenta);
+    if (["kg", "kilo", "kilogramo", "kilogramos"].includes(unidad) || tipo === "peso" || tipo === "pesable") return "kg";
+    if (["g", "gramo", "gramos"].includes(unidad)) return "g";
+    if (["l", "litro", "litros"].includes(unidad)) return "l";
+    if (["ml", "mililitro", "mililitros"].includes(unidad)) return "ml";
+    if (["manojo", "manojos"].includes(unidad)) return "manojo";
+    if (["paquete", "paquetes"].includes(unidad)) return "paquete";
+    return unidad || "pieza";
+}
+
 async function analizarFilas(
     filas
 ) {
 
     const resultado = [];
+    const tipoCatalogoDetectado = detectarTipoCatalogo(filas);
+
+    console.log("🏪 MOTI GO: tipo de catálogo detectado:", tipoCatalogoDetectado);
 
 
     // =====================================================
@@ -2486,6 +2523,19 @@ async function analizarFilas(
                 ]
             );
 
+        const unidadVenta = normalizarUnidadVenta(
+            obtenerValor(fila, ["Unidad de Venta", "UnidadVenta", "unidadVenta", "Unidad", "unidad"]),
+            tipoVenta
+        );
+
+        const incrementoVenta = convertirNumero(
+            obtenerValor(fila, ["Incremento", "Incremento Venta", "incrementoVenta"])
+        ) || (unidadVenta === "kg" ? 0.25 : 1);
+
+        const cantidadMinimaVenta = convertirNumero(
+            obtenerValor(fila, ["Cantidad Mínima", "Cantidad Minima", "cantidadMinimaVenta", "Mínimo de Venta"])
+        ) || (unidadVenta === "kg" ? 0.25 : 1);
+
 
         // -------------------------------------------------
         // CÓDIGO / GTIN
@@ -2737,6 +2787,11 @@ async function analizarFilas(
                 normalizarTipoVenta(
                     tipoVenta
                 ),
+
+            unidadVenta,
+            incrementoVenta,
+            cantidadMinimaVenta,
+            tipoCatalogo: tipoCatalogoDetectado,
 
             productoExistenteId:
                 productoExistente
@@ -3461,6 +3516,18 @@ async function importarProductos() {
                             tipoVenta:
                                 item.tipoVenta,
 
+                            unidadVenta:
+                                item.unidadVenta,
+
+                            incrementoVenta:
+                                item.incrementoVenta,
+
+                            cantidadMinimaVenta:
+                                item.cantidadMinimaVenta,
+
+                            tipoCatalogo:
+                                item.tipoCatalogo,
+
                             imagenUrl:
                                 "",
 
@@ -3523,6 +3590,18 @@ async function importarProductos() {
 
             tipoVenta:
                 item.tipoVenta,
+
+            unidadVenta:
+                item.unidadVenta,
+
+            incrementoVenta:
+                item.incrementoVenta,
+
+            cantidadMinimaVenta:
+                item.cantidadMinimaVenta,
+
+            tipoCatalogo:
+                item.tipoCatalogo,
 
             // =============================================
             // REVISIÓN
@@ -3615,6 +3694,18 @@ async function importarProductos() {
                     tipoVenta:
                         item.tipoVenta,
 
+                    unidadVenta:
+                        item.unidadVenta,
+
+                    incrementoVenta:
+                        item.incrementoVenta,
+
+                    cantidadMinimaVenta:
+                        item.cantidadMinimaVenta,
+
+                    tipoCatalogo:
+                        item.tipoCatalogo,
+
                     // -------------------------------------
                     // DISPONIBILIDAD
                     // -------------------------------------
@@ -3642,6 +3733,24 @@ async function importarProductos() {
 
         }
 
+
+        // =================================================
+        // GUARDAR TIPO DE CATÁLOGO DETECTADO
+        // =================================================
+
+        const tipoCatalogoImportado =
+            productosParaImportar[0]?.tipoCatalogo ||
+            "estandar";
+
+        await setDoc(
+            doc(db, "tiendas", tiendaId),
+            {
+                tipoCatalogo: tipoCatalogoImportado,
+                catalogoVariable: tipoCatalogoImportado !== "estandar",
+                catalogoActualizadoEn: serverTimestamp()
+            },
+            { merge: true }
+        );
 
         // =================================================
         // RESULTADO

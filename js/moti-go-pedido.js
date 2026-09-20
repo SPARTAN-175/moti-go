@@ -318,7 +318,13 @@ function obtenerProductosDelCarrito(
                         ? Number(
                             item.existencia
                         )
-                        : null
+                        : null,
+
+                unidadVenta: item.unidadVenta || producto?.unidadVenta || "pieza",
+                incrementoVenta: Number(item.incrementoVenta ?? producto?.incrementoVenta ?? 1),
+                cantidadMinimaVenta: Number(item.cantidadMinimaVenta ?? producto?.cantidadMinimaVenta ?? 1),
+                tipoVenta: item.tipoVenta || producto?.tipoVenta || "unidad",
+                tipoCatalogo: item.tipoCatalogo || producto?.tipoCatalogo || tienda?.tipoCatalogo || "estandar"
 
             });
 
