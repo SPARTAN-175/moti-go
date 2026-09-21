@@ -1972,7 +1972,7 @@ actualizarResumenPedido();
         );
 
 
-        alert(
+        window.motiGoNotificar(
             "No se pudo actualizar el estado del producto."
         );
 
@@ -2203,7 +2203,7 @@ async function ejecutarAccion() {
         !todosLosProductosVerificados()
     ) {
 
-        alert(
+        window.motiGoNotificar(
             "Debes verificar todos los productos antes de continuar."
         );
 
@@ -2230,7 +2230,7 @@ async function ejecutarAccion() {
         );
 
 
-        alert(
+        window.motiGoNotificar(
             error.message ||
             "No se pudo actualizar el inventario."
         );
@@ -3556,7 +3556,7 @@ async function cambiarEstado(
         );
 
 
-        alert(
+        window.motiGoNotificar(
             "No se pudo actualizar el estado del pedido."
         );
 
@@ -4759,7 +4759,7 @@ async function validarCodigoEntrega() {
         codigo.length !== 6
     ) {
 
-        alert(
+        window.motiGoNotificar(
             "Ingresa el código completo de 6 dígitos."
         );
 
@@ -4780,7 +4780,7 @@ async function validarCodigoEntrega() {
         codigoCorrecto
     ) {
 
-        alert(
+        window.motiGoNotificar(
             "El código de entrega no es correcto."
         );
 
@@ -5282,7 +5282,7 @@ porcentajeFundador:
         );
 
 
-        alert(
+        window.motiGoNotificar(
             error.message ||
             "No se pudo finalizar la entrega."
         );
@@ -5369,7 +5369,7 @@ async function manejarCancelacion() {
     );
 
 
-    alert(
+    window.motiGoNotificar(
         "El cliente canceló este pedido."
     );
 
@@ -5429,11 +5429,12 @@ if (btnVolver) {
 
         "click",
 
-        () => {
+        async () => {
 
             const confirmar =
-                confirm(
-                    "¿Quieres salir del pedido? El viaje seguirá activo."
+                await window.motiGoConfirm(
+                    "¿Quieres salir del pedido? El viaje seguirá activo.",
+                    { titulo: "Salir del pedido" }
                 );
 
 

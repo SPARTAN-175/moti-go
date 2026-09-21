@@ -1677,7 +1677,7 @@ function seleccionarArchivo(
 
     if (!valido) {
 
-        alert(
+        window.motiGoNotificar(
             "Selecciona un archivo Excel (.xlsx) o CSV (.csv)."
         );
 
@@ -1894,7 +1894,7 @@ async function procesarCatalogo() {
 
     if (!archivoSeleccionado) {
 
-        alert(
+        window.motiGoNotificar(
             "Selecciona un archivo primero."
         );
 
@@ -1905,7 +1905,7 @@ async function procesarCatalogo() {
 
     if (!tiendaId) {
 
-        alert(
+        window.motiGoNotificar(
             "Esta cuenta todavía no tiene una tienda asociada."
         );
 
@@ -1919,7 +1919,7 @@ async function procesarCatalogo() {
         "undefined"
     ) {
 
-        alert(
+        window.motiGoNotificar(
             "No se pudo cargar el lector de Excel."
         );
 
@@ -2023,7 +2023,7 @@ async function procesarCatalogo() {
         );
 
 
-        alert(
+        window.motiGoNotificar(
             "No pudimos procesar el archivo. Revisa la consola para más detalles."
         );
 
@@ -3376,7 +3376,7 @@ async function importarProductos() {
         productosParaImportar.length === 0
     ) {
 
-        alert(
+        window.motiGoNotificar(
             "No hay productos para importar."
         );
 
@@ -3391,7 +3391,7 @@ async function importarProductos() {
 
     if (!tiendaId) {
 
-        alert(
+        window.motiGoNotificar(
             "No hay una tienda asociada a esta cuenta."
         );
 
@@ -3416,7 +3416,7 @@ async function importarProductos() {
         duplicados.length > 0
     ) {
 
-        alert(
+        window.motiGoNotificar(
 
             "No se puede importar el catálogo.\n\n" +
 
@@ -3770,7 +3770,7 @@ async function importarProductos() {
         );
 
 
-        alert(
+        window.motiGoNotificar(
 
             "Catálogo importado correctamente.\n\n" +
 
@@ -3814,7 +3814,7 @@ async function importarProductos() {
         );
 
 
-        alert(
+        window.motiGoNotificar(
 
             "Ocurrió un error al guardar el catálogo.\n\n" +
 
@@ -3864,7 +3864,7 @@ if (productForm) {
 
             if (!tiendaId) {
 
-                alert(
+                window.motiGoNotificar(
                     "Esta cuenta no tiene una tienda asociada."
                 );
 
@@ -3925,7 +3925,7 @@ if (productForm) {
                     precio < 0
                 ) {
 
-                    alert(
+                    window.motiGoNotificar(
                         "Completa los campos obligatorios."
                     );
 
@@ -4074,7 +4074,7 @@ if (productForm) {
                 );
 
 
-                alert(
+                window.motiGoNotificar(
                     "Producto guardado correctamente."
                 );
 
@@ -4113,7 +4113,7 @@ if (productForm) {
                 );
 
 
-                alert(
+                window.motiGoNotificar(
                     "No se pudo guardar el producto."
                 );
 
@@ -4748,7 +4748,7 @@ if (
                 )
             ) {
 
-                alert(
+                window.motiGoNotificar(
                     "Solo puedes seleccionar imágenes JPG, PNG o WebP."
                 );
 
@@ -4781,7 +4781,7 @@ if (
                 maximoBytes
             ) {
 
-                alert(
+                window.motiGoNotificar(
                     "La imagen no puede superar los 2 MB."
                 );
 
@@ -4964,7 +4964,7 @@ const inventarioId =
 
 if (!productoId) {
 
-    alert(
+    window.motiGoNotificar(
         "No se pudo identificar el producto."
     );
 
@@ -5054,7 +5054,7 @@ const archivoImagen =
 
     if (!nombre) {
 
-        alert(
+        window.motiGoNotificar(
             "El nombre del producto es obligatorio."
         );
 
@@ -5070,7 +5070,7 @@ const archivoImagen =
         precio < 0
     ) {
 
-        alert(
+        window.motiGoNotificar(
             "Ingresa un precio válido."
         );
 
@@ -5086,7 +5086,7 @@ const archivoImagen =
         existencia < 0
     ) {
 
-        alert(
+        window.motiGoNotificar(
             "Ingresa una existencia válida."
         );
 
@@ -5097,7 +5097,7 @@ const archivoImagen =
 
     if (!tiendaId) {
 
-        alert(
+        window.motiGoNotificar(
             "No se encontró la tienda asociada."
         );
 
@@ -5108,7 +5108,7 @@ const archivoImagen =
 
 if (!productoId) {
 
-    alert(
+    window.motiGoNotificar(
         "No se pudo identificar el producto."
     );
 
@@ -5298,7 +5298,7 @@ if (archivoImagen) {
         );
 
 
-        alert(
+        window.motiGoNotificar(
             "No se pudo actualizar el producto. Revisa la consola."
         );
 
@@ -5382,8 +5382,9 @@ if (logoutButton) {
         async () => {
 
             const confirmar =
-                confirm(
-                    "¿Deseas cerrar sesión?"
+                await window.motiGoConfirm(
+                    "¿Deseas cerrar sesión?",
+                    { titulo: "Cerrar sesión" }
                 );
 
 

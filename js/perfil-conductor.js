@@ -188,7 +188,7 @@ function abrirEditar() {
     const ultima = datosUsuario.ultimaActualizacionPerfil;
     const timestamp = ultima?.toMillis ? ultima.toMillis() : new Date(ultima || 0).getTime();
     if (timestamp && Date.now() - timestamp < BLOQUEO_PERFIL_MS) {
-        alert("Puedes volver a modificar tu información después de 24 horas de la última actualización.");
+        window.motiGoNotificar("Puedes volver a modificar tu información después de 24 horas de la última actualización.");
         return;
     }
 
@@ -217,7 +217,7 @@ async function guardarPerfil() {
     const localidadTexto = $("editarLocalidad").value.trim();
 
     if (!nombre || !telefono || !placa || !localidadTexto) {
-        alert("Completa nombre, teléfono, localidad y placa.");
+        window.motiGoNotificar("Completa nombre, teléfono, localidad y placa.");
         return;
     }
 
@@ -226,7 +226,7 @@ async function guardarPerfil() {
     );
 
     if (!loc) {
-        alert("Selecciona una localidad válida de la lista.");
+        window.motiGoNotificar("Selecciona una localidad válida de la lista.");
         return;
     }
 
@@ -247,7 +247,7 @@ async function guardarPerfil() {
     datosUsuario = { ...datosUsuario, ...datosActualizados };
     render(datosUsuario);
     $("modalEditarPerfil").style.display = "none";
-    alert("Información actualizada correctamente.");
+    window.motiGoNotificar("Información actualizada correctamente.");
 }
 
 function abrirPassword() {
@@ -263,36 +263,36 @@ async function cambiarPassword() {
     const nueva2 = $("passwordNueva2Conductor").value;
 
     if (!actual || !nueva || !nueva2) {
-        alert("Completa todos los campos.");
+        window.motiGoNotificar("Completa todos los campos.");
         return;
     }
     if (nueva !== nueva2) {
-        alert("Las contraseñas no coinciden.");
+        window.motiGoNotificar("Las contraseñas no coinciden.");
         return;
     }
     if (nueva.length < 6) {
-        alert("La nueva contraseña debe tener al menos 6 caracteres.");
+        window.motiGoNotificar("La nueva contraseña debe tener al menos 6 caracteres.");
         return;
     }
 
     try {
         if (!usuarioActual?.email) {
-            alert("Tu cuenta no tiene un correo electrónico válido para cambiar la contraseña.");
+            window.motiGoNotificar("Tu cuenta no tiene un correo electrónico válido para cambiar la contraseña.");
             return;
         }
         const cred = EmailAuthProvider.credential(usuarioActual.email, actual);
         await reauthenticateWithCredential(usuarioActual, cred);
         await updatePassword(usuarioActual, nueva);
-        alert("Contraseña actualizada correctamente.");
+        window.motiGoNotificar("Contraseña actualizada correctamente.");
         $("modalPasswordConductor").style.display = "none";
     } catch (error) {
         console.error("MOTI GO: error cambiando contraseña:", error);
         if (error.code === "auth/wrong-password" || error.code === "auth/invalid-credential") {
-            alert("La contraseña actual es incorrecta.");
+            window.motiGoNotificar("La contraseña actual es incorrecta.");
         } else if (error.code === "auth/requires-recent-login") {
-            alert("Por seguridad, vuelve a iniciar sesión y después intenta cambiar la contraseña nuevamente.");
+            window.motiGoNotificar("Por seguridad, vuelve a iniciar sesión y después intenta cambiar la contraseña nuevamente.");
         } else {
-            alert("No se pudo actualizar la contraseña.");
+            window.motiGoNotificar("No se pudo actualizar la contraseña.");
         }
     }
 }
@@ -300,16 +300,16 @@ async function cambiarPassword() {
 async function recuperarPassword() {
     const email = usuarioActual?.email || datosUsuario?.email;
     if (!email) {
-        alert("No encontramos un correo electrónico asociado a esta cuenta.");
+        window.motiGoNotificar("No encontramos un correo electrónico asociado a esta cuenta.");
         return;
     }
 
     try {
         await sendPasswordResetEmail(auth, email);
-        alert(`Enviamos un enlace para restablecer tu contraseña a ${email}.`);
+        window.motiGoNotificar(`Enviamos un enlace para restablecer tu contraseña a ${email}.`);
     } catch (error) {
         console.error("MOTI GO: error enviando recuperación:", error);
-        alert("No se pudo enviar el enlace de recuperación. Verifica que tu correo sea válido.");
+        window.motiGoNotificar("No se pudo enviar el enlace de recuperación. Verifica que tu correo sea válido.");
     }
 }
 
@@ -319,7 +319,7 @@ $("btnEditarPerfil")?.addEventListener("click", event => {
 });
 $("btnGuardarPerfil")?.addEventListener("click", () => guardarPerfil().catch(error => {
     console.error("MOTI GO: error guardando perfil:", error);
-    alert("No se pudieron guardar los cambios.");
+    window.motiGoNotificar("No se pudieron guardar los cambios.");
 }));
 $("btnCerrarEditarPerfil")?.addEventListener("click", () => $("modalEditarPerfil").style.display = "none");
 $("btnCerrarEditarPerfilSecundario")?.addEventListener("click", () => $("modalEditarPerfil").style.display = "none");

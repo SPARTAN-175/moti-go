@@ -980,7 +980,7 @@ function cerrarModal(modal) {
 
 function mostrarMensaje(mensaje) {
 
-    alert(mensaje);
+    window.motiGoNotificar(mensaje);
 
 }
 

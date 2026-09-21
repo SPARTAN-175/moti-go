@@ -65,7 +65,7 @@ function evaluarSeguridadPassword(password) {
 }
 
 function mostrarMensaje(mensaje) {
-    alert(mensaje);
+    window.motiGoNotificar(mensaje);
 }
 
 // Mostrar u ocultar contraseña.

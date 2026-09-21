@@ -239,9 +239,11 @@ e.target.dataset.id;
 
 const confirmar=
 
-confirm(
+await window.motiGoConfirm(
 
-"¿Eliminar esta ruta?"
+"¿Eliminar esta ruta?",
+
+{ titulo: "Eliminar ruta" }
 
 );
 
@@ -298,9 +300,11 @@ e.target.dataset.id;
 
 const nuevaTarifa=
 
-prompt(
+await window.motiGoPrompt(
 
-"Escribe la nueva tarifa"
+"Escribe la nueva tarifa",
+
+{ titulo: "Actualizar tarifa", placeholder: "Ej. 50" }
 
 );
 
@@ -320,7 +324,7 @@ Number(nuevaTarifa)<=0
 
 ){
 
-alert(
+window.motiGoNotificar(
 
 "Tarifa inválida."
 

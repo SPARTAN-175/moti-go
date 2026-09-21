@@ -248,7 +248,7 @@ JSON.parse(
 
             if(!user){
 
-                alert(
+                window.motiGoNotificar(
                     "Debes iniciar sesión."
                 );
 
@@ -272,7 +272,7 @@ if(tipoViaje==="especial"){
 
     if(!destinoSeleccionado){
 
-        alert(
+        window.motiGoNotificar(
             "Selecciona un destino de la lista."
         );
 
@@ -354,7 +354,7 @@ listaConductores
 
 if(!mejorConductor){
 
-    alert(
+    window.motiGoNotificar(
 
         "No hay conductores disponibles."
 
@@ -455,7 +455,7 @@ window.location.href =
 
             console.error(error);
 
-            alert(
+            window.motiGoNotificar(
                 "Error al crear solicitud."
             );
 

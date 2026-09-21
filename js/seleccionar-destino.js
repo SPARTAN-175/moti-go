@@ -1,3 +1,5 @@
+import "./motigo-ui.js";
+
 let map;
 
 let marcador = null;
@@ -66,7 +68,7 @@ if("geolocation" in navigator){
 
             console.error(error);
 
-            alert(
+            window.motiGoNotificar(
 
                 "No fue posible obtener tu ubicación."
 

@@ -76,7 +76,7 @@ async function actualizarConductores(){
 
         );
 
-        alert(
+        window.motiGoNotificar(
 
             "Proceso terminado."
 

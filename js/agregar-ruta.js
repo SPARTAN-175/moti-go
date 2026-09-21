@@ -385,7 +385,7 @@ try{
 
 if(!usuarioActual){
 
-alert(
+window.motiGoNotificar(
 
 "No hay sesión."
 
@@ -398,7 +398,7 @@ return;
 
 if(!destinoSeleccionado){
 
-alert(
+window.motiGoNotificar(
 
 "Selecciona un destino."
 
@@ -415,7 +415,7 @@ tarifa.value.trim()===""
 
 ){
 
-alert(
+window.motiGoNotificar(
 
 "Escribe una tarifa."
 
@@ -565,7 +565,7 @@ existe=true;
 
 if(existe){
 
-alert(
+window.motiGoNotificar(
 
 "Ya tienes registrada esta ruta."
 
@@ -618,9 +618,11 @@ serverTimestamp()
 
 );
 
-alert(
+await window.motiGoNotificar(
 
-"Ruta guardada correctamente."
+"Ruta guardada correctamente.",
+
+{ titulo: "Ruta guardada", tipo: "exito" }
 
 );
 
@@ -634,7 +636,7 @@ catch(error){
 
 console.error(error);
 
-alert(
+window.motiGoNotificar(
 
 "Error al guardar."
 

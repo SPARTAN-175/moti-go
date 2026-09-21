@@ -36,7 +36,7 @@ async function iniciarSesion() {
 
     if (!email || !password) {
 
-        alert(
+        window.motiGoNotificar(
             "Completa todos los campos."
         );
 
@@ -45,7 +45,7 @@ async function iniciarSesion() {
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(email)) {
 
-        alert(
+        window.motiGoNotificar(
             "Ingresa un correo electrónico válido."
         );
 
@@ -89,7 +89,7 @@ async function iniciarSesion() {
 
         if (!docSnap.exists()) {
 
-            alert(
+            window.motiGoNotificar(
                 "No se encontró el perfil del usuario."
             );
 
@@ -215,7 +215,7 @@ if (
         // TIPO DESCONOCIDO
         // ============================
 
-        alert(
+        window.motiGoNotificar(
             "La cuenta no tiene un tipo de usuario válido."
         );
 
@@ -237,7 +237,7 @@ if (
             "auth/invalid-credential"
         ) {
 
-            alert(
+            window.motiGoNotificar(
                 "Correo electrónico o contraseña incorrectos."
             );
 
@@ -245,7 +245,7 @@ if (
         }
 
 
-        alert(
+        window.motiGoNotificar(
             "No se pudo iniciar sesión. Inténtalo nuevamente."
         );
 

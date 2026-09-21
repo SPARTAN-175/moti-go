@@ -178,8 +178,9 @@ onSnapshot(
 
 if(viaje.estado === "finalizada"){
 
-    alert(
-        "¡Gracias por usar MOTI! Tu viaje ha finalizado."
+    await window.motiGoNotificar(
+        "¡Gracias por usar MOTI! Tu viaje ha finalizado.",
+        { titulo: "Viaje finalizado", tipo: "exito" }
     );
 
     window.location.href =

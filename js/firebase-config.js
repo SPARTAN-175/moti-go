@@ -1,3 +1,5 @@
+import "./motigo-ui.js";
+
 // Importaciones Firebase
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";

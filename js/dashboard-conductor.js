@@ -724,7 +724,7 @@ function abrirEditarPerfilRepartidor() {
         timestamp &&
         Date.now() - timestamp < BLOQUEO_PERFIL_REPARTIDOR_MS
     ) {
-        alert(
+        window.motiGoNotificar(
             "Puedes volver a modificar tu información después de 24 horas de la última actualización."
         );
         return;
@@ -796,7 +796,7 @@ async function guardarPerfilRepartidor() {
         ).value.trim();
 
     if (!nombre || !telefono || !localidadTexto || !placa) {
-        alert(
+        window.motiGoNotificar(
             "Completa nombre, teléfono, localidad y placa."
         );
         return;
@@ -811,7 +811,7 @@ async function guardarPerfilRepartidor() {
         );
 
     if (!localidad) {
-        alert(
+        window.motiGoNotificar(
             "Selecciona una localidad válida de la lista."
         );
         return;
@@ -861,7 +861,7 @@ async function guardarPerfilRepartidor() {
 
     if (modal) modal.hidden = true;
 
-    alert(
+    window.motiGoNotificar(
         "Información actualizada correctamente."
     );
 }
@@ -901,17 +901,17 @@ async function cambiarPasswordRepartidor() {
         ).value;
 
     if (!actual || !nueva || !confirmacion) {
-        alert("Completa todos los campos.");
+        window.motiGoNotificar("Completa todos los campos.");
         return;
     }
 
     if (nueva !== confirmacion) {
-        alert("Las contraseñas no coinciden.");
+        window.motiGoNotificar("Las contraseñas no coinciden.");
         return;
     }
 
     if (nueva.length < 6) {
-        alert(
+        window.motiGoNotificar(
             "La nueva contraseña debe tener al menos 6 caracteres."
         );
         return;
@@ -919,7 +919,7 @@ async function cambiarPasswordRepartidor() {
 
     try {
         if (!auth.currentUser?.email) {
-            alert(
+            window.motiGoNotificar(
                 "Tu cuenta no tiene un correo electrónico válido para cambiar la contraseña."
             );
             return;
@@ -948,7 +948,7 @@ async function cambiarPasswordRepartidor() {
 
         if (modal) modal.hidden = true;
 
-        alert(
+        window.motiGoNotificar(
             "Contraseña actualizada correctamente."
         );
     } catch (error) {
@@ -961,15 +961,15 @@ async function cambiarPasswordRepartidor() {
             error.code === "auth/wrong-password" ||
             error.code === "auth/invalid-credential"
         ) {
-            alert("La contraseña actual es incorrecta.");
+            window.motiGoNotificar("La contraseña actual es incorrecta.");
         } else if (
             error.code === "auth/requires-recent-login"
         ) {
-            alert(
+            window.motiGoNotificar(
                 "Por seguridad, vuelve a iniciar sesión y después intenta cambiar la contraseña nuevamente."
             );
         } else {
-            alert(
+            window.motiGoNotificar(
                 "No se pudo actualizar la contraseña."
             );
         }
@@ -982,7 +982,7 @@ async function recuperarPasswordRepartidor() {
         datosPerfilRepartidor?.email;
 
     if (!email) {
-        alert(
+        window.motiGoNotificar(
             "No encontramos un correo electrónico asociado a esta cuenta."
         );
         return;
@@ -994,7 +994,7 @@ async function recuperarPasswordRepartidor() {
             email
         );
 
-        alert(
+        window.motiGoNotificar(
             `Enviamos un enlace para restablecer tu contraseña a ${email}.`
         );
     } catch (error) {
@@ -1003,7 +1003,7 @@ async function recuperarPasswordRepartidor() {
             error
         );
 
-        alert(
+        window.motiGoNotificar(
             "No se pudo enviar el enlace de recuperación. Verifica que tu correo sea válido."
         );
     }
@@ -1033,7 +1033,7 @@ document
                     "MOTI GO: error guardando perfil del repartidor:",
                     error
                 );
-                alert(
+                window.motiGoNotificar(
                     "No se pudieron guardar los cambios."
                 );
             }
@@ -2379,7 +2379,7 @@ async function aceptarSolicitud(
         );
 
 
-        alert(
+        window.motiGoNotificar(
             "No se pudo aceptar el pedido."
         );
 
@@ -2606,7 +2606,7 @@ async function rechazarSolicitud(
         );
 
 
-        alert(
+        window.motiGoNotificar(
             "No se pudo reasignar el pedido."
         );
 

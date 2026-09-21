@@ -26,10 +26,15 @@ params.get("id");
 
 if(!solicitudId){
 
-    alert("Solicitud no encontrada.");
+    window.motiGoNotificar(
+        "Solicitud no encontrada.",
+        { titulo: "Solicitud no disponible", tipo: "error" }
+    );
 
-    window.location.href =
-    "dashboard-pasajero.html";
+    setTimeout(() => {
+        window.location.href =
+        "dashboard-pasajero.html";
+    }, 700);
 
 }
 
@@ -141,7 +146,7 @@ catch(error){
 
 console.error(error);
 
-alert(
+window.motiGoNotificar(
 
 "No se pudo cancelar la solicitud."
 
@@ -194,8 +199,9 @@ if(solicitud.estado === "rechazada"){
 
     if(solicitud.tipoViaje === "especial"){
 
-        alert(
-            "El conductor rechazó la solicitud. Selecciona otro conductor."
+        await window.motiGoNotificar(
+            "El conductor rechazó la solicitud. Selecciona otro conductor.",
+            { titulo: "Solicitud rechazada", tipo: "advertencia" }
         );
 
         window.location.href =
@@ -209,7 +215,7 @@ if(solicitud.estado === "rechazada"){
         // El algoritmo MOTI asignará automáticamente
         // el siguiente conductor disponible.
 
-        alert(
+        window.motiGoNotificar(
             "Buscando otro conductor disponible..."
         );
 

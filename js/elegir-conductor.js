@@ -291,7 +291,7 @@ const conductorActual = await getDoc(
 
 if(!conductorActual.exists()){
 
-    alert("El conductor ya no existe.");
+    window.motiGoNotificar("El conductor ya no existe.");
 
     return;
 
@@ -301,7 +301,7 @@ const datosConductor = conductorActual.data();
 
 if(datosConductor.estadoServicio !== "disponible"){
 
-    alert(
+    window.motiGoNotificar(
 
         "Este conductor ya no está disponible.\nSelecciona otro."
 
@@ -343,7 +343,7 @@ const destinoDoc = await getDoc(
 
 if(!destinoDoc.exists()){
 
-    alert(
+    window.motiGoNotificar(
         "No se encontró el destino."
     );
 
@@ -403,7 +403,10 @@ fechaSolicitud: serverTimestamp()
 );
 
 console.log("Solicitud creada:", solicitudRef.id);
-alert("Solicitud creada correctamente");
+await window.motiGoNotificar(
+    "Solicitud creada correctamente.",
+    { titulo: "Solicitud enviada", tipo: "exito" }
+);
 window.location.href =
 `esperando-conductor.html?id=${solicitudRef.id}`;
 
@@ -412,7 +415,7 @@ catch(error){
 
 console.error(error);
 
-alert(error.message);
+window.motiGoNotificar(error.message);
 
 }
 

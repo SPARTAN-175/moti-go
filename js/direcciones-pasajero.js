@@ -142,7 +142,7 @@ function usarUbicacionActual() {
 
     if (!("geolocation" in navigator)) {
 
-        alert(
+        window.motiGoNotificar(
             "Este dispositivo no permite obtener la ubicación."
         );
 
@@ -212,7 +212,7 @@ function usarUbicacionActual() {
                 error
             );
 
-            alert(
+            window.motiGoNotificar(
                 "No pudimos obtener tu ubicación. Activa el GPS y permite el acceso a la ubicación."
             );
 
@@ -857,7 +857,7 @@ async function guardarDireccion() {
 
     if (!nombre) {
 
-        alert(
+        window.motiGoNotificar(
             "Escribe un nombre para esta dirección."
         );
 
@@ -872,7 +872,7 @@ async function guardarDireccion() {
         coordenadaLongitud
     )) {
 
-        alert(
+        window.motiGoNotificar(
             "Selecciona la ubicación exacta en el mapa o usa el GPS."
         );
 
@@ -990,7 +990,7 @@ async function guardarDireccion() {
             error
         );
 
-        alert(
+        window.motiGoNotificar(
             "No pudimos guardar la dirección. Intenta nuevamente."
         );
 
@@ -1012,8 +1012,9 @@ async function guardarDireccion() {
 async function eliminarDireccion(direccion) {
 
     const confirmar =
-        confirm(
-            `¿Eliminar "${direccion.nombre || "esta dirección"}"?`
+        await window.motiGoConfirm(
+            `¿Eliminar "${direccion.nombre || "esta dirección"}"?`,
+            { titulo: "Eliminar dirección" }
         );
 
     if (!confirmar) return;
@@ -1069,7 +1070,7 @@ async function eliminarDireccion(direccion) {
             error
         );
 
-        alert(
+        window.motiGoNotificar(
             "No pudimos eliminar la dirección."
         );
 
@@ -1141,7 +1142,7 @@ document
 
             if (!("geolocation" in navigator)) {
 
-                alert(
+                window.motiGoNotificar(
                     "Este dispositivo no permite obtener la ubicación."
                 );
 
@@ -1176,7 +1177,7 @@ document
                         error
                     );
 
-                    alert(
+                    window.motiGoNotificar(
                         "No pudimos obtener tu ubicación actual."
                     );
 

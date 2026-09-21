@@ -5153,7 +5153,7 @@ function usarUbicacionActualSelectorMotiGo() {
 
     if (!("geolocation" in navigator)) {
 
-        alert(
+        window.motiGoNotificar(
             "Este dispositivo no permite obtener la ubicación."
         );
 
@@ -5227,7 +5227,7 @@ function usarUbicacionActualSelectorMotiGo() {
                 error
             );
 
-            alert(
+            window.motiGoNotificar(
                 "No pudimos obtener tu ubicación actual. Activa el GPS e intenta nuevamente."
             );
 
@@ -10758,8 +10758,9 @@ function configurarBotonCancelarPedido(
 
 
             const confirmar =
-                confirm(
-                    "¿Seguro que quieres cancelar este pedido?"
+                await window.motiGoConfirm(
+                    "¿Seguro que quieres cancelar este pedido?",
+                    { titulo: "Cancelar pedido" }
                 );
 
 
@@ -10810,7 +10811,7 @@ function configurarBotonCancelarPedido(
                     !pedidoActual.exists()
                 ) {
 
-                    alert(
+                    window.motiGoNotificar(
                         "El pedido ya no existe."
                     );
 
@@ -10844,7 +10845,7 @@ function configurarBotonCancelarPedido(
                     )
                 ) {
 
-                    alert(
+                    window.motiGoNotificar(
                         "Este pedido ya está en proceso de entrega y ya no puede cancelarse."
                     );
 
@@ -11008,7 +11009,7 @@ await updateDoc(
                 );
 
 
-                alert(
+                window.motiGoNotificar(
                     "Tu pedido fue cancelado correctamente."
                 );
 
@@ -11036,7 +11037,7 @@ await updateDoc(
                 );
 
 
-                alert(
+                window.motiGoNotificar(
                     "No pudimos cancelar el pedido. Inténtalo nuevamente."
                 );
 
@@ -13551,7 +13552,7 @@ function mostrarCalificacionRepartidor(pedido) {
             console.error("❌ MOTI GO: error guardando calificación:", error);
             guardar.disabled = false;
             guardar.textContent = "Enviar calificación";
-            alert("No pudimos guardar tu calificación. Inténtalo nuevamente.");
+            window.motiGoNotificar("No pudimos guardar tu calificación. Inténtalo nuevamente.");
         }
 
     });
@@ -14094,7 +14095,7 @@ function mostrarTicketPedido(
                         error
                     );
 
-                    alert(
+                    window.motiGoNotificar(
                         "No pudimos guardar el ticket como imagen. Inténtalo nuevamente."
                     );
 

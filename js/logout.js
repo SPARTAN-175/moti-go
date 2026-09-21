@@ -59,7 +59,7 @@ if(btnLogout){
 
                 console.error(error);
 
-                alert(
+                window.motiGoNotificar(
                     "No se pudo cerrar sesión."
                 );
 

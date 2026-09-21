@@ -25,38 +25,38 @@ async function registrarRepartidor() {
     const terminos = document.getElementById("terminos")?.checked === true;
 
     if (!nombre || !telefono || !email || !placa || !password || !confirmPassword) {
-        alert("Completa todos los campos.");
+        window.motiGoNotificar("Completa todos los campos.");
         return;
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(email)) {
-        alert("Ingresa un correo electrónico válido.");
+        window.motiGoNotificar("Ingresa un correo electrónico válido.");
         document.getElementById("email")?.focus();
         return;
     }
 
     if (password !== confirmPassword) {
-        alert("Las contraseñas no coinciden.");
+        window.motiGoNotificar("Las contraseñas no coinciden.");
         return;
     }
 
     if (password.length < 6) {
-        alert("La contraseña debe tener al menos 6 caracteres.");
+        window.motiGoNotificar("La contraseña debe tener al menos 6 caracteres.");
         return;
     }
 
     if (!mayorEdad) {
-        alert("Debes declarar que eres mayor de edad para registrarte como repartidor.");
+        window.motiGoNotificar("Debes declarar que eres mayor de edad para registrarte como repartidor.");
         return;
     }
 
     if (!informacion) {
-        alert("Debes confirmar que la información proporcionada es correcta.");
+        window.motiGoNotificar("Debes confirmar que la información proporcionada es correcta.");
         return;
     }
 
     if (!terminos) {
-        alert("Debes leer y aceptar los Términos y Condiciones para Repartidores.");
+        window.motiGoNotificar("Debes leer y aceptar los Términos y Condiciones para Repartidores.");
         return;
     }
 
@@ -105,17 +105,20 @@ async function registrarRepartidor() {
             console.warn("MOTI GO: no se pudo enviar el correo de verificación:", verificationError);
         }
 
-        alert("Solicitud enviada correctamente. Revisa tu correo para verificar tu cuenta.");
+        await window.motiGoNotificar(
+            "Solicitud enviada correctamente. Revisa tu correo para verificar tu cuenta.",
+            { titulo: "Cuenta creada", tipo: "exito" }
+        );
         window.location.href = "conductor-pendiente.html";
     } catch (error) {
         console.error("Error registrando repartidor:", error);
 
         if (error.code === "auth/email-already-in-use") {
-            alert("Ese correo electrónico ya está registrado. Usa otro correo o recupera tu contraseña.");
+            window.motiGoNotificar("Ese correo electrónico ya está registrado. Usa otro correo o recupera tu contraseña.");
         } else if (error.code === "auth/weak-password") {
-            alert("La contraseña debe tener al menos 6 caracteres.");
+            window.motiGoNotificar("La contraseña debe tener al menos 6 caracteres.");
         } else {
-            alert("No se pudo crear la cuenta.");
+            window.motiGoNotificar("No se pudo crear la cuenta.");
         }
     } finally {
         btnRegistro.disabled = false;

@@ -2104,7 +2104,7 @@ async function renderizarRevisionPedido(
                 }
                 else {
 
-                    alert(
+                    window.motiGoNotificar(
                         "Abre “Mis direcciones” para seleccionar otro destino."
                     );
 
@@ -2832,7 +2832,7 @@ if (
     !destino
 ) {
 
-    alert(
+    window.motiGoNotificar(
         "No pudimos obtener tu ubicación actual. Activa el GPS e intenta nuevamente."
     );
 
@@ -4131,7 +4131,7 @@ catch (
             );
 
 
-        alert(
+        window.motiGoNotificar(
             "Algunos productos ya no tienen suficiente existencia.\n\n" +
             detalle +
             "\n\nActualiza tu carrito e intenta nuevamente."
@@ -4147,7 +4147,7 @@ catch (
     // ERROR GENERAL
     // =================================================
 
-    alert(
+    window.motiGoNotificar(
         "No pudimos crear tu pedido. Intenta nuevamente."
     );
 
@@ -4161,7 +4161,7 @@ catch (
         0
     ) {
 
-        alert(
+        window.motiGoNotificar(
             "Tu carrito está vacío."
         );
 
