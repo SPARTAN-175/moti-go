@@ -12,6 +12,22 @@ conductor.estadoServicio===
 
 "disponible"
 
+&&
+
+conductor.ubicacionActiva===true
+
+&&
+
+Number.isFinite(
+    Number(conductor.latitud)
+)
+
+&&
+
+Number.isFinite(
+    Number(conductor.longitud)
+)
+
 );
 
 }

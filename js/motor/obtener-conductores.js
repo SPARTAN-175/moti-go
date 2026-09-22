@@ -1,19 +1,19 @@
-import { db }
+import { db, rtdb }
 from "../firebase-config.js";
 
 import {
-
     collection,
-
     query,
-
     where,
-
     getDocs
-
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
+import {
+    ref,
+    get
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
 export async function obtenerConductores(){
 
@@ -27,36 +27,38 @@ export async function obtenerConductores(){
 
     );
 
-    const snapshot = await getDocs(
+    const [snapshot, ubicacionesSnapshot] = await Promise.all([
+        getDocs(consulta),
+        get(ref(rtdb, "ubicacionesRepartidores"))
+    ]);
 
-        consulta
-
-    );
+    const ubicaciones = ubicacionesSnapshot.exists()
+        ? ubicacionesSnapshot.val() || {}
+        : {};
 
     const conductores = [];
 
     snapshot.forEach(
-
-        doc=>{
+        docSnap => {
+            const datos = docSnap.data() || {};
+            const ubicacion = ubicaciones[docSnap.id] || {};
 
             conductores.push({
-
-                id:doc.id,
-
-                ...doc.data()
-
+                id: docSnap.id,
+                ...datos,
+                latitud: Number(ubicacion.latitud),
+                longitud: Number(ubicacion.longitud),
+                ubicacionActiva: ubicacion.activo === true,
+                ubicacionActualizadaEn: ubicacion.actualizadoEn ?? null,
+                precisionGPS: Number(ubicacion.precision) || null
             });
-
         }
-
     );
 
-     console.log(
-        "🚴 Repartidores encontrados:",
+    console.log(
+        "🚴 Repartidores disponibles con ubicación RTDB:",
         conductores
     );
 
-
     return conductores;
-
 }
