@@ -7633,19 +7633,40 @@ function programarTimeoutBusquedaPedido(
         return;
     }
 
-    // Mientras existe una solicitud concreta usamos su timestamp.
-    // Si todavía no existe, usamos la creación del pedido.
-    const inicio =
+    // Si existe una solicitud concreta, su reloj debe depender
+    // EXCLUSIVAMENTE de solicitudEnviadaEn.
+    //
+    // IMPORTANTE:
+    // Durante unos milisegundos Firestore puede entregar el
+    // serverTimestamp como null mientras se confirma el write.
+    // NO debemos caer a creadoEn en ese caso porque el pedido
+    // puede ser antiguo y eso produciría un timeout de 0 segundos
+    // que cancelaría la solicitud recién enviada al repartidor.
+    let inicio =
         obtenerMillisFechaMotiGo(
             pedido.solicitudEnviadaEn
-        ) ||
-        obtenerMillisFechaMotiGo(
-            pedido.creadoEn
         );
 
+    if (!inicio && pedido.estado === "solicitud_repartidor") {
+        console.log(
+            "⏳ MOTI GO: esperando timestamp de la nueva solicitud antes de activar el timeout:",
+            pedido.id
+        );
+        return;
+    }
+
+    // Para pendiente_asignacion sí podemos usar creadoEn como
+    // referencia de respaldo del ciclo de búsqueda inicial.
     if (!inicio) {
-        // El serverTimestamp todavía puede no haber llegado;
-        // el siguiente onSnapshot volverá a programarlo.
+        inicio =
+            obtenerMillisFechaMotiGo(
+                pedido.creadoEn
+            );
+    }
+
+    if (!inicio) {
+        // El timestamp todavía no llegó; el siguiente onSnapshot
+        // volverá a programarlo.
         return;
     }
 
