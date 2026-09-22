@@ -139,11 +139,13 @@ let pedidosActuales = [];
 let movimientosTiendasActuales = [];
 
 let pagosFundadoresActuales = [];
+let incidenciasActuales = [];
 
 let listenerUsuarios = null;
 let listenerPedidos = null;
 let listenerMovimientosTiendas = null;
 let listenerPagosFundadores = null;
+let listenerIncidencias = null;
 
 let configuracionMOTI = {
     tarifaBase: 8,
@@ -2100,6 +2102,62 @@ function escucharUsuarios() {
 
 
 /* =========================================================
+   INCIDENCIAS DE ENTREGA
+========================================================= */
+
+function escucharIncidencias() {
+
+    if (listenerIncidencias) {
+        listenerIncidencias();
+        listenerIncidencias = null;
+    }
+
+    listenerIncidencias = onSnapshot(
+        collection(db, "incidenciasEntrega"),
+        snapshot => {
+
+            incidenciasActuales = snapshot.docs.map(documento => ({
+                id: documento.id,
+                ...documento.data()
+            }));
+
+            incidenciasActuales.sort((a, b) => {
+                const fechaA = convertirFecha(a.creadaEn)?.getTime() || 0;
+                const fechaB = convertirFecha(b.creadaEn)?.getTime() || 0;
+                return fechaB - fechaA;
+            });
+
+            console.log(
+                "🚨 MOTI GO ADMIN: incidencias recibidas:",
+                incidenciasActuales.length
+            );
+
+            renderizarClientes();
+            actualizarResumen();
+
+        },
+        error => {
+            console.error(
+                "❌ MOTI GO ADMIN: error escuchando incidencias:",
+                error
+            );
+        }
+    );
+}
+
+
+function obtenerIncidenciasCliente(clienteId) {
+
+    if (!clienteId) return [];
+
+    return incidenciasActuales.filter(
+        incidencia =>
+            incidencia.clienteId === clienteId
+    );
+}
+
+
+/* =========================================================
    REPARTIDORES
 ========================================================= */
 
@@ -3540,12 +3598,18 @@ function renderizarClientes() {
 
             <div class="admin-summary">
                 <span>Con reportes</span>
-                <strong>0</strong>
+                <strong>
+                    ${new Set(
+                        incidenciasActuales
+                            .map(incidencia => incidencia.clienteId)
+                            .filter(Boolean)
+                    ).size}
+                </strong>
             </div>
 
             <div class="admin-summary">
                 <span>Incidencias</span>
-                <strong>0</strong>
+                <strong>${incidenciasActuales.length}</strong>
             </div>
 
         </div>
@@ -3784,6 +3848,28 @@ function crearTarjetaCliente(
     const activo =
         cliente.activo !== false;
 
+    const pedidosCliente =
+        pedidosActuales.filter(
+            pedido =>
+                pedido.clienteId === cliente.id ||
+                pedido.usuarioId === cliente.id
+        );
+
+    const cancelaciones =
+        pedidosCliente.filter(
+            pedido =>
+                pedido.estado === "cancelado" ||
+                pedido.estado === "cancelada"
+        ).length;
+
+    const reportes =
+        obtenerIncidenciasCliente(cliente.id).length;
+
+    const incidencias =
+        pedidosCliente.filter(
+            pedido =>
+                pedido.estado === "incidencia_entrega"
+        ).length;
 
     return `
 
@@ -3838,51 +3924,23 @@ function crearTarjetaCliente(
                 <div class="admin-behavior">
 
                     <div>
-
-                        <span>
-                            Pedidos
-                        </span>
-
-                        <strong>
-                            —
-                        </strong>
-
+                        <span>Pedidos</span>
+                        <strong>${pedidosCliente.length}</strong>
                     </div>
 
                     <div>
-
-                        <span>
-                            Cancelaciones
-                        </span>
-
-                        <strong>
-                            —
-                        </strong>
-
+                        <span>Cancelaciones</span>
+                        <strong>${cancelaciones}</strong>
                     </div>
 
                     <div>
-
-                        <span>
-                            Reportes
-                        </span>
-
-                        <strong>
-                            0
-                        </strong>
-
+                        <span>Reportes</span>
+                        <strong>${reportes}</strong>
                     </div>
 
                     <div>
-
-                        <span>
-                            Incidencias
-                        </span>
-
-                        <strong>
-                            0
-                        </strong>
-
+                        <span>Incidencias</span>
+                        <strong>${incidencias}</strong>
                     </div>
 
                 </div>
@@ -4027,6 +4085,25 @@ function abrirModalUsuario(
                 pedido.estado ===
                     "cancelada"
         );
+
+
+    // =====================================================
+    // REPORTES / INCIDENCIAS DEL CLIENTE
+    // =====================================================
+
+    const incidenciasUsuario =
+        tipo === "cliente"
+            ? obtenerIncidenciasCliente(usuario.id)
+            : [];
+
+    const gastoTotalCliente =
+        tipo === "cliente"
+            ? pedidosCompletados.reduce(
+                (total, pedido) =>
+                    total + Number(pedido.total || 0),
+                0
+            )
+            : 0;
 
 
     // =====================================================
@@ -4641,7 +4718,19 @@ function abrirModalUsuario(
                                         </span>
 
                                         <strong>
-                                            0
+                                            ${incidenciasUsuario.length}
+                                        </strong>
+
+                                    </div>
+
+                                    <div>
+
+                                        <span>
+                                            Gasto total
+                                        </span>
+
+                                        <strong>
+                                            ${moneda(gastoTotalCliente)}
                                         </strong>
 
                                     </div>
@@ -4651,6 +4740,81 @@ function abrirModalUsuario(
                             </div>
 
                         `
+                }
+
+
+                ${
+                    tipo === "cliente"
+                        ? `
+
+                            <div class="admin-detail-section">
+
+                                <h3>
+                                    Reportes e incidencias
+                                </h3>
+
+                                ${
+                                    incidenciasUsuario.length
+                                        ? `
+                                            <div class="admin-incidencias-lista">
+                                                ${incidenciasUsuario.map(incidencia => {
+                                                    const fecha = convertirFecha(
+                                                        incidencia.creadaEn
+                                                    );
+                                                    const fechaTexto = fecha
+                                                        ? fecha.toLocaleString("es-MX", {
+                                                            day: "2-digit",
+                                                            month: "2-digit",
+                                                            year: "numeric",
+                                                            hour: "2-digit",
+                                                            minute: "2-digit"
+                                                        })
+                                                        : "Fecha no disponible";
+
+                                                    const estadoTexto =
+                                                        incidencia.devolucionPendiente
+                                                            ? "Pendiente de devolución"
+                                                            : incidencia.estado || "Registrada";
+
+                                                    return `
+                                                        <article class="admin-incidencia-item">
+                                                            <div class="admin-incidencia-head">
+                                                                <strong>
+                                                                    ${escaparHTMLAdmin(
+                                                                        incidencia.motivo ||
+                                                                        "Incidencia de entrega"
+                                                                    )}
+                                                                </strong>
+                                                                <span>${escaparHTMLAdmin(estadoTexto)}</span>
+                                                            </div>
+
+                                                            <div class="admin-incidencia-meta">
+                                                                <span>Pedido: ${escaparHTMLAdmin(incidencia.pedidoId || incidencia.id)}</span>
+                                                                <span>${escaparHTMLAdmin(fechaTexto)}</span>
+                                                            </div>
+
+                                                            ${
+                                                                incidencia.comentario
+                                                                    ? `<p>${escaparHTMLAdmin(incidencia.comentario)}</p>`
+                                                                    : ""
+                                                            }
+
+                                                        </article>
+                                                    `;
+                                                }).join("")}
+                                            </div>
+                                        `
+                                        : `
+                                            <p class="admin-muted">
+                                                Este cliente no tiene reportes o incidencias registrados.
+                                            </p>
+                                        `
+                                }
+
+                            </div>
+
+                        `
+                        : ""
                 }
 
 
@@ -12801,6 +12965,8 @@ onAuthStateChanged(
             escucharUsuarios();
 
             escucharPedidos();
+
+            escucharIncidencias();
 
             escucharMovimientosTiendas();
 
