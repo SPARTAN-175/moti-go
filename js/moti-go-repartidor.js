@@ -41,6 +41,8 @@ let escuchandoPedidos = false;
 let solicitudesActivas = new Map();
 
 let listenerEstadoRepartidor = null;
+let listenerSolicitudesAsignadas = null;
+let moduloRepartidorIniciado = false;
 
 // =====================================================
 // ESCUCHAR ESTADO DEL REPARTIDOR EN TIEMPO REAL
@@ -49,7 +51,7 @@ let listenerEstadoRepartidor = null;
 function escucharEstadoRepartidor() {
 
     if (
-        !usuarioRepartidor
+        !usuarioRepartidor || !auth.currentUser
     ) {
 
         return;
@@ -615,7 +617,7 @@ function escucharSolicitudesAsignadas() {
     );
 
 
-    onSnapshot(
+    listenerSolicitudesAsignadas = onSnapshot(
 
         pedidosQuery,
 
@@ -702,6 +704,8 @@ function escucharSolicitudesAsignadas() {
 
         error => {
 
+            if (!auth.currentUser) return;
+
             console.error(
                 "❌ MOTI GO: error escuchando solicitudes:",
                 error
@@ -713,6 +717,29 @@ function escucharSolicitudesAsignadas() {
 
 }
 
+
+function detenerMotiGoRepartidor() {
+    usuarioRepartidor = null;
+    pedidoActual = null;
+    escuchandoPedidos = false;
+
+    if (listenerEstadoRepartidor) {
+        listenerEstadoRepartidor();
+        listenerEstadoRepartidor = null;
+    }
+
+    if (listenerSolicitudesAsignadas) {
+        listenerSolicitudesAsignadas();
+        listenerSolicitudesAsignadas = null;
+    }
+
+    solicitudesActivas.forEach((_, id) => limpiarSolicitud(id));
+    solicitudesActivas.clear();
+
+    console.log("🛵 MOTI GO: módulo repartidor detenido por cierre de sesión.");
+}
+
+window.addEventListener("moti-go:logout", detenerMotiGoRepartidor);
 
 // =====================================================
 // MAPA PROFESIONAL PARA LA SOLICITUD
@@ -3149,29 +3176,14 @@ window.motiGoRepartidor = {
 // INICIO AUTOMÁTICO
 // =====================================================
 
-if (
-    auth.currentUser
-) {
+auth.onAuthStateChanged(async (usuario) => {
+    if (!usuario) {
+        detenerMotiGoRepartidor();
+        moduloRepartidorIniciado = false;
+        return;
+    }
 
-    iniciarMotiGoRepartidor();
-
-}
-else {
-
-    auth.onAuthStateChanged(
-
-        usuario => {
-
-            if (
-                usuario
-            ) {
-
-                iniciarMotiGoRepartidor();
-
-            }
-
-        }
-
-    );
-
-}
+    if (moduloRepartidorIniciado) return;
+    moduloRepartidorIniciado = true;
+    await iniciarMotiGoRepartidor();
+});

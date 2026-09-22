@@ -11,6 +11,7 @@ import {
 import {
     doc,
     getDoc,
+    getDocs,
     updateDoc,
     collection,
     query,
@@ -291,6 +292,7 @@ document
 
 let currentState = null;
 let listenerUsuario = null;
+let sesionRepartidorActiva = true;
 
 // =========================================
 // SOLICITUD ACTUAL
@@ -724,7 +726,7 @@ function abrirEditarPerfilRepartidor() {
         timestamp &&
         Date.now() - timestamp < BLOQUEO_PERFIL_REPARTIDOR_MS
     ) {
-        window.motiGoNotificar(
+        alert(
             "Puedes volver a modificar tu información después de 24 horas de la última actualización."
         );
         return;
@@ -796,7 +798,7 @@ async function guardarPerfilRepartidor() {
         ).value.trim();
 
     if (!nombre || !telefono || !localidadTexto || !placa) {
-        window.motiGoNotificar(
+        alert(
             "Completa nombre, teléfono, localidad y placa."
         );
         return;
@@ -811,7 +813,7 @@ async function guardarPerfilRepartidor() {
         );
 
     if (!localidad) {
-        window.motiGoNotificar(
+        alert(
             "Selecciona una localidad válida de la lista."
         );
         return;
@@ -861,7 +863,7 @@ async function guardarPerfilRepartidor() {
 
     if (modal) modal.hidden = true;
 
-    window.motiGoNotificar(
+    alert(
         "Información actualizada correctamente."
     );
 }
@@ -901,17 +903,17 @@ async function cambiarPasswordRepartidor() {
         ).value;
 
     if (!actual || !nueva || !confirmacion) {
-        window.motiGoNotificar("Completa todos los campos.");
+        alert("Completa todos los campos.");
         return;
     }
 
     if (nueva !== confirmacion) {
-        window.motiGoNotificar("Las contraseñas no coinciden.");
+        alert("Las contraseñas no coinciden.");
         return;
     }
 
     if (nueva.length < 6) {
-        window.motiGoNotificar(
+        alert(
             "La nueva contraseña debe tener al menos 6 caracteres."
         );
         return;
@@ -919,7 +921,7 @@ async function cambiarPasswordRepartidor() {
 
     try {
         if (!auth.currentUser?.email) {
-            window.motiGoNotificar(
+            alert(
                 "Tu cuenta no tiene un correo electrónico válido para cambiar la contraseña."
             );
             return;
@@ -948,7 +950,7 @@ async function cambiarPasswordRepartidor() {
 
         if (modal) modal.hidden = true;
 
-        window.motiGoNotificar(
+        alert(
             "Contraseña actualizada correctamente."
         );
     } catch (error) {
@@ -961,15 +963,15 @@ async function cambiarPasswordRepartidor() {
             error.code === "auth/wrong-password" ||
             error.code === "auth/invalid-credential"
         ) {
-            window.motiGoNotificar("La contraseña actual es incorrecta.");
+            alert("La contraseña actual es incorrecta.");
         } else if (
             error.code === "auth/requires-recent-login"
         ) {
-            window.motiGoNotificar(
+            alert(
                 "Por seguridad, vuelve a iniciar sesión y después intenta cambiar la contraseña nuevamente."
             );
         } else {
-            window.motiGoNotificar(
+            alert(
                 "No se pudo actualizar la contraseña."
             );
         }
@@ -982,7 +984,7 @@ async function recuperarPasswordRepartidor() {
         datosPerfilRepartidor?.email;
 
     if (!email) {
-        window.motiGoNotificar(
+        alert(
             "No encontramos un correo electrónico asociado a esta cuenta."
         );
         return;
@@ -994,7 +996,7 @@ async function recuperarPasswordRepartidor() {
             email
         );
 
-        window.motiGoNotificar(
+        alert(
             `Enviamos un enlace para restablecer tu contraseña a ${email}.`
         );
     } catch (error) {
@@ -1003,7 +1005,7 @@ async function recuperarPasswordRepartidor() {
             error
         );
 
-        window.motiGoNotificar(
+        alert(
             "No se pudo enviar el enlace de recuperación. Verifica que tu correo sea válido."
         );
     }
@@ -1033,7 +1035,7 @@ document
                     "MOTI GO: error guardando perfil del repartidor:",
                     error
                 );
-                window.motiGoNotificar(
+                alert(
                     "No se pudieron guardar los cambios."
                 );
             }
@@ -1102,7 +1104,6 @@ document
     );
 
 prepararBusquedaLocalidadPerfilRepartidor();
-cargarLocalidadesPerfilRepartidor();
 
 // =========================================
 // AUTENTICACIÓN
@@ -1113,8 +1114,29 @@ onAuthStateChanged(
     async (user) => {
 
         if (!user) {
+            sesionRepartidorActiva = false;
+
+            if (listenerUsuario) {
+                listenerUsuario();
+                listenerUsuario = null;
+            }
+
+            if (listenerSolicitudes) {
+                listenerSolicitudes();
+                listenerSolicitudes = null;
+            }
+
+            if (listenerEstadisticas) {
+                listenerEstadisticas();
+                listenerEstadisticas = null;
+            }
+
+            detenerEscuchaSolicitudes();
             return;
         }
+
+        sesionRepartidorActiva = true;
+        await cargarLocalidadesPerfilRepartidor();
 
 
         try {
@@ -1362,6 +1384,8 @@ function escucharEstadoRepartidor(
     user
 ) {
 
+    if (!sesionRepartidorActiva || !user) return;
+
     if (
         listenerUsuario
     ) {
@@ -1388,6 +1412,8 @@ function escucharEstadoRepartidor(
             usuarioRef,
 
             snapshot => {
+
+                if (!sesionRepartidorActiva || !auth.currentUser) return;
 
                 if (
                     !snapshot.exists()
@@ -1621,6 +1647,8 @@ let listenerEstadisticas = null;
 
 function cargarEstadisticas() {
 
+    if (!sesionRepartidorActiva) return;
+
     const user = auth.currentUser;
 
     if (!user) {
@@ -1700,6 +1728,8 @@ function cargarEstadisticas() {
             q,
 
             (snapshot) => {
+
+                if (!sesionRepartidorActiva || !auth.currentUser) return;
 
                 let pedidosHoy = 0;
 
@@ -1867,6 +1897,8 @@ function cargarEstadisticas() {
 
             (error) => {
 
+                if (!sesionRepartidorActiva || !auth.currentUser) return;
+
                 console.error(
                     "❌ MOTI GO — Error obteniendo estadísticas:",
                     error
@@ -2005,6 +2037,8 @@ function escucharSolicitudes() {
 
             (snapshot) => {
 
+                if (!sesionRepartidorActiva || !auth.currentUser) return;
+
                 if (
                     snapshot.empty
                 ) {
@@ -2053,6 +2087,8 @@ function escucharSolicitudes() {
             },
 
             (error) => {
+
+                if (!sesionRepartidorActiva || !auth.currentUser) return;
 
                 console.error(
                     "Error escuchando solicitudes:",
@@ -2379,7 +2415,7 @@ async function aceptarSolicitud(
         );
 
 
-        window.motiGoNotificar(
+        alert(
             "No se pudo aceptar el pedido."
         );
 
@@ -2606,7 +2642,7 @@ async function rechazarSolicitud(
         );
 
 
-        window.motiGoNotificar(
+        alert(
             "No se pudo reasignar el pedido."
         );
 
