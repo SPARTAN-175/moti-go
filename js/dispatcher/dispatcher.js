@@ -37,7 +37,7 @@ from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 // =====================================================
 
 const TIEMPO_ESPERA =
-    15;
+    20;
 
 
 // =====================================================
