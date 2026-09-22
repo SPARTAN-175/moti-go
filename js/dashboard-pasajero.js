@@ -4740,6 +4740,74 @@ function guardarDestinoEnSesionMotiGo(destino) {
 
     renderizarDestinoEntregaMotiGo();
 
+    // =========================================================
+    // SINCRONIZAR LA UBICACIÓN ELEGIDA CON LA REVISIÓN DEL PEDIDO
+    // =========================================================
+    // Si el selector de direcciones se abre desde "Revisar pedido",
+    // el panel ya existe en el DOM. Actualizamos únicamente sus campos
+    // para que la referencia guardada aparezca de inmediato, sin tener
+    // que cerrar y volver a abrir la revisión.
+
+    const campoReferencia =
+        document.getElementById(
+            "motiGoReferenciaEntrega"
+        );
+
+    if (campoReferencia) {
+
+        campoReferencia.value =
+            destinoSeleccionadoMotiGo.referencia ||
+            "";
+
+    }
+
+    const infoDestino =
+        document.querySelector(
+            "#motiGoPedidoPanel .moti-go-destino-entrega-info"
+        );
+
+    if (infoDestino) {
+
+        const elementos =
+            infoDestino.children;
+
+        const nombreDestino =
+            destinoSeleccionadoMotiGo.nombre ||
+            (
+                destinoSeleccionadoMotiGo.tipo === "actual"
+                    ? "Mi ubicación actual"
+                    : "Dirección guardada"
+            );
+
+        const localidadDestino =
+            destinoSeleccionadoMotiGo.localidad ||
+            "Ubicación GPS";
+
+        const referenciaDestino =
+            destinoSeleccionadoMotiGo.referencia ||
+            "Sin referencia adicional.";
+
+        if (elementos[0]) {
+            elementos[0].textContent = "ENTREGAR EN";
+        }
+
+        if (elementos[1]) {
+            elementos[1].textContent =
+                nombreDestino;
+        }
+
+        if (elementos[2]) {
+            elementos[2].textContent =
+                localidadDestino;
+        }
+
+        if (elementos[3]) {
+            elementos[3].textContent =
+                referenciaDestino;
+        }
+
+    }
+
     return true;
 
 }
