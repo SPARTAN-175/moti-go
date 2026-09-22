@@ -3207,6 +3207,235 @@ button {
 
 }
 
+
+
+/* =========================================================
+   MI NEGOCIO — PERFIL AMPLIADO
+========================================================= */
+
+.business-profile-expanded {
+    max-width: 700px;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid #f0f1f3;
+}
+
+.profile-data-card {
+    min-height: 68px;
+    padding: 12px 17px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    border-bottom: 1px solid #f0f1f3;
+}
+
+.profile-data-card:nth-child(even) {
+    border-left: 1px solid #f0f1f3;
+}
+
+.profile-data-card:nth-last-child(-n + 2) {
+    border-bottom: none;
+}
+
+.profile-data-card-wide {
+    grid-column: 1 / -1;
+    border-left: none !important;
+}
+
+.profile-data-card span {
+    color: #9ca3af;
+    font-size: 8px;
+    font-weight: 600;
+}
+
+.profile-data-card strong {
+    color: #374151;
+    font-size: 10px;
+    overflow-wrap: anywhere;
+}
+
+.profile-data-card strong.status-active {
+    color: #16a34a;
+}
+
+.profile-data-card strong.status-inactive {
+    color: #dc2626;
+}
+
+.business-info-note {
+    max-width: 700px;
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: #f8faf9;
+    border: 1px solid #e6eee8;
+    border-radius: 13px;
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+}
+
+.business-info-note > .material-symbols-outlined {
+    color: #16a34a;
+    font-size: 19px;
+}
+
+.business-info-note strong {
+    display: block;
+    color: #374151;
+    font-size: 10px;
+}
+
+.business-info-note p {
+    margin: 3px 0 0;
+    color: #9ca3af;
+    font-size: 8px;
+    line-height: 1.45;
+}
+
+/* =========================================================
+   VENTAS REALES
+========================================================= */
+
+.sales-section-header {
+    align-items: flex-start;
+}
+
+.sales-export-button {
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 0 11px;
+    border: 1px solid #bbf7d0;
+    border-radius: 9px;
+    background: #ecfdf5;
+    color: #15803d;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-size: 8px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.sales-export-button:hover {
+    background: #dcfce7;
+}
+
+.sales-export-button .material-symbols-outlined {
+    font-size: 16px;
+}
+
+.sales-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.sales-summary-item {
+    min-width: 0;
+    padding: 12px;
+    background: #f8faf9;
+    border: 1px solid #edf0ee;
+    border-radius: 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sales-summary-item span {
+    color: #9ca3af;
+    font-size: 8px;
+    line-height: 1.25;
+}
+
+.sales-summary-item strong {
+    color: #111827;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.sales-summary-item.commission strong {
+    color: #ea580c;
+}
+
+.sales-summary-item.net strong {
+    color: #16a34a;
+}
+
+.sales-chart-toolbar {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.sales-chart-toolbar > span {
+    color: #9ca3af;
+    font-size: 8px;
+    font-weight: 600;
+}
+
+.sales-period-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.sales-period-buttons .account-filter {
+    min-height: 29px;
+    padding: 0 10px;
+}
+
+@media (max-width: 600px) {
+    .profile-grid,
+    .sales-summary-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .sales-summary-item strong {
+        font-size: 12px;
+    }
+
+    .sales-section-header {
+        flex-direction: column;
+    }
+
+    .sales-export-button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 430px) {
+    .profile-grid,
+    .sales-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-data-card,
+    .profile-data-card-wide {
+        grid-column: 1 / -1;
+        border-left: none !important;
+    }
+
+    .profile-data-card:nth-last-child(-n + 2) {
+        border-bottom: 1px solid #f0f1f3;
+    }
+
+    .profile-data-card:last-child {
+        border-bottom: none;
+    }
+
+    .sales-chart-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
 /* =========================================================
    DEVOLUCIONES DE INVENTARIO
    ========================================================= */
