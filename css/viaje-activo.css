@@ -1363,3 +1363,94 @@ button {
     }
 
 }
+
+
+/* =========================================================
+   INCIDENCIAS DE ENTREGA
+========================================================= */
+
+.btn-incidencia {
+    width: 100%;
+    max-width: 720px;
+    min-height: 44px;
+    margin: 0 auto 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid #fecaca;
+    border-radius: 13px;
+    background: #fff;
+    color: #b91c1c;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.btn-incidencia[hidden] { display: none !important; }
+
+.btn-incidencia:active { transform: scale(.985); }
+
+.incidencia-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 14px;
+    background: rgba(15, 23, 42, .58);
+    backdrop-filter: blur(5px);
+}
+
+.incidencia-panel.oculto { display: none; }
+
+.incidencia-dialog {
+    width: min(100%, 560px);
+    max-height: calc(100vh - 28px);
+    overflow: auto;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 18px 60px rgba(15, 23, 42, .28);
+}
+
+.incidencia-contenido { padding: 18px; }
+
+.incidencia-icono {
+    width: 100%;
+    padding: 18px 18px 0;
+    color: #b91c1c;
+}
+
+.incidencia-icono .material-symbols-outlined {
+    width: 48px; height: 48px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 15px;
+    background: #fef2f2;
+    font-size: 26px;
+}
+
+.incidencia-contenido h2 { margin: 0 0 7px; font-size: 20px; color: #172033; }
+.incidencia-contenido p { margin: 0 0 16px; color: #64748b; font-size: 13px; line-height: 1.5; }
+.incidencia-contenido label { display: block; margin: 12px 0 7px; color: #334155; font-size: 12px; font-weight: 800; }
+.incidencia-contenido label span { color: #94a3b8; font-weight: 600; }
+.incidencia-contenido select,
+.incidencia-contenido textarea {
+    width: 100%; box-sizing: border-box;
+    border: 1px solid #dbe1e8; border-radius: 12px;
+    background: #fff; color: #172033;
+    font: inherit; font-size: 13px; outline: none;
+}
+.incidencia-contenido select { min-height: 46px; padding: 0 12px; }
+.incidencia-contenido textarea { padding: 11px 12px; resize: vertical; }
+.incidencia-contenido select:focus, .incidencia-contenido textarea:focus { border-color: #b91c1c; box-shadow: 0 0 0 3px rgba(185, 28, 28, .10); }
+.incidencia-mensaje { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: #fef2f2; color: #b91c1c; font-size: 12px; font-weight: 700; }
+.incidencia-acciones { display: grid; grid-template-columns: 1fr 1.4fr; gap: 9px; margin-top: 16px; }
+.btn-incidencia-secundario, .btn-incidencia-principal { min-height: 48px; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; }
+.btn-incidencia-secundario { border: 1px solid #dbe1e8; background: #fff; color: #475569; }
+.btn-incidencia-principal { border: none; background: #b91c1c; color: #fff; display: flex; align-items: center; justify-content: center; gap: 7px; }
+.btn-incidencia-principal:disabled { opacity: .6; cursor: not-allowed; }
+
+@media (min-width: 700px) {
+    .incidencia-panel { align-items: center; }
+}
