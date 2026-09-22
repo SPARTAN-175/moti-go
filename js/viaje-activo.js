@@ -1,4 +1,4 @@
-import { auth, db }
+import { auth, db, rtdb }
 from "./firebase-config.js"; 
 
 import {
@@ -11,6 +11,12 @@ import {
     serverTimestamp
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+import {
+    ref,
+    onValue
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
 import {
     onAuthStateChanged
@@ -4729,18 +4735,21 @@ function escucharMovimientoConductor() {
         true;
 
 
-    onSnapshot(
+    onValue(
 
-        doc(
-            db,
-            "usuarios",
-            auth.currentUser.uid
+        ref(
+            rtdb,
+            `ubicacionesRepartidores/${auth.currentUser.uid}`
         ),
 
         (snapshot) => {
 
             const datos =
-                snapshot.data();
+                snapshot.val();
+
+            if (!datos || datos.activo !== true) {
+                return;
+            }
 
 
             if (!datos) {

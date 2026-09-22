@@ -1,14 +1,19 @@
-import { db }
+import { db, rtdb }
 from "./firebase-config.js";
 
 import {
 
     doc,
-    getDoc,
-    onSnapshot
+    getDoc
 
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+import {
+    ref,
+    onValue
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
 
 // ========================================
@@ -428,33 +433,31 @@ if(!movimientoActivo){
 
 function escucharMovimientoConductor(conductorId){
 
-    onSnapshot(
+    onValue(
 
-        doc(
-
-            db,
-
-            "usuarios",
-
-            conductorId
-
+        ref(
+            rtdb,
+            `ubicacionesRepartidores/${conductorId}`
         ),
 
-        (docSnap)=>{
+        (snapshot)=>{
 
-            if(!docSnap.exists()) return;
+            const conductor = snapshot.val();
 
-            const conductor =
-
-            docSnap.data();
+            if(!conductor || conductor.activo !== true) return;
 
             if(!conductorMarker) return;
 
+            const lat = Number(conductor.latitud);
+            const lng = Number(conductor.longitud);
+
+            if(!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
             const nuevaPos=[
 
-                conductor.latitud,
+                lat,
 
-                conductor.longitud
+                lng
 
             ];
 

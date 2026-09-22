@@ -1,6 +1,7 @@
 import {
     auth,
-    db
+    db,
+    rtdb
 } from "./firebase-config.js";
 
 import {
@@ -11,6 +12,12 @@ import {
     doc,
     runTransaction
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+import {
+    ref,
+    get
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
 // =====================================================
 // MOTOR DE ASIGNACIÓN MOTI GO
@@ -2173,6 +2180,20 @@ async function obtenerRepartidoresParaMotorMotiGo() {
         );
 
 
+    const ubicacionesSnapshot =
+        await get(
+            ref(
+                rtdb,
+                "ubicacionesRepartidores"
+            )
+        );
+
+    const ubicaciones =
+        ubicacionesSnapshot.exists()
+            ? ubicacionesSnapshot.val() || {}
+            : {};
+
+
     const repartidores =
         [];
 
@@ -2194,12 +2215,31 @@ async function obtenerRepartidoresParaMotorMotiGo() {
             }
 
 
+            const ubicacion =
+                ubicaciones[docSnap.id] || {};
+
+
             repartidores.push({
 
                 id:
                     docSnap.id,
 
-                ...datos
+                ...datos,
+
+                latitud:
+                    Number(ubicacion.latitud),
+
+                longitud:
+                    Number(ubicacion.longitud),
+
+                ubicacionActiva:
+                    ubicacion.activo === true,
+
+                ubicacionActualizadaEn:
+                    ubicacion.actualizadoEn ?? null,
+
+                precisionGPS:
+                    Number(ubicacion.precision) || null
 
             });
 
