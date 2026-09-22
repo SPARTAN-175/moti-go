@@ -60,21 +60,6 @@ let pedidoActivoClienteId = null;
 let listenerPedidoActivoCliente = null;
 
 // =====================================================
-// MOTI GO - VIGILANCIA DE BÚSQUEDA DE REPARTIDOR
-// =====================================================
-// Si una solicitud queda abierta demasiado tiempo (por
-// ejemplo, porque el cliente recargó la app y el dispatcher
-// original dejó de existir), cerramos esa búsqueda y dejamos
-// el pedido en "sin_repartidor" para poder intentar de nuevo.
-// =====================================================
-
-const MOTIGO_TIEMPO_MAX_BUSQUEDA_MS =
-    2 * 60 * 1000;
-
-let temporizadorBusquedaPedido = null;
-let pedidoVigiladoBusquedaId = null;
-
-// =====================================================
 // ELEMENTOS DEL DOM
 // =====================================================
 
@@ -7467,13 +7452,6 @@ async function iniciarEscuchaPedidoActivoCliente(
             pedidoActivo.id
         );
 
-        // Recuperar visualmente el pedido activo después de una recarga.
-        // Así "Buscando repartidor" / "Sin repartidor" no desaparece
-        // aunque el usuario haya recargado la aplicación.
-        abrirSeguimientoPedidoMotiGo(
-            pedidoActivo
-        );
-
     }
     catch (error) {
 
@@ -7485,230 +7463,6 @@ async function iniciarEscuchaPedidoActivoCliente(
     }
 
 }
-
-// =====================================================
-// MOTI GO - OBTENER MILISEGUNDOS DE UNA FECHA FIREBASE
-// =====================================================
-
-function obtenerMillisFechaMotiGo(
-    valor
-) {
-
-    if (!valor) {
-        return null;
-    }
-
-    if (typeof valor?.toMillis === "function") {
-        return valor.toMillis();
-    }
-
-    if (valor instanceof Date) {
-        return valor.getTime();
-    }
-
-    if (typeof valor === "number" && Number.isFinite(valor)) {
-        return valor;
-    }
-
-    const fecha = new Date(valor);
-
-    return Number.isNaN(fecha.getTime())
-        ? null
-        : fecha.getTime();
-}
-
-
-// =====================================================
-// MOTI GO - MARCAR BÚSQUEDA AGOTADA
-// =====================================================
-
-async function marcarPedidoSinRepartidorPorTimeout(
-    pedidoId
-) {
-
-    if (!pedidoId) {
-        return;
-    }
-
-    try {
-
-        const referencia =
-            doc(
-                db,
-                "pedidos",
-                pedidoId
-            );
-
-        const snapshot =
-            await getDoc(
-                referencia
-            );
-
-        if (!snapshot.exists()) {
-            return;
-        }
-
-        const pedido = snapshot.data() || {};
-
-        if (
-            ![
-                "pendiente_asignacion",
-                "solicitud_repartidor"
-            ].includes(pedido.estado)
-        ) {
-            return;
-        }
-
-        await updateDoc(
-            referencia,
-            {
-                estado:
-                    "sin_repartidor",
-
-                repartidorId:
-                    null,
-
-                repartidorNombre:
-                    null,
-
-                indiceRepartidor:
-                    null,
-
-                solicitudRechazadaPor:
-                    null,
-
-                actualizadoEn:
-                    serverTimestamp()
-            }
-        );
-
-        console.log(
-            "⌛ MOTI GO: búsqueda de repartidor agotada por tiempo:",
-            pedidoId
-        );
-
-        window.motiGoNotificar?.(
-            "No recibimos respuesta de los repartidores. Puedes intentar buscar nuevamente."
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "❌ MOTI GO: error cerrando búsqueda por tiempo:",
-            error
-        );
-
-    }
-}
-
-
-// =====================================================
-// MOTI GO - PROGRAMAR LÍMITE DE BÚSQUEDA
-// =====================================================
-
-function programarTimeoutBusquedaPedido(
-    pedido
-) {
-
-    if (temporizadorBusquedaPedido) {
-        clearTimeout(
-            temporizadorBusquedaPedido
-        );
-        temporizadorBusquedaPedido = null;
-    }
-
-    pedidoVigiladoBusquedaId = null;
-
-    if (!pedido?.id) {
-        return;
-    }
-
-    const estadosBusqueda = [
-        "pendiente_asignacion",
-        "solicitud_repartidor"
-    ];
-
-    if (!estadosBusqueda.includes(pedido.estado)) {
-        return;
-    }
-
-    // Si existe una solicitud concreta, su reloj debe depender
-    // EXCLUSIVAMENTE de solicitudEnviadaEn.
-    //
-    // IMPORTANTE:
-    // Durante unos milisegundos Firestore puede entregar el
-    // serverTimestamp como null mientras se confirma el write.
-    // NO debemos caer a creadoEn en ese caso porque el pedido
-    // puede ser antiguo y eso produciría un timeout de 0 segundos
-    // que cancelaría la solicitud recién enviada al repartidor.
-    let inicio =
-        obtenerMillisFechaMotiGo(
-            pedido.solicitudEnviadaEn
-        );
-
-    if (!inicio && pedido.estado === "solicitud_repartidor") {
-        console.log(
-            "⏳ MOTI GO: esperando timestamp de la nueva solicitud antes de activar el timeout:",
-            pedido.id
-        );
-        return;
-    }
-
-    // Para pendiente_asignacion sí podemos usar creadoEn como
-    // referencia de respaldo del ciclo de búsqueda inicial.
-    if (!inicio) {
-        inicio =
-            obtenerMillisFechaMotiGo(
-                pedido.creadoEn
-            );
-    }
-
-    if (!inicio) {
-        // El timestamp todavía no llegó; el siguiente onSnapshot
-        // volverá a programarlo.
-        return;
-    }
-
-    const restante =
-        Math.max(
-            0,
-            MOTIGO_TIEMPO_MAX_BUSQUEDA_MS -
-            (Date.now() - inicio)
-        );
-
-    pedidoVigiladoBusquedaId =
-        pedido.id;
-
-    temporizadorBusquedaPedido =
-        setTimeout(
-            () => {
-
-                temporizadorBusquedaPedido = null;
-
-                if (
-                    pedidoVigiladoBusquedaId ===
-                    pedido.id
-                ) {
-
-                    marcarPedidoSinRepartidorPorTimeout(
-                        pedido.id
-                    );
-
-                }
-
-            },
-            restante
-        );
-
-    console.log(
-        "⏱️ MOTI GO: límite de búsqueda programado en",
-        Math.ceil(restante / 1000),
-        "segundos para",
-        pedido.id
-    );
-}
-
 
 onAuthStateChanged(
     auth,
@@ -9213,6 +8967,9 @@ function obtenerTextoEstadoPedido(
         entregado:
             "Pedido entregado",
 
+        incidencia_entrega:
+            "Entrega no completada",
+
         cancelado:
             "Pedido cancelado"
 
@@ -9253,6 +9010,9 @@ function obtenerIconoEstadoPedido(
 
         entregado:
             "check_circle",
+
+        incidencia_entrega:
+            "report_problem",
 
         cancelado:
             "cancel"
@@ -10253,31 +10013,6 @@ productosTiendaHTML += `
             : "";
 
 
-    const botonReintentarBusquedaHTML =
-        estado ===
-        "sin_repartidor"
-            ? `
-
-                <button
-                    type="button"
-                    id="motigoReintentarRepartidor"
-                    class="moti-seguimiento-reintentar"
-                >
-
-                    <span
-                        class="material-symbols-outlined"
-                    >
-                        refresh
-                    </span>
-
-                    Buscar repartidor nuevamente
-
-                </button>
-
-            `
-            : "";
-
-
     // =====================================================
     // ESTADO ESPECIAL: CANCELADO
     // =====================================================
@@ -10333,6 +10068,93 @@ productosTiendaHTML += `
                     <strong>
                         ${escaparHTML(
                             folio
+                        )}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        return;
+
+    }
+
+
+    // =====================================================
+    // ESTADO ESPECIAL: INCIDENCIA DE ENTREGA
+    // =====================================================
+
+    if (
+        estado ===
+        "incidencia_entrega"
+    ) {
+
+        const motivoIncidencia =
+            pedido.incidenciaEntrega?.motivo ||
+            pedido.incidenciaEntrega?.comentario ||
+            "El repartidor no pudo completar la entrega.";
+
+
+        contenido.innerHTML = `
+
+            <div
+                class="moti-pedido-contenedor"
+            >
+
+                <div
+                    class="moti-estado-principal moti-estado-incidencia"
+                >
+
+                    <div
+                        class="moti-estado-icono"
+                    >
+
+                        <span
+                            class="material-symbols-outlined"
+                        >
+                            report_problem
+                        </span>
+
+                    </div>
+
+
+                    <h3>
+                        Entrega no completada
+                    </h3>
+
+
+                    <p>
+                        El servicio de este pedido terminó con una incidencia.
+                        El pedido ya no se encuentra en proceso.
+                    </p>
+
+                </div>
+
+
+                <div
+                    class="moti-pedido-meta"
+                >
+
+                    <span>
+                        Pedido
+                    </span>
+
+                    <strong>
+                        ${escaparHTML(
+                            folio
+                        )}
+                    </strong>
+
+                    <span>
+                        Motivo
+                    </span>
+
+                    <strong>
+                        ${escaparHTML(
+                            motivoIncidencia
                         )}
                     </strong>
 
@@ -10703,13 +10525,6 @@ productosTiendaHTML += `
 
 
             <!-- ========================================= -->
-            <!-- BUSCAR NUEVAMENTE -->
-            <!-- ========================================= -->
-
-            ${botonReintentarBusquedaHTML}
-
-
-            <!-- ========================================= -->
             <!-- CANCELAR -->
             <!-- ========================================= -->
 
@@ -10751,105 +10566,6 @@ productosTiendaHTML += `
 
         configurarBotonCancelarPedido(
             pedido
-        );
-
-    }
-
-
-    const botonReintentar =
-        document.getElementById(
-            "motigoReintentarRepartidor"
-        );
-
-    if (botonReintentar) {
-
-        if (!document.getElementById("motiEstiloReintentarBusqueda")) {
-            const estiloReintento = document.createElement("style");
-            estiloReintento.id = "motiEstiloReintentarBusqueda";
-            estiloReintento.textContent = `
-                #motigoReintentarRepartidor {
-                    width:100%;
-                    border:0;
-                    border-radius:16px;
-                    padding:14px 16px;
-                    margin-top:10px;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    gap:8px;
-                    font:inherit;
-                    font-weight:700;
-                    cursor:pointer;
-                    background:#e9f8ef;
-                    color:#168447;
-                }
-                #motigoReintentarRepartidor:disabled {
-                    opacity:.65;
-                    cursor:default;
-                }
-            `;
-            document.head.appendChild(estiloReintento);
-        }
-
-        botonReintentar.addEventListener(
-            "click",
-            async () => {
-
-                if (botonReintentar.disabled) {
-                    return;
-                }
-
-                botonReintentar.disabled = true;
-                botonReintentar.innerHTML = `
-                    <span class="material-symbols-outlined">
-                        hourglass_top
-                    </span>
-                    Buscando repartidor...
-                `;
-
-                try {
-
-                    if (
-                        typeof window.motiGoReintentarBusqueda ===
-                        "function"
-                    ) {
-
-                        await window.motiGoReintentarBusqueda(
-                            pedido.id
-                        );
-
-                    }
-                    else {
-
-                        throw new Error(
-                            "El módulo de búsqueda no está disponible."
-                        );
-
-                    }
-
-                }
-                catch (error) {
-
-                    console.error(
-                        "❌ MOTI GO: error reintentando búsqueda:",
-                        error
-                    );
-
-                    window.motiGoNotificar?.(
-                        "No pudimos iniciar nuevamente la búsqueda de repartidor."
-                    );
-
-                    botonReintentar.disabled = false;
-                    botonReintentar.innerHTML = `
-                        <span class="material-symbols-outlined">
-                            refresh
-                        </span>
-                        Buscar repartidor nuevamente
-                    `;
-
-                }
-
-            }
         );
 
     }
@@ -11581,6 +11297,23 @@ function obtenerConfiguracionEstadoPedido(
 
             progreso:
                 95
+
+        },
+
+
+        incidencia_entrega: {
+
+            icono:
+                "report_problem",
+
+            titulo:
+                "Entrega no completada",
+
+            descripcion:
+                "El servicio terminó con una incidencia y el pedido ya no está en proceso.",
+
+            progreso:
+                100
 
         },
 
@@ -13503,12 +13236,6 @@ function escucharPedidoActivoCliente(
                 );
 
 
-                // Vigilar la búsqueda para que no quede abierta indefinidamente.
-                programarTimeoutBusquedaPedido(
-                    pedidoActual
-                );
-
-
                 // =================================================
                 // ACTUALIZAR EL PEDIDO EN EL PANEL SI ESTÁ ABIERTO
                 // =================================================
@@ -13590,6 +13317,37 @@ if (
     );
 
 }
+
+
+                // =================================================
+                // SI TERMINÓ CON INCIDENCIA
+                // =================================================
+
+                if (
+                    pedidoActual.estado ===
+                    "incidencia_entrega"
+                ) {
+
+                    const panelBuscando =
+                        document.getElementById(
+                            "motiGoBuscandoRepartidor"
+                        );
+
+
+                    if (
+                        panelBuscando
+                    ) {
+
+                        panelBuscando.remove();
+
+                    }
+
+
+                    console.log(
+                        "🏁 MOTI GO: el pedido terminó con incidencia y dejó de estar activo."
+                    );
+
+                }
 
 
                 // =================================================
