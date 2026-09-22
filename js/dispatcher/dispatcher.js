@@ -241,6 +241,28 @@ function esperarRespuestaPedido(
 
 
                         // =================================
+                        // BÚSQUEDA AGOTADA / DETENIDA
+                        // =================================
+
+                        if (
+                            pedido.estado ===
+                            "sin_repartidor"
+                        ) {
+
+                            console.log(
+                                "🛑 MOTI GO: búsqueda detenida; ya no se enviarán más solicitudes."
+                            );
+
+                            finalizar(
+                                "cancelado"
+                            );
+
+                            return;
+
+                        }
+
+
+                        // =================================
                         // CLIENTE CANCELÓ
                         // =================================
 
