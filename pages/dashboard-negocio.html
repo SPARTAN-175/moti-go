@@ -1421,80 +1421,71 @@
             >
 
                 <div class="view-intro compact">
-
-                    <span class="eyebrow">
-                        NEGOCIO
-                    </span>
-
-                    <h1>
-                        Mi negocio
-                    </h1>
-
+                    <span class="eyebrow">NEGOCIO</span>
+                    <h1>Mi negocio</h1>
                     <p>
-                        Consulta la información de tu negocio
-                        afiliado a MOTI GO.
+                        Consulta la información y los datos de tu negocio afiliado a MOTI GO.
                     </p>
-
                 </div>
 
-
-                <div class="business-profile">
-
+                <div class="business-profile business-profile-expanded">
 
                     <div class="profile-main">
-
                         <div class="profile-store-icon">
-
-                            <span class="material-symbols-outlined">
-                                storefront
-                            </span>
-
+                            <span class="material-symbols-outlined">storefront</span>
                         </div>
-
 
                         <div>
+                            <strong id="profileBusinessName">Mi negocio</strong>
+                            <span id="profileBusinessType">Negocio afiliado</span>
+                        </div>
+                    </div>
 
-                            <strong id="profileBusinessName">
-                                Mi negocio
-                            </strong>
+                    <div class="profile-grid">
 
-                            <span id="profileBusinessType">
-                                Negocio afiliado
-                            </span>
+                        <div class="profile-data-card">
+                            <span>Estado</span>
+                            <strong id="profileBusinessStatus" class="status-active">Activo</strong>
+                        </div>
 
+                        <div class="profile-data-card">
+                            <span>Categoría</span>
+                            <strong id="profileBusinessCategory">No registrada</strong>
+                        </div>
+
+                        <div class="profile-data-card profile-data-card-wide">
+                            <span>Dirección</span>
+                            <strong id="profileAddress">No registrada</strong>
+                        </div>
+
+                        <div class="profile-data-card">
+                            <span>Teléfono</span>
+                            <strong id="profileBusinessPhone">No registrado</strong>
+                        </div>
+
+                        <div class="profile-data-card">
+                            <span>Correo</span>
+                            <strong id="profileBusinessEmail">No registrado</strong>
+                        </div>
+
+                        <div class="profile-data-card profile-data-card-wide">
+                            <span>ID de tienda</span>
+                            <strong id="profileBusinessId">No disponible</strong>
                         </div>
 
                     </div>
-
-
-                    <div class="profile-line">
-
-                        <span>
-                            Dirección
-                        </span>
-
-                        <strong id="profileAddress">
-                            No registrada
-                        </strong>
-
-                    </div>
-
-
-                    <div class="profile-line">
-
-                        <span>
-                            Estado
-                        </span>
-
-                        <strong class="status-active">
-                            Activo
-                        </strong>
-
-                    </div>
-
 
                 </div>
 
+                <div class="business-info-note">
+                    <span class="material-symbols-outlined">info</span>
+                    <div>
+                        <strong>Información de tu cuenta</strong>
+                        <p>
+                            Estos datos se muestran directamente desde la información registrada en MOTI GO.
+                        </p>
+                    </div>
+                </div>
 
             </section>
 
@@ -1519,7 +1510,7 @@
         </h1>
 
         <p>
-            Consulta las comisiones generadas por tus ventas,
+            Consulta tus ventas realizadas en MOTI GO, la comisión aplicada,
             los pagos realizados y el saldo pendiente con MOTI GO.
         </p>
 
@@ -1595,33 +1586,68 @@
 
     
 <!-- =====================================================
-     GANANCIAS GENERADAS
+     VENTAS REALIZADAS
 ===================================================== -->
 
-<div class="account-earnings-card">
+<div class="account-earnings-card sales-card">
 
-    <div class="account-section-header">
-
+    <div class="account-section-header sales-section-header">
         <div>
-
-            <h3>
-                Ganancias generadas
-            </h3>
-
+            <h3>Ventas realizadas</h3>
             <p>
-                Comisiones generadas por tus ventas
+                Ventas confirmadas en MOTI GO, comisión aplicada y neto para tu negocio.
             </p>
-
         </div>
 
-        <span
-            class="material-symbols-outlined"
+        <button
+            type="button"
+            class="sales-export-button"
+            id="exportBusinessSales"
         >
-            trending_up
-        </span>
+            <span class="material-symbols-outlined">download</span>
+            Exportar Excel
+        </button>
+    </div>
+
+    <div class="sales-summary-grid">
+
+        <div class="sales-summary-item">
+            <span>Ventas brutas</span>
+            <strong id="businessSalesGross">$0.00</strong>
+        </div>
+
+        <div class="sales-summary-item commission">
+            <span>Comisión MOTI</span>
+            <strong id="businessSalesCommission">$0.00</strong>
+        </div>
+
+        <div class="sales-summary-item net">
+            <span>Neto después de comisión</span>
+            <strong id="businessSalesNet">$0.00</strong>
+        </div>
+
+        <div class="sales-summary-item">
+            <span>Pedidos vendidos</span>
+            <strong id="businessSalesOrders">0</strong>
+        </div>
 
     </div>
 
+    <div class="sales-chart-toolbar">
+        <span>Ventas por</span>
+
+        <div class="sales-period-buttons">
+            <button type="button" class="account-filter" data-sales-period="dia">
+                Día
+            </button>
+            <button type="button" class="account-filter" data-sales-period="semana">
+                Semana
+            </button>
+            <button type="button" class="account-filter active" data-sales-period="mes">
+                Mes
+            </button>
+        </div>
+    </div>
 
     <div
         id="accountEarningsChart"
