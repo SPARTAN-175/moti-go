@@ -13534,11 +13534,11 @@ if (
 ) {
 
     if (
-        typeof mostrarBusquedaAgotadaRepartidorMotiGo ===
+        typeof window.mostrarBusquedaAgotadaRepartidorMotiGo ===
         "function"
     ) {
 
-        mostrarBusquedaAgotadaRepartidorMotiGo(
+        window.mostrarBusquedaAgotadaRepartidorMotiGo(
             pedidoActual
         );
 

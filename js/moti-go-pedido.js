@@ -10,6 +10,7 @@ import {
     serverTimestamp,
     getDocs,
     doc,
+    updateDoc,
     runTransaction
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
@@ -1592,6 +1593,11 @@ function mostrarBusquedaAgotadaRepartidorMotiGo(pedido) {
         pedido?.id
     );
 }
+
+// Exponer la vista de búsqueda agotada para que dashboard-pasajero.js
+// pueda actualizar el popup cuando Firestore cambie a sin_repartidor.
+window.mostrarBusquedaAgotadaRepartidorMotiGo =
+    mostrarBusquedaAgotadaRepartidorMotiGo;
 
 // =====================================================
 // ESTILOS - BUSCANDO REPARTIDOR
