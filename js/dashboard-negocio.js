@@ -72,6 +72,9 @@ let cancelarListenerCuenta = null;
 let cancelarListenerDevoluciones = null;
 let devolucionesPendientes = [];
 
+// Estado de autenticación para proteger la interfaz mientras Firebase inicializa.
+let authEstadoResuelto = false;
+
 
 // =========================================================
 // ELEMENTOS PRINCIPALES
@@ -406,26 +409,49 @@ onAuthStateChanged(
     auth,
     async user => {
 
+        // Firebase terminó de resolver el estado de autenticación.
+        authEstadoResuelto = true;
+
         if (!user) {
 
             console.warn(
-                "⚠️ No hay usuario autenticado."
+                "⚠️ No hay usuario autenticado. Redirigiendo al acceso..."
             );
 
+            // Nunca dejar listeners activos después de cerrar sesión.
+            if (cancelarListenerDevoluciones) {
+                cancelarListenerDevoluciones();
+                cancelarListenerDevoluciones = null;
+            }
+
+            if (cancelarListenerCuenta) {
+                cancelarListenerCuenta();
+                cancelarListenerCuenta = null;
+            }
+
+            usuarioActual = null;
+            tiendaActual = null;
+            tiendaId = null;
+            devolucionesPendientes = [];
+            movimientosCuenta = [];
+
+            document.body.classList.add("auth-pending");
+
+            // La pantalla de negocio nunca debe quedar accesible sin sesión.
+            window.location.replace("login.html");
             return;
 
         }
 
+        usuarioActual = user;
 
-        usuarioActual =
-            user;
-
+        // Solo mostramos el panel después de confirmar que existe una sesión.
+        document.body.classList.remove("auth-pending");
 
         console.log(
             "👤 Usuario negocio:",
             user.uid
         );
-
 
         await cargarDatosNegocio();
 
@@ -5399,17 +5425,39 @@ if (logoutButton) {
 
             try {
 
+                // Detener primero todos los listeners de Firestore.
+                if (cancelarListenerDevoluciones) {
+                    cancelarListenerDevoluciones();
+                    cancelarListenerDevoluciones = null;
+                }
+
+                if (cancelarListenerCuenta) {
+                    cancelarListenerCuenta();
+                    cancelarListenerCuenta = null;
+                }
+
+                usuarioActual = null;
+                tiendaActual = null;
+                tiendaId = null;
+                devolucionesPendientes = [];
+                movimientosCuenta = [];
+
+                // Ocultar inmediatamente el panel mientras se completa el cierre.
+                document.body.classList.add("auth-pending");
+
                 await signOut(
                     auth
                 );
 
-
-                window.location.href =
-                    "login.html";
-
+                // replace evita regresar al dashboard con el botón Atrás.
+                window.location.replace(
+                    "login.html"
+                );
 
             }
             catch (error) {
+
+                document.body.classList.remove("auth-pending");
 
                 console.error(
                     "❌ Error cerrando sesión:",
