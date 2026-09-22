@@ -2844,8 +2844,12 @@ window.motiGoReintentarBusqueda =
                 solicitudRechazadaPor:
                     null,
 
+                // Reiniciamos también el reloj de búsqueda.
+                // El pedido ya tiene una fecha de creación antigua,
+                // por lo que no debemos permitir que el watchdog
+                // lo marque agotado inmediatamente al reintentar.
                 solicitudEnviadaEn:
-                    null,
+                    serverTimestamp(),
 
                 actualizadoEn:
                     serverTimestamp()
@@ -2866,8 +2870,11 @@ window.motiGoReintentarBusqueda =
                 0,
             solicitudRechazadaPor:
                 null,
+            // Referencia local para el nuevo ciclo de búsqueda.
+            // El dispatcher escribirá el timestamp real al enviar
+            // la primera solicitud al repartidor.
             solicitudEnviadaEn:
-                null
+                new Date()
         };
 
         console.log(
