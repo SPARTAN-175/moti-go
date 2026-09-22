@@ -10,6 +10,7 @@ import {
     serverTimestamp,
     getDocs,
     doc,
+    updateDoc,
     runTransaction
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
