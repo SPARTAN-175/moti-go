@@ -643,6 +643,8 @@ function actualizarInterfaz() {
         estadoBox
     );
 
+    actualizarBotonIncidencia(estado);
+
 
     switch (estado) {
 
@@ -878,6 +880,30 @@ function actualizarInterfaz() {
 
 
         // =====================================
+        // INCIDENCIA DE ENTREGA
+        // =====================================
+
+        case "incidencia_entrega":
+
+            setEstadoVisual(
+                "Entrega con incidencia",
+                "El reporte fue registrado y el pedido quedó pendiente de revisión.",
+                "report_problem",
+                "estado-finalizado"
+            );
+
+            setBoton(
+                "Incidencia registrada",
+                "check_circle",
+                ""
+            );
+
+            if (boton) boton.disabled = true;
+            actualizarProgreso(100);
+            break;
+
+
+        // =====================================
         // ENTREGADO
         // =====================================
 
@@ -1005,6 +1031,473 @@ function actualizarInterfaz() {
 // =====================================================
 // ESTADO VISUAL
 // =====================================================
+
+function actualizarBotonIncidencia(estado) {
+
+    const boton = document.getElementById("btnIncidencia");
+
+    if (!boton) return;
+
+    const estadosPermitidos = [
+        "asignado",
+        "en_camino_tienda",
+        "en_compra",
+        "listo_entrega",
+        "en_camino_cliente",
+        "entregando"
+    ];
+
+    boton.hidden = !estadosPermitidos.includes(estado);
+
+}
+
+
+// =====================================================
+// PANEL DE INCIDENCIA
+// =====================================================
+
+function mostrarPanelIncidencia() {
+
+    const panel = document.getElementById("panelIncidencia");
+    const motivo = document.getElementById("incidenciaMotivo");
+    const comentario = document.getElementById("incidenciaComentario");
+    const mensaje = document.getElementById("incidenciaMensaje");
+
+    if (!panel) return;
+
+    if (motivo) motivo.value = "";
+    if (comentario) comentario.value = "";
+    if (mensaje) { mensaje.hidden = true; mensaje.textContent = ""; }
+
+    panel.classList.remove("oculto");
+    panel.setAttribute("aria-hidden", "false");
+
+    setTimeout(() => motivo?.focus(), 80);
+}
+
+function cerrarPanelIncidencia() {
+
+    const panel = document.getElementById("panelIncidencia");
+
+    if (!panel) return;
+
+    panel.classList.add("oculto");
+    panel.setAttribute("aria-hidden", "true");
+}
+
+function mostrarErrorIncidencia(mensajeTexto) {
+
+    const mensaje = document.getElementById("incidenciaMensaje");
+
+    if (!mensaje) return;
+
+    mensaje.textContent = mensajeTexto;
+    mensaje.hidden = false;
+}
+
+async function reportarIncidenciaEntrega() {
+
+    if (!viajeId || !viajeActual || !auth.currentUser) return;
+
+    const boton = document.getElementById("btnConfirmarIncidencia");
+    const motivo = document.getElementById("incidenciaMotivo")?.value || "";
+    const comentario = (document.getElementById("incidenciaComentario")?.value || "").trim();
+
+    if (!motivo) {
+        mostrarErrorIncidencia("Selecciona el motivo de la incidencia.");
+        return;
+    }
+
+    if (boton) {
+        boton.disabled = true;
+        boton.innerHTML = '<span class="material-symbols-outlined">progress_activity</span> Registrando...';
+    }
+
+    try {
+
+        const ahoraCliente = new Date().toISOString();
+        const incidenciaRef = doc(db, "incidenciasEntrega", viajeId);
+        const devolucionRef = doc(db, "devolucionesInventario", viajeId);
+
+        await runTransaction(db, async (transaction) => {
+
+            const pedidoRef = doc(db, "pedidos", viajeId);
+            const repartidorRef = doc(db, "usuarios", auth.currentUser.uid);
+
+            const pedidoSnap = await transaction.get(pedidoRef);
+            const repartidorSnap = await transaction.get(repartidorRef);
+            const incidenciaSnap = await transaction.get(incidenciaRef);
+            const devolucionSnap = await transaction.get(devolucionRef);
+
+            if (!pedidoSnap.exists()) {
+                throw new Error("El pedido ya no existe.");
+            }
+
+            if (!repartidorSnap.exists()) {
+                throw new Error("No se encontró el perfil del repartidor.");
+            }
+
+            const pedido = pedidoSnap.data();
+
+            if (pedido.estado === "entregado") {
+                throw new Error("Este pedido ya fue entregado.");
+            }
+
+            // =============================================
+            // IDEMPOTENCIA
+            // =============================================
+            // Si el reporte ya se registró, solamente
+            // aseguramos que el repartidor quede disponible.
+            // No volvemos a tocar inventario.
+            // =============================================
+
+            if (
+                incidenciaSnap.exists() &&
+                incidenciaSnap.data().inventarioProcesado === true
+            ) {
+
+                transaction.update(
+                    repartidorRef,
+                    {
+                        viajeActivo: null,
+                        estadoServicio: "disponible",
+                        actualizadoEn: serverTimestamp(),
+                        viajeCanceladoEn: serverTimestamp(),
+                        viajeCanceladoMotivo: "incidencia_entrega"
+                    }
+                );
+
+                return;
+
+            }
+
+            const productos = Array.isArray(pedido.productos)
+                ? pedido.productos
+                : [];
+
+            const operaciones = new Map();
+
+            productos.forEach((producto) => {
+
+                const tiendaId =
+                    producto.tiendaId ||
+                    producto.idTienda ||
+                    producto.tienda_id;
+
+                const productoId =
+                    producto.productoId ||
+                    producto.id;
+
+                if (!tiendaId || !productoId) return;
+
+                const inventarioId =
+                    `${tiendaId}_${productoId}`;
+
+                const cantidadSolicitada = Math.max(
+                    0,
+                    Number(
+                        producto.cantidad ??
+                        producto.qty ??
+                        producto.cantidadSolicitada ??
+                        1
+                    )
+                );
+
+                const cantidadComprada = Math.max(
+                    0,
+                    Number(
+                        producto.cantidadComprada ??
+                        0
+                    )
+                );
+
+                const procesado =
+                    producto.inventarioProcesado === true;
+
+                const estadoCompra =
+                    producto.estadoCompra ||
+                    producto.estado ||
+                    "pendiente";
+
+                const actual =
+                    operaciones.get(inventarioId) ||
+                    {
+                        inventarioId,
+                        tiendaId,
+                        productoId,
+                        nombre: producto.nombre || "Producto",
+                        liberarReserva: 0,
+                        devolucionPendiente: 0
+                    };
+
+                // -----------------------------------------
+                // AÚN NO SE HABÍA PROCESADO EN LA TIENDA
+                // -----------------------------------------
+                // La reserva sigue ocupando stock, pero el
+                // producto físicamente continúa en la tienda.
+                // Por eso solamente liberamos reservado.
+                // -----------------------------------------
+
+                if (!procesado) {
+
+                    actual.liberarReserva +=
+                        cantidadSolicitada;
+
+                }
+
+                // -----------------------------------------
+                // YA SE HABÍA COMPRADO
+                // -----------------------------------------
+                // existencia ya fue reducida y reservado ya
+                // fue liberado. El producto está físicamente
+                // con el repartidor, así que NO lo volvemos a
+                // existencia todavía.
+                // -----------------------------------------
+
+                else if (
+                    estadoCompra === "disponible" &&
+                    cantidadComprada > 0
+                ) {
+
+                    actual.devolucionPendiente +=
+                        cantidadComprada;
+
+                }
+
+                operaciones.set(
+                    inventarioId,
+                    actual
+                );
+
+            });
+
+            const inventarios = [];
+
+            for (const operacion of operaciones.values()) {
+
+                const inventarioRef = doc(
+                    db,
+                    "inventarios",
+                    operacion.inventarioId
+                );
+
+                const inventarioSnap =
+                    await transaction.get(
+                        inventarioRef
+                    );
+
+                if (!inventarioSnap.exists()) {
+                    throw new Error(
+                        `No se encontró el inventario de "${operacion.nombre}".`
+                    );
+                }
+
+                inventarios.push({
+                    ...operacion,
+                    referencia: inventarioRef,
+                    snapshot: inventarioSnap
+                });
+
+            }
+
+            // =============================================
+            // LIBERAR SOLAMENTE LAS RESERVAS NO PROCESADAS
+            // =============================================
+
+            inventarios.forEach((item) => {
+
+                if (item.liberarReserva <= 0) return;
+
+                const datos = item.snapshot.data();
+
+                const existencia = Math.max(
+                    0,
+                    Number(datos.existencia || 0)
+                );
+
+                const reservado = Math.max(
+                    0,
+                    Number(datos.reservado || 0)
+                );
+
+                const nuevoReservado = Math.max(
+                    0,
+                    reservado - item.liberarReserva
+                );
+
+                transaction.update(
+                    item.referencia,
+                    {
+                        reservado: nuevoReservado,
+                        disponible: existencia > 0,
+                        actualizadoEn: serverTimestamp()
+                    }
+                );
+
+            });
+
+            // =============================================
+            // PREPARAR DEVOLUCIÓN FÍSICA PENDIENTE
+            // =============================================
+
+            const itemsPendientes = [];
+
+            inventarios.forEach((item) => {
+
+                if (item.devolucionPendiente <= 0) return;
+
+                itemsPendientes.push({
+                    inventarioId: item.inventarioId,
+                    tiendaId: item.tiendaId,
+                    productoId: item.productoId,
+                    nombre: item.nombre,
+                    cantidad: item.devolucionPendiente,
+                    estado: "pendiente_recepcion"
+                });
+
+            });
+
+            const tieneDevolucionPendiente =
+                itemsPendientes.length > 0;
+
+            const devolucion = {
+                pedidoId: viajeId,
+                repartidorId: auth.currentUser.uid,
+                estado: tieneDevolucionPendiente
+                    ? "pendiente_recepcion"
+                    : "sin_productos_fisicos",
+                requiereRecepcionTienda:
+                    tieneDevolucionPendiente,
+                inventarioRestituido: false,
+                items: itemsPendientes,
+                creadaEn: serverTimestamp(),
+                actualizadaEn: serverTimestamp()
+            };
+
+            transaction.set(
+                devolucionRef,
+                devolucion,
+                { merge: true }
+            );
+
+            // =============================================
+            // REGISTRO DE INCIDENCIA
+            // =============================================
+
+            const incidencia = {
+                pedidoId: viajeId,
+                repartidorId: auth.currentUser.uid,
+                clienteId:
+                    pedido.clienteId ||
+                    pedido.usuarioId ||
+                    pedido.uidCliente ||
+                    null,
+                negocioIds:
+                    Array.from(
+                        new Set(
+                            productos
+                                .map(
+                                    p =>
+                                        p.tiendaId ||
+                                        p.idTienda ||
+                                        p.tienda_id
+                                )
+                                .filter(Boolean)
+                        )
+                    ),
+                motivo,
+                comentario:
+                    comentario.slice(0, 500),
+                estado: "pendiente",
+                inventarioProcesado: true,
+                reservasNoProcesadasLiberadas: true,
+                devolucionPendiente:
+                    tieneDevolucionPendiente,
+                devolucionId: viajeId,
+                creadaEn: serverTimestamp(),
+                actualizadaEn: serverTimestamp(),
+                fechaCliente: ahoraCliente
+            };
+
+            transaction.set(
+                incidenciaRef,
+                incidencia,
+                { merge: true }
+            );
+
+            // =============================================
+            // CERRAR PEDIDO COMO INCIDENCIA
+            // =============================================
+
+            transaction.update(
+                pedidoRef,
+                {
+                    estado: "incidencia_entrega",
+                    incidenciaId: viajeId,
+                    incidenciaEntrega: incidencia,
+                    entregaConfirmada: false,
+                    devolucionInventarioPendiente:
+                        tieneDevolucionPendiente,
+                    actualizadoEn: serverTimestamp()
+                }
+            );
+
+            // =============================================
+            // LIBERAR REPARTIDOR
+            // =============================================
+
+            transaction.update(
+                repartidorRef,
+                {
+                    viajeActivo: null,
+                    estadoServicio: "disponible",
+                    actualizadoEn: serverTimestamp(),
+                    viajeCanceladoEn: serverTimestamp(),
+                    viajeCanceladoMotivo: "incidencia_entrega"
+                }
+            );
+
+        });
+
+        cerrarPanelIncidencia();
+
+        window.motiGoNotificar(
+            "Incidencia registrada. Las reservas pendientes fueron liberadas y los productos recogidos quedaron registrados para devolución a la tienda. Ya estás disponible para otro servicio."
+        );
+
+        if (listenerPedido) {
+            listenerPedido();
+            listenerPedido = null;
+        }
+
+        setTimeout(() => {
+            window.location.replace(
+                "dashboard-repartidor.html"
+            );
+        }, 900);
+
+    }
+    catch (error) {
+
+        console.error(
+            "❌ MOTI GO: error registrando incidencia de entrega:",
+            error
+        );
+
+        mostrarErrorIncidencia(
+            error.message ||
+            "No se pudo registrar la incidencia."
+        );
+
+        if (boton) {
+            boton.disabled = false;
+            boton.innerHTML =
+                '<span class="material-symbols-outlined">send</span> Reportar y finalizar';
+        }
+
+    }
+
+}
 
 function setEstadoVisual(
     titulo,
@@ -2100,6 +2593,35 @@ return (
 // =====================================================
 // BOTÓN PRINCIPAL
 // =====================================================
+
+const btnIncidencia = document.getElementById("btnIncidencia");
+
+if (btnIncidencia) {
+    btnIncidencia.addEventListener("click", () => {
+        mostrarPanelIncidencia();
+    });
+}
+
+const btnCerrarIncidencia = document.getElementById("btnCerrarIncidencia");
+
+if (btnCerrarIncidencia) {
+    btnCerrarIncidencia.addEventListener("click", cerrarPanelIncidencia);
+}
+
+const btnConfirmarIncidencia = document.getElementById("btnConfirmarIncidencia");
+
+if (btnConfirmarIncidencia) {
+    btnConfirmarIncidencia.addEventListener("click", reportarIncidenciaEntrega);
+}
+
+const panelIncidencia = document.getElementById("panelIncidencia");
+
+if (panelIncidencia) {
+    panelIncidencia.addEventListener("click", (event) => {
+        if (event.target === panelIncidencia) cerrarPanelIncidencia();
+    });
+}
+
 
 const botonAccion =
     document.getElementById(

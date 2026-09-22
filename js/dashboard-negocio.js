@@ -26,7 +26,8 @@ import {
     addDoc,
     serverTimestamp,
     documentId,
-    onSnapshot
+    onSnapshot,
+    runTransaction
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 import {
@@ -68,6 +69,8 @@ let fechaCuentaDesde = "";
 let fechaCuentaHasta = "";
 
 let cancelarListenerCuenta = null;
+let cancelarListenerDevoluciones = null;
+let devolucionesPendientes = [];
 
 
 // =========================================================
@@ -522,6 +525,7 @@ async function cargarDatosNegocio() {
 await cargarProductos();
 
 escucharMovimientosCuenta();
+escucharDevoluciones();
 
 
     }
@@ -5872,6 +5876,250 @@ function mostrarErrorProductos(
         error
     );
 
+}
+
+// =========================================================
+// DEVOLUCIONES DE INVENTARIO
+// =========================================================
+
+function obtenerFechaGenerica(valor) {
+    if (!valor) return new Date(0);
+    if (typeof valor?.toDate === "function") return valor.toDate();
+    const fecha = new Date(valor);
+    return Number.isNaN(fecha.getTime()) ? new Date(0) : fecha;
+}
+
+function formatearFechaDevolucion(valor) {
+    const fecha = obtenerFechaGenerica(valor);
+    if (fecha.getTime() === 0) return "Fecha pendiente";
+    return fecha.toLocaleString("es-MX", {
+        dateStyle: "medium",
+        timeStyle: "short"
+    });
+}
+
+function mostrarEstadoDevoluciones() {
+    const lista = document.getElementById("businessReturnsList");
+    const vacio = document.getElementById("businessReturnsEmpty");
+    const contador = document.getElementById("businessReturnsCount");
+    const badge = document.getElementById("businessReturnsBadge");
+
+    if (!lista) return;
+
+    lista.innerHTML = "";
+
+    if (contador) {
+        contador.textContent = `${devolucionesPendientes.length} pendiente${devolucionesPendientes.length === 1 ? "" : "s"}`;
+    }
+
+    if (badge) {
+        badge.textContent = String(devolucionesPendientes.length);
+        badge.hidden = devolucionesPendientes.length === 0;
+    }
+
+    if (!devolucionesPendientes.length) {
+        if (vacio) vacio.hidden = false;
+        return;
+    }
+
+    if (vacio) vacio.hidden = true;
+
+    devolucionesPendientes.forEach(devolucion => {
+        const article = document.createElement("article");
+        article.className = "business-return-card";
+
+        const items = devolucion.items || [];
+        const totalUnidades = items.reduce((total, item) => total + Number(item.cantidad || 0), 0);
+
+        const listaItems = items.map(item => `
+            <li>
+                <span>${escapeHtmlNegocio(item.nombre || "Producto")}</span>
+                <strong>${Number(item.cantidad || 0)}</strong>
+            </li>
+        `).join("");
+
+        article.innerHTML = `
+            <div class="business-return-card__top">
+                <div>
+                    <span class="business-return-eyebrow">DEVOLUCIÓN PENDIENTE</span>
+                    <h3>Pedido #${escapeHtmlNegocio(devolucion.pedidoId || devolucion.id)}</h3>
+                </div>
+                <span class="business-return-status">Pendiente</span>
+            </div>
+            <div class="business-return-meta">
+                <span><span class="material-symbols-outlined">local_shipping</span> Repartidor: ${escapeHtmlNegocio(devolucion.repartidorNombre || devolucion.repartidorId || "No disponible")}</span>
+                <span><span class="material-symbols-outlined">schedule</span> ${formatearFechaDevolucion(devolucion.creadaEn)}</span>
+            </div>
+            <div class="business-return-items">
+                <div class="business-return-items__header">
+                    <strong>Productos a recibir</strong>
+                    <span>${totalUnidades} unidad${totalUnidades === 1 ? "" : "es"}</span>
+                </div>
+                <ul>${listaItems}</ul>
+            </div>
+            <div class="business-return-note">
+                <span class="material-symbols-outlined">inventory_2</span>
+                Los productos todavía no están disponibles. Confirma la recepción física antes de devolverlos al inventario.
+            </div>
+            <button type="button" class="business-return-confirm" data-return-id="${escapeHtmlNegocio(devolucion.id)}">
+                <span class="material-symbols-outlined">inventory</span>
+                Confirmar recepción y devolver al inventario
+            </button>
+        `;
+
+        lista.appendChild(article);
+    });
+
+    lista.querySelectorAll("[data-return-id]").forEach(button => {
+        button.addEventListener("click", () => confirmarRecepcionDevolucion(button.dataset.returnId));
+    });
+}
+
+function escapeHtmlNegocio(valor) {
+    return String(valor ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function escucharDevoluciones() {
+    if (!tiendaId) return;
+
+    if (cancelarListenerDevoluciones) {
+        cancelarListenerDevoluciones();
+        cancelarListenerDevoluciones = null;
+    }
+
+    const devolucionesQuery = query(
+        collection(db, "devolucionesInventario"),
+        where("estado", "==", "pendiente_recepcion")
+    );
+
+    cancelarListenerDevoluciones = onSnapshot(
+        devolucionesQuery,
+        snapshot => {
+            devolucionesPendientes = snapshot.docs.map(docSnap => ({
+                id: docSnap.id,
+                ...docSnap.data()
+            })).map(devolucion => {
+                const itemsTienda = (devolucion.items || []).filter(item =>
+                    item.tiendaId === tiendaId &&
+                    item.estadoRecepcion !== "recibido"
+                );
+                return { ...devolucion, items: itemsTienda };
+            }).filter(devolucion => devolucion.items.length > 0);
+
+            mostrarEstadoDevoluciones();
+        },
+        error => {
+            console.error("❌ Error escuchando devoluciones:", error);
+        }
+    );
+}
+
+async function confirmarRecepcionDevolucion(devolucionId) {
+    if (!devolucionId || !tiendaId || !usuarioActual) return;
+
+    const button = document.querySelector(`[data-return-id="${CSS.escape(devolucionId)}"]`);
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = '<span class="material-symbols-outlined">progress_activity</span> Registrando...';
+    }
+
+    try {
+        const devolucionRef = doc(db, "devolucionesInventario", devolucionId);
+
+        await runTransaction(db, async transaction => {
+            const devolucionSnap = await transaction.get(devolucionRef);
+
+            if (!devolucionSnap.exists()) {
+                throw new Error("La devolución ya no existe.");
+            }
+
+            const devolucion = devolucionSnap.data();
+            const items = Array.isArray(devolucion.items) ? devolucion.items : [];
+
+            const itemsActualizados = items.map(item => ({ ...item }));
+            const inventariosAActualizar = [];
+            let recibidosEnEstaOperacion = 0;
+
+            for (let index = 0; index < itemsActualizados.length; index++) {
+                const item = itemsActualizados[index];
+
+                if (item.tiendaId !== tiendaId || item.estadoRecepcion === "recibido") {
+                    continue;
+                }
+
+                const cantidad = Math.max(0, Number(item.cantidad || 0));
+                if (!cantidad) continue;
+
+                const inventarioId = item.inventarioId || `${tiendaId}_${item.productoId}`;
+                const inventarioRef = doc(db, "inventarios", inventarioId);
+                const inventarioSnap = await transaction.get(inventarioRef);
+
+                if (!inventarioSnap.exists()) {
+                    throw new Error(`No se encontró el inventario de "${item.nombre || "Producto"}".`);
+                }
+
+                const inventario = inventarioSnap.data();
+                const existenciaActual = Math.max(0, Number(inventario.existencia || 0));
+
+                inventariosAActualizar.push({
+                    ref: inventarioRef,
+                    existencia: existenciaActual + cantidad
+                });
+
+                itemsActualizados[index] = {
+                    ...item,
+                    estadoRecepcion: "recibido",
+                    recibidoPor: usuarioActual.uid,
+                    recibidoEn: new Date().toISOString(),
+                    cantidadRestituida: cantidad
+                };
+
+                recibidosEnEstaOperacion += cantidad;
+            }
+
+            if (recibidosEnEstaOperacion <= 0) {
+                throw new Error("Esta devolución ya fue recibida o no contiene productos de tu tienda.");
+            }
+
+            inventariosAActualizar.forEach(item => {
+                transaction.update(item.ref, {
+                    existencia: item.existencia,
+                    disponible: item.existencia > 0,
+                    actualizadoEn: serverTimestamp()
+                });
+            });
+
+            const quedanPendientes = itemsActualizados.some(item =>
+                item.estadoRecepcion !== "recibido"
+            );
+
+            transaction.update(devolucionRef, {
+                items: itemsActualizados,
+                estado: quedanPendientes ? "pendiente_recepcion" : "recibida",
+                inventarioRestituido: !quedanPendientes,
+                ultimaRecepcion: {
+                    tiendaId,
+                    usuarioId: usuarioActual.uid,
+                    cantidadUnidades: recibidosEnEstaOperacion
+                },
+                actualizadaEn: serverTimestamp()
+            });
+        });
+
+        window.motiGoNotificar?.(
+            "Devolución recibida. Los productos ya volvieron a estar disponibles en el inventario de tu tienda."
+        );
+    } catch (error) {
+        console.error("❌ Error confirmando devolución:", error);
+        window.motiGoNotificar?.(error.message || "No pudimos registrar la recepción de la devolución.", "error");
+    } finally {
+        mostrarEstadoDevoluciones();
+    }
 }
 
 // =========================================================
