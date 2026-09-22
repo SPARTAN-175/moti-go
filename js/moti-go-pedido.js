@@ -10,7 +10,6 @@ import {
     serverTimestamp,
     getDocs,
     doc,
-    updateDoc,
     runTransaction
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
@@ -1408,6 +1407,190 @@ function mostrarBuscandoRepartidorMotiGo(
         pedido.folio
     );
 
+}
+
+// =====================================================
+// MOSTRAR ESTADO: NO SE ENCONTRÓ REPARTIDOR
+// =====================================================
+
+function mostrarBusquedaAgotadaRepartidorMotiGo(pedido) {
+
+    const panelAnterior = document.getElementById(
+        "motiGoBuscandoRepartidor"
+    );
+
+    if (panelAnterior) {
+        panelAnterior.remove();
+    }
+
+    const panel = document.createElement("div");
+    panel.id = "motiGoBuscandoRepartidor";
+
+    panel.innerHTML = `
+        <div class="moti-go-buscando-overlay">
+            <div class="moti-go-buscando-panel moti-go-busqueda-agotada">
+
+                <div class="moti-go-buscando-icono moti-go-busqueda-agotada-icono">
+                    <span class="material-symbols-outlined">
+                        person_search
+                    </span>
+                </div>
+
+                <h2>No encontramos un repartidor</h2>
+
+                <p>
+                    Por el momento ningún repartidor ha aceptado tu pedido.
+                </p>
+
+                <div class="moti-go-buscando-folio">
+                    <span>Pedido</span>
+                    <strong>${escaparHTMLPedido(pedido?.folio || pedido?.id || "")}</strong>
+                </div>
+
+                <p class="moti-go-buscando-ayuda">
+                    Puedes seguir buscando o cancelar tu pedido.
+                </p>
+
+                <div class="moti-go-busqueda-acciones">
+                    <button type="button" id="motigoSeguirBuscandoRepartidor">
+                        <span class="material-symbols-outlined">refresh</span>
+                        Seguir buscando
+                    </button>
+
+                    <button type="button" id="motigoCancelarBusquedaRepartidor">
+                        <span class="material-symbols-outlined">cancel</span>
+                        Cancelar pedido
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(panel);
+    agregarEstilosBuscandoRepartidorMotiGo();
+
+    const estiloExtra = document.getElementById(
+        "motiGoBusquedaAgotadaEstilos"
+    );
+
+    if (!estiloExtra) {
+        const estilos = document.createElement("style");
+        estilos.id = "motiGoBusquedaAgotadaEstilos";
+        estilos.textContent = `
+            .moti-go-busqueda-agotada .moti-go-buscando-ayuda {
+                margin-bottom: 18px;
+            }
+
+            .moti-go-busqueda-agotada-icono {
+                background: #fff4e5;
+                color: #c77800;
+            }
+
+            .moti-go-busqueda-acciones {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                width: 100%;
+                margin-top: 8px;
+            }
+
+            .moti-go-busqueda-acciones button {
+                width: 100%;
+                border: 0;
+                border-radius: 16px;
+                padding: 14px 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                font: inherit;
+                font-weight: 700;
+                cursor: pointer;
+            }
+
+            #motigoSeguirBuscandoRepartidor {
+                background: #e9f8ef;
+                color: #168447;
+            }
+
+            #motigoCancelarBusquedaRepartidor {
+                background: #f3f4f6;
+                color: #4b5563;
+            }
+
+            .moti-go-busqueda-acciones button:disabled {
+                opacity: .65;
+                cursor: default;
+            }
+        `;
+        document.head.appendChild(estilos);
+    }
+
+    const seguir = document.getElementById(
+        "motigoSeguirBuscandoRepartidor"
+    );
+
+    if (seguir) {
+        seguir.addEventListener("click", async () => {
+            if (seguir.disabled) return;
+
+            seguir.disabled = true;
+            seguir.innerHTML = `
+                <span class="material-symbols-outlined">hourglass_top</span>
+                Buscando repartidor...
+            `;
+
+            try {
+                if (typeof window.motiGoReintentarBusqueda !== "function") {
+                    throw new Error("El módulo de búsqueda no está disponible.");
+                }
+
+                await window.motiGoReintentarBusqueda(pedido.id);
+            } catch (error) {
+                console.error(
+                    "❌ MOTI GO: error continuando búsqueda:",
+                    error
+                );
+
+                window.motiGoNotificar?.(
+                    "No pudimos continuar la búsqueda de repartidor."
+                );
+
+                seguir.disabled = false;
+                seguir.innerHTML = `
+                    <span class="material-symbols-outlined">refresh</span>
+                    Seguir buscando
+                `;
+            }
+        });
+    }
+
+    const cancelar = document.getElementById(
+        "motigoCancelarBusquedaRepartidor"
+    );
+
+    if (cancelar) {
+        cancelar.addEventListener("click", () => {
+            const botonCancelar = document.getElementById(
+                "cancelarPedidoMotiGo"
+            );
+
+            if (botonCancelar) {
+                botonCancelar.click();
+                return;
+            }
+
+            window.motiGoNotificar?.(
+                "No pudimos abrir la cancelación del pedido."
+            );
+        });
+    }
+
+    console.log(
+        "⚠️ MOTI GO: búsqueda de repartidor agotada; mostrando opciones al cliente.",
+        pedido?.id
+    );
 }
 
 // =====================================================
@@ -2844,12 +3027,8 @@ window.motiGoReintentarBusqueda =
                 solicitudRechazadaPor:
                     null,
 
-                // Reiniciamos también el reloj de búsqueda.
-                // El pedido ya tiene una fecha de creación antigua,
-                // por lo que no debemos permitir que el watchdog
-                // lo marque agotado inmediatamente al reintentar.
                 solicitudEnviadaEn:
-                    serverTimestamp(),
+                    null,
 
                 actualizadoEn:
                     serverTimestamp()
@@ -2870,11 +3049,8 @@ window.motiGoReintentarBusqueda =
                 0,
             solicitudRechazadaPor:
                 null,
-            // Referencia local para el nuevo ciclo de búsqueda.
-            // El dispatcher escribirá el timestamp real al enviar
-            // la primera solicitud al repartidor.
             solicitudEnviadaEn:
-                new Date()
+                null
         };
 
         console.log(
