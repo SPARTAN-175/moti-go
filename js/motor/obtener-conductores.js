@@ -27,23 +27,20 @@ export async function obtenerConductores(){
 
     );
 
-    const [snapshot, ubicacionesSnapshot] = await Promise.all([
-        getDocs(consulta),
-        get(ref(rtdb, "ubicacionesRepartidores"))
-    ]);
+    const snapshot = await getDocs(consulta);
 
-    const ubicaciones = ubicacionesSnapshot.exists()
-        ? ubicacionesSnapshot.val() || {}
-        : {};
-
-    const conductores = [];
-
-    snapshot.forEach(
-        docSnap => {
+    const conductores = await Promise.all(
+        snapshot.docs.map(async (docSnap) => {
             const datos = docSnap.data() || {};
-            const ubicacion = ubicaciones[docSnap.id] || {};
+            const ubicacionSnapshot = await get(
+                ref(rtdb, `ubicacionesRepartidores/${docSnap.id}`)
+            );
 
-            conductores.push({
+            const ubicacion = ubicacionSnapshot.exists()
+                ? ubicacionSnapshot.val() || {}
+                : {};
+
+            return {
                 id: docSnap.id,
                 ...datos,
                 latitud: Number(ubicacion.latitud),
@@ -51,8 +48,8 @@ export async function obtenerConductores(){
                 ubicacionActiva: ubicacion.activo === true,
                 ubicacionActualizadaEn: ubicacion.actualizadoEn ?? null,
                 precisionGPS: Number(ubicacion.precision) || null
-            });
-        }
+            };
+        })
     );
 
     console.log(
