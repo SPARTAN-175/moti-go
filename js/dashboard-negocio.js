@@ -44,6 +44,8 @@ let usuarioActual = null;
 
 let tiendaActual = null;
 
+let datosUsuarioNegocio = null;
+
 let tiendaId = null;
 
 let productos = [];
@@ -67,6 +69,8 @@ let filtroCuentaActual = "todos";
 let fechaCuentaDesde = "";
 
 let fechaCuentaHasta = "";
+
+let ventasPeriodoActual = "mes";
 
 let cancelarListenerCuenta = null;
 let cancelarListenerDevoluciones = null;
@@ -548,6 +552,9 @@ async function cargarDatosNegocio() {
         const datosUsuario =
             usuarioSnap.data();
 
+        datosUsuarioNegocio =
+            datosUsuario;
+
 
         /*
             Esperamos que la cuenta del negocio
@@ -657,6 +664,7 @@ async function cargarTienda() {
 
 
     actualizarDatosVisualesTienda();
+actualizarPerfilCompletoNegocio();
 
 }
 
@@ -764,6 +772,99 @@ function actualizarDatosVisualesTienda() {
 
     }
 
+}
+
+
+// =========================================================
+// PERFIL COMPLETO DEL NEGOCIO
+// =========================================================
+
+function obtenerValorNegocio(...valores) {
+    return valores.find(
+        valor =>
+            valor !== undefined &&
+            valor !== null &&
+            String(valor).trim() !== ""
+    );
+}
+
+function actualizarPerfilCompletoNegocio() {
+
+    const usuario = datosUsuarioNegocio || {};
+    const tienda = tiendaActual || {};
+
+    const datos = {
+        nombre: obtenerValorNegocio(
+            tienda.nombre,
+            tienda.nombreTienda,
+            usuario.nombre,
+            "Mi negocio"
+        ),
+        tipo: obtenerValorNegocio(
+            tienda.tipo,
+            tienda.categoria,
+            "Negocio afiliado"
+        ),
+        categoria: obtenerValorNegocio(
+            tienda.categoria,
+            tienda.departamento,
+            "No registrada"
+        ),
+        direccion: obtenerValorNegocio(
+            tienda.direccion,
+            tienda.domicilio,
+            "No registrada"
+        ),
+        telefono: obtenerValorNegocio(
+            tienda.telefono,
+            tienda.telefonoContacto,
+            usuario.telefono,
+            usuario.telefonoContacto,
+            "No registrado"
+        ),
+        email: obtenerValorNegocio(
+            tienda.email,
+            tienda.correo,
+            usuario.email,
+            usuario.correo,
+            usuarioActual?.email,
+            "No registrado"
+        ),
+        estado: obtenerValorNegocio(
+            tienda.estado,
+            usuario.estado,
+            "Activo"
+        ),
+        id: obtenerValorNegocio(
+            tienda.id,
+            tiendaId,
+            "No disponible"
+        )
+    };
+
+    const asignaciones = {
+        profileBusinessName: datos.nombre,
+        profileBusinessType: datos.tipo,
+        profileAddress: datos.direccion,
+        profileBusinessCategory: datos.categoria,
+        profileBusinessPhone: datos.telefono,
+        profileBusinessEmail: datos.email,
+        profileBusinessId: datos.id,
+        profileBusinessStatus: datos.estado
+    };
+
+    Object.entries(asignaciones).forEach(([id, valor]) => {
+        const elemento = document.getElementById(id);
+        if (elemento) elemento.textContent = String(valor);
+    });
+
+    const estadoElemento = document.getElementById("profileBusinessStatus");
+    if (estadoElemento) {
+        const estadoNormalizado = String(datos.estado || "activo").toLowerCase();
+        const activo = !["inactivo", "suspendido", "bloqueado", "cerrado"].includes(estadoNormalizado);
+        estadoElemento.classList.toggle("status-active", activo);
+        estadoElemento.classList.toggle("status-inactive", !activo);
+    }
 }
 
 
@@ -6323,6 +6424,7 @@ function escucharMovimientosCuenta() {
                 actualizarResumenCuenta();
 
                 aplicarFiltrosCuenta();
+                actualizarPanelVentas();
 
             },
 
@@ -7216,312 +7318,273 @@ function formatearFechaMovimiento(
 }
 
 // =========================================================
-// GRÁFICA DE GANANCIAS POR MES
+// VENTAS REALES DEL NEGOCIO
 // =========================================================
 
-function renderizarGraficaGanancias() {
+function obtenerVentasReales() {
 
-    const container =
-        document.getElementById(
-            "accountEarningsChart"
-        );
+    return movimientosCuenta
+        .filter(movimiento =>
+            String(movimiento.tipo || "").toLowerCase() === "comision"
+        )
+        .map(movimiento => {
+            const ventaBruta = Number(
+                movimiento.subtotalVenta ??
+                movimiento.subtotal ??
+                0
+            ) || 0;
 
+            const comision = Number(movimiento.monto || 0) || 0;
 
-    if (!container) {
+            return {
+                ...movimiento,
+                ventaBruta,
+                comision,
+                neto: Number((ventaBruta - comision).toFixed(2))
+            };
+        })
+        .filter(venta => venta.ventaBruta > 0);
+}
 
-        return;
+function obtenerClavePeriodo(fecha, periodo) {
 
+    const año = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+
+    if (periodo === "dia") {
+        return `${año}-${mes}-${String(fecha.getDate()).padStart(2, "0")}`;
     }
 
+    if (periodo === "semana") {
+        const inicio = new Date(fecha);
+        const dia = inicio.getDay();
+        inicio.setDate(inicio.getDate() + (dia === 0 ? -6 : 1 - dia));
+        return `${inicio.getFullYear()}-${String(inicio.getMonth() + 1).padStart(2, "0")}-${String(inicio.getDate()).padStart(2, "0")}`;
+    }
 
-    // =====================================================
-    // SOLO COMISIONES GENERADAS
-    // =====================================================
+    return `${año}-${mes}`;
+}
 
-    const comisiones =
-        movimientosCuenta.filter(
-            movimiento =>
-                String(
-                    movimiento.tipo ||
-                    ""
-                ).toLowerCase() ===
-                "comision"
-        );
+function formatearEtiquetaPeriodo(clave, periodo) {
 
+    if (periodo === "mes") {
+        const [año, mes] = clave.split("-");
+        return new Intl.DateTimeFormat("es-MX", {
+            month: "short",
+            year: "numeric"
+        }).format(new Date(Number(año), Number(mes) - 1, 1)).replace(".", "");
+    }
 
-    if (
-        comisiones.length === 0
-    ) {
+    const fecha = new Date(`${clave}T12:00:00`);
+    if (Number.isNaN(fecha.getTime())) return clave;
 
+    const texto = new Intl.DateTimeFormat("es-MX", {
+        day: "2-digit",
+        month: "short"
+    }).format(fecha).replace(".", "");
+
+    return periodo === "semana" ? `Sem. ${texto}` : texto;
+}
+
+function obtenerDatosGraficaVentas() {
+
+    const agrupadas = new Map();
+
+    obtenerVentasReales().forEach(venta => {
+
+        const fecha = obtenerFechaMovimiento(venta);
+        if (fecha.getTime() === 0) return;
+
+        const clave = obtenerClavePeriodo(fecha, ventasPeriodoActual);
+        const actual = agrupadas.get(clave) || {
+            ventaBruta: 0,
+            comision: 0,
+            neto: 0,
+            pedidos: 0
+        };
+
+        actual.ventaBruta += venta.ventaBruta;
+        actual.comision += venta.comision;
+        actual.neto += venta.neto;
+        actual.pedidos += 1;
+        agrupadas.set(clave, actual);
+    });
+
+    const limite =
+        ventasPeriodoActual === "dia" ? 14 :
+        ventasPeriodoActual === "semana" ? 8 : 12;
+
+    return [...agrupadas.entries()]
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .slice(-limite);
+}
+
+function renderizarGraficaVentas() {
+
+    const container = document.getElementById("accountEarningsChart");
+    if (!container) return;
+
+    const datos = obtenerDatosGraficaVentas();
+
+    if (!datos.length) {
         container.innerHTML = `
-
             <div class="account-chart-empty">
-
                 <div>
-
-                    <span
-                        class="material-symbols-outlined"
-                        style="
-                            display:block;
-                            font-size:32px;
-                            margin-bottom:7px;
-                        "
-                    >
-                        bar_chart
-                    </span>
-
-                    Todavía no hay comisiones
-                    generadas.
-
+                    <span class="material-symbols-outlined">bar_chart</span>
+                    Todavía no hay ventas realizadas por la aplicación.
                 </div>
-
             </div>
-
         `;
-
         return;
-
     }
 
-
-    // =====================================================
-    // AGRUPAR POR MES
-    // =====================================================
-
-    const meses =
-        new Map();
-
-
-    comisiones.forEach(
-        movimiento => {
-
-            const fecha =
-                obtenerFechaMovimiento(
-                    movimiento
-                );
-
-
-            if (
-                !fecha ||
-                fecha.getTime() ===
-                    0
-            ) {
-
-                return;
-
-            }
-
-
-            const año =
-                fecha.getFullYear();
-
-
-            const mes =
-                fecha.getMonth();
-
-
-            const clave =
-                `${año}-${String(
-                    mes + 1
-                ).padStart(
-                    2,
-                    "0"
-                )}`;
-
-
-            const monto =
-                Number(
-                    movimiento.monto ||
-                    0
-                );
-
-
-            meses.set(
-                clave,
-                (
-                    meses.get(
-                        clave
-                    ) ||
-                    0
-                ) + monto
-            );
-
-        }
+    const maximo = Math.max(
+        ...datos.map(([, datosPeriodo]) => datosPeriodo.ventaBruta),
+        0
     );
 
+    container.innerHTML = "";
 
-    // =====================================================
-    // ORDENAR MESES
-    // =====================================================
+    datos.forEach(([clave, datosPeriodo]) => {
 
-    const datos =
-        [...meses.entries()]
-            .sort(
-                (
-                    a,
-                    b
-                ) =>
-                    a[0].localeCompare(
-                        b[0]
-                    )
-            )
-            .slice(
-                -12
-            );
+        const porcentaje = maximo > 0
+            ? (datosPeriodo.ventaBruta / maximo) * 100
+            : 0;
 
+        const columna = document.createElement("div");
+        columna.className = "account-chart-month";
 
-    if (
-        datos.length === 0
-    ) {
-
-        container.innerHTML = `
-
-            <div class="account-chart-empty">
-
-                No hay fechas válidas
-                para mostrar.
-
+        columna.innerHTML = `
+            <div class="account-chart-value">
+                ${formatearPrecio(datosPeriodo.ventaBruta)}
             </div>
-
+            <div class="account-chart-bar-wrapper">
+                <div
+                    class="account-chart-bar"
+                    style="height:${Math.max(porcentaje, 3)}%;"
+                    title="Venta bruta: ${escapeHtml(formatearPrecio(datosPeriodo.ventaBruta))}"
+                ></div>
+            </div>
+            <div class="account-chart-label">
+                ${escapeHtml(formatearEtiquetaPeriodo(clave, ventasPeriodoActual))}
+            </div>
         `;
 
-        return;
+        container.appendChild(columna);
+    });
+}
 
-    }
+function actualizarResumenVentas() {
 
+    const ventas = obtenerVentasReales();
 
-    const maximo =
-        Math.max(
-            ...datos.map(
-                ([, monto]) =>
-                    monto
-            ),
-            0
+    const ventaBruta = ventas.reduce(
+        (total, venta) => total + venta.ventaBruta,
+        0
+    );
+
+    const comision = ventas.reduce(
+        (total, venta) => total + venta.comision,
+        0
+    );
+
+    const neto = Number((ventaBruta - comision).toFixed(2));
+
+    const elementos = {
+        businessSalesGross: ventaBruta,
+        businessSalesCommission: comision,
+        businessSalesNet: neto,
+        businessSalesOrders: ventas.length
+    };
+
+    Object.entries(elementos).forEach(([id, valor]) => {
+        const elemento = document.getElementById(id);
+        if (!elemento) return;
+
+        elemento.textContent =
+            id === "businessSalesOrders"
+                ? String(valor)
+                : formatearPrecio(valor);
+    });
+}
+
+function actualizarPanelVentas() {
+    actualizarResumenVentas();
+    renderizarGraficaVentas();
+}
+
+function obtenerVentasParaExportar() {
+
+    return obtenerVentasReales().map(venta => ({
+        Fecha: formatearFechaMovimiento(obtenerFechaMovimiento(venta)),
+        Pedido: venta.pedidoId || venta.folio || venta.id || "",
+        Negocio: venta.tiendaNombre || tiendaActual?.nombre || "",
+        Venta_bruta: Number(venta.ventaBruta.toFixed(2)),
+        Comision_MOTI: Number(venta.comision.toFixed(2)),
+        Porcentaje_comision: Number(venta.porcentaje || 0),
+        Neto_despues_comision: Number(venta.neto.toFixed(2)),
+        Estado: venta.estado || "registrada"
+    }));
+}
+
+function exportarVentasExcel() {
+
+    if (typeof XLSX === "undefined") {
+        window.motiGoNotificar?.(
+            "No se pudo cargar el exportador de Excel.",
+            "error"
         );
+        return;
+    }
 
+    const datos = obtenerVentasParaExportar();
 
-    // =====================================================
-    // CREAR GRÁFICA
-    // =====================================================
+    if (!datos.length) {
+        window.motiGoNotificar?.(
+            "Todavía no hay ventas realizadas para exportar.",
+            "info"
+        );
+        return;
+    }
 
-    container.innerHTML =
-        "";
+    const hoja = XLSX.utils.json_to_sheet(datos);
+    hoja["!cols"] = [
+        { wch: 18 },
+        { wch: 28 },
+        { wch: 24 },
+        { wch: 15 },
+        { wch: 17 },
+        { wch: 20 },
+        { wch: 24 },
+        { wch: 24 }
+    ];
 
+    const libro = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(libro, hoja, "Ventas");
 
-    datos.forEach(
-        ([clave, monto]) => {
-
-            const [año, mes] =
-                clave.split("-");
-
-
-            const fecha =
-                new Date(
-                    Number(año),
-                    Number(mes) - 1,
-                    1
-                );
-
-
-            const nombreMes =
-                new Intl.DateTimeFormat(
-                    "es-MX",
-                    {
-                        month:
-                            "short"
-                    }
-                )
-                .format(
-                    fecha
-                )
-                .replace(
-                    ".",
-                    ""
-                );
-
-
-            const porcentaje =
-                maximo > 0
-                    ? (
-                        monto /
-                        maximo
-                    ) * 100
-                    : 0;
-
-
-            const columna =
-                document.createElement(
-                    "div"
-                );
-
-
-            columna.className =
-                "account-chart-month";
-
-
-            columna.innerHTML = `
-
-                <div
-                    class="account-chart-value"
-                >
-                    ${formatearPrecio(
-                        monto
-                    )}
-                </div>
-
-
-                <div
-                    class="account-chart-bar-wrapper"
-                >
-
-                    <div
-                        class="account-chart-bar"
-                        style="
-                            height:${Math.max(
-                                porcentaje,
-                                3
-                            )}%;
-                        "
-                        title="${formatearPrecio(
-                            monto
-                        )}"
-                    ></div>
-
-                </div>
-
-
-                <div
-                    class="account-chart-label"
-                >
-                    ${escapeHtml(
-                        nombreMes
-                    )}
-                    ${año}
-                </div>
-
-            `;
-
-
-            container.appendChild(
-                columna
-            );
-
-        }
+    XLSX.writeFile(
+        libro,
+        `MOTI_GO_Ventas_${new Date().toISOString().slice(0, 10)}.xlsx`
     );
-
 }
 
+const salesPeriodButtons = document.querySelectorAll("[data-sales-period]");
 
-// =========================================================
-// ACTUALIZAR GRÁFICA CUANDO CAMBIAN
-// LOS MOVIMIENTOS
-// =========================================================
+salesPeriodButtons.forEach(button => {
+    button.addEventListener("click", () => {
+        salesPeriodButtons.forEach(item => item.classList.remove("active"));
+        button.classList.add("active");
+        ventasPeriodoActual = button.dataset.salesPeriod || "mes";
+        renderizarGraficaVentas();
+    });
+});
 
-function actualizarGraficaGanancias() {
+const exportSalesButton = document.getElementById("exportBusinessSales");
 
-    renderizarGraficaGanancias();
-
+if (exportSalesButton) {
+    exportSalesButton.addEventListener("click", exportarVentasExcel);
 }
+
 
 // =========================================================
 // INICIO
