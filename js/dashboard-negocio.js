@@ -6564,7 +6564,7 @@ function actualizarResumenCuenta() {
         }
     );
 
-        actualizarGraficaGanancias();
+        actualizarPanelVentas();
 
 }
 
