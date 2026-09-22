@@ -2779,6 +2779,156 @@ async function reservarInventarioPedido(
 
 }
 
+// =====================================================
+// MOTI GO - REINTENTAR BÚSQUEDA DE REPARTIDOR
+// =====================================================
+// Se reutiliza el pedido existente. No se crea un pedido nuevo
+// ni se vuelve a reservar inventario.
+// =====================================================
+
+window.motiGoReintentarBusqueda =
+    async function (
+        pedidoId
+    ) {
+
+        if (!pedidoId) {
+            throw new Error("Pedido sin ID.");
+        }
+
+        const referencia =
+            doc(
+                db,
+                "pedidos",
+                pedidoId
+            );
+
+        const snapshot =
+            await getDocs(
+                collection(
+                    db,
+                    "pedidos"
+                )
+            );
+
+        const documento =
+            snapshot.docs.find(
+                item => item.id === pedidoId
+            );
+
+        if (!documento) {
+            throw new Error("El pedido ya no existe.");
+        }
+
+        const datos = documento.data() || {};
+
+        if (datos.estado !== "sin_repartidor") {
+            return;
+        }
+
+        await updateDoc(
+            referencia,
+            {
+                estado:
+                    "pendiente_asignacion",
+
+                repartidorId:
+                    null,
+
+                repartidorNombre:
+                    null,
+
+                indiceRepartidor:
+                    0,
+
+                solicitudRechazadaPor:
+                    null,
+
+                solicitudEnviadaEn:
+                    null,
+
+                actualizadoEn:
+                    serverTimestamp()
+            }
+        );
+
+        const pedido = {
+            id:
+                pedidoId,
+            ...datos,
+            estado:
+                "pendiente_asignacion",
+            repartidorId:
+                null,
+            repartidorNombre:
+                null,
+            indiceRepartidor:
+                0,
+            solicitudRechazadaPor:
+                null,
+            solicitudEnviadaEn:
+                null
+        };
+
+        console.log(
+            "🔁 MOTI GO: reintentando búsqueda de repartidor:",
+            pedidoId
+        );
+
+        const resultadoAsignacion =
+            await ejecutarAsignacionInicialMotiGo(
+                pedido
+            );
+
+        if (
+            !resultadoAsignacion ||
+            !Array.isArray(resultadoAsignacion.grupos) ||
+            resultadoAsignacion.grupos.length === 0
+        ) {
+
+            await updateDoc(
+                referencia,
+                {
+                    estado:
+                        "sin_repartidor",
+                    actualizadoEn:
+                        serverTimestamp()
+                }
+            );
+
+            window.motiGoNotificar?.(
+                "No hay repartidores disponibles en este momento."
+            );
+
+            return;
+        }
+
+        console.log(
+            "📤 MOTI GO: reiniciando dispatcher..."
+        );
+
+        iniciarDispatcher(
+            pedido,
+            resultadoAsignacion.grupos
+        )
+        .then(
+            resultado => {
+                console.log(
+                    "🏁 MOTI GO: dispatcher de reintento finalizado:",
+                    resultado
+                );
+            }
+        )
+        .catch(
+            error => {
+                console.error(
+                    "❌ MOTI GO: error en dispatcher de reintento:",
+                    error
+                );
+            }
+        );
+    };
+
+
 async function prepararConfirmacionPedido() {
 
     // =====================================================

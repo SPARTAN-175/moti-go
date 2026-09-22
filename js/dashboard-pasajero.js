@@ -60,6 +60,21 @@ let pedidoActivoClienteId = null;
 let listenerPedidoActivoCliente = null;
 
 // =====================================================
+// MOTI GO - VIGILANCIA DE BÚSQUEDA DE REPARTIDOR
+// =====================================================
+// Si una solicitud queda abierta demasiado tiempo (por
+// ejemplo, porque el cliente recargó la app y el dispatcher
+// original dejó de existir), cerramos esa búsqueda y dejamos
+// el pedido en "sin_repartidor" para poder intentar de nuevo.
+// =====================================================
+
+const MOTIGO_TIEMPO_MAX_BUSQUEDA_MS =
+    2 * 60 * 1000;
+
+let temporizadorBusquedaPedido = null;
+let pedidoVigiladoBusquedaId = null;
+
+// =====================================================
 // ELEMENTOS DEL DOM
 // =====================================================
 
@@ -4740,74 +4755,6 @@ function guardarDestinoEnSesionMotiGo(destino) {
 
     renderizarDestinoEntregaMotiGo();
 
-    // =========================================================
-    // SINCRONIZAR LA UBICACIÓN ELEGIDA CON LA REVISIÓN DEL PEDIDO
-    // =========================================================
-    // Si el selector de direcciones se abre desde "Revisar pedido",
-    // el panel ya existe en el DOM. Actualizamos únicamente sus campos
-    // para que la referencia guardada aparezca de inmediato, sin tener
-    // que cerrar y volver a abrir la revisión.
-
-    const campoReferencia =
-        document.getElementById(
-            "motiGoReferenciaEntrega"
-        );
-
-    if (campoReferencia) {
-
-        campoReferencia.value =
-            destinoSeleccionadoMotiGo.referencia ||
-            "";
-
-    }
-
-    const infoDestino =
-        document.querySelector(
-            "#motiGoPedidoPanel .moti-go-destino-entrega-info"
-        );
-
-    if (infoDestino) {
-
-        const elementos =
-            infoDestino.children;
-
-        const nombreDestino =
-            destinoSeleccionadoMotiGo.nombre ||
-            (
-                destinoSeleccionadoMotiGo.tipo === "actual"
-                    ? "Mi ubicación actual"
-                    : "Dirección guardada"
-            );
-
-        const localidadDestino =
-            destinoSeleccionadoMotiGo.localidad ||
-            "Ubicación GPS";
-
-        const referenciaDestino =
-            destinoSeleccionadoMotiGo.referencia ||
-            "Sin referencia adicional.";
-
-        if (elementos[0]) {
-            elementos[0].textContent = "ENTREGAR EN";
-        }
-
-        if (elementos[1]) {
-            elementos[1].textContent =
-                nombreDestino;
-        }
-
-        if (elementos[2]) {
-            elementos[2].textContent =
-                localidadDestino;
-        }
-
-        if (elementos[3]) {
-            elementos[3].textContent =
-                referenciaDestino;
-        }
-
-    }
-
     return true;
 
 }
@@ -7520,6 +7467,13 @@ async function iniciarEscuchaPedidoActivoCliente(
             pedidoActivo.id
         );
 
+        // Recuperar visualmente el pedido activo después de una recarga.
+        // Así "Buscando repartidor" / "Sin repartidor" no desaparece
+        // aunque el usuario haya recargado la aplicación.
+        abrirSeguimientoPedidoMotiGo(
+            pedidoActivo
+        );
+
     }
     catch (error) {
 
@@ -7531,6 +7485,209 @@ async function iniciarEscuchaPedidoActivoCliente(
     }
 
 }
+
+// =====================================================
+// MOTI GO - OBTENER MILISEGUNDOS DE UNA FECHA FIREBASE
+// =====================================================
+
+function obtenerMillisFechaMotiGo(
+    valor
+) {
+
+    if (!valor) {
+        return null;
+    }
+
+    if (typeof valor?.toMillis === "function") {
+        return valor.toMillis();
+    }
+
+    if (valor instanceof Date) {
+        return valor.getTime();
+    }
+
+    if (typeof valor === "number" && Number.isFinite(valor)) {
+        return valor;
+    }
+
+    const fecha = new Date(valor);
+
+    return Number.isNaN(fecha.getTime())
+        ? null
+        : fecha.getTime();
+}
+
+
+// =====================================================
+// MOTI GO - MARCAR BÚSQUEDA AGOTADA
+// =====================================================
+
+async function marcarPedidoSinRepartidorPorTimeout(
+    pedidoId
+) {
+
+    if (!pedidoId) {
+        return;
+    }
+
+    try {
+
+        const referencia =
+            doc(
+                db,
+                "pedidos",
+                pedidoId
+            );
+
+        const snapshot =
+            await getDoc(
+                referencia
+            );
+
+        if (!snapshot.exists()) {
+            return;
+        }
+
+        const pedido = snapshot.data() || {};
+
+        if (
+            ![
+                "pendiente_asignacion",
+                "solicitud_repartidor"
+            ].includes(pedido.estado)
+        ) {
+            return;
+        }
+
+        await updateDoc(
+            referencia,
+            {
+                estado:
+                    "sin_repartidor",
+
+                repartidorId:
+                    null,
+
+                repartidorNombre:
+                    null,
+
+                indiceRepartidor:
+                    null,
+
+                solicitudRechazadaPor:
+                    null,
+
+                actualizadoEn:
+                    serverTimestamp()
+            }
+        );
+
+        console.log(
+            "⌛ MOTI GO: búsqueda de repartidor agotada por tiempo:",
+            pedidoId
+        );
+
+        window.motiGoNotificar?.(
+            "No recibimos respuesta de los repartidores. Puedes intentar buscar nuevamente."
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "❌ MOTI GO: error cerrando búsqueda por tiempo:",
+            error
+        );
+
+    }
+}
+
+
+// =====================================================
+// MOTI GO - PROGRAMAR LÍMITE DE BÚSQUEDA
+// =====================================================
+
+function programarTimeoutBusquedaPedido(
+    pedido
+) {
+
+    if (temporizadorBusquedaPedido) {
+        clearTimeout(
+            temporizadorBusquedaPedido
+        );
+        temporizadorBusquedaPedido = null;
+    }
+
+    pedidoVigiladoBusquedaId = null;
+
+    if (!pedido?.id) {
+        return;
+    }
+
+    const estadosBusqueda = [
+        "pendiente_asignacion",
+        "solicitud_repartidor"
+    ];
+
+    if (!estadosBusqueda.includes(pedido.estado)) {
+        return;
+    }
+
+    // Mientras existe una solicitud concreta usamos su timestamp.
+    // Si todavía no existe, usamos la creación del pedido.
+    const inicio =
+        obtenerMillisFechaMotiGo(
+            pedido.solicitudEnviadaEn
+        ) ||
+        obtenerMillisFechaMotiGo(
+            pedido.creadoEn
+        );
+
+    if (!inicio) {
+        // El serverTimestamp todavía puede no haber llegado;
+        // el siguiente onSnapshot volverá a programarlo.
+        return;
+    }
+
+    const restante =
+        Math.max(
+            0,
+            MOTIGO_TIEMPO_MAX_BUSQUEDA_MS -
+            (Date.now() - inicio)
+        );
+
+    pedidoVigiladoBusquedaId =
+        pedido.id;
+
+    temporizadorBusquedaPedido =
+        setTimeout(
+            () => {
+
+                temporizadorBusquedaPedido = null;
+
+                if (
+                    pedidoVigiladoBusquedaId ===
+                    pedido.id
+                ) {
+
+                    marcarPedidoSinRepartidorPorTimeout(
+                        pedido.id
+                    );
+
+                }
+
+            },
+            restante
+        );
+
+    console.log(
+        "⏱️ MOTI GO: límite de búsqueda programado en",
+        Math.ceil(restante / 1000),
+        "segundos para",
+        pedido.id
+    );
+}
+
 
 onAuthStateChanged(
     auth,
@@ -10075,6 +10232,31 @@ productosTiendaHTML += `
             : "";
 
 
+    const botonReintentarBusquedaHTML =
+        estado ===
+        "sin_repartidor"
+            ? `
+
+                <button
+                    type="button"
+                    id="motigoReintentarRepartidor"
+                    class="moti-seguimiento-reintentar"
+                >
+
+                    <span
+                        class="material-symbols-outlined"
+                    >
+                        refresh
+                    </span>
+
+                    Buscar repartidor nuevamente
+
+                </button>
+
+            `
+            : "";
+
+
     // =====================================================
     // ESTADO ESPECIAL: CANCELADO
     // =====================================================
@@ -10500,6 +10682,13 @@ productosTiendaHTML += `
 
 
             <!-- ========================================= -->
+            <!-- BUSCAR NUEVAMENTE -->
+            <!-- ========================================= -->
+
+            ${botonReintentarBusquedaHTML}
+
+
+            <!-- ========================================= -->
             <!-- CANCELAR -->
             <!-- ========================================= -->
 
@@ -10541,6 +10730,105 @@ productosTiendaHTML += `
 
         configurarBotonCancelarPedido(
             pedido
+        );
+
+    }
+
+
+    const botonReintentar =
+        document.getElementById(
+            "motigoReintentarRepartidor"
+        );
+
+    if (botonReintentar) {
+
+        if (!document.getElementById("motiEstiloReintentarBusqueda")) {
+            const estiloReintento = document.createElement("style");
+            estiloReintento.id = "motiEstiloReintentarBusqueda";
+            estiloReintento.textContent = `
+                #motigoReintentarRepartidor {
+                    width:100%;
+                    border:0;
+                    border-radius:16px;
+                    padding:14px 16px;
+                    margin-top:10px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    gap:8px;
+                    font:inherit;
+                    font-weight:700;
+                    cursor:pointer;
+                    background:#e9f8ef;
+                    color:#168447;
+                }
+                #motigoReintentarRepartidor:disabled {
+                    opacity:.65;
+                    cursor:default;
+                }
+            `;
+            document.head.appendChild(estiloReintento);
+        }
+
+        botonReintentar.addEventListener(
+            "click",
+            async () => {
+
+                if (botonReintentar.disabled) {
+                    return;
+                }
+
+                botonReintentar.disabled = true;
+                botonReintentar.innerHTML = `
+                    <span class="material-symbols-outlined">
+                        hourglass_top
+                    </span>
+                    Buscando repartidor...
+                `;
+
+                try {
+
+                    if (
+                        typeof window.motiGoReintentarBusqueda ===
+                        "function"
+                    ) {
+
+                        await window.motiGoReintentarBusqueda(
+                            pedido.id
+                        );
+
+                    }
+                    else {
+
+                        throw new Error(
+                            "El módulo de búsqueda no está disponible."
+                        );
+
+                    }
+
+                }
+                catch (error) {
+
+                    console.error(
+                        "❌ MOTI GO: error reintentando búsqueda:",
+                        error
+                    );
+
+                    window.motiGoNotificar?.(
+                        "No pudimos iniciar nuevamente la búsqueda de repartidor."
+                    );
+
+                    botonReintentar.disabled = false;
+                    botonReintentar.innerHTML = `
+                        <span class="material-symbols-outlined">
+                            refresh
+                        </span>
+                        Buscar repartidor nuevamente
+                    `;
+
+                }
+
+            }
         );
 
     }
@@ -13191,6 +13479,12 @@ function escucharPedidoActivoCliente(
                 console.log(
                     "🔄 MOTI GO: cambio recibido del pedido activo:",
                     pedidoActual.estado
+                );
+
+
+                // Vigilar la búsqueda para que no quede abierta indefinidamente.
+                programarTimeoutBusquedaPedido(
+                    pedidoActual
                 );
 
 
