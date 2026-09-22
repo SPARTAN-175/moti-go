@@ -6841,12 +6841,99 @@ function aplicarFiltrosCuenta() {
 
 
 // =========================================================
+// ESTADO VISUAL DE COMISIONES SEGÚN PAGOS REALIZADOS
+// =========================================================
+// Los movimientos históricos no se modifican en Firestore.
+// Aquí calculamos únicamente el estado que se muestra al negocio.
+// Los pagos se aplican primero a las comisiones más antiguas.
+
+function obtenerEstadosVisualesComisiones() {
+
+    const estados = new Map();
+
+    const comisiones =
+        movimientosCuenta
+            .filter(movimiento =>
+                String(movimiento.tipo || "").toLowerCase() === "comision"
+            )
+            .sort((a, b) =>
+                obtenerFechaMovimiento(a) -
+                obtenerFechaMovimiento(b)
+            );
+
+    const pagos =
+        movimientosCuenta
+            .filter(movimiento =>
+                String(movimiento.tipo || "").toLowerCase() === "pago"
+            );
+
+    let totalPagos = pagos.reduce(
+        (total, movimiento) =>
+            total + (Number(movimiento.monto) || 0),
+        0
+    );
+
+    let acumuladoComisiones = 0;
+
+    comisiones.forEach(movimiento => {
+
+        const monto = Number(movimiento.monto) || 0;
+        acumuladoComisiones += monto;
+
+        const estadoOriginal =
+            String(movimiento.estado || "").toLowerCase();
+
+        // Un movimiento que ya viene explícitamente cancelado/anulado
+        // conserva ese estado y no se considera cubierto por pagos.
+        if (
+            ["cancelado", "anulado", "rechazado"].includes(estadoOriginal)
+        ) {
+            estados.set(movimiento.id, {
+                texto: movimiento.estado,
+                clase: "",
+                clave: estadoOriginal
+            });
+            return;
+        }
+
+        if (totalPagos >= acumuladoComisiones) {
+            estados.set(movimiento.id, {
+                texto: "Pagada",
+                clase: "paid",
+                clave: "pagada"
+            });
+        }
+        else if (totalPagos > acumuladoComisiones - monto) {
+            estados.set(movimiento.id, {
+                texto: "Pago parcial",
+                clase: "partial",
+                clave: "parcial"
+            });
+        }
+        else {
+            estados.set(movimiento.id, {
+                texto: "Pendiente",
+                clase: "pending",
+                clave: "pendiente"
+            });
+        }
+
+    });
+
+    return estados;
+}
+
+
+// =========================================================
 // RENDERIZAR MOVIMIENTOS
 // =========================================================
 
 function renderizarMovimientosCuenta(
     movimientos
 ) {
+
+    const estadosVisuales =
+        obtenerEstadosVisualesComisiones();
 
     const container =
         document.getElementById(
@@ -6929,9 +7016,14 @@ function renderizarMovimientosCuenta(
     movimientos.forEach(
         movimiento => {
 
+            const movimientoParaMostrar = {
+                ...movimiento,
+                estadoVisual: estadosVisuales.get(movimiento.id) || null
+            };
+
             container.appendChild(
                 crearMovimientoCuenta(
-                    movimiento
+                    movimientoParaMostrar
                 )
             );
 
@@ -7020,10 +7112,16 @@ function crearMovimientoCuenta(
 
     if (esComision) {
 
-        if (
-            estado ===
-            "pendiente"
-        ) {
+        if (movimiento.estadoVisual) {
+
+            estadoTexto =
+                movimiento.estadoVisual.texto;
+
+            estadoClase =
+                movimiento.estadoVisual.clase;
+
+        }
+        else if (estado === "pendiente") {
 
             estadoTexto =
                 "Pendiente";
