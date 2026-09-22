@@ -267,6 +267,24 @@
 
 </button>
 
+<button
+    type="button"
+    class="nav-item nav-item-with-badge"
+    data-view="devoluciones"
+>
+
+    <span class="material-symbols-outlined">
+        assignment_return
+    </span>
+
+    <span>
+        Devoluciones
+    </span>
+
+    <span id="businessReturnsBadge" class="nav-badge" hidden>0</span>
+
+</button>
+
 
 <button
     type="button"
@@ -1752,6 +1770,43 @@
     </div>
 
 </section>
+
+            <!-- =================================================
+                 VISTA: CONFIGURACIÓN
+            ================================================== -->
+
+            <section
+                class="business-view"
+                id="viewDevoluciones"
+                data-view-content="devoluciones"
+            >
+
+                <div class="view-intro compact">
+                    <span class="eyebrow">INVENTARIO</span>
+                    <h1>Devoluciones pendientes</h1>
+                    <p>Recibe físicamente los productos devueltos por incidencias y reincorpóralos al inventario.</p>
+                </div>
+
+                <div class="returns-summary-card">
+                    <div>
+                        <span class="material-symbols-outlined">inventory_2</span>
+                        <div>
+                            <strong>Recepciones pendientes</strong>
+                            <span id="businessReturnsCount">0 pendientes</span>
+                        </div>
+                    </div>
+                    <span class="returns-summary-note">Solo confirma cuando tengas físicamente los productos.</span>
+                </div>
+
+                <div id="businessReturnsList" class="business-returns-list"></div>
+
+                <div id="businessReturnsEmpty" class="business-returns-empty" hidden>
+                    <span class="material-symbols-outlined">inventory</span>
+                    <strong>No tienes devoluciones pendientes</strong>
+                    <span>Cuando un pedido tenga una incidencia y regresen productos a tu tienda, aparecerán aquí.</span>
+                </div>
+
+            </section>
 
             <!-- =================================================
                  VISTA: CONFIGURACIÓN

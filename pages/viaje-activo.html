@@ -563,12 +563,76 @@
         </section>
 
 
+        <!-- ================================= -->
+        <!-- INCIDENCIA DE ENTREGA -->
+        <!-- ================================= -->
+
+        <section
+            id="panelIncidencia"
+            class="incidencia-panel oculto"
+            aria-hidden="true"
+        >
+            <div class="incidencia-dialog" role="dialog" aria-modal="true" aria-labelledby="incidenciaTitulo">
+                <div class="incidencia-icono">
+                    <span class="material-symbols-outlined">report_problem</span>
+                </div>
+
+                <div class="incidencia-contenido">
+                    <h2 id="incidenciaTitulo">Reportar incidencia</h2>
+                    <p>Indica qué ocurrió con la entrega. MOTI GO registrará el reporte y devolverá correctamente al inventario los productos que correspondan.</p>
+
+                    <label for="incidenciaMotivo">¿Qué ocurrió?</label>
+                    <select id="incidenciaMotivo">
+                        <option value="">Selecciona un motivo</option>
+                        <option value="cliente_no_disponible">El cliente no estaba disponible</option>
+                        <option value="cliente_no_responde">El cliente no responde</option>
+                        <option value="direccion_incorrecta">La dirección o referencia es incorrecta</option>
+                        <option value="cliente_rechaza_pedido">El cliente rechazó el pedido</option>
+                        <option value="problema_con_pedido">Hay un problema con el pedido</option>
+                        <option value="problema_en_ruta">No fue posible completar la ruta</option>
+                        <option value="otro">Otro motivo</option>
+                    </select>
+
+                    <label for="incidenciaComentario">Detalles <span>(opcional)</span></label>
+                    <textarea
+                        id="incidenciaComentario"
+                        maxlength="500"
+                        rows="4"
+                        placeholder="Describe brevemente lo ocurrido..."
+                    ></textarea>
+
+                    <div id="incidenciaMensaje" class="incidencia-mensaje" hidden></div>
+
+                    <div class="incidencia-acciones">
+                        <button id="btnCerrarIncidencia" class="btn-incidencia-secundario" type="button">Volver</button>
+                        <button id="btnConfirmarIncidencia" class="btn-incidencia-principal" type="button">
+                            <span class="material-symbols-outlined">send</span>
+                            Reportar y finalizar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
 
         <!-- ================================= -->
         <!-- BOTÓN PRINCIPAL -->
         <!-- ================================= -->
 
         <div class="acciones-viaje">
+
+            <button
+                id="btnIncidencia"
+                class="btn-incidencia"
+                type="button"
+                hidden
+            >
+                <span class="material-symbols-outlined">
+                    report_problem
+                </span>
+                <span>Reportar incidencia</span>
+            </button>
 
             <button
                 id="btnAccion"
