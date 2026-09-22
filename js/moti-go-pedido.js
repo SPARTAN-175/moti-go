@@ -2180,23 +2180,10 @@ async function obtenerRepartidoresParaMotorMotiGo() {
         );
 
 
-    const ubicacionesSnapshot =
-        await get(
-            ref(
-                rtdb,
-                "ubicacionesRepartidores"
-            )
-        );
-
-    const ubicaciones =
-        ubicacionesSnapshot.exists()
-            ? ubicacionesSnapshot.val() || {}
-            : {};
-
-
     const repartidores =
         [];
 
+    const candidatos = [];
 
     snapshot.forEach(
         docSnap => {
@@ -2215,36 +2202,40 @@ async function obtenerRepartidoresParaMotorMotiGo() {
             }
 
 
-            const ubicacion =
-                ubicaciones[docSnap.id] || {};
-
-
-            repartidores.push({
-
-                id:
-                    docSnap.id,
-
-                ...datos,
-
-                latitud:
-                    Number(ubicacion.latitud),
-
-                longitud:
-                    Number(ubicacion.longitud),
-
-                ubicacionActiva:
-                    ubicacion.activo === true,
-
-                ubicacionActualizadaEn:
-                    ubicacion.actualizadoEn ?? null,
-
-                precisionGPS:
-                    Number(ubicacion.precision) || null
-
+            candidatos.push({
+                docSnap,
+                datos
             });
 
         }
     );
+
+    const resultadosUbicacion = await Promise.all(
+        candidatos.map(async ({ docSnap, datos }) => {
+            const ubicacionSnap = await get(
+                ref(
+                    rtdb,
+                    `ubicacionesRepartidores/${docSnap.id}`
+                )
+            );
+
+            const ubicacion = ubicacionSnap.exists()
+                ? ubicacionSnap.val() || {}
+                : {};
+
+            return {
+                id: docSnap.id,
+                ...datos,
+                latitud: Number(ubicacion.latitud),
+                longitud: Number(ubicacion.longitud),
+                ubicacionActiva: ubicacion.activo === true,
+                ubicacionActualizadaEn: ubicacion.actualizadoEn ?? null,
+                precisionGPS: Number(ubicacion.precision) || null
+            };
+        })
+    );
+
+    repartidores.push(...resultadosUbicacion);
 
 
     console.log(

@@ -3,7 +3,7 @@ import { auth, db, rtdb } from "./firebase-config.js";
 import { onAuthStateChanged }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
-import { doc, onSnapshot }
+import { doc, getDoc, onSnapshot }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 import {
@@ -78,13 +78,39 @@ function detenerGPS() {
 window.motiGoGPS = { detener: detenerGPS };
 window.addEventListener("moti-go:logout", detenerGPS);
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
     if (!user) {
         detenerGPS();
         return;
     }
 
-    iniciarGPS(user.uid);
+    try {
+        const usuarioSnap = await getDoc(doc(db, "usuarios", user.uid));
+
+        if (!auth.currentUser || auth.currentUser.uid !== user.uid) return;
+
+        if (!usuarioSnap.exists()) {
+            detenerGPS();
+            return;
+        }
+
+        const usuario = usuarioSnap.data() || {};
+
+        // El canal ubicacionesRepartidores es exclusivo de repartidores.
+        // Los clientes conservan su ubicación de entrega por el flujo propio
+        // de dashboard-pasajero.js y no publican telemetría en RTDB.
+        if (usuario.tipo !== "repartidor") {
+            detenerGPS();
+            console.log("📍 GPS RTDB: usuario no repartidor; publicación RTDB omitida.");
+            return;
+        }
+
+        iniciarGPS(user.uid);
+    } catch (error) {
+        if (auth.currentUser?.uid !== user.uid) return;
+        console.warn("📍 GPS RTDB: no se pudo verificar el tipo de usuario:", error);
+        detenerGPS();
+    }
 });
 
 function iniciarGPS(uid) {
