@@ -405,55 +405,99 @@ document
 // FIREBASE AUTH
 // =========================================================
 
+async function resolverSesionNegocio(user) {
+
+    authEstadoResuelto = true;
+
+    if (!user) {
+
+        console.warn(
+            "⚠️ MOTI GO: sesión de negocio no disponible. Redirigiendo al acceso..."
+        );
+
+        // Nunca dejar listeners activos después de cerrar sesión.
+        if (cancelarListenerDevoluciones) {
+            cancelarListenerDevoluciones();
+            cancelarListenerDevoluciones = null;
+        }
+
+        if (cancelarListenerCuenta) {
+            cancelarListenerCuenta();
+            cancelarListenerCuenta = null;
+        }
+
+        usuarioActual = null;
+        tiendaActual = null;
+        tiendaId = null;
+        devolucionesPendientes = [];
+        movimientosCuenta = [];
+
+        document.body.classList.add("auth-pending");
+
+        // La pantalla de negocio nunca debe quedar accesible sin sesión.
+        window.location.replace("login.html");
+        return;
+    }
+
+    usuarioActual = user;
+
+    // Solo mostramos el panel después de confirmar que existe una sesión.
+    document.body.classList.remove("auth-pending");
+
+    console.log(
+        "👤 Usuario negocio:",
+        user.uid
+    );
+
+    await cargarDatosNegocio();
+}
+
+
+// Esperamos explícitamente a que Firebase termine de restaurar la sesión
+// antes de tomar la decisión de redirigir o mostrar el dashboard.
+(async () => {
+
+    try {
+
+        await auth.authStateReady();
+
+        await resolverSesionNegocio(
+            auth.currentUser
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "❌ MOTI GO: error resolviendo la sesión del negocio:",
+            error
+        );
+
+        document.body.classList.add("auth-pending");
+        window.location.replace("login.html");
+
+    }
+
+})();
+
+
+// Después de resolver el estado inicial, seguimos escuchando cambios reales
+// de sesión para cerrar correctamente el dashboard cuando haya logout.
 onAuthStateChanged(
     auth,
     async user => {
 
-        // Firebase terminó de resolver el estado de autenticación.
-        authEstadoResuelto = true;
-
-        if (!user) {
-
-            console.warn(
-                "⚠️ No hay usuario autenticado. Redirigiendo al acceso..."
-            );
-
-            // Nunca dejar listeners activos después de cerrar sesión.
-            if (cancelarListenerDevoluciones) {
-                cancelarListenerDevoluciones();
-                cancelarListenerDevoluciones = null;
-            }
-
-            if (cancelarListenerCuenta) {
-                cancelarListenerCuenta();
-                cancelarListenerCuenta = null;
-            }
-
-            usuarioActual = null;
-            tiendaActual = null;
-            tiendaId = null;
-            devolucionesPendientes = [];
-            movimientosCuenta = [];
-
-            document.body.classList.add("auth-pending");
-
-            // La pantalla de negocio nunca debe quedar accesible sin sesión.
-            window.location.replace("login.html");
+        if (!authEstadoResuelto) {
             return;
-
         }
 
-        usuarioActual = user;
+        // Evitamos recargar todo el negocio cuando el mismo usuario provoca
+        // una notificación de Auth que no cambia realmente la identidad.
+        if (user && usuarioActual?.uid === user.uid) {
+            return;
+        }
 
-        // Solo mostramos el panel después de confirmar que existe una sesión.
-        document.body.classList.remove("auth-pending");
-
-        console.log(
-            "👤 Usuario negocio:",
-            user.uid
-        );
-
-        await cargarDatosNegocio();
+        await resolverSesionNegocio(user);
 
     }
 );

@@ -1,17 +1,26 @@
 import "./motigo-ui.js";
 
-// Importaciones Firebase
+// =========================================================
+// FIREBASE — CONFIGURACIÓN CENTRAL
+// =========================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import {
+  initializeAuth,
+  indexedDBLocalPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 import { getStorage } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-storage.js";
 
 
+// =========================================================
 // CONFIGURACIÓN FIREBASE
+// =========================================================
 
 const firebaseConfig = {
   apiKey: "AIzaSyBQyULHw9P6V_nukIe_Np3_6LA2hdWuu5A",
@@ -22,11 +31,23 @@ const firebaseConfig = {
   appId: "1:403488200433:web:695fd2eee203846546bb50"
 };
 
-// Inicializar Firebase
+
+// =========================================================
+// INICIALIZAR FIREBASE
+// =========================================================
 
 const app = initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
+// La persistencia queda definida explícitamente para que el estado
+// autenticado sobreviva correctamente al navegar entre páginas.
+// El usuario sigue necesitando cerrar sesión explícitamente para salir.
+export const auth = initializeAuth(app, {
+  persistence: [
+    indexedDBLocalPersistence,
+    browserLocalPersistence,
+    browserSessionPersistence
+  ]
+});
 
 export const db = getFirestore(app);
 
