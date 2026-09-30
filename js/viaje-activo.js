@@ -1,4 +1,4 @@
-import { auth, db, rtdb }
+import { auth, db }
 from "./firebase-config.js"; 
 
 import {
@@ -11,12 +11,6 @@ import {
     serverTimestamp
 }
 from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
-
-import {
-    ref,
-    onValue
-}
-from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
 import {
     onAuthStateChanged
@@ -1348,9 +1342,13 @@ async function reportarIncidenciaEntrega() {
 
             const itemsPendientes = [];
 
+            const tiendaIdsDevolucion = new Set();
+
             inventarios.forEach((item) => {
 
                 if (item.devolucionPendiente <= 0) return;
+
+                tiendaIdsDevolucion.add(item.tiendaId);
 
                 itemsPendientes.push({
                     inventarioId: item.inventarioId,
@@ -1375,6 +1373,8 @@ async function reportarIncidenciaEntrega() {
                 requiereRecepcionTienda:
                     tieneDevolucionPendiente,
                 inventarioRestituido: false,
+                tiendaIds:
+                    Array.from(tiendaIdsDevolucion),
                 items: itemsPendientes,
                 creadaEn: serverTimestamp(),
                 actualizadaEn: serverTimestamp()
@@ -4735,21 +4735,18 @@ function escucharMovimientoConductor() {
         true;
 
 
-    onValue(
+    onSnapshot(
 
-        ref(
-            rtdb,
-            `ubicacionesRepartidores/${auth.currentUser.uid}`
+        doc(
+            db,
+            "usuarios",
+            auth.currentUser.uid
         ),
 
         (snapshot) => {
 
             const datos =
-                snapshot.val();
-
-            if (!datos || datos.activo !== true) {
-                return;
-            }
+                snapshot.data();
 
 
             if (!datos) {

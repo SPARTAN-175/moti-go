@@ -44,8 +44,6 @@ let usuarioActual = null;
 
 let tiendaActual = null;
 
-let datosUsuarioNegocio = null;
-
 let tiendaId = null;
 
 let productos = [];
@@ -69,8 +67,6 @@ let filtroCuentaActual = "todos";
 let fechaCuentaDesde = "";
 
 let fechaCuentaHasta = "";
-
-let ventasPeriodoActual = "mes";
 
 let cancelarListenerCuenta = null;
 let cancelarListenerDevoluciones = null;
@@ -409,99 +405,55 @@ document
 // FIREBASE AUTH
 // =========================================================
 
-async function resolverSesionNegocio(user) {
-
-    authEstadoResuelto = true;
-
-    if (!user) {
-
-        console.warn(
-            "⚠️ MOTI GO: sesión de negocio no disponible. Redirigiendo al acceso..."
-        );
-
-        // Nunca dejar listeners activos después de cerrar sesión.
-        if (cancelarListenerDevoluciones) {
-            cancelarListenerDevoluciones();
-            cancelarListenerDevoluciones = null;
-        }
-
-        if (cancelarListenerCuenta) {
-            cancelarListenerCuenta();
-            cancelarListenerCuenta = null;
-        }
-
-        usuarioActual = null;
-        tiendaActual = null;
-        tiendaId = null;
-        devolucionesPendientes = [];
-        movimientosCuenta = [];
-
-        document.body.classList.add("auth-pending");
-
-        // La pantalla de negocio nunca debe quedar accesible sin sesión.
-        window.location.replace("login.html");
-        return;
-    }
-
-    usuarioActual = user;
-
-    // Solo mostramos el panel después de confirmar que existe una sesión.
-    document.body.classList.remove("auth-pending");
-
-    console.log(
-        "👤 Usuario negocio:",
-        user.uid
-    );
-
-    await cargarDatosNegocio();
-}
-
-
-// Esperamos explícitamente a que Firebase termine de restaurar la sesión
-// antes de tomar la decisión de redirigir o mostrar el dashboard.
-(async () => {
-
-    try {
-
-        await auth.authStateReady();
-
-        await resolverSesionNegocio(
-            auth.currentUser
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "❌ MOTI GO: error resolviendo la sesión del negocio:",
-            error
-        );
-
-        document.body.classList.add("auth-pending");
-        window.location.replace("login.html");
-
-    }
-
-})();
-
-
-// Después de resolver el estado inicial, seguimos escuchando cambios reales
-// de sesión para cerrar correctamente el dashboard cuando haya logout.
 onAuthStateChanged(
     auth,
     async user => {
 
-        if (!authEstadoResuelto) {
+        // Firebase terminó de resolver el estado de autenticación.
+        authEstadoResuelto = true;
+
+        if (!user) {
+
+            console.warn(
+                "⚠️ No hay usuario autenticado. Redirigiendo al acceso..."
+            );
+
+            // Nunca dejar listeners activos después de cerrar sesión.
+            if (cancelarListenerDevoluciones) {
+                cancelarListenerDevoluciones();
+                cancelarListenerDevoluciones = null;
+            }
+
+            if (cancelarListenerCuenta) {
+                cancelarListenerCuenta();
+                cancelarListenerCuenta = null;
+            }
+
+            usuarioActual = null;
+            tiendaActual = null;
+            tiendaId = null;
+            devolucionesPendientes = [];
+            movimientosCuenta = [];
+
+            document.body.classList.add("auth-pending");
+
+            // La pantalla de negocio nunca debe quedar accesible sin sesión.
+            window.location.replace("login.html");
             return;
+
         }
 
-        // Evitamos recargar todo el negocio cuando el mismo usuario provoca
-        // una notificación de Auth que no cambia realmente la identidad.
-        if (user && usuarioActual?.uid === user.uid) {
-            return;
-        }
+        usuarioActual = user;
 
-        await resolverSesionNegocio(user);
+        // Solo mostramos el panel después de confirmar que existe una sesión.
+        document.body.classList.remove("auth-pending");
+
+        console.log(
+            "👤 Usuario negocio:",
+            user.uid
+        );
+
+        await cargarDatosNegocio();
 
     }
 );
@@ -551,9 +503,6 @@ async function cargarDatosNegocio() {
 
         const datosUsuario =
             usuarioSnap.data();
-
-        datosUsuarioNegocio =
-            datosUsuario;
 
 
         /*
@@ -664,7 +613,6 @@ async function cargarTienda() {
 
 
     actualizarDatosVisualesTienda();
-actualizarPerfilCompletoNegocio();
 
 }
 
@@ -772,99 +720,6 @@ function actualizarDatosVisualesTienda() {
 
     }
 
-}
-
-
-// =========================================================
-// PERFIL COMPLETO DEL NEGOCIO
-// =========================================================
-
-function obtenerValorNegocio(...valores) {
-    return valores.find(
-        valor =>
-            valor !== undefined &&
-            valor !== null &&
-            String(valor).trim() !== ""
-    );
-}
-
-function actualizarPerfilCompletoNegocio() {
-
-    const usuario = datosUsuarioNegocio || {};
-    const tienda = tiendaActual || {};
-
-    const datos = {
-        nombre: obtenerValorNegocio(
-            tienda.nombre,
-            tienda.nombreTienda,
-            usuario.nombre,
-            "Mi negocio"
-        ),
-        tipo: obtenerValorNegocio(
-            tienda.tipo,
-            tienda.categoria,
-            "Negocio afiliado"
-        ),
-        categoria: obtenerValorNegocio(
-            tienda.categoria,
-            tienda.departamento,
-            "No registrada"
-        ),
-        direccion: obtenerValorNegocio(
-            tienda.direccion,
-            tienda.domicilio,
-            "No registrada"
-        ),
-        telefono: obtenerValorNegocio(
-            tienda.telefono,
-            tienda.telefonoContacto,
-            usuario.telefono,
-            usuario.telefonoContacto,
-            "No registrado"
-        ),
-        email: obtenerValorNegocio(
-            tienda.email,
-            tienda.correo,
-            usuario.email,
-            usuario.correo,
-            usuarioActual?.email,
-            "No registrado"
-        ),
-        estado: obtenerValorNegocio(
-            tienda.estado,
-            usuario.estado,
-            "Activo"
-        ),
-        id: obtenerValorNegocio(
-            tienda.id,
-            tiendaId,
-            "No disponible"
-        )
-    };
-
-    const asignaciones = {
-        profileBusinessName: datos.nombre,
-        profileBusinessType: datos.tipo,
-        profileAddress: datos.direccion,
-        profileBusinessCategory: datos.categoria,
-        profileBusinessPhone: datos.telefono,
-        profileBusinessEmail: datos.email,
-        profileBusinessId: datos.id,
-        profileBusinessStatus: datos.estado
-    };
-
-    Object.entries(asignaciones).forEach(([id, valor]) => {
-        const elemento = document.getElementById(id);
-        if (elemento) elemento.textContent = String(valor);
-    });
-
-    const estadoElemento = document.getElementById("profileBusinessStatus");
-    if (estadoElemento) {
-        const estadoNormalizado = String(datos.estado || "activo").toLowerCase();
-        const activo = !["inactivo", "suspendido", "bloqueado", "cerrado"].includes(estadoNormalizado);
-        estadoElemento.classList.toggle("status-active", activo);
-        estadoElemento.classList.toggle("status-inactive", !activo);
-    }
 }
 
 
@@ -6187,7 +6042,7 @@ function escucharDevoluciones() {
 
     const devolucionesQuery = query(
         collection(db, "devolucionesInventario"),
-        where("estado", "==", "pendiente_recepcion")
+        where("tiendaIds", "array-contains", tiendaId)
     );
 
     cancelarListenerDevoluciones = onSnapshot(
@@ -6196,7 +6051,9 @@ function escucharDevoluciones() {
             devolucionesPendientes = snapshot.docs.map(docSnap => ({
                 id: docSnap.id,
                 ...docSnap.data()
-            })).map(devolucion => {
+            })).filter(devolucion =>
+                devolucion.estado === "pendiente_recepcion"
+            ).map(devolucion => {
                 const itemsTienda = (devolucion.items || []).filter(item =>
                     item.tiendaId === tiendaId &&
                     item.estadoRecepcion !== "recibido"
@@ -6424,7 +6281,6 @@ function escucharMovimientosCuenta() {
                 actualizarResumenCuenta();
 
                 aplicarFiltrosCuenta();
-                actualizarPanelVentas();
 
             },
 
@@ -6564,7 +6420,7 @@ function actualizarResumenCuenta() {
         }
     );
 
-        actualizarPanelVentas();
+        actualizarGraficaGanancias();
 
 }
 
@@ -6841,99 +6697,12 @@ function aplicarFiltrosCuenta() {
 
 
 // =========================================================
-// ESTADO VISUAL DE COMISIONES SEGÚN PAGOS REALIZADOS
-// =========================================================
-// Los movimientos históricos no se modifican en Firestore.
-// Aquí calculamos únicamente el estado que se muestra al negocio.
-// Los pagos se aplican primero a las comisiones más antiguas.
-
-function obtenerEstadosVisualesComisiones() {
-
-    const estados = new Map();
-
-    const comisiones =
-        movimientosCuenta
-            .filter(movimiento =>
-                String(movimiento.tipo || "").toLowerCase() === "comision"
-            )
-            .sort((a, b) =>
-                obtenerFechaMovimiento(a) -
-                obtenerFechaMovimiento(b)
-            );
-
-    const pagos =
-        movimientosCuenta
-            .filter(movimiento =>
-                String(movimiento.tipo || "").toLowerCase() === "pago"
-            );
-
-    let totalPagos = pagos.reduce(
-        (total, movimiento) =>
-            total + (Number(movimiento.monto) || 0),
-        0
-    );
-
-    let acumuladoComisiones = 0;
-
-    comisiones.forEach(movimiento => {
-
-        const monto = Number(movimiento.monto) || 0;
-        acumuladoComisiones += monto;
-
-        const estadoOriginal =
-            String(movimiento.estado || "").toLowerCase();
-
-        // Un movimiento que ya viene explícitamente cancelado/anulado
-        // conserva ese estado y no se considera cubierto por pagos.
-        if (
-            ["cancelado", "anulado", "rechazado"].includes(estadoOriginal)
-        ) {
-            estados.set(movimiento.id, {
-                texto: movimiento.estado,
-                clase: "",
-                clave: estadoOriginal
-            });
-            return;
-        }
-
-        if (totalPagos >= acumuladoComisiones) {
-            estados.set(movimiento.id, {
-                texto: "Pagada",
-                clase: "paid",
-                clave: "pagada"
-            });
-        }
-        else if (totalPagos > acumuladoComisiones - monto) {
-            estados.set(movimiento.id, {
-                texto: "Pago parcial",
-                clase: "partial",
-                clave: "parcial"
-            });
-        }
-        else {
-            estados.set(movimiento.id, {
-                texto: "Pendiente",
-                clase: "pending",
-                clave: "pendiente"
-            });
-        }
-
-    });
-
-    return estados;
-}
-
-
-// =========================================================
 // RENDERIZAR MOVIMIENTOS
 // =========================================================
 
 function renderizarMovimientosCuenta(
     movimientos
 ) {
-
-    const estadosVisuales =
-        obtenerEstadosVisualesComisiones();
 
     const container =
         document.getElementById(
@@ -7016,14 +6785,9 @@ function renderizarMovimientosCuenta(
     movimientos.forEach(
         movimiento => {
 
-            const movimientoParaMostrar = {
-                ...movimiento,
-                estadoVisual: estadosVisuales.get(movimiento.id) || null
-            };
-
             container.appendChild(
                 crearMovimientoCuenta(
-                    movimientoParaMostrar
+                    movimiento
                 )
             );
 
@@ -7112,16 +6876,10 @@ function crearMovimientoCuenta(
 
     if (esComision) {
 
-        if (movimiento.estadoVisual) {
-
-            estadoTexto =
-                movimiento.estadoVisual.texto;
-
-            estadoClase =
-                movimiento.estadoVisual.clase;
-
-        }
-        else if (estado === "pendiente") {
+        if (
+            estado ===
+            "pendiente"
+        ) {
 
             estadoTexto =
                 "Pendiente";
@@ -7416,273 +7174,312 @@ function formatearFechaMovimiento(
 }
 
 // =========================================================
-// VENTAS REALES DEL NEGOCIO
+// GRÁFICA DE GANANCIAS POR MES
 // =========================================================
 
-function obtenerVentasReales() {
+function renderizarGraficaGanancias() {
 
-    return movimientosCuenta
-        .filter(movimiento =>
-            String(movimiento.tipo || "").toLowerCase() === "comision"
-        )
-        .map(movimiento => {
-            const ventaBruta = Number(
-                movimiento.subtotalVenta ??
-                movimiento.subtotal ??
-                0
-            ) || 0;
+    const container =
+        document.getElementById(
+            "accountEarningsChart"
+        );
 
-            const comision = Number(movimiento.monto || 0) || 0;
 
-            return {
-                ...movimiento,
-                ventaBruta,
-                comision,
-                neto: Number((ventaBruta - comision).toFixed(2))
-            };
-        })
-        .filter(venta => venta.ventaBruta > 0);
-}
+    if (!container) {
 
-function obtenerClavePeriodo(fecha, periodo) {
+        return;
 
-    const año = fecha.getFullYear();
-    const mes = String(fecha.getMonth() + 1).padStart(2, "0");
-
-    if (periodo === "dia") {
-        return `${año}-${mes}-${String(fecha.getDate()).padStart(2, "0")}`;
     }
 
-    if (periodo === "semana") {
-        const inicio = new Date(fecha);
-        const dia = inicio.getDay();
-        inicio.setDate(inicio.getDate() + (dia === 0 ? -6 : 1 - dia));
-        return `${inicio.getFullYear()}-${String(inicio.getMonth() + 1).padStart(2, "0")}-${String(inicio.getDate()).padStart(2, "0")}`;
-    }
 
-    return `${año}-${mes}`;
-}
+    // =====================================================
+    // SOLO COMISIONES GENERADAS
+    // =====================================================
 
-function formatearEtiquetaPeriodo(clave, periodo) {
+    const comisiones =
+        movimientosCuenta.filter(
+            movimiento =>
+                String(
+                    movimiento.tipo ||
+                    ""
+                ).toLowerCase() ===
+                "comision"
+        );
 
-    if (periodo === "mes") {
-        const [año, mes] = clave.split("-");
-        return new Intl.DateTimeFormat("es-MX", {
-            month: "short",
-            year: "numeric"
-        }).format(new Date(Number(año), Number(mes) - 1, 1)).replace(".", "");
-    }
 
-    const fecha = new Date(`${clave}T12:00:00`);
-    if (Number.isNaN(fecha.getTime())) return clave;
+    if (
+        comisiones.length === 0
+    ) {
 
-    const texto = new Intl.DateTimeFormat("es-MX", {
-        day: "2-digit",
-        month: "short"
-    }).format(fecha).replace(".", "");
-
-    return periodo === "semana" ? `Sem. ${texto}` : texto;
-}
-
-function obtenerDatosGraficaVentas() {
-
-    const agrupadas = new Map();
-
-    obtenerVentasReales().forEach(venta => {
-
-        const fecha = obtenerFechaMovimiento(venta);
-        if (fecha.getTime() === 0) return;
-
-        const clave = obtenerClavePeriodo(fecha, ventasPeriodoActual);
-        const actual = agrupadas.get(clave) || {
-            ventaBruta: 0,
-            comision: 0,
-            neto: 0,
-            pedidos: 0
-        };
-
-        actual.ventaBruta += venta.ventaBruta;
-        actual.comision += venta.comision;
-        actual.neto += venta.neto;
-        actual.pedidos += 1;
-        agrupadas.set(clave, actual);
-    });
-
-    const limite =
-        ventasPeriodoActual === "dia" ? 14 :
-        ventasPeriodoActual === "semana" ? 8 : 12;
-
-    return [...agrupadas.entries()]
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .slice(-limite);
-}
-
-function renderizarGraficaVentas() {
-
-    const container = document.getElementById("accountEarningsChart");
-    if (!container) return;
-
-    const datos = obtenerDatosGraficaVentas();
-
-    if (!datos.length) {
         container.innerHTML = `
+
             <div class="account-chart-empty">
+
                 <div>
-                    <span class="material-symbols-outlined">bar_chart</span>
-                    Todavía no hay ventas realizadas por la aplicación.
+
+                    <span
+                        class="material-symbols-outlined"
+                        style="
+                            display:block;
+                            font-size:32px;
+                            margin-bottom:7px;
+                        "
+                    >
+                        bar_chart
+                    </span>
+
+                    Todavía no hay comisiones
+                    generadas.
+
                 </div>
+
             </div>
+
         `;
+
         return;
+
     }
 
-    const maximo = Math.max(
-        ...datos.map(([, datosPeriodo]) => datosPeriodo.ventaBruta),
-        0
+
+    // =====================================================
+    // AGRUPAR POR MES
+    // =====================================================
+
+    const meses =
+        new Map();
+
+
+    comisiones.forEach(
+        movimiento => {
+
+            const fecha =
+                obtenerFechaMovimiento(
+                    movimiento
+                );
+
+
+            if (
+                !fecha ||
+                fecha.getTime() ===
+                    0
+            ) {
+
+                return;
+
+            }
+
+
+            const año =
+                fecha.getFullYear();
+
+
+            const mes =
+                fecha.getMonth();
+
+
+            const clave =
+                `${año}-${String(
+                    mes + 1
+                ).padStart(
+                    2,
+                    "0"
+                )}`;
+
+
+            const monto =
+                Number(
+                    movimiento.monto ||
+                    0
+                );
+
+
+            meses.set(
+                clave,
+                (
+                    meses.get(
+                        clave
+                    ) ||
+                    0
+                ) + monto
+            );
+
+        }
     );
 
-    container.innerHTML = "";
 
-    datos.forEach(([clave, datosPeriodo]) => {
+    // =====================================================
+    // ORDENAR MESES
+    // =====================================================
 
-        const porcentaje = maximo > 0
-            ? (datosPeriodo.ventaBruta / maximo) * 100
-            : 0;
+    const datos =
+        [...meses.entries()]
+            .sort(
+                (
+                    a,
+                    b
+                ) =>
+                    a[0].localeCompare(
+                        b[0]
+                    )
+            )
+            .slice(
+                -12
+            );
 
-        const columna = document.createElement("div");
-        columna.className = "account-chart-month";
 
-        columna.innerHTML = `
-            <div class="account-chart-value">
-                ${formatearPrecio(datosPeriodo.ventaBruta)}
+    if (
+        datos.length === 0
+    ) {
+
+        container.innerHTML = `
+
+            <div class="account-chart-empty">
+
+                No hay fechas válidas
+                para mostrar.
+
             </div>
-            <div class="account-chart-bar-wrapper">
+
+        `;
+
+        return;
+
+    }
+
+
+    const maximo =
+        Math.max(
+            ...datos.map(
+                ([, monto]) =>
+                    monto
+            ),
+            0
+        );
+
+
+    // =====================================================
+    // CREAR GRÁFICA
+    // =====================================================
+
+    container.innerHTML =
+        "";
+
+
+    datos.forEach(
+        ([clave, monto]) => {
+
+            const [año, mes] =
+                clave.split("-");
+
+
+            const fecha =
+                new Date(
+                    Number(año),
+                    Number(mes) - 1,
+                    1
+                );
+
+
+            const nombreMes =
+                new Intl.DateTimeFormat(
+                    "es-MX",
+                    {
+                        month:
+                            "short"
+                    }
+                )
+                .format(
+                    fecha
+                )
+                .replace(
+                    ".",
+                    ""
+                );
+
+
+            const porcentaje =
+                maximo > 0
+                    ? (
+                        monto /
+                        maximo
+                    ) * 100
+                    : 0;
+
+
+            const columna =
+                document.createElement(
+                    "div"
+                );
+
+
+            columna.className =
+                "account-chart-month";
+
+
+            columna.innerHTML = `
+
                 <div
-                    class="account-chart-bar"
-                    style="height:${Math.max(porcentaje, 3)}%;"
-                    title="Venta bruta: ${escapeHtml(formatearPrecio(datosPeriodo.ventaBruta))}"
-                ></div>
-            </div>
-            <div class="account-chart-label">
-                ${escapeHtml(formatearEtiquetaPeriodo(clave, ventasPeriodoActual))}
-            </div>
-        `;
+                    class="account-chart-value"
+                >
+                    ${formatearPrecio(
+                        monto
+                    )}
+                </div>
 
-        container.appendChild(columna);
-    });
-}
 
-function actualizarResumenVentas() {
+                <div
+                    class="account-chart-bar-wrapper"
+                >
 
-    const ventas = obtenerVentasReales();
+                    <div
+                        class="account-chart-bar"
+                        style="
+                            height:${Math.max(
+                                porcentaje,
+                                3
+                            )}%;
+                        "
+                        title="${formatearPrecio(
+                            monto
+                        )}"
+                    ></div>
 
-    const ventaBruta = ventas.reduce(
-        (total, venta) => total + venta.ventaBruta,
-        0
+                </div>
+
+
+                <div
+                    class="account-chart-label"
+                >
+                    ${escapeHtml(
+                        nombreMes
+                    )}
+                    ${año}
+                </div>
+
+            `;
+
+
+            container.appendChild(
+                columna
+            );
+
+        }
     );
 
-    const comision = ventas.reduce(
-        (total, venta) => total + venta.comision,
-        0
-    );
-
-    const neto = Number((ventaBruta - comision).toFixed(2));
-
-    const elementos = {
-        businessSalesGross: ventaBruta,
-        businessSalesCommission: comision,
-        businessSalesNet: neto,
-        businessSalesOrders: ventas.length
-    };
-
-    Object.entries(elementos).forEach(([id, valor]) => {
-        const elemento = document.getElementById(id);
-        if (!elemento) return;
-
-        elemento.textContent =
-            id === "businessSalesOrders"
-                ? String(valor)
-                : formatearPrecio(valor);
-    });
 }
 
-function actualizarPanelVentas() {
-    actualizarResumenVentas();
-    renderizarGraficaVentas();
+
+// =========================================================
+// ACTUALIZAR GRÁFICA CUANDO CAMBIAN
+// LOS MOVIMIENTOS
+// =========================================================
+
+function actualizarGraficaGanancias() {
+
+    renderizarGraficaGanancias();
+
 }
-
-function obtenerVentasParaExportar() {
-
-    return obtenerVentasReales().map(venta => ({
-        Fecha: formatearFechaMovimiento(obtenerFechaMovimiento(venta)),
-        Pedido: venta.pedidoId || venta.folio || venta.id || "",
-        Negocio: venta.tiendaNombre || tiendaActual?.nombre || "",
-        Venta_bruta: Number(venta.ventaBruta.toFixed(2)),
-        Comision_MOTI: Number(venta.comision.toFixed(2)),
-        Porcentaje_comision: Number(venta.porcentaje || 0),
-        Neto_despues_comision: Number(venta.neto.toFixed(2)),
-        Estado: venta.estado || "registrada"
-    }));
-}
-
-function exportarVentasExcel() {
-
-    if (typeof XLSX === "undefined") {
-        window.motiGoNotificar?.(
-            "No se pudo cargar el exportador de Excel.",
-            "error"
-        );
-        return;
-    }
-
-    const datos = obtenerVentasParaExportar();
-
-    if (!datos.length) {
-        window.motiGoNotificar?.(
-            "Todavía no hay ventas realizadas para exportar.",
-            "info"
-        );
-        return;
-    }
-
-    const hoja = XLSX.utils.json_to_sheet(datos);
-    hoja["!cols"] = [
-        { wch: 18 },
-        { wch: 28 },
-        { wch: 24 },
-        { wch: 15 },
-        { wch: 17 },
-        { wch: 20 },
-        { wch: 24 },
-        { wch: 24 }
-    ];
-
-    const libro = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(libro, hoja, "Ventas");
-
-    XLSX.writeFile(
-        libro,
-        `MOTI_GO_Ventas_${new Date().toISOString().slice(0, 10)}.xlsx`
-    );
-}
-
-const salesPeriodButtons = document.querySelectorAll("[data-sales-period]");
-
-salesPeriodButtons.forEach(button => {
-    button.addEventListener("click", () => {
-        salesPeriodButtons.forEach(item => item.classList.remove("active"));
-        button.classList.add("active");
-        ventasPeriodoActual = button.dataset.salesPeriod || "mes";
-        renderizarGraficaVentas();
-    });
-});
-
-const exportSalesButton = document.getElementById("exportBusinessSales");
-
-if (exportSalesButton) {
-    exportSalesButton.addEventListener("click", exportarVentasExcel);
-}
-
 
 // =========================================================
 // INICIO

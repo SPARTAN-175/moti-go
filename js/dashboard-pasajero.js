@@ -60,21 +60,6 @@ let pedidoActivoClienteId = null;
 let listenerPedidoActivoCliente = null;
 
 // =====================================================
-// MOTI GO - VIGILANCIA DE BÚSQUEDA DE REPARTIDOR
-// =====================================================
-// Si una solicitud queda abierta demasiado tiempo (por
-// ejemplo, porque el cliente recargó la app y el dispatcher
-// original dejó de existir), cerramos esa búsqueda y dejamos
-// el pedido en "sin_repartidor" para poder intentar de nuevo.
-// =====================================================
-
-const MOTIGO_TIEMPO_MAX_BUSQUEDA_MS =
-    2 * 60 * 1000;
-
-let temporizadorBusquedaPedido = null;
-let pedidoVigiladoBusquedaId = null;
-
-// =====================================================
 // ELEMENTOS DEL DOM
 // =====================================================
 
@@ -124,6 +109,9 @@ const storeSelectorSection =
 storeSelectorSection.id =
     "motiStoreSelectorSection";
 
+storeSelectorSection.className =
+    "moti-store-selector";
+
 storeSelectorSection.style.display =
     "none";
 
@@ -131,15 +119,11 @@ storeSelectorSection.style.display =
 const storeSelectorLabel =
     document.createElement("div");
 
+storeSelectorLabel.className =
+    "moti-store-selector-label";
+
 storeSelectorLabel.textContent =
     "Comprar en";
-
-
-storeSelectorLabel.style.fontWeight =
-    "600";
-
-storeSelectorLabel.style.marginBottom =
-    "6px";
 
 
 const storeSelector =
@@ -148,24 +132,13 @@ const storeSelector =
 storeSelector.id =
     "motiStoreSelector";
 
+storeSelector.className =
+    "moti-store-selector-select";
 
-storeSelector.style.width =
-    "100%";
-
-storeSelector.style.padding =
-    "12px";
-
-storeSelector.style.borderRadius =
-    "10px";
-
-storeSelector.style.border =
-    "1px solid #ddd";
-
-storeSelector.style.background =
-    "#fff";
-
-storeSelector.style.fontSize =
-    "15px";
+storeSelector.setAttribute(
+    "aria-label",
+    "Seleccionar tienda"
+);
 
 
 storeSelectorSection.appendChild(
@@ -2086,11 +2059,32 @@ function crearProductoElemento(
         );
 
 
+    const imagenProducto =
+        producto.imagenUrl
+            ? escaparHTML(producto.imagenUrl)
+            : "";
+
     article.innerHTML = `
 
-        <div class="product-icon">
+        <div class="product-image">
 
-            <span class="material-symbols-outlined">
+            ${
+                imagenProducto
+                    ? `
+                        <img
+                            src="${imagenProducto}"
+                            alt="${escaparHTML(producto.nombre || "Producto")}"
+                            loading="lazy"
+                            decoding="async"
+                        >
+                    `
+                    : ""
+            }
+
+            <span
+                class="product-image-fallback material-symbols-outlined"
+                ${imagenProducto ? 'style="display:none;"' : ""}
+            >
                 ${icono}
             </span>
 
@@ -2156,33 +2150,49 @@ function crearProductoElemento(
         </div>
 
 
-        <div class="quantity-control">
+        <div class="product-actions">
+
+            <div class="quantity-control">
+
+                <button
+                    type="button"
+                    class="quantity-minus"
+                    data-product-id="${producto.id}"
+                    aria-label="Disminuir cantidad"
+                >
+                    −
+                </button>
+
+
+                <span
+                    class="quantity-value"
+                    data-product-id="${producto.id}"
+                >
+                    ${catalogoVariable ? Number(cantidad).toFixed(2) : cantidad}
+                </span>
+
+
+                <button
+                    type="button"
+                    class="quantity-plus"
+                    data-product-id="${producto.id}"
+                    aria-label="Aumentar cantidad"
+                >
+                    +
+                </button>
+
+            </div>
 
             <button
                 type="button"
-                class="quantity-minus"
+                class="product-cart-button"
                 data-product-id="${producto.id}"
-                aria-label="Disminuir cantidad"
+                aria-label="Agregar ${escaparHTML(producto.nombre || "producto")} al carrito"
+                title="Agregar al carrito"
             >
-                −
-            </button>
-
-
-            <span
-                class="quantity-value"
-                data-product-id="${producto.id}"
-            >
-                ${catalogoVariable ? Number(cantidad).toFixed(2) : cantidad}
-            </span>
-
-
-            <button
-                type="button"
-                class="quantity-plus"
-                data-product-id="${producto.id}"
-                aria-label="Aumentar cantidad"
-            >
-                +
+                <span class="material-symbols-outlined">
+                    shopping_cart
+                </span>
             </button>
 
         </div>
@@ -2221,8 +2231,43 @@ function crearProductoElemento(
 
 
     // =================================================
-    // BOTÓN MÁS
+    // FALLBACK DE IMAGEN
+    // =====================================================
+
+    const imagenElement =
+        article.querySelector(
+            ".product-image img"
+        );
+
+    const fallbackImagen =
+        article.querySelector(
+            ".product-image-fallback"
+        );
+
+    if (imagenElement) {
+
+        imagenElement.addEventListener(
+            "error",
+            () => {
+
+                imagenElement.style.display =
+                    "none";
+
+                if (fallbackImagen) {
+                    fallbackImagen.style.display =
+                        "flex";
+                }
+
+            },
+            { once: true }
+        );
+
+    }
+
+
     // =================================================
+    // BOTÓN MÁS
+    // =====================================================
 
     const btnPlus =
         article.querySelector(
@@ -2242,6 +2287,46 @@ function crearProductoElemento(
                 cambiarCantidad(
                     producto.id,
                     1
+                );
+
+            }
+        );
+
+    }
+
+
+    // =================================================
+    // BOTÓN AGREGAR AL CARRITO
+    // =====================================================
+
+    const btnCart =
+        article.querySelector(
+            ".product-cart-button"
+        );
+
+    if (btnCart) {
+
+        btnCart.addEventListener(
+            "click",
+            event => {
+
+                event.stopPropagation();
+
+                cambiarCantidad(
+                    producto.id,
+                    1
+                );
+
+                btnCart.classList.add(
+                    "added"
+                );
+
+                window.setTimeout(
+                    () =>
+                        btnCart.classList.remove(
+                            "added"
+                        ),
+                    220
                 );
 
             }
@@ -7467,13 +7552,6 @@ async function iniciarEscuchaPedidoActivoCliente(
             pedidoActivo.id
         );
 
-        // Recuperar visualmente el pedido activo después de una recarga.
-        // Así "Buscando repartidor" / "Sin repartidor" no desaparece
-        // aunque el usuario haya recargado la aplicación.
-        abrirSeguimientoPedidoMotiGo(
-            pedidoActivo
-        );
-
     }
     catch (error) {
 
@@ -7485,209 +7563,6 @@ async function iniciarEscuchaPedidoActivoCliente(
     }
 
 }
-
-// =====================================================
-// MOTI GO - OBTENER MILISEGUNDOS DE UNA FECHA FIREBASE
-// =====================================================
-
-function obtenerMillisFechaMotiGo(
-    valor
-) {
-
-    if (!valor) {
-        return null;
-    }
-
-    if (typeof valor?.toMillis === "function") {
-        return valor.toMillis();
-    }
-
-    if (valor instanceof Date) {
-        return valor.getTime();
-    }
-
-    if (typeof valor === "number" && Number.isFinite(valor)) {
-        return valor;
-    }
-
-    const fecha = new Date(valor);
-
-    return Number.isNaN(fecha.getTime())
-        ? null
-        : fecha.getTime();
-}
-
-
-// =====================================================
-// MOTI GO - MARCAR BÚSQUEDA AGOTADA
-// =====================================================
-
-async function marcarPedidoSinRepartidorPorTimeout(
-    pedidoId
-) {
-
-    if (!pedidoId) {
-        return;
-    }
-
-    try {
-
-        const referencia =
-            doc(
-                db,
-                "pedidos",
-                pedidoId
-            );
-
-        const snapshot =
-            await getDoc(
-                referencia
-            );
-
-        if (!snapshot.exists()) {
-            return;
-        }
-
-        const pedido = snapshot.data() || {};
-
-        if (
-            ![
-                "pendiente_asignacion",
-                "solicitud_repartidor"
-            ].includes(pedido.estado)
-        ) {
-            return;
-        }
-
-        await updateDoc(
-            referencia,
-            {
-                estado:
-                    "sin_repartidor",
-
-                repartidorId:
-                    null,
-
-                repartidorNombre:
-                    null,
-
-                indiceRepartidor:
-                    null,
-
-                solicitudRechazadaPor:
-                    null,
-
-                actualizadoEn:
-                    serverTimestamp()
-            }
-        );
-
-        console.log(
-            "⌛ MOTI GO: búsqueda de repartidor agotada por tiempo:",
-            pedidoId
-        );
-
-        window.motiGoNotificar?.(
-            "No recibimos respuesta de los repartidores. Puedes intentar buscar nuevamente."
-        );
-
-    }
-    catch (error) {
-
-        console.error(
-            "❌ MOTI GO: error cerrando búsqueda por tiempo:",
-            error
-        );
-
-    }
-}
-
-
-// =====================================================
-// MOTI GO - PROGRAMAR LÍMITE DE BÚSQUEDA
-// =====================================================
-
-function programarTimeoutBusquedaPedido(
-    pedido
-) {
-
-    if (temporizadorBusquedaPedido) {
-        clearTimeout(
-            temporizadorBusquedaPedido
-        );
-        temporizadorBusquedaPedido = null;
-    }
-
-    pedidoVigiladoBusquedaId = null;
-
-    if (!pedido?.id) {
-        return;
-    }
-
-    const estadosBusqueda = [
-        "pendiente_asignacion",
-        "solicitud_repartidor"
-    ];
-
-    if (!estadosBusqueda.includes(pedido.estado)) {
-        return;
-    }
-
-    // Mientras existe una solicitud concreta usamos su timestamp.
-    // Si todavía no existe, usamos la creación del pedido.
-    const inicio =
-        obtenerMillisFechaMotiGo(
-            pedido.solicitudEnviadaEn
-        ) ||
-        obtenerMillisFechaMotiGo(
-            pedido.creadoEn
-        );
-
-    if (!inicio) {
-        // El serverTimestamp todavía puede no haber llegado;
-        // el siguiente onSnapshot volverá a programarlo.
-        return;
-    }
-
-    const restante =
-        Math.max(
-            0,
-            MOTIGO_TIEMPO_MAX_BUSQUEDA_MS -
-            (Date.now() - inicio)
-        );
-
-    pedidoVigiladoBusquedaId =
-        pedido.id;
-
-    temporizadorBusquedaPedido =
-        setTimeout(
-            () => {
-
-                temporizadorBusquedaPedido = null;
-
-                if (
-                    pedidoVigiladoBusquedaId ===
-                    pedido.id
-                ) {
-
-                    marcarPedidoSinRepartidorPorTimeout(
-                        pedido.id
-                    );
-
-                }
-
-            },
-            restante
-        );
-
-    console.log(
-        "⏱️ MOTI GO: límite de búsqueda programado en",
-        Math.ceil(restante / 1000),
-        "segundos para",
-        pedido.id
-    );
-}
-
 
 onAuthStateChanged(
     auth,
@@ -10232,31 +10107,6 @@ productosTiendaHTML += `
             : "";
 
 
-    const botonReintentarBusquedaHTML =
-        estado ===
-        "sin_repartidor"
-            ? `
-
-                <button
-                    type="button"
-                    id="motigoReintentarRepartidor"
-                    class="moti-seguimiento-reintentar"
-                >
-
-                    <span
-                        class="material-symbols-outlined"
-                    >
-                        refresh
-                    </span>
-
-                    Buscar repartidor nuevamente
-
-                </button>
-
-            `
-            : "";
-
-
     // =====================================================
     // ESTADO ESPECIAL: CANCELADO
     // =====================================================
@@ -10682,13 +10532,6 @@ productosTiendaHTML += `
 
 
             <!-- ========================================= -->
-            <!-- BUSCAR NUEVAMENTE -->
-            <!-- ========================================= -->
-
-            ${botonReintentarBusquedaHTML}
-
-
-            <!-- ========================================= -->
             <!-- CANCELAR -->
             <!-- ========================================= -->
 
@@ -10730,105 +10573,6 @@ productosTiendaHTML += `
 
         configurarBotonCancelarPedido(
             pedido
-        );
-
-    }
-
-
-    const botonReintentar =
-        document.getElementById(
-            "motigoReintentarRepartidor"
-        );
-
-    if (botonReintentar) {
-
-        if (!document.getElementById("motiEstiloReintentarBusqueda")) {
-            const estiloReintento = document.createElement("style");
-            estiloReintento.id = "motiEstiloReintentarBusqueda";
-            estiloReintento.textContent = `
-                #motigoReintentarRepartidor {
-                    width:100%;
-                    border:0;
-                    border-radius:16px;
-                    padding:14px 16px;
-                    margin-top:10px;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    gap:8px;
-                    font:inherit;
-                    font-weight:700;
-                    cursor:pointer;
-                    background:#e9f8ef;
-                    color:#168447;
-                }
-                #motigoReintentarRepartidor:disabled {
-                    opacity:.65;
-                    cursor:default;
-                }
-            `;
-            document.head.appendChild(estiloReintento);
-        }
-
-        botonReintentar.addEventListener(
-            "click",
-            async () => {
-
-                if (botonReintentar.disabled) {
-                    return;
-                }
-
-                botonReintentar.disabled = true;
-                botonReintentar.innerHTML = `
-                    <span class="material-symbols-outlined">
-                        hourglass_top
-                    </span>
-                    Buscando repartidor...
-                `;
-
-                try {
-
-                    if (
-                        typeof window.motiGoReintentarBusqueda ===
-                        "function"
-                    ) {
-
-                        await window.motiGoReintentarBusqueda(
-                            pedido.id
-                        );
-
-                    }
-                    else {
-
-                        throw new Error(
-                            "El módulo de búsqueda no está disponible."
-                        );
-
-                    }
-
-                }
-                catch (error) {
-
-                    console.error(
-                        "❌ MOTI GO: error reintentando búsqueda:",
-                        error
-                    );
-
-                    window.motiGoNotificar?.(
-                        "No pudimos iniciar nuevamente la búsqueda de repartidor."
-                    );
-
-                    botonReintentar.disabled = false;
-                    botonReintentar.innerHTML = `
-                        <span class="material-symbols-outlined">
-                            refresh
-                        </span>
-                        Buscar repartidor nuevamente
-                    `;
-
-                }
-
-            }
         );
 
     }
@@ -13482,12 +13226,6 @@ function escucharPedidoActivoCliente(
                 );
 
 
-                // Vigilar la búsqueda para que no quede abierta indefinidamente.
-                programarTimeoutBusquedaPedido(
-                    pedidoActual
-                );
-
-
                 // =================================================
                 // ACTUALIZAR EL PEDIDO EN EL PANEL SI ESTÁ ABIERTO
                 // =================================================
@@ -13523,28 +13261,6 @@ function escucharPedidoActivoCliente(
                     );
 
                 }
-
-
-// =================================================
-// SI NO SE ENCONTRÓ REPARTIDOR
-// =================================================
-if (
-    pedidoActual.estado ===
-    "sin_repartidor"
-) {
-
-    if (
-        typeof window.mostrarBusquedaAgotadaRepartidorMotiGo ===
-        "function"
-    ) {
-
-        window.mostrarBusquedaAgotadaRepartidorMotiGo(
-            pedidoActual
-        );
-
-    }
-
-}
 
 
 // =================================================
@@ -13914,8 +13630,16 @@ function mostrarCalificacionRepartidor(pedido) {
                 const marcaTiempo = serverTimestamp();
 
                 transaction.update(pedidoRef, {
-                    calificacionRepartidor: { estrellas: seleccion, creadoEn: marcaTiempo },
-                    valoracionRepartidor: { estrellas: seleccion, creadoEn: marcaTiempo },
+                    calificacionRepartidor: {
+                        estrellas: seleccion,
+                        pedidoId: pedido.id,
+                        creadoEn: marcaTiempo
+                    },
+                    valoracionRepartidor: {
+                        estrellas: seleccion,
+                        pedidoId: pedido.id,
+                        creadoEn: marcaTiempo
+                    },
                     actualizadoEn: marcaTiempo
                 });
 
@@ -13924,6 +13648,7 @@ function mostrarCalificacionRepartidor(pedido) {
                         promedio: nuevoPromedio,
                         cantidad: nuevaCantidad,
                         suma: nuevaSuma,
+                        ultimoPedidoId: pedido.id,
                         actualizadoEn: marcaTiempo
                     }
                 }, { merge: true });
