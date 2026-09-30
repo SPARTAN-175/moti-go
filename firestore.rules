@@ -1,0 +1,764 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================
+    // HELPERS
+    // =========================================================
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userPath(uid) {
+      return /databases/$(database)/documents/usuarios/$(uid);
+    }
+
+    function currentUserExists() {
+      return signedIn() && exists(userPath(request.auth.uid));
+    }
+
+    function currentUser() {
+      return get(userPath(request.auth.uid));
+    }
+
+    function isAdmin() {
+      return currentUserExists() && currentUser().data.tipo == "admin";
+    }
+
+    function isClient() {
+      return currentUserExists() && currentUser().data.tipo == "cliente";
+    }
+
+    function isDriver() {
+      return currentUserExists() && currentUser().data.tipo == "repartidor";
+    }
+
+    function isBusiness() {
+      return currentUserExists() && currentUser().data.tipo == "negocio";
+    }
+
+    function currentStoreId() {
+      return currentUser().data.tiendaId;
+    }
+
+    function driverOperationalFieldsOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        "estadoServicio",
+        "viajeActivo",
+        "actualizadoEn",
+        "viajeCanceladoEn",
+        "viajeCanceladoMotivo",
+        "latitud",
+        "longitud",
+        "ultimaUbicacion",
+        "viajesHoy",
+        "viajesTotales"
+      ]);
+    }
+
+    function businessProfileFieldsOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        "nombre",
+        "telefono",
+        "municipio",
+        "localidad",
+        "localidadId",
+        "localidadLatitud",
+        "localidadLongitud",
+        "ultimaActualizacionPerfil",
+        "activo"
+      ]);
+    }
+
+    function clientRegistrationIsValid() {
+      return request.resource.data.keys().hasOnly([
+        "nombre",
+        "telefono",
+        "email",
+        "tipo",
+        "terminosVersion",
+        "terminosAceptadosEn",
+        "passwordTemporal",
+        "fechaRegistro",
+        "latitud",
+        "longitud",
+        "viajeActivo",
+        "estadoServicio"
+      ])
+      && request.resource.data.tipo == "cliente"
+      && request.resource.data.estadoServicio == "no_disponible"
+      && request.resource.data.viajeActivo == null
+      && request.resource.data.passwordTemporal == false;
+    }
+
+    function driverRegistrationIsValid() {
+      return request.resource.data.keys().hasOnly([
+        "nombre",
+        "telefono",
+        "email",
+        "municipio",
+        "localidad",
+        "localidadId",
+        "localidadLatitud",
+        "localidadLongitud",
+        "placa",
+        "tipo",
+        "estado",
+        "estadoServicio",
+        "verificado",
+        "beta",
+        "passwordTemporal",
+        "latitud",
+        "longitud",
+        "viajesHoy",
+        "viajesTotales",
+        "declaracionesRegistro",
+        "terminosRepartidorAceptados",
+        "versionTerminosRepartidor",
+        "fechaAceptacionTerminosRepartidor",
+        "fechaRegistro"
+      ])
+      && request.resource.data.tipo == "repartidor"
+      && request.resource.data.estado == "pendiente"
+      && request.resource.data.estadoServicio == "disponible"
+      && request.resource.data.verificado == false
+      && request.resource.data.passwordTemporal == false
+      && request.resource.data.viajesHoy == 0
+      && request.resource.data.viajesTotales == 0;
+    }
+
+    function clientLogoutFieldsOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        "estadoServicio",
+        "viajeActivo"
+      ])
+      && request.resource.data.estadoServicio == "no_disponible"
+      && request.resource.data.viajeActivo == null;
+    }
+
+    function clientProfileFieldsOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        "nombre",
+        "telefono",
+        "municipio",
+        "localidad",
+        "localidadId",
+        "localidadLatitud",
+        "localidadLongitud",
+        "ultimaActualizacionPerfil"
+      ]);
+    }
+
+    function driverOperationalUpdateValid() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        "estadoServicio",
+        "viajeActivo",
+        "actualizadoEn",
+        "viajeCanceladoEn",
+        "viajeCanceladoMotivo",
+        "latitud",
+        "longitud",
+        "ultimaUbicacion",
+        "viajesHoy",
+        "viajesTotales"
+      ])
+      && request.resource.data.estadoServicio in ["disponible", "ocupado", "en_viaje", "no_disponible"]
+      && (
+        request.resource.data.viajeActivo == null
+        || (
+          request.resource.data.viajeActivo.pedidoId is string
+          && get(/databases/$(database)/documents/pedidos/$(request.resource.data.viajeActivo.pedidoId)).data.repartidorId == request.auth.uid
+        )
+      )
+      && (
+        !request.resource.data.keys().hasAny(["latitud"])
+        || (request.resource.data.latitud == null || (request.resource.data.latitud is number && request.resource.data.latitud >= -90 && request.resource.data.latitud <= 90))
+      )
+      && (
+        !request.resource.data.keys().hasAny(["longitud"])
+        || (request.resource.data.longitud == null || (request.resource.data.longitud is number && request.resource.data.longitud >= -180 && request.resource.data.longitud <= 180))
+      );
+    }
+
+    function driverProfileFieldsOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        "nombre",
+        "telefono",
+        "placa",
+        "municipio",
+        "localidad",
+        "localidadId",
+        "localidadLatitud",
+        "localidadLongitud",
+        "ultimaActualizacionPerfil"
+      ]);
+    }
+
+    function ratingUpdateIsValid(targetUid) {
+      return signedIn()
+        && request.resource.data.valoracionRepartidor.ultimoPedidoId is string
+        && getAfter(
+          /databases/$(database)/documents/pedidos/$(request.resource.data.valoracionRepartidor.ultimoPedidoId)
+        ).data.clienteId == request.auth.uid
+        && getAfter(
+          /databases/$(database)/documents/pedidos/$(request.resource.data.valoracionRepartidor.ultimoPedidoId)
+        ).data.repartidorId == targetUid
+        && getAfter(
+          /databases/$(database)/documents/pedidos/$(request.resource.data.valoracionRepartidor.ultimoPedidoId)
+        ).data.estado == "entregado"
+        && getAfter(
+          /databases/$(database)/documents/pedidos/$(request.resource.data.valoracionRepartidor.ultimoPedidoId)
+        ).data.entregaConfirmada == true
+        && getAfter(
+          /databases/$(database)/documents/pedidos/$(request.resource.data.valoracionRepartidor.ultimoPedidoId)
+        ).data.calificacionRepartidor.estrellas is number
+        && getAfter(
+          /databases/$(database)/documents/pedidos/$(request.resource.data.valoracionRepartidor.ultimoPedidoId)
+        ).data.calificacionRepartidor.estrellas >= 1
+        && getAfter(
+          /databases/$(database)/documents/pedidos/$(request.resource.data.valoracionRepartidor.ultimoPedidoId)
+        ).data.calificacionRepartidor.estrellas <= 5
+        && request.resource.data.valoracionRepartidor.cantidad == (resource.data.valoracionRepartidor.cantidad + 1)
+        && request.resource.data.valoracionRepartidor.suma == (resource.data.valoracionRepartidor.suma + getAfter(
+          /databases/$(database)/documents/pedidos/$(request.resource.data.valoracionRepartidor.ultimoPedidoId)
+        ).data.calificacionRepartidor.estrellas);
+    }
+
+    function pedidoDriverFieldsOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        "estado",
+        "repartidorId",
+        "repartidorNombre",
+        "repartidorPlaca",
+        "indiceRepartidor",
+        "solicitudEnviadaEn",
+        "solicitudRechazadaPor",
+        "solicitudRechazadaEn",
+        "fechaAsignacion",
+        "esFundador",
+        "repartidorEsFundador",
+        "fundadorId",
+        "fundadorNombre",
+        "comisiones",
+        "productos",
+        "subtotal",
+        "costoEntrega",
+        "total",
+        "incidenciaId",
+        "incidenciaEntrega",
+        "entregaConfirmada",
+        "devolucionInventarioPendiente",
+        "fechaFinalizacion",
+        "codigoValidado",
+        "actualizadoEn"
+      ]);
+    }
+
+    function pedidoClientDispatchFieldsOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        "estado",
+        "repartidorId",
+        "repartidorNombre",
+        "repartidorPlaca",
+        "indiceRepartidor",
+        "solicitudEnviadaEn",
+        "actualizadoEn"
+      ]);
+    }
+
+    function pedidoClientCancelFieldsOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        "estado",
+        "canceladoEn",
+        "canceladoPor",
+        "actualizadoEn"
+      ]);
+    }
+
+    function clientCanReleaseDriver(targetUid) {
+      return isClient()
+        && resource.data.viajeActivo.pedidoId is string
+        && get(/databases/$(database)/documents/pedidos/$(resource.data.viajeActivo.pedidoId)).data.clienteId == request.auth.uid
+        && get(/databases/$(database)/documents/pedidos/$(resource.data.viajeActivo.pedidoId)).data.repartidorId == targetUid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "estadoServicio",
+          "viajeActivo",
+          "actualizadoEn"
+        ])
+        && request.resource.data.estadoServicio == "disponible"
+        && request.resource.data.viajeActivo == null;
+    }
+
+    function pedidoClientRatingFieldsOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        "calificacionRepartidor",
+        "valoracionRepartidor",
+        "actualizadoEn"
+      ]);
+    }
+
+    // =========================================================
+    // LOCALIDADES
+    // Se consultan incluso antes de autenticarse.
+    // El cliente nunca las modifica.
+    // =========================================================
+
+    match /destinos/{destinoId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // =========================================================
+    // USUARIOS
+    // =========================================================
+
+    match /usuarios/{uid} {
+
+      allow read: if signedIn() && (
+        uid == request.auth.uid ||
+        resource.data.tipo == "repartidor" ||
+        isAdmin()
+      );
+
+      // Registro normal de cliente/repartidor.
+      allow create: if isAdmin()
+        || (
+          signedIn()
+          && uid == request.auth.uid
+          && request.resource.data.tipo == "cliente"
+          && clientRegistrationIsValid()
+        )
+        || (
+          signedIn()
+          && uid == request.auth.uid
+          && request.resource.data.tipo == "repartidor"
+          && driverRegistrationIsValid()
+        )
+        // Registro de negocio mediante invitación pendiente.
+        || (
+          signedIn()
+          && uid == request.auth.uid
+          && request.resource.data.tipo == "negocio"
+          && request.resource.data.tiendaId is string
+          && request.resource.data.codigoInvitacion is string
+          && get(
+            /databases/$(database)/documents/invitacionesTiendas/$(request.resource.data.codigoInvitacion)
+          ).data.estado == "pendiente"
+        );
+
+      allow update: if isAdmin()
+        // Cliente: solo sus datos personales.
+        || (
+          signedIn()
+          && uid == request.auth.uid
+          && resource.data.tipo == "cliente"
+          && request.resource.data.tipo == resource.data.tipo
+          && clientProfileFieldsOnly()
+        )
+        || (
+          signedIn()
+          && uid == request.auth.uid
+          && resource.data.tipo == "cliente"
+          && clientLogoutFieldsOnly()
+        )
+        // Repartidor: perfil + operaciones propias.
+        || (
+          signedIn()
+          && uid == request.auth.uid
+          && resource.data.tipo == "repartidor"
+          && request.resource.data.tipo == resource.data.tipo
+          && (
+            driverOperationalUpdateValid()
+            || driverProfileFieldsOnly()
+          )
+        )
+        // Negocio: nunca puede cambiar tipo ni tiendaId.
+        || (
+          signedIn()
+          && uid == request.auth.uid
+          && resource.data.tipo == "negocio"
+          && request.resource.data.tipo == resource.data.tipo
+          && request.resource.data.tiendaId == resource.data.tiendaId
+          && businessProfileFieldsOnly()
+        )
+        // El cliente puede liberar únicamente al repartidor que aparece
+        // como viaje activo en un pedido suyo.
+        || (
+          isClient()
+          && resource.data.tipo == "repartidor"
+          && clientCanReleaseDriver(uid)
+        )
+        // El cliente puede actualizar únicamente el agregado de valoración
+        // del repartidor correspondiente al pedido que acaba de calificar.
+        || (
+          isClient()
+          && resource.data.tipo == "repartidor"
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "valoracionRepartidor"
+          ])
+          && ratingUpdateIsValid(uid)
+        );
+
+      allow delete: if isAdmin();
+
+      match /direcciones/{direccionId} {
+        allow read, create, update, delete: if signedIn()
+          && uid == request.auth.uid;
+      }
+    }
+
+    // =========================================================
+    // TIENDAS
+    // Catálogo público para usuarios autenticados.
+    // Escritura limitada al dueño o al administrador.
+    // =========================================================
+
+    match /tiendas/{tiendaId} {
+      allow read: if signedIn();
+
+      allow create: if isAdmin()
+        || (
+          signedIn()
+          && getAfter(userPath(request.auth.uid)).data.tipo == "negocio"
+          && getAfter(userPath(request.auth.uid)).data.tiendaId == tiendaId
+          && request.resource.data.codigoInvitacion == getAfter(userPath(request.auth.uid)).data.codigoInvitacion
+          && get(/databases/$(database)/documents/invitacionesTiendas/$(request.resource.data.codigoInvitacion)).data.estado == "pendiente"
+        );
+
+      allow update: if isAdmin()
+        || (
+          isBusiness()
+          && currentStoreId() == tiendaId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "nombre",
+            "tipo",
+            "municipio",
+            "direccion",
+            "latitud",
+            "longitud",
+            "activa",
+            "tipoCatalogo",
+            "catalogoVariable",
+            "catalogoActualizadoEn",
+            "logoUrl",
+            "fotoUrl",
+            "actualizadoEn"
+          ])
+        );
+
+      allow delete: if isAdmin();
+    }
+
+    // =========================================================
+    // PRODUCTOS MAESTROS
+    // Los clientes necesitan lectura para el catálogo.
+    // =========================================================
+
+    match /productos/{productoId} {
+      allow read: if signedIn();
+      allow create, update: if isAdmin() || isBusiness();
+      allow delete: if isAdmin();
+    }
+
+    // =========================================================
+    // INVENTARIOS
+    // =========================================================
+
+    match /inventarios/{inventarioId} {
+      allow read: if signedIn();
+
+      // Negocio: solo su propia tienda.
+      allow update, create: if isAdmin()
+        || (
+          isBusiness()
+          && request.resource.data.tiendaId == currentStoreId()
+        )
+        // Repartidor: operaciones físicas durante un viaje.
+        || (
+          isDriver()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "existencia",
+            "reservado",
+            "disponible",
+            "actualizadoEn"
+          ])
+        )
+        // Cliente: únicamente la reserva lógica de inventario.
+        // No puede modificar precio, existencia física, tienda o producto.
+        || (
+          isClient()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "reservado",
+            "disponible",
+            "actualizadoEn"
+          ])
+          && request.resource.data.reservado is number
+          && request.resource.data.reservado >= 0
+          && request.resource.data.reservado <= request.resource.data.existencia
+          && request.resource.data.existencia == resource.data.existencia
+          && request.resource.data.precio == resource.data.precio
+          && request.resource.data.disponible == (request.resource.data.existencia > request.resource.data.reservado)
+        );
+
+      allow delete: if isAdmin();
+    }
+
+    // =========================================================
+    // PEDIDOS
+    // =========================================================
+
+    match /pedidos/{pedidoId} {
+
+      allow read: if signedIn() && (
+        isAdmin()
+        || resource.data.clienteId == request.auth.uid
+        || resource.data.repartidorId == request.auth.uid
+      );
+
+      allow create: if isAdmin()
+        || (
+          isClient()
+          && request.resource.data.clienteId == request.auth.uid
+          && request.resource.data.estado == "pendiente_asignacion"
+          && request.resource.data.pago.metodo == "efectivo"
+          && request.resource.data.subtotal is number
+          && request.resource.data.costoEntrega is number
+          && request.resource.data.total is number
+          && request.resource.data.subtotal >= 0
+          && request.resource.data.costoEntrega >= 0
+          && request.resource.data.total >= request.resource.data.subtotal
+          && request.resource.data.codigoEntrega is string
+        );
+
+      allow update: if isAdmin()
+        // Cliente: dispatcher y cancelación, sin tocar dinero/productos.
+        || (
+          isClient()
+          && resource.data.clienteId == request.auth.uid
+          && (
+            (
+              pedidoClientDispatchFieldsOnly()
+              && resource.data.estado == "pendiente_asignacion"
+              && request.resource.data.estado in ["solicitud_repartidor", "sin_repartidor"]
+            )
+            ||
+            (
+              pedidoClientCancelFieldsOnly()
+              && request.resource.data.estado == "cancelado"
+              && request.resource.data.canceladoPor == "cliente"
+            )
+            ||
+            (
+              pedidoClientRatingFieldsOnly()
+              && resource.data.estado == "entregado"
+              && resource.data.entregaConfirmada == true
+              && request.resource.data.calificacionRepartidor.estrellas is number
+              && request.resource.data.calificacionRepartidor.estrellas >= 1
+              && request.resource.data.calificacionRepartidor.estrellas <= 5
+              && !resource.data.keys().hasAny(["calificacionRepartidor"])
+            )
+          )
+        )
+        // Repartidor asignado: operaciones del viaje.
+        || (
+          isDriver()
+          && resource.data.repartidorId == request.auth.uid
+          && pedidoDriverFieldsOnly()
+        );
+
+      allow delete: if isAdmin();
+    }
+
+    // =========================================================
+    // MOVIMIENTOS DE TIENDAS
+    // =========================================================
+
+    match /movimientosTiendas/{movimientoId} {
+      allow read: if isAdmin()
+        || (
+          isBusiness()
+          && resource.data.tiendaId == currentStoreId()
+        );
+
+      allow create: if isAdmin()
+        || (
+          isDriver()
+          && request.resource.data.tipo == "comision"
+          && request.resource.data.estado == "pendiente"
+          && request.resource.data.pedidoId is string
+          && get(/databases/$(database)/documents/pedidos/$(request.resource.data.pedidoId)).data.repartidorId == request.auth.uid
+          && request.resource.data.tiendaId is string
+          && request.resource.data.monto is number
+          && request.resource.data.monto >= 0
+          && request.resource.data.subtotalVenta is number
+          && request.resource.data.subtotalVenta >= 0
+          && request.resource.data.monto <= request.resource.data.subtotalVenta
+        );
+
+      allow update, delete: if isAdmin();
+    }
+
+    // =========================================================
+    // PAGOS A FUNDADORES
+    // Solo administración.
+    // =========================================================
+
+    match /pagosFundadores/{pagoId} {
+      allow read, write: if isAdmin();
+    }
+
+    // =========================================================
+    // CONFIGURACIÓN GENERAL
+    // Lectura para el cálculo de tarifas; escritura administrativa.
+    // =========================================================
+
+    match /configuracion/{configId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    // =========================================================
+    // INVITACIONES DE TIENDAS
+    // El enlace de registro necesita leer una invitación pendiente
+    // antes de que exista una sesión.
+    // =========================================================
+
+    match /invitacionesTiendas/{codigo} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin()
+        || (
+          signedIn()
+          && request.resource.data.estado == "usado"
+          && resource.data.estado == "pendiente"
+          && request.resource.data.tiendaId is string
+          && getAfter(userPath(request.auth.uid)).data.tipo == "negocio"
+          && getAfter(userPath(request.auth.uid)).data.tiendaId == request.resource.data.tiendaId
+          && getAfter(userPath(request.auth.uid)).data.codigoInvitacion == codigo
+        );
+      allow delete: if isAdmin();
+    }
+
+    // =========================================================
+    // DEVOLUCIONES DE INVENTARIO
+    // =========================================================
+
+    match /devolucionesInventario/{devolucionId} {
+      allow read: if isAdmin()
+        || (
+          isBusiness()
+          && resource.data.tiendaIds.hasAny([currentStoreId()])
+        )
+        || (
+          isDriver()
+          && resource.data.repartidorId == request.auth.uid
+        );
+
+      allow create: if isAdmin()
+        || (
+          isDriver()
+          && request.resource.data.repartidorId == request.auth.uid
+          && request.resource.data.pedidoId is string
+          && get(/databases/$(database)/documents/pedidos/$(request.resource.data.pedidoId)).data.repartidorId == request.auth.uid
+        );
+
+      allow update: if isAdmin()
+        || (
+          isDriver()
+          && resource.data.repartidorId == request.auth.uid
+        )
+        || (
+          isBusiness()
+          && resource.data.tiendaIds.hasAny([currentStoreId()])
+          && request.resource.data.ultimaRecepcion.tiendaId == currentStoreId()
+          && request.resource.data.ultimaRecepcion.usuarioId == request.auth.uid
+        );
+
+      allow delete: if isAdmin();
+    }
+
+    // =========================================================
+    // INCIDENCIAS DE ENTREGA
+    // =========================================================
+
+    match /incidenciasEntrega/{incidenciaId} {
+      allow read: if isAdmin()
+        || (
+          isDriver()
+          && resource.data.repartidorId == request.auth.uid
+        );
+
+      allow create: if isAdmin()
+        || (
+          isDriver()
+          && request.resource.data.repartidorId == request.auth.uid
+          && request.resource.data.pedidoId is string
+          && get(/databases/$(database)/documents/pedidos/$(request.resource.data.pedidoId)).data.repartidorId == request.auth.uid
+        );
+
+      allow update: if isAdmin()
+        || (
+          isDriver()
+          && resource.data.repartidorId == request.auth.uid
+        );
+
+      allow delete: if isAdmin();
+    }
+
+    // =========================================================
+    // FLUJO LEGACY DE SOLICITUDES
+    // Se conserva para no romper las páginas antiguas.
+    // =========================================================
+
+    match /solicitudes/{solicitudId} {
+      allow read: if signedIn() && (
+        isAdmin()
+        || resource.data.pasajeroId == request.auth.uid
+        || resource.data.conductorId == request.auth.uid
+      );
+
+      allow create: if signedIn()
+        && request.resource.data.pasajeroId == request.auth.uid;
+
+      allow update: if isAdmin()
+        || (
+          signedIn()
+          && (
+            resource.data.pasajeroId == request.auth.uid
+            || resource.data.conductorId == request.auth.uid
+          )
+        );
+
+      allow delete: if isAdmin()
+        || (
+          signedIn()
+          && resource.data.pasajeroId == request.auth.uid
+        );
+    }
+
+    // =========================================================
+    // RUTAS / DESTINOS ESPECIALES LEGACY
+    // =========================================================
+
+    match /rutasEspeciales/{rutaId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /destinosEspeciales/{destinoId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    // =========================================================
+    // BLOQUEO FINAL
+    // Ninguna colección nueva queda abierta por accidente.
+    // =========================================================
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

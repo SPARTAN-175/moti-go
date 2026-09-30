@@ -1,0 +1,128 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return firestore.get(
+        /databases/(default)/documents/usuarios/$(request.auth.uid)
+      );
+    }
+
+    function isAdmin() {
+      return signedIn() && userDoc().data.tipo == "admin";
+    }
+
+    function isBusiness() {
+      return signedIn() && userDoc().data.tipo == "negocio";
+    }
+
+    function currentStoreId() {
+      return userDoc().data.tiendaId;
+    }
+
+    function ownsProduct(productId) {
+      return isBusiness()
+        && firestore.exists(
+          /databases/(default)/documents/inventarios/$(currentStoreId() + "_" + productId)
+        );
+    }
+
+    // =========================================================
+    // IMÁGENES DE PRODUCTOS
+    // Son material de catálogo, por lo que pueden visualizarse
+    // sin exponer documentos privados.
+    // =========================================================
+
+    match /productos/{productoId}/imagen {
+      allow read: if true;
+
+      allow write: if (
+          isAdmin() || ownsProduct(productoId)
+        )
+        && request.resource.size <= 2 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+
+      allow delete: if isAdmin() || ownsProduct(productoId);
+    }
+
+    // =========================================================
+    // FOTO DE PERFIL
+    // =========================================================
+
+    match /usuarios/{uid}/perfil/{archivo} {
+      allow read: if signedIn() && (
+        uid == request.auth.uid || isAdmin()
+      );
+
+      allow write: if signedIn()
+        && (uid == request.auth.uid || isAdmin())
+        && request.resource.size <= 3 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+    }
+
+    // =========================================================
+    // VEHÍCULO DEL REPARTIDOR
+    // =========================================================
+
+    match /repartidores/{uid}/vehiculo/{archivo} {
+      allow read: if signedIn() && (
+        uid == request.auth.uid || isAdmin()
+      );
+
+      allow write: if signedIn()
+        && (uid == request.auth.uid || isAdmin())
+        && request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+    }
+
+    // =========================================================
+    // DOCUMENTOS DEL REPARTIDOR
+    // Privados por defecto.
+    // =========================================================
+
+    match /repartidores/{uid}/documentos/{documento} {
+      allow read: if signedIn() && (
+        uid == request.auth.uid || isAdmin()
+      );
+
+      allow write: if signedIn()
+        && (uid == request.auth.uid || isAdmin())
+        && request.resource.size <= 8 * 1024 * 1024
+        && (
+          request.resource.contentType.matches('image/(jpeg|png|webp)')
+          || request.resource.contentType == 'application/pdf'
+        );
+    }
+
+    // =========================================================
+    // LOGO / FOTO DE TIENDA
+    // =========================================================
+
+    match /tiendas/{tiendaId}/{archivo} {
+      allow read: if true;
+
+      allow write: if (
+          isAdmin()
+          || (isBusiness() && currentStoreId() == tiendaId)
+        )
+        && request.resource.size <= 3 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+
+      allow delete: if isAdmin()
+        || (isBusiness() && currentStoreId() == tiendaId);
+    }
+
+    // =========================================================
+    // BLOQUEO FINAL
+    // =========================================================
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -847,9 +847,11 @@ if (formRegistroTienda) {
                             {
 
                                 tipo:
-                                    negocio",
+                                    "negocio",
 
                                 tiendaId,
+
+                                codigoInvitacion,
 
                                 correo:
                                     correo,
@@ -878,6 +880,8 @@ if (formRegistroTienda) {
                                 nombre,
 
                                 tipo,
+
+                                codigoInvitacion,
 
                                 municipio,
 

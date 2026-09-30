@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "ubicacionesRepartidores": {
+      "$uid": {
+        ".read": "auth !== null",
+        ".write": "auth !== null && auth.uid === $uid",
+        ".validate": "newData.hasChild('activo') && newData.child('activo').isBoolean() && (!newData.hasChild('latitud') || (newData.child('latitud').isNumber() && newData.child('latitud').val() >= -90 && newData.child('latitud').val() <= 90)) && (!newData.hasChild('longitud') || (newData.child('longitud').isNumber() && newData.child('longitud').val() >= -180 && newData.child('longitud').val() <= 180)) && (!newData.hasChild('precision') || newData.child('precision').isNumber()) && (!newData.hasChild('rumbo') || newData.child('rumbo').isNumber()) && (!newData.hasChild('velocidad') || newData.child('velocidad').isNumber()) && (!newData.hasChild('actualizadoEn') || newData.child('actualizadoEn').isNumber())"
+      }
+    }
+  }
+}
