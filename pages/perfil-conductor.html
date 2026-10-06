@@ -8,13 +8,19 @@
     <link rel="stylesheet" href="../css/variables.css">
     <link rel="stylesheet" href="../css/main.css">
     <link rel="stylesheet" href="../css/perfil-conductor.css">
+    <link rel="stylesheet" href="../css/foto-perfil.css">
 
 <script type="module" src="../js/motigo-ui.js"></script>
 </head>
 <body>
     <main class="perfil-conductor-page">
         <section class="perfil-hero">
-            <div class="perfil-avatar" id="perfilAvatar">R</div>
+            <div class="perfil-avatar motigo-photo-wrap" id="perfilAvatar">
+                <img data-foto-perfil-preview class="motigo-profile-photo" alt="Foto de perfil" hidden>
+                <span class="motigo-photo-fallback">R</span>
+                <button type="button" class="motigo-photo-button" data-foto-perfil-trigger aria-label="Cambiar foto de perfil" title="Cambiar foto de perfil"><span class="material-symbols-outlined">photo_camera</span></button>
+                <input type="file" accept="image/jpeg,image/png,image/webp" data-foto-perfil-input hidden>
+            </div>
             <div class="perfil-hero-info">
                 <span class="perfil-kicker">MOTI GO</span>
                 <h1 id="profileName">Cargando...</h1>
@@ -131,5 +137,6 @@
     <script type="module" src="../js/logout.js"></script>
     <script type="module" src="../js/auth-guard.js"></script>
     <script type="module" src="../js/perfil-conductor.js"></script>
+<script type="module" src="../js/foto-perfil.js"></script>
 </body>
 </html>

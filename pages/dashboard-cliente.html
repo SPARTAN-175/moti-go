@@ -47,6 +47,7 @@
 
 
 <script type="module" src="../js/motigo-ui.js"></script>
+<link rel="stylesheet" href="../css/foto-perfil.css">
 </head>
 
 
@@ -157,6 +158,11 @@
 
 
         <div class="side-welcome">
+
+    <div class="side-avatar motigo-photo-wrap">
+        <img data-foto-perfil-preview class="motigo-profile-photo" alt="Foto de perfil del cliente" hidden>
+        <span class="material-symbols-outlined motigo-photo-fallback">person</span>
+    </div>
 
     <span class="side-welcome-label">
         BIENVENIDO A MOTI GO
@@ -345,6 +351,12 @@
 
             </a>
 
+
+
+            <a href="documentos.html" class="side-link">
+                <span class="material-symbols-outlined">folder_shared</span>
+                <div><strong>Mis documentos</strong></div>
+            </a>
 
 
             <a
@@ -1131,7 +1143,7 @@
     src="../js/menu.js">
 </script>
 
-    <a href="documentos.html" class="motigo-documentos-link">📂 Mis documentos</a>
+<script type="module" src="../js/foto-perfil.js"></script>
 </body>
 
 </html>

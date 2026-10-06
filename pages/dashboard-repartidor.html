@@ -47,6 +47,7 @@
 
 
 <script type="module" src="../js/motigo-ui.js"></script>
+<link rel="stylesheet" href="../css/foto-perfil.css">
 </head>
 
 
@@ -122,16 +123,9 @@
 
         <div class="side-profile">
 
-            <div class="side-avatar">
-
-                <span
-                    id="sideUserInitial"
-                    class="material-symbols-outlined">
-
-                    person
-
-                </span>
-
+            <div class="side-avatar motigo-photo-wrap">
+                <img data-foto-perfil-preview class="motigo-profile-photo" alt="Foto de perfil del repartidor" hidden>
+                <span id="sideUserInitial" class="material-symbols-outlined motigo-photo-fallback">person</span>
             </div>
 
 
@@ -241,6 +235,11 @@
 
             </a>
 
+
+            <a href="documentos.html" class="side-link">
+                <span class="material-symbols-outlined">folder_shared</span>
+                <span>Mi expediente</span>
+            </a>
 
         </nav>
 
@@ -1291,8 +1290,13 @@
 
         <div class="repartidor-perfil-card">
             <div class="perfil-presentacion">
-                <div class="perfil-avatar perfil-avatar-pro">
-                    <span id="perfilRepartidorInicial">R</span>
+                <div class="perfil-avatar perfil-avatar-pro motigo-photo-wrap">
+                    <img data-foto-perfil-preview class="motigo-profile-photo" alt="Foto de perfil" hidden>
+                    <span id="perfilRepartidorInicial" class="motigo-photo-fallback">R</span>
+                    <button type="button" class="motigo-photo-button" data-foto-perfil-trigger aria-label="Cambiar foto de perfil" title="Cambiar foto de perfil">
+                        <span class="material-symbols-outlined">photo_camera</span>
+                    </button>
+                    <input type="file" accept="image/jpeg,image/png,image/webp" data-foto-perfil-input hidden>
                 </div>
 
                 <div class="perfil-identidad">
@@ -1571,7 +1575,7 @@
 </script>
 
 
-    <a href="documentos.html" class="motigo-documentos-link">📂 Mi expediente</a>
+<script type="module" src="../js/foto-perfil.js"></script>
 </body>
 
 </html>

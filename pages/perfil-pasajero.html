@@ -31,6 +31,8 @@
         rel="stylesheet"
         href="../css/perfil-pasajero.css">
 
+    <link rel="stylesheet" href="../css/foto-perfil.css">
+
 
 <script type="module" src="../js/motigo-ui.js"></script>
 </head>
@@ -83,12 +85,11 @@
 
     <section class="perfil-hero">
 
-        <div class="perfil-avatar">
-
-            <span id="profileInitial">
-                —
-            </span>
-
+        <div class="perfil-avatar motigo-photo-wrap">
+            <img data-foto-perfil-preview class="motigo-profile-photo" alt="Foto de perfil" hidden>
+            <span id="profileInitial" class="motigo-photo-fallback">—</span>
+            <button type="button" class="motigo-photo-button" data-foto-perfil-trigger aria-label="Cambiar foto de perfil" title="Cambiar foto de perfil"><span class="material-symbols-outlined">photo_camera</span></button>
+            <input type="file" accept="image/jpeg,image/png,image/webp" data-foto-perfil-input hidden>
         </div>
 
 
@@ -843,6 +844,7 @@
 </script>
 
 
+<script type="module" src="../js/foto-perfil.js"></script>
 </body>
 
 </html>

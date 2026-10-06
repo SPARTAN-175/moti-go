@@ -43,6 +43,7 @@
 
 
 <script type="module" src="../js/motigo-ui.js"></script>
+<link rel="stylesheet" href="../css/foto-perfil.css">
 </head>
 
 
@@ -121,12 +122,9 @@
 
         <div class="sidebar-business">
 
-            <div class="business-avatar">
-
-                <span class="material-symbols-outlined">
-                    storefront
-                </span>
-
+            <div class="business-avatar motigo-photo-wrap">
+                <img data-foto-perfil-preview class="motigo-profile-photo" alt="Logo del negocio" hidden>
+                <span class="material-symbols-outlined motigo-photo-fallback">storefront</span>
             </div>
 
 
@@ -283,6 +281,12 @@
 
     <span id="businessReturnsBadge" class="nav-badge" hidden>0</span>
 
+</button>
+
+
+<button type="button" class="nav-item" data-view="documentos" onclick="window.location.href='documentos.html'">
+    <span class="material-symbols-outlined">folder_shared</span>
+    <span>Documentos</span>
 </button>
 
 
@@ -1431,8 +1435,13 @@
                 <div class="business-profile business-profile-expanded">
 
                     <div class="profile-main">
-                        <div class="profile-store-icon">
-                            <span class="material-symbols-outlined">storefront</span>
+                        <div class="profile-store-icon motigo-photo-wrap">
+                            <img data-foto-perfil-preview class="motigo-profile-photo" alt="Logo del negocio" hidden>
+                            <span class="material-symbols-outlined motigo-photo-fallback">storefront</span>
+                            <button type="button" class="motigo-photo-button" data-foto-perfil-trigger aria-label="Cambiar logo o foto del negocio" title="Cambiar logo o foto">
+                                <span class="material-symbols-outlined">photo_camera</span>
+                            </button>
+                            <input type="file" accept="image/jpeg,image/png,image/webp" data-foto-perfil-input hidden>
                         </div>
 
                         <div>
@@ -1968,7 +1977,7 @@
 ></script>
 
 
-    <a href="documentos.html" class="motigo-documentos-link">📂 Documentos</a>
+<script type="module" src="../js/foto-perfil.js"></script>
 </body>
 
 </html>
