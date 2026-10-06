@@ -23,6 +23,7 @@ import {
     query,
     where,
     setDoc,
+    updateDoc,
     addDoc,
     serverTimestamp,
     documentId,
@@ -41,6 +42,7 @@ import {
 // =========================================================
 
 let usuarioActual = null;
+let datosUsuarioActual = null;
 
 let tiendaActual = null;
 
@@ -430,6 +432,7 @@ onAuthStateChanged(
             }
 
             usuarioActual = null;
+            datosUsuarioActual = null;
             tiendaActual = null;
             tiendaId = null;
             devolucionesPendientes = [];
@@ -503,6 +506,8 @@ async function cargarDatosNegocio() {
 
         const datosUsuario =
             usuarioSnap.data();
+
+        datosUsuarioActual = datosUsuario;
 
 
         /*
@@ -623,103 +628,158 @@ async function cargarTienda() {
 
 function actualizarDatosVisualesTienda() {
 
-    const nombre =
-        tiendaActual.nombre ||
-        "Mi negocio";
+    const nombre = tiendaActual?.nombre || "Mi negocio";
+    const tipo = tiendaActual?.tipo || tiendaActual?.categoria || "";
+    const direccion = tiendaActual?.direccion || "";
+    const municipio = tiendaActual?.municipio || "";
+    const telefono = datosUsuarioActual?.telefono || "";
+    const correo = datosUsuarioActual?.correo || datosUsuarioActual?.email || usuarioActual?.email || "";
 
+    ["businessName", "importBusinessName", "profileBusinessName"].forEach(id => {
+        const elemento = document.getElementById(id);
+        if (elemento) elemento.textContent = nombre;
+    });
 
-    const tipo =
-        tiendaActual.tipo ||
-        tiendaActual.categoria ||
-        "Negocio afiliado";
+    ["businessType", "profileBusinessType"].forEach(id => {
+        const elemento = document.getElementById(id);
+        if (elemento) elemento.textContent = tipo || "Tipo de negocio pendiente";
+    });
 
-
-    const elementosNombre = [
-
-        "businessName",
-
-        "importBusinessName",
-
-        "profileBusinessName"
-
-    ];
-
-
-    elementosNombre.forEach(
-        id => {
-
-            const elemento =
-                document.getElementById(id);
-
-            if (elemento) {
-
-                elemento.textContent =
-                    nombre;
-
-            }
-
-        }
-    );
-
-
-    const elementosTipo = [
-
-        "businessType",
-
-        "profileBusinessType"
-
-    ];
-
-
-    elementosTipo.forEach(
-        id => {
-
-            const elemento =
-                document.getElementById(id);
-
-            if (elemento) {
-
-                elemento.textContent =
-                    tipo;
-
-            }
-
-        }
-    );
-
-
-    const direccion =
-        tiendaActual.direccion ||
-        "No registrada";
-
-
-    const profileAddress =
-        document.getElementById(
-            "profileAddress"
-        );
-
-
-    if (profileAddress) {
-
-        profileAddress.textContent =
-            direccion;
-
+    const estado = document.getElementById("profileBusinessStatus");
+    if (estado) {
+        estado.textContent = tiendaActual?.activa === false ? "Inactivo" : "Activo";
+        estado.classList.toggle("status-active", tiendaActual?.activa !== false);
+        estado.classList.toggle("status-inactive", tiendaActual?.activa === false);
     }
 
+    const category = document.getElementById("profileBusinessCategory");
+    if (category) category.textContent = tipo || "Pendiente de registrar";
 
-    const welcomeTitle =
-        document.getElementById(
-            "welcomeTitle"
-        );
+    const address = document.getElementById("profileAddress");
+    if (address) address.textContent = direccion || "Pendiente de registrar";
 
+    const phone = document.getElementById("profileBusinessPhone");
+    if (phone) phone.textContent = telefono || "Pendiente de registrar";
 
-    if (welcomeTitle) {
+    const email = document.getElementById("profileBusinessEmail");
+    if (email) email.textContent = correo || "Pendiente de registrar";
 
-        welcomeTitle.textContent =
-            `Hola, ${nombre} 👋`;
+    const storeId = document.getElementById("profileBusinessId");
+    if (storeId) storeId.textContent = tiendaId || "No disponible";
 
-    }
+    const welcomeTitle = document.getElementById("welcomeTitle");
+    if (welcomeTitle) welcomeTitle.textContent = `Hola, ${nombre} 👋`;
 
+    prepararFormularioInformacionNegocio();
+}
+
+function prepararFormularioInformacionNegocio() {
+    const panel = document.getElementById("businessMissingInfo");
+    const form = document.getElementById("businessMissingInfoForm");
+    if (!panel || !form || !tiendaActual) return;
+
+    const faltantes = {
+        phone: !String(datosUsuarioActual?.telefono || "").trim(),
+        address: !String(tiendaActual?.direccion || "").trim(),
+        municipio: !String(tiendaActual?.municipio || "").trim(),
+        type: !String(tiendaActual?.tipo || tiendaActual?.categoria || "").trim()
+    };
+
+    const campos = [
+        ["businessMissingPhoneField", "businessMissingPhone", faltantes.phone, datosUsuarioActual?.telefono || ""],
+        ["businessMissingAddressField", "businessMissingAddress", faltantes.address, tiendaActual?.direccion || ""],
+        ["businessMissingMunicipioField", "businessMissingMunicipio", faltantes.municipio, tiendaActual?.municipio || ""],
+        ["businessMissingTypeField", "businessMissingType", faltantes.type, tiendaActual?.tipo || tiendaActual?.categoria || ""]
+    ];
+
+    let hayFaltantes = false;
+    campos.forEach(([labelId, inputId, falta, valor]) => {
+        const label = document.getElementById(labelId);
+        const input = document.getElementById(inputId);
+        if (!label || !input) return;
+        label.hidden = !falta;
+        if (falta) {
+            hayFaltantes = true;
+            input.value = valor || "";
+        }
+    });
+
+    panel.hidden = !hayFaltantes;
+
+    if (form.dataset.motigoPreparado === "1") return;
+    form.dataset.motigoPreparado = "1";
+
+    form.addEventListener("submit", async event => {
+        event.preventDefault();
+        if (!usuarioActual || !tiendaId) return;
+
+        const status = document.getElementById("businessMissingInfoStatus");
+        const datosUsuario = {};
+        const datosTienda = {};
+
+        if (faltantes.phone) {
+            const valor = document.getElementById("businessMissingPhone")?.value.trim() || "";
+            if (!valor) {
+                status.textContent = "Escribe un teléfono para continuar.";
+                return;
+            }
+            datosUsuario.telefono = valor;
+        }
+        if (faltantes.address) {
+            const valor = document.getElementById("businessMissingAddress")?.value.trim() || "";
+            if (!valor) {
+                status.textContent = "Escribe la dirección de tu negocio para continuar.";
+                return;
+            }
+            datosTienda.direccion = valor;
+        }
+        if (faltantes.municipio) {
+            const valor = document.getElementById("businessMissingMunicipio")?.value.trim() || "";
+            if (!valor) {
+                status.textContent = "Escribe el municipio para continuar.";
+                return;
+            }
+            datosTienda.municipio = valor;
+        }
+        if (faltantes.type) {
+            const valor = document.getElementById("businessMissingType")?.value.trim() || "";
+            if (!valor) {
+                status.textContent = "Indica el tipo o categoría de tu negocio para continuar.";
+                return;
+            }
+            datosTienda.tipo = valor;
+        }
+
+        const submit = form.querySelector("button[type=submit]");
+        if (submit) submit.disabled = true;
+        status.textContent = "Guardando información...";
+
+        try {
+            if (Object.keys(datosUsuario).length) {
+                await updateDoc(doc(db, "usuarios", usuarioActual.uid), {
+                    ...datosUsuario,
+                    ultimaActualizacionPerfil: serverTimestamp()
+                });
+                datosUsuarioActual = { ...datosUsuarioActual, ...datosUsuario };
+            }
+
+            if (Object.keys(datosTienda).length) {
+                await updateDoc(doc(db, "tiendas", tiendaId), {
+                    ...datosTienda,
+                    actualizadoEn: serverTimestamp()
+                });
+                tiendaActual = { ...tiendaActual, ...datosTienda };
+            }
+
+            status.textContent = "Información guardada correctamente.";
+            actualizarDatosVisualesTienda();
+        } catch (error) {
+            console.error("❌ MOTI GO: error guardando información del negocio:", error);
+            status.textContent = "No se pudo guardar la información. Intenta nuevamente.";
+        } finally {
+            if (submit) submit.disabled = false;
+        }
+    });
 }
 
 
