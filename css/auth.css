@@ -234,3 +234,39 @@
 }
 
 
+
+
+/* ===================================
+   BOTÓN MOSTRAR / OCULTAR CONTRASEÑA
+   =================================== */
+
+.input-wrapper {
+    position: relative;
+}
+
+#password {
+    padding-right: 52px;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: #667085;
+    border-radius: 10px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.password-toggle:hover {
+    background: #f2f4f7;
+    color: var(--primary);
+}
