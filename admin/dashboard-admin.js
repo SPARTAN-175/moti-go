@@ -12914,3 +12914,16 @@ mostrarVista(
 console.log(
     "🚀 MOTI GO ADMIN: panel iniciado."
 );
+
+
+// Accesos rápidos a expedientes y documentos desde el panel administrativo.
+(function(){
+    document.addEventListener('click', function(e){
+        const b=e.target.closest?.('[data-motigo-documentos]');
+        if(!b)return;
+        const uid=b.getAttribute('data-uid');
+        const storeId=b.getAttribute('data-store-id');
+        if(uid) location.href='../pages/documentos.html?uid='+encodeURIComponent(uid);
+        else if(storeId) location.href='../pages/documentos.html?storeId='+encodeURIComponent(storeId);
+    });
+})();
