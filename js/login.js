@@ -21,6 +21,36 @@ btnLogin.addEventListener(
 );
 
 
+// Mostrar / ocultar contraseña
+const togglePassword =
+    document.getElementById("togglePassword");
+
+if (togglePassword) {
+    togglePassword.addEventListener("click", () => {
+        const password = document.getElementById("password");
+        const icon = togglePassword.querySelector(".material-symbols-outlined");
+
+        if (!password) return;
+
+        const mostrar = password.type === "password";
+        password.type = mostrar ? "text" : "password";
+
+        if (icon) {
+            icon.textContent = mostrar ? "visibility_off" : "visibility";
+        }
+
+        togglePassword.setAttribute(
+            "aria-label",
+            mostrar ? "Ocultar contraseña" : "Mostrar contraseña"
+        );
+        togglePassword.setAttribute(
+            "title",
+            mostrar ? "Ocultar contraseña" : "Mostrar contraseña"
+        );
+    });
+}
+
+
 async function iniciarSesion() {
 
     const email =

@@ -564,3 +564,35 @@ function iniciarMotiGoUI() {
 }
 
 iniciarMotiGoUI();
+
+
+// =========================================================
+// HISTORIAL DE NAVEGACIÓN INTERNA
+// Permite que el botón físico Atrás vuelva a la vista anterior
+// antes de abandonar el dashboard.
+// =========================================================
+(function instalarHistorialMotiGo(){
+    const clave = "motigo-historial-" + location.pathname;
+    if (sessionStorage.getItem(clave) !== "1") {
+        history.replaceState({ motigoBase: true, vista: null }, "", location.href);
+        history.pushState({ motigoBase: true, vista: null }, "", location.href);
+        sessionStorage.setItem(clave, "1");
+    }
+    let supr = false;
+    document.addEventListener("click", (e) => {
+        const el = e.target.closest?.("[data-view]");
+        if (!el || supr) return;
+        const vista = el.getAttribute("data-view");
+        if (!vista) return;
+        history.pushState({ motigoVista: vista }, "", location.href);
+    }, true);
+    window.addEventListener("popstate", (e) => {
+        const vista = e.state?.motigoVista;
+        if (!vista) return;
+        const el = document.querySelector(`[data-view="${CSS.escape(vista)}"]`);
+        if (!el) return;
+        supr = true;
+        el.click();
+        setTimeout(() => supr = false, 0);
+    });
+})();
