@@ -306,16 +306,6 @@
 
 </button>
 
-                    <span class="material-symbols-outlined">
-                        settings
-                    </span>
-
-                    <span>
-                        Configuración
-                    </span>
-
-                </button>
-
             </div>
 
         </nav>
@@ -1484,6 +1474,47 @@
 
                     </div>
 
+                </div>
+
+                <div id="businessMissingInfo" class="business-missing-info" hidden>
+                    <div class="business-missing-info-head">
+                        <span class="material-symbols-outlined">
+                            edit_note
+                        </span>
+                        <div>
+                            <strong>Completa la información de tu negocio</strong>
+                            <span>Solo te pediremos los datos que todavía no están registrados.</span>
+                        </div>
+                    </div>
+
+                    <form id="businessMissingInfoForm" class="business-missing-info-form">
+                        <label id="businessMissingPhoneField" hidden>
+                            Teléfono
+                            <input id="businessMissingPhone" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" placeholder="Ej. 932 000 0000">
+                        </label>
+
+                        <label id="businessMissingAddressField" hidden>
+                            Dirección
+                            <input id="businessMissingAddress" type="text" autocomplete="street-address" maxlength="180" placeholder="Escribe la dirección de tu negocio">
+                        </label>
+
+                        <label id="businessMissingMunicipioField" hidden>
+                            Municipio
+                            <input id="businessMissingMunicipio" type="text" maxlength="100" placeholder="Ej. Ostuacán">
+                        </label>
+
+                        <label id="businessMissingTypeField" hidden>
+                            Categoría / tipo de negocio
+                            <input id="businessMissingType" type="text" maxlength="80" placeholder="Ej. Abarrotes, carnicería, farmacia...">
+                        </label>
+
+                        <div class="business-missing-info-actions">
+                            <button type="submit" class="business-primary-button">
+                                Guardar información
+                            </button>
+                        </div>
+                        <p id="businessMissingInfoStatus" class="business-missing-info-status" aria-live="polite"></p>
+                    </form>
                 </div>
 
                 <div class="business-info-note">
