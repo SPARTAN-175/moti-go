@@ -43,6 +43,163 @@ service cloud.firestore {
       return currentUser().data.tiendaId;
     }
 
+    function businessProductFieldsOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        "codigoBarras",
+        "nombre",
+        "nombreNormalizado",
+        "categoria",
+        "departamentoOriginal",
+        "tipoVenta",
+        "unidadVenta",
+        "unidad",
+        "incrementoVenta",
+        "cantidadMinimaVenta",
+        "tipoCatalogo",
+        "imagenUrl",
+        "descripcion",
+        "necesitaRevision",
+        "actualizadoEn"
+      ]);
+    }
+
+    function businessProductCreateIsValid() {
+      return request.resource.data.nombre is string
+        && request.resource.data.categoria is string
+        && request.resource.data.imagenUrl is string
+        && request.resource.data.necesitaRevision is bool;
+    }
+
+    function businessInventoryFieldsOnly() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        "tiendaId",
+        "productoId",
+        "codigoTienda",
+        "codigoBarras",
+        "precio",
+        "costo",
+        "precioMayoreo",
+        "existencia",
+        "inventarioMinimo",
+        "inventarioMaximo",
+        "tipoVenta",
+        "unidadVenta",
+        "unidad",
+        "incrementoVenta",
+        "cantidadMinimaVenta",
+        "tipoCatalogo",
+        "disponible",
+        "actualizadoEn"
+      ]);
+    }
+
+    function driverStateTransitionValid() {
+      return (resource.data.estado == "asignado"
+        && request.resource.data.estado == "en_camino_tienda")
+        || (resource.data.estado == "en_camino_tienda"
+        && request.resource.data.estado == "en_compra")
+        || (resource.data.estado == "en_compra"
+        && request.resource.data.estado == "en_camino_tienda")
+        || (resource.data.estado == "en_compra"
+        && request.resource.data.estado == "listo_entrega")
+        || (resource.data.estado == "listo_entrega"
+        && request.resource.data.estado == "en_camino_cliente")
+        || (resource.data.estado == "en_camino_cliente"
+        && request.resource.data.estado == "entregando");
+    }
+
+    function clientDispatchIsValid() {
+      return request.resource.data.estado in ["solicitud_repartidor", "sin_repartidor"]
+        && (
+          request.resource.data.estado == "sin_repartidor"
+          || (
+            request.resource.data.repartidorId is string
+            && get(/databases/$(database)/documents/usuarios/$(request.resource.data.repartidorId)).data.tipo == "repartidor"
+          )
+        );
+    }
+
+    function clientCancelIsValid() {
+      return request.resource.data.estado == "cancelado"
+        && request.resource.data.canceladoPor == "cliente"
+        && resource.data.estado in [
+          "pendiente_asignacion",
+          "solicitud_repartidor",
+          "sin_repartidor",
+          "asignado",
+          "en_camino_tienda",
+          "en_compra",
+          "listo_entrega",
+          "en_camino_cliente",
+          "entregando"
+        ];
+    }
+
+    function driverAssignedToPedido() {
+      return isDriver()
+        && resource.data.repartidorId == request.auth.uid;
+    }
+
+    function driverPedidoUpdateIsValid() {
+      return driverAssignedToPedido()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          "estado",
+          "repartidorId",
+          "repartidorNombre",
+          "repartidorPlaca",
+          "indiceRepartidor",
+          "solicitudEnviadaEn",
+          "solicitudRechazadaPor",
+          "solicitudRechazadaEn",
+          "fechaAsignacion",
+          "esFundador",
+          "repartidorEsFundador",
+          "fundadorId",
+          "fundadorNombre",
+          "comisiones",
+          "productos",
+          "subtotal",
+          "costoEntrega",
+          "total",
+          "incidenciaId",
+          "incidenciaEntrega",
+          "entregaConfirmada",
+          "devolucionInventarioPendiente",
+          "fechaFinalizacion",
+          "codigoValidado",
+          "actualizadoEn"
+        ])
+        && request.resource.data.repartidorId == request.auth.uid
+        && request.resource.data.costoEntrega == resource.data.costoEntrega
+        && request.resource.data.subtotal is number
+        && request.resource.data.subtotal >= 0
+        && request.resource.data.total == (request.resource.data.subtotal + request.resource.data.costoEntrega)
+        && request.resource.data.comisiones.repartidor.monto == resource.data.comisiones.repartidor.monto
+        && (
+          !request.resource.data.keys().hasAny(["productos"])
+          || request.resource.data.productos.size() == resource.data.productos.size()
+        );
+    }
+
+    function driverDeliveryIsValid() {
+      return driverAssignedToPedido()
+        && resource.data.estado == "entregando"
+        && request.resource.data.estado == "entregado"
+        && request.resource.data.entregaConfirmada == true
+        && request.resource.data.codigoValidado == true
+        && request.resource.data.fechaFinalizacion != null;
+    }
+
+    function driverIncidenceIsValid() {
+      return driverAssignedToPedido()
+        && request.resource.data.estado == "incidencia_entrega"
+        && request.resource.data.entregaConfirmada == false
+        && request.resource.data.incidenciaId is string
+        && getAfter(
+          /databases/$(database)/documents/incidenciasEntrega/$(request.resource.data.incidenciaId)
+        ).data.repartidorId == request.auth.uid;
+    }
+
     function driverOperationalFieldsOnly() {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
         "estadoServicio",
@@ -458,7 +615,13 @@ service cloud.firestore {
 
     match /productos/{productoId} {
       allow read: if signedIn();
-      allow create, update: if isAdmin() || isBusiness();
+
+      allow create: if isAdmin()
+        || (isBusiness() && businessProductCreateIsValid());
+
+      allow update: if isAdmin()
+        || (isBusiness() && businessProductFieldsOnly());
+
       allow delete: if isAdmin();
     }
 
@@ -469,13 +632,31 @@ service cloud.firestore {
     match /inventarios/{inventarioId} {
       allow read: if signedIn();
 
-      // Negocio: solo su propia tienda.
-      allow update, create: if isAdmin()
+      allow create: if isAdmin()
         || (
           isBusiness()
           && request.resource.data.tiendaId == currentStoreId()
+          && request.resource.data.productoId is string
+          && request.resource.data.existencia is number
+          && request.resource.data.existencia >= 0
+          && request.resource.data.precio is number
+          && request.resource.data.precio >= 0
+          && request.resource.data.disponible == (request.resource.data.existencia > 0)
+        );
+
+      allow update: if isAdmin()
+        || (
+          isBusiness()
+          && resource.data.tiendaId == currentStoreId()
+          && request.resource.data.tiendaId == resource.data.tiendaId
+          && request.resource.data.productoId == resource.data.productoId
+          && request.resource.data.existencia is number
+          && request.resource.data.existencia >= 0
+          && request.resource.data.precio is number
+          && request.resource.data.precio >= 0
+          && request.resource.data.disponible == (request.resource.data.existencia > 0)
+          && businessInventoryFieldsOnly()
         )
-        // Repartidor: operaciones físicas durante un viaje.
         || (
           isDriver()
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
@@ -484,9 +665,13 @@ service cloud.firestore {
             "disponible",
             "actualizadoEn"
           ])
+          && request.resource.data.existencia is number
+          && request.resource.data.existencia >= 0
+          && request.resource.data.reservado is number
+          && request.resource.data.reservado >= 0
+          && request.resource.data.reservado <= request.resource.data.existencia
+          && request.resource.data.disponible == (request.resource.data.existencia > 0)
         )
-        // Cliente: únicamente la reserva lógica de inventario.
-        // No puede modificar precio, existencia física, tienda o producto.
         || (
           isClient()
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
@@ -499,7 +684,7 @@ service cloud.firestore {
           && request.resource.data.reservado <= request.resource.data.existencia
           && request.resource.data.existencia == resource.data.existencia
           && request.resource.data.precio == resource.data.precio
-          && request.resource.data.disponible == (request.resource.data.existencia > request.resource.data.reservado)
+          && request.resource.data.disponible == (request.resource.data.existencia > 0)
         );
 
       allow delete: if isAdmin();
@@ -511,7 +696,18 @@ service cloud.firestore {
 
     match /pedidos/{pedidoId} {
 
-      allow read: if signedIn() && (
+      // Lectura individual: el cliente puede consultar un ID que todavía
+      // no existe (flujo de comprobación/idempotencia antes de crear el pedido).
+      // Si el pedido ya existe, solo puede leerlo si es suyo.
+      allow get: if signedIn() && (
+        isAdmin()
+        || resource == null
+        || resource.data.clienteId == request.auth.uid
+        || resource.data.repartidorId == request.auth.uid
+      );
+
+      // Las consultas/listados siguen restringidos a pedidos propios.
+      allow list: if signedIn() && (
         isAdmin()
         || resource.data.clienteId == request.auth.uid
         || resource.data.repartidorId == request.auth.uid
@@ -541,13 +737,12 @@ service cloud.firestore {
             (
               pedidoClientDispatchFieldsOnly()
               && resource.data.estado == "pendiente_asignacion"
-              && request.resource.data.estado in ["solicitud_repartidor", "sin_repartidor"]
+              && clientDispatchIsValid()
             )
             ||
             (
               pedidoClientCancelFieldsOnly()
-              && request.resource.data.estado == "cancelado"
-              && request.resource.data.canceladoPor == "cliente"
+              && clientCancelIsValid()
             )
             ||
             (
@@ -565,7 +760,84 @@ service cloud.firestore {
         || (
           isDriver()
           && resource.data.repartidorId == request.auth.uid
-          && pedidoDriverFieldsOnly()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["estado"])
+          && driverStateTransitionValid()
+        )
+        || (
+          isDriver()
+          && resource.data.estado == "solicitud_repartidor"
+          && resource.data.repartidorId == request.auth.uid
+          && request.resource.data.estado == "asignado"
+          && request.resource.data.repartidorId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "estado",
+            "repartidorId",
+            "repartidorNombre",
+            "esFundador",
+            "repartidorEsFundador",
+            "fundadorId",
+            "fundadorNombre",
+            "comisiones",
+            "fechaAsignacion",
+            "actualizadoEn"
+          ])
+          && request.resource.data.esFundador == (currentUser().data.esFundador == true)
+          && request.resource.data.repartidorEsFundador == request.resource.data.esFundador
+          && request.resource.data.fundadorId == (request.resource.data.esFundador ? request.auth.uid : null)
+          && request.resource.data.comisiones.repartidor == resource.data.comisiones.repartidor
+        )
+        || (
+          isDriver()
+          && resource.data.estado == "solicitud_repartidor"
+          && resource.data.repartidorId == request.auth.uid
+          && request.resource.data.estado == "pendiente_asignacion"
+          && request.resource.data.repartidorId == null
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "estado",
+            "repartidorId",
+            "repartidorNombre",
+            "solicitudRechazadaPor",
+            "solicitudRechazadaEn",
+            "actualizadoEn"
+          ])
+        )
+        || (
+          isDriver()
+          && resource.data.repartidorId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "productos",
+            "subtotal",
+            "costoEntrega",
+            "total",
+            "comisiones",
+            "actualizadoEn"
+          ])
+          && driverPedidoUpdateIsValid()
+        )
+        || (
+          isDriver()
+          && resource.data.repartidorId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "estado",
+            "incidenciaId",
+            "incidenciaEntrega",
+            "entregaConfirmada",
+            "devolucionInventarioPendiente",
+            "actualizadoEn"
+          ])
+          && driverIncidenceIsValid()
+        )
+        || (
+          isDriver()
+          && resource.data.repartidorId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "estado",
+            "fechaFinalizacion",
+            "entregaConfirmada",
+            "codigoValidado",
+            "actualizadoEn"
+          ])
+          && driverDeliveryIsValid()
         );
 
       allow delete: if isAdmin();
@@ -576,7 +848,29 @@ service cloud.firestore {
     // =========================================================
 
     match /movimientosTiendas/{movimientoId} {
-      allow read: if isAdmin()
+      // Lectura puntual del movimiento: el repartidor solo puede leer
+      // la comisión de un pedido que tiene asignado.
+      allow get: if isAdmin()
+        || (
+          isBusiness()
+          && resource.data.tiendaId == currentStoreId()
+        )
+        || (
+          isDriver()
+          && (
+            !exists(/databases/$(database)/documents/movimientosTiendas/$(movimientoId))
+            || (
+              resource.data.tipo == "comision"
+              && resource.data.pedidoId is string
+              && get(
+                /databases/$(database)/documents/pedidos/$(resource.data.pedidoId)
+              ).data.repartidorId == request.auth.uid
+            )
+          )
+        );
+
+      // Los repartidores no pueden listar movimientos de tiendas.
+      allow list: if isAdmin()
         || (
           isBusiness()
           && resource.data.tiendaId == currentStoreId()
@@ -588,8 +882,10 @@ service cloud.firestore {
           && request.resource.data.tipo == "comision"
           && request.resource.data.estado == "pendiente"
           && request.resource.data.pedidoId is string
-          && get(/databases/$(database)/documents/pedidos/$(request.resource.data.pedidoId)).data.repartidorId == request.auth.uid
           && request.resource.data.tiendaId is string
+          && movimientoId == (request.resource.data.pedidoId + "_" + request.resource.data.tiendaId)
+          && getAfter(/databases/$(database)/documents/pedidos/$(request.resource.data.pedidoId)).data.repartidorId == request.auth.uid
+          && getAfter(/databases/$(database)/documents/pedidos/$(request.resource.data.pedidoId)).data.estado == "entregado"
           && request.resource.data.monto is number
           && request.resource.data.monto >= 0
           && request.resource.data.subtotalVenta is number
@@ -626,7 +922,8 @@ service cloud.firestore {
     // =========================================================
 
     match /invitacionesTiendas/{codigo} {
-      allow read: if true;
+      allow get: if true;
+      allow list: if false;
       allow create: if isAdmin();
       allow update: if isAdmin()
         || (
@@ -647,14 +944,8 @@ service cloud.firestore {
 
     match /devolucionesInventario/{devolucionId} {
       allow read: if isAdmin()
-        || (
-          isBusiness()
-          && resource.data.tiendaIds.hasAny([currentStoreId()])
-        )
-        || (
-          isDriver()
-          && resource.data.repartidorId == request.auth.uid
-        );
+        || (isBusiness() && resource.data.tiendaIds.hasAny([currentStoreId()]))
+        || (isDriver() && resource.data.repartidorId == request.auth.uid);
 
       allow create: if isAdmin()
         || (
@@ -666,12 +957,15 @@ service cloud.firestore {
 
       allow update: if isAdmin()
         || (
-          isDriver()
-          && resource.data.repartidorId == request.auth.uid
-        )
-        || (
           isBusiness()
           && resource.data.tiendaIds.hasAny([currentStoreId()])
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            "items",
+            "estado",
+            "inventarioRestituido",
+            "ultimaRecepcion",
+            "actualizadaEn"
+          ])
           && request.resource.data.ultimaRecepcion.tiendaId == currentStoreId()
           && request.resource.data.ultimaRecepcion.usuarioId == request.auth.uid
         );
@@ -685,10 +979,7 @@ service cloud.firestore {
 
     match /incidenciasEntrega/{incidenciaId} {
       allow read: if isAdmin()
-        || (
-          isDriver()
-          && resource.data.repartidorId == request.auth.uid
-        );
+        || (isDriver() && resource.data.repartidorId == request.auth.uid);
 
       allow create: if isAdmin()
         || (
@@ -698,13 +989,7 @@ service cloud.firestore {
           && get(/databases/$(database)/documents/pedidos/$(request.resource.data.pedidoId)).data.repartidorId == request.auth.uid
         );
 
-      allow update: if isAdmin()
-        || (
-          isDriver()
-          && resource.data.repartidorId == request.auth.uid
-        );
-
-      allow delete: if isAdmin();
+      allow update, delete: if isAdmin();
     }
 
     // =========================================================
@@ -750,6 +1035,54 @@ service cloud.firestore {
     match /destinosEspeciales/{destinoId} {
       allow read: if signedIn();
       allow write: if isAdmin();
+    }
+
+
+
+    // =========================================================
+    // DOCUMENTOS DE USUARIOS
+    // Los documentos son privados: cada usuario puede gestionar
+    // los suyos y administración puede consultarlos.
+    // =========================================================
+
+    match /usuarios/{uid}/documentos/{documentoId} {
+      allow read: if signedIn() && (uid == request.auth.uid || isAdmin());
+
+      allow create, update: if signedIn()
+        && (uid == request.auth.uid || isAdmin())
+        && request.resource.data.tipoDocumento is string
+        && request.resource.data.nombre is string
+        && request.resource.data.storagePath is string
+        && request.resource.data.contentType is string
+        && request.resource.data.size is number
+        && request.resource.data.size >= 0
+        && request.resource.data.subidoPor is string;
+
+      allow delete: if signedIn() && (uid == request.auth.uid || isAdmin());
+    }
+
+    // =========================================================
+    // DOCUMENTOS DE TIENDAS
+    // Solo el negocio dueño de la tienda o administración.
+    // =========================================================
+
+    match /tiendas/{tiendaId}/documentos/{documentoId} {
+      allow read: if isAdmin()
+        || (isBusiness() && currentStoreId() == tiendaId);
+
+      allow create, update: if isAdmin()
+        || (isBusiness()
+          && currentStoreId() == tiendaId
+          && request.resource.data.tipoDocumento is string
+          && request.resource.data.nombre is string
+          && request.resource.data.storagePath is string
+          && request.resource.data.contentType is string
+          && request.resource.data.size is number
+          && request.resource.data.size >= 0
+          && request.resource.data.subidoPor == request.auth.uid);
+
+      allow delete: if isAdmin()
+        || (isBusiness() && currentStoreId() == tiendaId);
     }
 
     // =========================================================

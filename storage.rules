@@ -3,6 +3,10 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
+    // =====================================================
+    // FUNCIONES DE AUTENTICACIÓN
+    // =====================================================
+
     function signedIn() {
       return request.auth != null;
     }
@@ -14,81 +18,76 @@ service firebase.storage {
     }
 
     function isAdmin() {
-      return signedIn() && userDoc().data.tipo == "admin";
+      return signedIn()
+        && userDoc().data.tipo == "admin";
     }
 
     function isBusiness() {
-      return signedIn() && userDoc().data.tipo == "negocio";
+      return signedIn()
+        && userDoc().data.tipo == "negocio";
     }
 
-    function currentStoreId() {
-      return userDoc().data.tiendaId;
-    }
 
-    function ownsProduct(productId) {
-      return isBusiness()
-        && firestore.exists(
-          /databases/(default)/documents/inventarios/$(currentStoreId() + "_" + productId)
+    // =====================================================
+    // IMÁGENES DE PRODUCTOS
+    // Ruta utilizada por MOTI GO:
+    //
+    // productos/{productoId}/imagen
+    // =====================================================
+
+    match /productos/{productoId}/imagen {
+
+      // Las imágenes de productos pueden visualizarse
+      // desde el catálogo.
+      allow read: if true;
+
+
+      // Administradores y negocios autenticados
+      // pueden subir/reemplazar la imagen.
+      //
+      // Límites:
+      // - máximo 2 MB
+      // - JPEG
+      // - PNG
+      // - WebP
+      //
+      // Se permite crear la imagen aunque todavía no exista
+      // el inventario, porque MOTI GO sube la imagen antes
+      // de terminar de guardar el producto.
+      allow write: if (
+          isAdmin()
+          || isBusiness()
+        )
+        && request.resource.size <= 2 * 1024 * 1024
+        && request.resource.contentType.matches(
+          'image/(jpeg|png|webp)'
         );
     }
 
-    // =========================================================
-    // IMÁGENES DE PRODUCTOS
-    // Son material de catálogo, por lo que pueden visualizarse
-    // sin exponer documentos privados.
-    // =========================================================
 
-    match /productos/{productoId}/imagen {
-      allow read: if true;
 
-      allow write: if (
-          isAdmin() || ownsProduct(productoId)
-        )
-        && request.resource.size <= 2 * 1024 * 1024
-        && request.resource.contentType.matches('image/(jpeg|png|webp)');
 
-      allow delete: if isAdmin() || ownsProduct(productoId);
-    }
-
-    // =========================================================
-    // FOTO DE PERFIL
-    // =========================================================
+    // =====================================================
+    // FOTOS DE PERFIL
+    // =====================================================
 
     match /usuarios/{uid}/perfil/{archivo} {
-      allow read: if signedIn() && (
-        uid == request.auth.uid || isAdmin()
-      );
+      allow read: if signedIn() && (uid == request.auth.uid || isAdmin());
 
       allow write: if signedIn()
         && (uid == request.auth.uid || isAdmin())
         && request.resource.size <= 3 * 1024 * 1024
         && request.resource.contentType.matches('image/(jpeg|png|webp)');
+
+      allow delete: if signedIn() && (uid == request.auth.uid || isAdmin());
     }
 
-    // =========================================================
-    // VEHÍCULO DEL REPARTIDOR
-    // =========================================================
+    // =====================================================
+    // DOCUMENTOS DE REPARTIDORES
+    // =====================================================
 
-    match /repartidores/{uid}/vehiculo/{archivo} {
-      allow read: if signedIn() && (
-        uid == request.auth.uid || isAdmin()
-      );
-
-      allow write: if signedIn()
-        && (uid == request.auth.uid || isAdmin())
-        && request.resource.size <= 5 * 1024 * 1024
-        && request.resource.contentType.matches('image/(jpeg|png|webp)');
-    }
-
-    // =========================================================
-    // DOCUMENTOS DEL REPARTIDOR
-    // Privados por defecto.
-    // =========================================================
-
-    match /repartidores/{uid}/documentos/{documento} {
-      allow read: if signedIn() && (
-        uid == request.auth.uid || isAdmin()
-      );
+    match /repartidores/{uid}/documentos/{archivo} {
+      allow read: if signedIn() && (uid == request.auth.uid || isAdmin());
 
       allow write: if signedIn()
         && (uid == request.auth.uid || isAdmin())
@@ -97,29 +96,55 @@ service firebase.storage {
           request.resource.contentType.matches('image/(jpeg|png|webp)')
           || request.resource.contentType == 'application/pdf'
         );
+
+      allow delete: if signedIn() && (uid == request.auth.uid || isAdmin());
     }
 
-    // =========================================================
+    // =====================================================
     // LOGO / FOTO DE TIENDA
-    // =========================================================
+    // Ruta usada por el perfil del negocio:
+    // tiendas/{tiendaId}/logo/perfil
+    // =====================================================
 
-    match /tiendas/{tiendaId}/{archivo} {
+    match /tiendas/{tiendaId}/logo/{archivo} {
       allow read: if true;
 
       allow write: if (
           isAdmin()
-          || (isBusiness() && currentStoreId() == tiendaId)
+          || (isBusiness() && userDoc().data.tiendaId == tiendaId)
         )
         && request.resource.size <= 3 * 1024 * 1024
         && request.resource.contentType.matches('image/(jpeg|png|webp)');
 
       allow delete: if isAdmin()
-        || (isBusiness() && currentStoreId() == tiendaId);
+        || (isBusiness() && userDoc().data.tiendaId == tiendaId);
     }
 
-    // =========================================================
-    // BLOQUEO FINAL
-    // =========================================================
+    // =====================================================
+    // DOCUMENTOS DE TIENDAS
+    // =====================================================
+
+    match /tiendas/{tiendaId}/documentos/{archivo} {
+      allow read: if isAdmin()
+        || (isBusiness() && userDoc().data.tiendaId == tiendaId);
+
+      allow write: if (
+          isAdmin()
+          || (isBusiness() && userDoc().data.tiendaId == tiendaId)
+        )
+        && request.resource.size <= 8 * 1024 * 1024
+        && (
+          request.resource.contentType.matches('image/(jpeg|png|webp)')
+          || request.resource.contentType == 'application/pdf'
+        );
+
+      allow delete: if isAdmin()
+        || (isBusiness() && userDoc().data.tiendaId == tiendaId);
+    }
+
+    // =====================================================
+    // TODO LO DEMÁS QUEDA BLOQUEADO
+    // =====================================================
 
     match /{allPaths=**} {
       allow read, write: if false;
