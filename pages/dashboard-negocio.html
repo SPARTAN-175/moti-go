@@ -1336,7 +1336,7 @@
                                 add_photo_alternate
                             </span>
 
-                            <span>
+                            <span id="productImageLabel">
                                 Agregar fotografía
                             </span>
 
@@ -1348,6 +1348,7 @@
                             >
 
                         </label>
+                        <div id="productImagePreview" class="product-image-preview" hidden></div>
 
                     </div>
 
@@ -1505,7 +1506,21 @@
 
                         <label id="businessMissingTypeField" hidden>
                             Categoría / tipo de negocio
-                            <input id="businessMissingType" type="text" maxlength="80" placeholder="Ej. Abarrotes, carnicería, farmacia...">
+                            <select id="businessMissingType" required>
+                                <option value="">Selecciona el tipo de negocio</option>
+                                <option value="abarrotes">Abarrotes / tienda de conveniencia</option>
+                                <option value="carniceria">Carnicería</option>
+                                <option value="fruteria">Frutería / frutas y verduras</option>
+                                <option value="farmacia">Farmacia</option>
+                                <option value="papeleria">Papelería</option>
+                                <option value="panaderia">Panadería</option>
+                                <option value="tortilleria">Tortillería</option>
+                                <option value="restaurante">Comida preparada / restaurante</option>
+                                <option value="bebidas">Bebidas</option>
+                                <option value="ropa">Ropa y accesorios</option>
+                                <option value="ferreteria">Ferretería</option>
+                                <option value="otro">Otro giro comercial</option>
+                            </select>
                         </label>
 
                         <div class="business-missing-info-actions">
