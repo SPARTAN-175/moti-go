@@ -25,8 +25,9 @@ from "../firebase-config.js";
 
 import {
     doc,
-    updateDoc,
     getDoc,
+    runTransaction,
+    updateDoc,
     onSnapshot,
     serverTimestamp
 }
@@ -372,86 +373,109 @@ async function enviarSolicitudRepartidor(
 
 
     // =================================================
-    // PROTECCIÓN: VERIFICAR ESTADO REAL ANTES DE ENVIAR
+    // ESCRIBIR SOLICITUD DE FORMA ATÓMICA
     // =================================================
-    // Si el repartidor ya aceptó (o el pedido cambió de estado),
-    // NO volver a escribir "solicitud_repartidor".
-    const estadoActualSnapshot =
-        await getDoc(pedidoRef);
+    //
+    // IMPORTANTE:
+    // Nunca sobrescribimos un pedido que ya fue asignado.
+    // Esto evita que una carrera entre el dispatcher y
+    // "Aceptar pedido" vuelva a crear la solicitud.
+    // =================================================
 
-    if (!estadoActualSnapshot.exists()) {
-        console.warn(
-            "⚠️ MOTI GO: el pedido ya no existe. No se enviará solicitud."
+    const solicitudCreada =
+        await runTransaction(
+            db,
+            async transaction => {
+
+                const snapshot =
+                    await transaction.get(
+                        pedidoRef
+                    );
+
+                if (
+                    !snapshot.exists()
+                ) {
+                    return false;
+                }
+
+                const actual =
+                    snapshot.data();
+
+                // El pedido ya terminó su asignación.
+                if (
+                    actual.estado !==
+                    "pendiente_asignacion"
+                ) {
+                    console.log(
+                        "🛑 MOTI GO: no se sobrescribe el pedido. Estado actual:",
+                        actual.estado
+                    );
+
+                    return false;
+                }
+
+                // Nunca tomar un pedido que ya tenga otro repartidor.
+                if (
+                    actual.repartidorId &&
+                    actual.repartidorId !== repartidor.id
+                ) {
+                    console.log(
+                        "🛑 MOTI GO: pedido ya tiene repartidor:",
+                        actual.repartidorId
+                    );
+
+                    return false;
+                }
+
+                transaction.update(
+                    pedidoRef,
+                    {
+                        estado:
+                            "solicitud_repartidor",
+
+                        repartidorId:
+                            repartidor.id,
+
+                        repartidorNombre:
+                            repartidor.nombre ||
+                            "",
+
+                        repartidorPlaca:
+                            repartidor.placa ||
+                            "",
+
+                        indiceRepartidor:
+                            indice,
+
+                        solicitudEnviadaEn:
+                            serverTimestamp(),
+
+                        actualizadoEn:
+                            serverTimestamp(),
+
+                        solicitudRechazadaPor:
+                            null,
+
+                        solicitudRechazadaEn:
+                            null
+
+                    }
+                );
+
+                return true;
+
+            }
         );
-
-        return "cancelado";
-    }
-
-    const estadoActual =
-        estadoActualSnapshot.data();
 
     if (
-        estadoActual.estado !==
-        "pendiente_asignacion"
+        !solicitudCreada
     ) {
         console.log(
-            "🛑 MOTI GO: pedido ya no está pendiente; no se sobrescribirá:",
-            estadoActual.estado
+            "🛑 MOTI GO: el pedido ya no está disponible para este dispatcher."
         );
 
-        if (
-            estadoActual.estado ===
-            "asignado"
-        ) {
-            return "aceptado";
-        }
-
-        return "cancelado";
+        return "ya_asignado";
     }
-
-    // =================================================
-    // LIMPIAR MARCA DE RECHAZO ANTERIOR
-    // =================================================
-
-    const datosSolicitud = {
-
-        estado:
-            "solicitud_repartidor",
-
-        repartidorId:
-            repartidor.id,
-
-        repartidorNombre:
-            repartidor.nombre ||
-            "",
-
-        repartidorPlaca:
-            repartidor.placa ||
-            "",
-
-        indiceRepartidor:
-            indice,
-
-        solicitudEnviadaEn:
-            serverTimestamp(),
-
-        actualizadoEn:
-            serverTimestamp()
-
-    };
-
-
-    // =================================================
-    // ESCRIBIR SOLICITUD
-    // =================================================
-
-    await updateDoc(
-
-        pedidoRef,
-
-        datosSolicitud
-
-    );
 
 
     console.log(
@@ -653,6 +677,27 @@ export async function iniciarDispatcher(
 
 
             // =============================================
+            // PEDIDO YA ASIGNADO
+            // =============================================
+
+            if (
+                respuesta ===
+                "ya_asignado"
+            ) {
+
+                console.log(
+                    "🛑 MOTI GO: el pedido ya fue asignado. Dispatcher detenido."
+                );
+
+                return {
+                    asignado:
+                        true
+                };
+
+            }
+
+
+            // =============================================
             // ACEPTADO
             // =============================================
 
@@ -719,35 +764,6 @@ export async function iniciarDispatcher(
         // =================================================
         // TERMINAR CANDIDATOS
         // =================================================
-        // Última protección: nunca marcar como "sin_repartidor"
-        // un pedido que pudo haber sido aceptado mientras
-        // terminaban las rondas.
-        const estadoFinalSnapshot =
-            await getDoc(
-                doc(
-                    db,
-                    "pedidos",
-                    pedido.id
-                )
-            );
-
-        if (
-            estadoFinalSnapshot.exists() &&
-            estadoFinalSnapshot.data().estado ===
-            "asignado"
-        ) {
-            console.log(
-                "🎉 MOTI GO: el pedido fue asignado antes de cerrar el dispatcher."
-            );
-
-            return {
-                asignado:
-                    true,
-
-                repartidorId:
-                    estadoFinalSnapshot.data().repartidorId
-            };
-        }
 
         await marcarSinRepartidor(
             pedido
