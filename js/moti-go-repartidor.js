@@ -10,9 +10,9 @@ import {
     onSnapshot,
     doc,
     getDoc,
-    runTransaction,
     updateDoc,
-    serverTimestamp
+    serverTimestamp,
+    runTransaction
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 import {
@@ -627,25 +627,6 @@ function escucharSolicitudesAsignadas() {
                 "📦 MOTI GO - SOLICITUDES PARA ESTE REPARTIDOR:",
                 snapshot.size
             );
-
-
-            // Si ya tenemos un viaje asignado, jamás mostramos
-            // nuevamente una solicitud aunque exista una actualización
-            // tardía del listener.
-            if (
-                pedidoActual
-            ) {
-                snapshot.docChanges()
-                    .forEach(
-                        cambio => {
-                            limpiarSolicitud(
-                                cambio.doc.id
-                            );
-                        }
-                    );
-
-                return;
-            }
 
 
             snapshot.docChanges()
@@ -1624,125 +1605,60 @@ const totalFundador =
 // ACEPTAR PEDIDO
 // =================================================
 
-const asignacionExitosa =
-    await runTransaction(
-        db,
-        async transaction => {
+await updateDoc(
 
-            const snapshot =
-                await transaction.get(
-                    pedidoRef
-                );
+    pedidoRef,
 
-            if (!snapshot.exists()) {
-                return false;
-            }
+    {
 
-            const actual =
-                snapshot.data();
+        estado:
+            "asignado",
 
-            // Solo el repartidor que recibió la solicitud
-            // puede convertirla en asignada.
-            if (
-                actual.estado !==
-                "solicitud_repartidor" ||
-                actual.repartidorId !==
-                usuarioRepartidor.uid
-            ) {
-                console.log(
-                    "🛑 MOTI GO: solicitud ya no disponible al aceptar.",
-                    {
-                        estado: actual.estado,
-                        repartidorId: actual.repartidorId
-                    }
-                );
+        repartidorId:
+            usuarioRepartidor.uid,
 
-                return false;
-            }
+        repartidorNombre:
+            usuarioRepartidor.displayName ||
+            pedido.repartidorNombre ||
+            "",
 
-            transaction.update(
-                pedidoRef,
-                {
-                    estado:
-                        "asignado",
+        // =========================================
+        // IDENTIDAD FINANCIERA DEL REPARTIDOR
+        // =========================================
 
-                    repartidorId:
-                        usuarioRepartidor.uid,
+        esFundador:
+            esFundador,
 
-                    repartidorNombre:
-                        usuarioRepartidor.displayName ||
-                        pedido.repartidorNombre ||
-                        "",
+        repartidorEsFundador:
+            esFundador,
 
-                    esFundador:
-                        esFundador,
+        fundadorId:
+            esFundador
+                ? usuarioRepartidor.uid
+                : null,
 
-                    repartidorEsFundador:
-                        esFundador,
+        fundadorNombre:
+            esFundador
+                ? (
+                    datosRepartidor.nombre ||
+                    usuarioRepartidor.displayName ||
+                    ""
+                )
+                : null,
 
-                    fundadorId:
-                        esFundador
-                            ? usuarioRepartidor.uid
-                            : null,
+        // Las comisiones existentes del pedido se conservan.
+        // Las reglas de Firestore exigen que comisiones.repartidor
+        // permanezca exactamente igual durante la aceptación.
 
-                    fundadorNombre:
-                        esFundador
-                            ? (
-                                datosRepartidor.nombre ||
-                                usuarioRepartidor.displayName ||
-                                ""
-                            )
-                            : null,
+        fechaAsignacion:
+            serverTimestamp(),
 
-                    comisiones: {
-                        ...comisionesActuales,
+        actualizadoEn:
+            serverTimestamp()
 
-                        tiendas:
-                            comisionesTiendas,
+    }
 
-                        fundador: {
-                            monto:
-                                totalFundador,
-
-                            porcentaje:
-                                esFundador
-                                    ? porcentajeFundador
-                                    : 0,
-
-                            estado:
-                                esFundador
-                                    ? "pendiente_cobro_tienda"
-                                    : "no_aplica"
-                        }
-                    },
-
-                    fechaAsignacion:
-                        serverTimestamp(),
-
-                    actualizadoEn:
-                        serverTimestamp()
-                }
-            );
-
-            return true;
-        }
-    );
-
-
-if (
-    !asignacionExitosa
-) {
-    limpiarSolicitud(
-        pedido.id
-    );
-
-    mostrarAviso(
-        "Solicitud no disponible",
-        "Este pedido ya fue aceptado o ya no está disponible."
-    );
-
-    return;
-}
+);
 
        pedidoActual =
 {
