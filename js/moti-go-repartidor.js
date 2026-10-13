@@ -1462,6 +1462,88 @@ if (!repartidorSnapshot.exists()) {
 const datosRepartidor = repartidorSnapshot.data();
 const esFundador = datosRepartidor.esFundador === true;
 
+// =================================================
+// DIAGNOSTICO TEMPORAL DE REGLA DE ACEPTACION
+// No modifica Firestore. Solo muestra que condicion de
+// la regla esta fallando, si alguna no coincide.
+// =================================================
+const datosAceptacion = {
+    estado: "asignado",
+    repartidorId: usuarioRepartidor.uid,
+    repartidorNombre:
+        usuarioRepartidor.displayName ||
+        pedido.repartidorNombre ||
+        "",
+    esFundador: esFundador,
+    repartidorEsFundador: esFundador,
+    fundadorId:
+        esFundador ? usuarioRepartidor.uid : null,
+    fundadorNombre:
+        esFundador
+            ? (datosRepartidor.nombre || usuarioRepartidor.displayName || "")
+            : null
+};
+
+const clavesPermitidasAceptacion = [
+    "estado",
+    "repartidorId",
+    "repartidorNombre",
+    "esFundador",
+    "repartidorEsFundador",
+    "fundadorId",
+    "fundadorNombre",
+    "comisiones",
+    "fechaAsignacion",
+    "actualizadoEn"
+];
+
+const clavesQueCambian = Object.keys(datosAceptacion);
+const comisionAnterior = datosActuales?.comisiones?.repartidor;
+
+const diagnosticoAceptacion = {
+    uidAuth: usuarioRepartidor.uid,
+    uidUsuarioDocumento: usuarioRepartidor.uid,
+    tipoUsuario: datosRepartidor.tipo,
+    esFundadorRaw: datosRepartidor.esFundador,
+    tipoEsFundadorRaw: typeof datosRepartidor.esFundador,
+    estadoPedidoActual: datosActuales.estado,
+    repartidorIdPedidoActual: datosActuales.repartidorId,
+    estadoPropuesto: datosAceptacion.estado,
+    repartidorIdPropuesto: datosAceptacion.repartidorId,
+    comisionRepartidorExiste: comisionAnterior !== undefined,
+    comisionRepartidor: comisionAnterior,
+    clavesQueCambian,
+    clavesNoPermitidas: clavesQueCambian.filter(
+        clave => !clavesPermitidasAceptacion.includes(clave)
+    ),
+    condiciones: {
+        esDriver: datosRepartidor.tipo === "repartidor",
+        estadoSolicitud: datosActuales.estado === "solicitud_repartidor",
+        repartidorCoincide: datosActuales.repartidorId === usuarioRepartidor.uid,
+        estadoAsignado: datosAceptacion.estado === "asignado",
+        repartidorPropuestoCoincide: datosAceptacion.repartidorId === usuarioRepartidor.uid,
+        camposPermitidos: clavesQueCambian.every(
+            clave => clavesPermitidasAceptacion.includes(clave)
+        ),
+        esFundadorCoincide: datosAceptacion.esFundador === (datosRepartidor.esFundador === true),
+        repartidorEsFundadorCoincide:
+            datosAceptacion.repartidorEsFundador === datosAceptacion.esFundador,
+        fundadorIdCorrecto:
+            datosAceptacion.fundadorId ===
+            (datosAceptacion.esFundador ? usuarioRepartidor.uid : null),
+        comisionRepartidorPresente:
+            datosActuales?.comisiones?.repartidor !== undefined
+    }
+};
+
+console.group("🔎 MOTI GO — DIAGNOSTICO ACEPTACION");
+console.table(diagnosticoAceptacion.condiciones);
+console.log("📋 Datos completos del repartidor:", datosRepartidor);
+console.log("📦 Datos actuales del pedido:", datosActuales);
+console.log("📝 Datos que se enviaran:", datosAceptacion);
+console.log("💰 comisiones.repartidor que debe permanecer intacta:", comisionAnterior);
+console.groupEnd();
+
 await updateDoc(
 
     pedidoRef,
