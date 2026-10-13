@@ -10,9 +10,9 @@ import {
     onSnapshot,
     doc,
     getDoc,
+    runTransaction,
     updateDoc,
-    serverTimestamp,
-    runTransaction
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
 import {
@@ -627,6 +627,25 @@ function escucharSolicitudesAsignadas() {
                 "📦 MOTI GO - SOLICITUDES PARA ESTE REPARTIDOR:",
                 snapshot.size
             );
+
+
+            // Si ya tenemos un viaje asignado, jamás mostramos
+            // nuevamente una solicitud aunque exista una actualización
+            // tardía del listener.
+            if (
+                pedidoActual
+            ) {
+                snapshot.docChanges()
+                    .forEach(
+                        cambio => {
+                            limpiarSolicitud(
+                                cambio.doc.id
+                            );
+                        }
+                    );
+
+                return;
+            }
 
 
             snapshot.docChanges()
@@ -1605,86 +1624,125 @@ const totalFundador =
 // ACEPTAR PEDIDO
 // =================================================
 
-await updateDoc(
+const asignacionExitosa =
+    await runTransaction(
+        db,
+        async transaction => {
 
-    pedidoRef,
+            const snapshot =
+                await transaction.get(
+                    pedidoRef
+                );
 
-    {
-
-        estado:
-            "asignado",
-
-        repartidorId:
-            usuarioRepartidor.uid,
-
-        repartidorNombre:
-            usuarioRepartidor.displayName ||
-            pedido.repartidorNombre ||
-            "",
-
-        // =========================================
-        // IDENTIDAD FINANCIERA DEL REPARTIDOR
-        // =========================================
-
-        esFundador:
-            esFundador,
-
-        repartidorEsFundador:
-            esFundador,
-
-        fundadorId:
-            esFundador
-                ? usuarioRepartidor.uid
-                : null,
-
-        fundadorNombre:
-            esFundador
-                ? (
-                    datosRepartidor.nombre ||
-                    usuarioRepartidor.displayName ||
-                    ""
-                )
-                : null,
-
-        // =========================================
-        // COMISIONES ACTUALIZADAS
-        // =========================================
-
-        comisiones: {
-
-            ...comisionesActuales,
-
-            tiendas:
-                comisionesTiendas,
-
-            fundador: {
-
-                monto:
-                    totalFundador,
-
-                porcentaje:
-                    esFundador
-                        ? porcentajeFundador
-                        : 0,
-
-                estado:
-                    esFundador
-                        ? "pendiente_cobro_tienda"
-                        : "no_aplica"
-
+            if (!snapshot.exists()) {
+                return false;
             }
 
-        },
+            const actual =
+                snapshot.data();
 
-        fechaAsignacion:
-            serverTimestamp(),
+            // Solo el repartidor que recibió la solicitud
+            // puede convertirla en asignada.
+            if (
+                actual.estado !==
+                "solicitud_repartidor" ||
+                actual.repartidorId !==
+                usuarioRepartidor.uid
+            ) {
+                console.log(
+                    "🛑 MOTI GO: solicitud ya no disponible al aceptar.",
+                    {
+                        estado: actual.estado,
+                        repartidorId: actual.repartidorId
+                    }
+                );
 
-        actualizadoEn:
-            serverTimestamp()
+                return false;
+            }
 
-    }
+            transaction.update(
+                pedidoRef,
+                {
+                    estado:
+                        "asignado",
 
-);
+                    repartidorId:
+                        usuarioRepartidor.uid,
+
+                    repartidorNombre:
+                        usuarioRepartidor.displayName ||
+                        pedido.repartidorNombre ||
+                        "",
+
+                    esFundador:
+                        esFundador,
+
+                    repartidorEsFundador:
+                        esFundador,
+
+                    fundadorId:
+                        esFundador
+                            ? usuarioRepartidor.uid
+                            : null,
+
+                    fundadorNombre:
+                        esFundador
+                            ? (
+                                datosRepartidor.nombre ||
+                                usuarioRepartidor.displayName ||
+                                ""
+                            )
+                            : null,
+
+                    comisiones: {
+                        ...comisionesActuales,
+
+                        tiendas:
+                            comisionesTiendas,
+
+                        fundador: {
+                            monto:
+                                totalFundador,
+
+                            porcentaje:
+                                esFundador
+                                    ? porcentajeFundador
+                                    : 0,
+
+                            estado:
+                                esFundador
+                                    ? "pendiente_cobro_tienda"
+                                    : "no_aplica"
+                        }
+                    },
+
+                    fechaAsignacion:
+                        serverTimestamp(),
+
+                    actualizadoEn:
+                        serverTimestamp()
+                }
+            );
+
+            return true;
+        }
+    );
+
+
+if (
+    !asignacionExitosa
+) {
+    limpiarSolicitud(
+        pedido.id
+    );
+
+    mostrarAviso(
+        "Solicitud no disponible",
+        "Este pedido ya fue aceptado o ya no está disponible."
+    );
+
+    return;
+}
 
        pedidoActual =
 {
