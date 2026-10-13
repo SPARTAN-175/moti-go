@@ -26,6 +26,7 @@ from "../firebase-config.js";
 import {
     doc,
     updateDoc,
+    getDoc,
     onSnapshot,
     serverTimestamp
 }
@@ -371,6 +372,44 @@ async function enviarSolicitudRepartidor(
 
 
     // =================================================
+    // PROTECCIÓN: VERIFICAR ESTADO REAL ANTES DE ENVIAR
+    // =================================================
+    // Si el repartidor ya aceptó (o el pedido cambió de estado),
+    // NO volver a escribir "solicitud_repartidor".
+    const estadoActualSnapshot =
+        await getDoc(pedidoRef);
+
+    if (!estadoActualSnapshot.exists()) {
+        console.warn(
+            "⚠️ MOTI GO: el pedido ya no existe. No se enviará solicitud."
+        );
+
+        return "cancelado";
+    }
+
+    const estadoActual =
+        estadoActualSnapshot.data();
+
+    if (
+        estadoActual.estado !==
+        "pendiente_asignacion"
+    ) {
+        console.log(
+            "🛑 MOTI GO: pedido ya no está pendiente; no se sobrescribirá:",
+            estadoActual.estado
+        );
+
+        if (
+            estadoActual.estado ===
+            "asignado"
+        ) {
+            return "aceptado";
+        }
+
+        return "cancelado";
+    }
+
+    // =================================================
     // LIMPIAR MARCA DE RECHAZO ANTERIOR
     // =================================================
 
@@ -680,6 +719,35 @@ export async function iniciarDispatcher(
         // =================================================
         // TERMINAR CANDIDATOS
         // =================================================
+        // Última protección: nunca marcar como "sin_repartidor"
+        // un pedido que pudo haber sido aceptado mientras
+        // terminaban las rondas.
+        const estadoFinalSnapshot =
+            await getDoc(
+                doc(
+                    db,
+                    "pedidos",
+                    pedido.id
+                )
+            );
+
+        if (
+            estadoFinalSnapshot.exists() &&
+            estadoFinalSnapshot.data().estado ===
+            "asignado"
+        ) {
+            console.log(
+                "🎉 MOTI GO: el pedido fue asignado antes de cerrar el dispatcher."
+            );
+
+            return {
+                asignado:
+                    true,
+
+                repartidorId:
+                    estadoFinalSnapshot.data().repartidorId
+            };
+        }
 
         await marcarSinRepartidor(
             pedido
