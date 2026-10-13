@@ -65,6 +65,7 @@ let productosParaImportar = [];
 let movimientosCuenta = [];
 
 let filtroCuentaActual = "todos";
+let periodoVentasActual = "mes";
 
 let fechaCuentaDesde = "";
 
@@ -407,6 +408,25 @@ document
 // FIREBASE AUTH
 // =========================================================
 
+// Vista previa de fotografía al crear un producto.
+const productImageInput = document.getElementById("productImage");
+if (productImageInput) {
+    productImageInput.addEventListener("change", () => {
+        const file = productImageInput.files?.[0];
+        const preview = document.getElementById("productImagePreview");
+        const label = document.getElementById("productImageLabel");
+        if (!preview) return;
+        if (!file) { preview.hidden = true; preview.innerHTML = ""; return; }
+        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 2 * 1024 * 1024) {
+            window.motiGoNotificar?.("Selecciona una imagen JPG, PNG o WebP de máximo 2 MB.");
+            productImageInput.value = ""; preview.hidden = true; preview.innerHTML = ""; return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => { preview.innerHTML = `<img src="${reader.result}" alt="Vista previa del producto">`; preview.hidden = false; if (label) label.textContent = file.name; };
+        reader.readAsDataURL(file);
+    });
+}
+
 onAuthStateChanged(
     auth,
     async user => {
@@ -742,8 +762,9 @@ function prepararFormularioInformacionNegocio() {
             datosTienda.municipio = valor;
         }
         if (faltantes.type) {
-            const valor = document.getElementById("businessMissingType")?.value.trim() || "";
-            if (!valor) {
+            const valor = document.getElementById("businessMissingType")?.value || "";
+            const tiposPermitidos = ["abarrotes", "carniceria", "fruteria", "farmacia", "papeleria", "panaderia", "tortilleria", "restaurante", "bebidas", "ropa", "ferreteria", "otro"];
+            if (!tiposPermitidos.includes(valor)) {
                 status.textContent = "Indica el tipo o categoría de tu negocio para continuar.";
                 return;
             }
@@ -4002,6 +4023,12 @@ if (productForm) {
                         "productDescription"
                     ).value.trim();
 
+                const imagenInput = document.getElementById("productImage");
+                const archivoImagen = imagenInput?.files?.[0] || null;
+                if (archivoImagen && (!['image/jpeg', 'image/png', 'image/webp'].includes(archivoImagen.type) || archivoImagen.size > 2 * 1024 * 1024)) {
+                    window.motiGoNotificar("La foto debe ser JPG, PNG o WebP y pesar máximo 2 MB.");
+                    return;
+                }
 
                 const disponible =
                     document.getElementById(
@@ -4122,6 +4149,16 @@ if (productForm) {
 
 
                 // -------------------------------------
+                // Subir fotografía del producto si se eligió una
+                // -------------------------------------
+                if (archivoImagen) {
+                    const rutaImagen = ref(storage, `productos/${productoId}/imagen`);
+                    await uploadBytes(rutaImagen, archivoImagen, { contentType: archivoImagen.type });
+                    const imagenUrl = await getDownloadURL(rutaImagen);
+                    await setDoc(doc(db, "productos", productoId), { imagenUrl, actualizadoEn: serverTimestamp() }, { merge: true });
+                }
+
+                // -------------------------------------
                 // Inventario
                 // -------------------------------------
 
@@ -4170,7 +4207,10 @@ if (productForm) {
 
 
                 productForm.reset();
-
+                const previewProducto = document.getElementById("productImagePreview");
+                const labelImagenProducto = document.getElementById("productImageLabel");
+                if (previewProducto) { previewProducto.hidden = true; previewProducto.innerHTML = ""; }
+                if (labelImagenProducto) labelImagenProducto.textContent = "Agregar fotografía";
 
                 const available =
                     document.getElementById(
@@ -6339,7 +6379,7 @@ function escucharMovimientosCuenta() {
 
 
                 actualizarResumenCuenta();
-
+                actualizarResumenVentasRealizadas();
                 aplicarFiltrosCuenta();
 
             },
@@ -7237,6 +7277,28 @@ function formatearFechaMovimiento(
 // GRÁFICA DE GANANCIAS POR MES
 // =========================================================
 
+function actualizarResumenVentasRealizadas() {
+    const comisiones = movimientosCuenta.filter(m => String(m.tipo || "").toLowerCase() === "comision");
+    const ventasBrutas = comisiones.reduce((s, m) => s + (Number(m.subtotalVenta) || 0), 0);
+    const totalComision = comisiones.reduce((s, m) => s + (Number(m.monto) || 0), 0);
+    const pedidos = new Set(comisiones.map(m => m.pedidoId).filter(Boolean));
+    const poner = (id, valor) => { const el = document.getElementById(id); if (el) el.textContent = valor; };
+    poner("businessSalesGross", formatearPrecio(ventasBrutas));
+    poner("businessSalesCommission", formatearPrecio(totalComision));
+    poner("businessSalesNet", formatearPrecio(ventasBrutas - totalComision));
+    poner("businessSalesOrders", String(pedidos.size));
+}
+
+document.querySelectorAll("[data-sales-period]").forEach(button => {
+    button.addEventListener("click", () => {
+        periodoVentasActual = button.dataset.salesPeriod || "mes";
+        document.querySelectorAll("[data-sales-period]").forEach(item =>
+            item.classList.toggle("active", item === button)
+        );
+        renderizarGraficaGanancias();
+    });
+});
+
 function renderizarGraficaGanancias() {
 
     const container =
@@ -7302,90 +7364,43 @@ function renderizarGraficaGanancias() {
     }
 
 
-    // =====================================================
-    // AGRUPAR POR MES
-    // =====================================================
+    // Agrupar por día, semana o mes según el filtro elegido.
+    const meses = new Map();
+    const ahora = new Date();
+    const inicioDia = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+    const inicioSemana = new Date(inicioDia);
+    inicioSemana.setDate(inicioSemana.getDate() - ((inicioSemana.getDay() + 6) % 7));
 
-    const meses =
-        new Map();
-
-
-    comisiones.forEach(
-        movimiento => {
-
-            const fecha =
-                obtenerFechaMovimiento(
-                    movimiento
-                );
-
-
-            if (
-                !fecha ||
-                fecha.getTime() ===
-                    0
-            ) {
-
-                return;
-
-            }
-
-
-            const año =
-                fecha.getFullYear();
-
-
-            const mes =
-                fecha.getMonth();
-
-
-            const clave =
-                `${año}-${String(
-                    mes + 1
-                ).padStart(
-                    2,
-                    "0"
-                )}`;
-
-
-            const monto =
-                Number(
-                    movimiento.monto ||
-                    0
-                );
-
-
-            meses.set(
-                clave,
-                (
-                    meses.get(
-                        clave
-                    ) ||
-                    0
-                ) + monto
-            );
-
+    comisiones.forEach(movimiento => {
+        const fecha = obtenerFechaMovimiento(movimiento);
+        if (!fecha || fecha.getTime() === 0) return;
+        let clave, etiqueta;
+        if (periodoVentasActual === "dia") {
+            if (fecha < inicioDia) return;
+            clave = `${fecha.getHours().toString().padStart(2, "0")}:00`;
+            etiqueta = clave;
+        } else if (periodoVentasActual === "semana") {
+            if (fecha < inicioSemana) return;
+            clave = `${fecha.getFullYear()}-${String(fecha.getMonth()+1).padStart(2,"0")}-${String(fecha.getDate()).padStart(2,"0")}`;
+            etiqueta = new Intl.DateTimeFormat("es-MX", { weekday: "short", day: "numeric" }).format(fecha);
+        } else {
+            const año = fecha.getFullYear(), mes = fecha.getMonth();
+            clave = `${año}-${String(mes+1).padStart(2,"0")}`;
+            etiqueta = new Intl.DateTimeFormat("es-MX", { month: "short" }).format(new Date(año, mes, 1)).replace(".", "");
         }
-    );
+        const anterior = meses.get(clave) || { monto: 0, etiqueta };
+        anterior.monto += Number(movimiento.subtotalVenta || 0);
+        meses.set(clave, anterior);
+    });
 
 
     // =====================================================
     // ORDENAR MESES
     // =====================================================
 
-    const datos =
-        [...meses.entries()]
-            .sort(
-                (
-                    a,
-                    b
-                ) =>
-                    a[0].localeCompare(
-                        b[0]
-                    )
-            )
-            .slice(
-                -12
-            );
+    const datos = [...meses.entries()]
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .slice(periodoVentasActual === "dia" ? -24 : periodoVentasActual === "semana" ? -7 : -12);
 
 
     if (
@@ -7410,10 +7425,7 @@ function renderizarGraficaGanancias() {
 
     const maximo =
         Math.max(
-            ...datos.map(
-                ([, monto]) =>
-                    monto
-            ),
+            ...datos.map(([, item]) => item.monto),
             0
         );
 
@@ -7426,36 +7438,9 @@ function renderizarGraficaGanancias() {
         "";
 
 
-    datos.forEach(
-        ([clave, monto]) => {
-
-            const [año, mes] =
-                clave.split("-");
-
-
-            const fecha =
-                new Date(
-                    Number(año),
-                    Number(mes) - 1,
-                    1
-                );
-
-
-            const nombreMes =
-                new Intl.DateTimeFormat(
-                    "es-MX",
-                    {
-                        month:
-                            "short"
-                    }
-                )
-                .format(
-                    fecha
-                )
-                .replace(
-                    ".",
-                    ""
-                );
+    datos.forEach(([clave, item]) => {
+            const monto = item.monto;
+            const nombreMes = item.etiqueta;
 
 
             const porcentaje =
@@ -7511,10 +7496,7 @@ function renderizarGraficaGanancias() {
                 <div
                     class="account-chart-label"
                 >
-                    ${escapeHtml(
-                        nombreMes
-                    )}
-                    ${año}
+                    ${escapeHtml(nombreMes)}
                 </div>
 
             `;
@@ -7540,6 +7522,32 @@ function actualizarGraficaGanancias() {
     renderizarGraficaGanancias();
 
 }
+
+// Acciones de configuración del negocio.
+document.querySelectorAll(".settings-item").forEach((button, index) => {
+    if (button.dataset.businessSettingAction) return;
+    button.dataset.businessSettingAction = ["seguridad", "notificaciones", "ayuda"][index] || "ayuda";
+    button.addEventListener("click", async () => {
+        const action = button.dataset.businessSettingAction;
+        if (action === "seguridad") {
+            const correo = auth.currentUser?.email;
+            if (!correo) return window.motiGoNotificar?.("No se encontró el correo de esta cuenta.");
+            try {
+                const { sendPasswordResetEmail } = await import("https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js");
+                await sendPasswordResetEmail(auth, correo);
+                window.motiGoNotificar?.("Te enviamos un enlace para cambiar tu contraseña.");
+            } catch (error) { console.error(error); window.motiGoNotificar?.("No se pudo enviar el enlace de recuperación."); }
+        } else if (action === "notificaciones") {
+            if (!("Notification" in window)) return window.motiGoNotificar?.("Este navegador no admite notificaciones. En Android podremos habilitarlas al integrar las notificaciones push.");
+            try {
+                const permiso = Notification.permission === "default" ? await Notification.requestPermission() : Notification.permission;
+                window.motiGoNotificar?.(permiso === "granted" ? "Permiso de notificaciones habilitado en este dispositivo." : "Las notificaciones están bloqueadas en este dispositivo.");
+            } catch (_) { window.motiGoNotificar?.("No se pudieron configurar las notificaciones en este navegador."); }
+        } else {
+            window.motiGoNotificar?.("Centro de ayuda MOTI GO: contacta al administrador para recibir asistencia.");
+        }
+    });
+});
 
 // =========================================================
 // INICIO

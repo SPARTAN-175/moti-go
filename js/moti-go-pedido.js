@@ -1,6 +1,7 @@
 import {
     auth,
-    db
+    db,
+    rtdb
 } from "./firebase-config.js";
 
 import {
@@ -13,6 +14,9 @@ import {
     where,
     runTransaction
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+import { ref as rtdbRef, get as rtdbGet }
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
 // =====================================================
 // MOTOR DE ASIGNACIÓN MOTI GO
@@ -2186,38 +2190,34 @@ async function obtenerRepartidoresParaMotorMotiGo() {
         );
 
 
-    const repartidores =
-        [];
+    const repartidores = await Promise.all(
+        snapshot.docs.map(async docSnap => {
+            const datos = docSnap.data() || {};
+            if (datos.tipo !== "repartidor") return null;
 
-
-    snapshot.forEach(
-        docSnap => {
-
-            const datos =
-                docSnap.data();
-
-
-            if (
-                datos.tipo !==
-                "repartidor"
-            ) {
-
-                return;
-
+            // La ubicación operativa y la que muestra el mapa viven en RTDB,
+            // no en los campos antiguos de Firestore.
+            let ubicacion = {};
+            try {
+                const ubicacionSnap = await rtdbGet(
+                    rtdbRef(rtdb, `ubicacionesRepartidores/${docSnap.id}`)
+                );
+                if (ubicacionSnap.exists()) ubicacion = ubicacionSnap.val() || {};
+            } catch (error) {
+                console.warn("📍 MOTI GO: no se pudo leer GPS RTDB de", docSnap.id, error);
             }
 
-
-            repartidores.push({
-
-                id:
-                    docSnap.id,
-
-                ...datos
-
-            });
-
-        }
-    );
+            return {
+                id: docSnap.id,
+                ...datos,
+                latitud: Number(ubicacion.latitud),
+                longitud: Number(ubicacion.longitud),
+                ubicacionActiva: ubicacion.activo === true,
+                ubicacionActualizadaEn: ubicacion.actualizadoEn ?? null,
+                precisionGPS: Number(ubicacion.precision) || null
+            };
+        })
+    ).then(items => items.filter(Boolean));
 
 
     console.log(
