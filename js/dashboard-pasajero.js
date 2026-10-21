@@ -514,13 +514,19 @@ async function cargarTiendasDeLaZona(
             );
 
 
+        // No convertir null a 0: Number(null) produce 0 y
+        // provocaba distancias falsas desde las coordenadas 0,0.
         const ubicacionValida =
-            Number.isFinite(
-                latCliente
-            ) &&
-            Number.isFinite(
-                lngCliente
-            );
+            userLat !== null &&
+            userLat !== undefined &&
+            userLng !== null &&
+            userLng !== undefined &&
+            Number.isFinite(latCliente) &&
+            Number.isFinite(lngCliente) &&
+            latCliente >= -90 &&
+            latCliente <= 90 &&
+            lngCliente >= -180 &&
+            lngCliente <= 180;
 
 
         // =================================================
@@ -5391,10 +5397,27 @@ if (
 
             if (user) {
 
+                // La ubicación GPS del cliente se conserva en memoria para
+                // calcular distancias y preparar el pedido. No se intenta
+                // escribir latitud/longitud en /usuarios, porque las reglas
+                // actuales no autorizan esa actualización al cliente.
                 actualizarUbicacion(
                     user.uid,
                     userLat,
                     userLng
+                );
+
+            }
+
+            // Si las tiendas ya se cargaron antes de obtener el GPS,
+            // recalcular sus distancias con las coordenadas reales.
+            if (tiendasDisponibles.length > 0) {
+
+                cargarContextoTiendas().catch(
+                    error => console.error(
+                        "❌ MOTI GO: no se pudo recalcular la zona tras obtener GPS:",
+                        error
+                    )
                 );
 
             }
@@ -5443,45 +5466,42 @@ async function actualizarUbicacion(
     lng
 ) {
 
-    try {
+    // Validar la ubicación y mantenerla en el estado local de esta sesión.
+    // No escribir en /usuarios: las reglas actuales no permiten que el
+    // cliente modifique latitud, longitud ni ultimaUbicacion en ese documento.
+    if (
+        !auth.currentUser ||
+        auth.currentUser.uid !== uid ||
+        lat === null ||
+        lat === undefined ||
+        lng === null ||
+        lng === undefined ||
+        !Number.isFinite(Number(lat)) ||
+        !Number.isFinite(Number(lng)) ||
+        Number(lat) < -90 ||
+        Number(lat) > 90 ||
+        Number(lng) < -180 ||
+        Number(lng) > 180
+    ) {
 
-        await updateDoc(
-
-            doc(
-                db,
-                "usuarios",
-                uid
-            ),
-
-            {
-
-                latitud:
-                    lat,
-
-                longitud:
-                    lng,
-
-                ultimaUbicacion:
-                    new Date().toISOString()
-
-            }
-
+        console.warn(
+            "⚠️ MOTI GO: ubicación del cliente no válida; no se guardó."
         );
 
-
-        console.log(
-            "📍 Ubicación actualizada"
-        );
+        return false;
 
     }
-    catch (error) {
 
-        console.error(
-            "Error actualizando ubicación:",
-            error
-        );
+    userLat = Number(lat);
+    userLng = Number(lng);
 
-    }
+    console.log(
+        "📍 MOTI GO: ubicación GPS del cliente disponible en esta sesión:",
+        userLat,
+        userLng
+    );
+
+    return true;
 
 }
 
