@@ -39,6 +39,7 @@ let pedidoActual = null;
 let escuchandoPedidos = false;
 
 let solicitudesActivas = new Map();
+let solicitudesAceptando = new Set();
 
 let listenerEstadoRepartidor = null;
 let listenerSolicitudesAsignadas = null;
@@ -1380,6 +1381,12 @@ async function aceptarPedido(
     }
 
 
+    if (solicitudesAceptando.has(pedido.id)) {
+        return;
+    }
+
+    solicitudesAceptando.add(pedido.id);
+
     try {
 
         console.log(
@@ -1397,188 +1404,76 @@ async function aceptarPedido(
 
 
         // =================================================
-        // VERIFICAR NUEVAMENTE EL PEDIDO EN FIREBASE
+        // VALIDAR PERFIL Y ACEPTAR ATÓMICAMENTE
+        // La transacción evita aceptar una solicitud que el
+        // despachador ya haya reasignado o vencido.
         // =================================================
 
-        const pedidoSnapshot =
-            await getDoc(
-                pedidoRef
-            );
+        const repartidorRef = doc(db, "usuarios", usuarioRepartidor.uid);
+        const repartidorSnapshot = await getDoc(repartidorRef);
 
-
-        if (
-            !pedidoSnapshot.exists()
-        ) {
-
-            limpiarSolicitud(
-                pedido.id
-            );
-
-            return;
-
+        if (!repartidorSnapshot.exists()) {
+            throw new Error("No se encontró el perfil del repartidor.");
         }
 
+        const datosRepartidor = repartidorSnapshot.data();
 
-        const datosActuales =
-            pedidoSnapshot.data();
-
-
-        if (
-            datosActuales.estado !==
-            "solicitud_repartidor"
-            ||
-            datosActuales.repartidorId !==
-            usuarioRepartidor.uid
-        ) {
-
-            mostrarAviso(
-                "Solicitud no disponible",
-                "Este pedido ya no está disponible."
-            );
-
-
-            limpiarSolicitud(
-                pedido.id
-            );
-
-
-            return;
-
+        if (datosRepartidor.tipo !== "repartidor") {
+            throw new Error("La cuenta autenticada no tiene perfil de repartidor.");
         }
 
-
-        // =================================================
-        // ACEPTAR
-// ACEPTAR PEDIDO
-// =================================================
-
-const repartidorRef = doc(db, "usuarios", usuarioRepartidor.uid);
-const repartidorSnapshot = await getDoc(repartidorRef);
-
-if (!repartidorSnapshot.exists()) {
-    throw new Error("No se encontró el perfil del repartidor.");
-}
-
-const datosRepartidor = repartidorSnapshot.data();
-const esFundador = datosRepartidor.esFundador === true;
-
-// =================================================
-// DIAGNOSTICO TEMPORAL DE REGLA DE ACEPTACION
-// No modifica Firestore. Solo muestra que condicion de
-// la regla esta fallando, si alguna no coincide.
-// =================================================
-const datosAceptacion = {
-    estado: "asignado",
-    repartidorId: usuarioRepartidor.uid,
-    repartidorNombre:
-        usuarioRepartidor.displayName ||
-        pedido.repartidorNombre ||
-        "",
-    esFundador: esFundador,
-    repartidorEsFundador: esFundador,
-    fundadorId:
-        esFundador ? usuarioRepartidor.uid : null,
-    fundadorNombre:
-        esFundador
-            ? (datosRepartidor.nombre || usuarioRepartidor.displayName || "")
-            : null
-};
-
-const clavesPermitidasAceptacion = [
-    "estado",
-    "repartidorId",
-    "repartidorNombre",
-    "esFundador",
-    "repartidorEsFundador",
-    "fundadorId",
-    "fundadorNombre",
-    "comisiones",
-    "fechaAsignacion",
-    "actualizadoEn"
-];
-
-const clavesQueCambian = Object.keys(datosAceptacion);
-const comisionAnterior = datosActuales?.comisiones?.repartidor;
-
-const diagnosticoAceptacion = {
-    uidAuth: usuarioRepartidor.uid,
-    uidUsuarioDocumento: usuarioRepartidor.uid,
-    tipoUsuario: datosRepartidor.tipo,
-    esFundadorRaw: datosRepartidor.esFundador,
-    tipoEsFundadorRaw: typeof datosRepartidor.esFundador,
-    estadoPedidoActual: datosActuales.estado,
-    repartidorIdPedidoActual: datosActuales.repartidorId,
-    estadoPropuesto: datosAceptacion.estado,
-    repartidorIdPropuesto: datosAceptacion.repartidorId,
-    comisionRepartidorExiste: comisionAnterior !== undefined,
-    comisionRepartidor: comisionAnterior,
-    clavesQueCambian,
-    clavesNoPermitidas: clavesQueCambian.filter(
-        clave => !clavesPermitidasAceptacion.includes(clave)
-    ),
-    condiciones: {
-        esDriver: datosRepartidor.tipo === "repartidor",
-        estadoSolicitud: datosActuales.estado === "solicitud_repartidor",
-        repartidorCoincide: datosActuales.repartidorId === usuarioRepartidor.uid,
-        estadoAsignado: datosAceptacion.estado === "asignado",
-        repartidorPropuestoCoincide: datosAceptacion.repartidorId === usuarioRepartidor.uid,
-        camposPermitidos: clavesQueCambian.every(
-            clave => clavesPermitidasAceptacion.includes(clave)
-        ),
-        esFundadorCoincide: datosAceptacion.esFundador === (datosRepartidor.esFundador === true),
-        repartidorEsFundadorCoincide:
-            datosAceptacion.repartidorEsFundador === datosAceptacion.esFundador,
-        fundadorIdCorrecto:
-            datosAceptacion.fundadorId ===
-            (datosAceptacion.esFundador ? usuarioRepartidor.uid : null),
-        comisionRepartidorPresente:
-            datosActuales?.comisiones?.repartidor !== undefined
-    }
-};
-
-console.group("🔎 MOTI GO — DIAGNOSTICO ACEPTACION");
-console.table(diagnosticoAceptacion.condiciones);
-console.log("📋 Datos completos del repartidor:", datosRepartidor);
-console.log("📦 Datos actuales del pedido:", datosActuales);
-console.log("📝 Datos que se enviaran:", datosAceptacion);
-console.log("💰 comisiones.repartidor que debe permanecer intacta:", comisionAnterior);
-console.groupEnd();
-
-await updateDoc(
-
-    pedidoRef,
-
-    {
-
-        estado: "asignado",
-
-        repartidorId: usuarioRepartidor.uid,
-
-        repartidorNombre:
+        const esFundador = datosRepartidor.esFundador === true;
+        const nombreRepartidor =
+            datosRepartidor.nombre ||
             usuarioRepartidor.displayName ||
             pedido.repartidorNombre ||
-            "",
+            "";
 
-        esFundador: esFundador,
+        const resultadoAceptacion = await runTransaction(db, async (transaction) => {
+            const pedidoSnapshot = await transaction.get(pedidoRef);
 
-        repartidorEsFundador: esFundador,
+            if (!pedidoSnapshot.exists()) {
+                return { ok: false, motivo: "no_existe" };
+            }
 
-        fundadorId:
-            esFundador ? usuarioRepartidor.uid : null,
+            const datos = pedidoSnapshot.data();
 
-        fundadorNombre:
-            esFundador
-                ? (datosRepartidor.nombre || usuarioRepartidor.displayName || "")
-                : null,
+            if (
+                datos.estado !== "solicitud_repartidor" ||
+                datos.repartidorId !== usuarioRepartidor.uid
+            ) {
+                return { ok: false, motivo: "no_disponible" };
+            }
 
-        fechaAsignacion: serverTimestamp(),
-        actualizadoEn: serverTimestamp()
+            transaction.update(pedidoRef, {
+                estado: "asignado",
+                repartidorId: usuarioRepartidor.uid,
+                repartidorNombre: nombreRepartidor,
+                esFundador,
+                repartidorEsFundador: esFundador,
+                fundadorId: esFundador ? usuarioRepartidor.uid : null,
+                fundadorNombre: esFundador ? nombreRepartidor : null,
+                fechaAsignacion: serverTimestamp(),
+                actualizadoEn: serverTimestamp()
+            });
 
-    }
+            return { ok: true, datosActuales: datos };
+        });
 
-);
+        if (!resultadoAceptacion.ok) {
+            limpiarSolicitud(pedido.id);
+            mostrarAviso(
+                "Solicitud no disponible",
+                "El pedido ya venció, fue rechazado o se asignó a otro repartidor."
+            );
+            return;
+        }
 
-       pedidoActual =
+        const datosActuales = resultadoAceptacion.datosActuales;
+
+        console.log("🎉 MOTI GO: aceptación confirmada por Firebase:", pedido.id);
+
+        pedidoActual =
 {
     id:
         pedido.id,
@@ -1592,9 +1487,7 @@ await updateDoc(
         usuarioRepartidor.uid,
 
     repartidorNombre:
-        usuarioRepartidor.displayName ||
-        pedido.repartidorNombre ||
-        ""
+        nombreRepartidor
 };
 
 
@@ -1692,6 +1585,14 @@ await updateDoc(
             error
         );
 
+        mostrarAviso(
+            "No se pudo aceptar el pedido",
+            "La solicitud no se confirmó. Revisa la conexión e inténtalo nuevamente."
+        );
+
+    }
+    finally {
+        solicitudesAceptando.delete(pedido?.id);
     }
 
 }
