@@ -1,0 +1,130 @@
+MOTI GO MARKETPLACE V1 — MÓDULO AISLADO
+Versión preparada para integrarse en el repositorio actual de MOTI GO.
+
+IMPORTANTE ANTES DE PUBLICAR
+Esta entrega incluye la interfaz y el backend de Marketplace por separado. No reemplaza ni modifica js/firebase-config.js, las reglas existentes, los pedidos de Mandaditos, los inventarios ni las ubicaciones de repartidores normales.
+
+La carpeta marketplace-v1 debe quedar en la raíz del repositorio, al mismo nivel que js/, css/, assets/ y pages/.
+
+1. ARCHIVOS
+- marketplace-v1/index.html: catálogo, carrusel de banners, búsqueda, categorías, carrito multitienda, favoritos, detalle de producto, carrusel de fotos, valoraciones, perfil de vendedor, pedidos y paneles operativos.
+- marketplace-v1/marketplace.js: lógica Firebase exclusiva de Marketplace.
+- marketplace-v1/marketplace.css: estilos independientes y adaptables a móvil.
+- marketplace-v1/mp-sw.js: service worker reservado para notificaciones push de Marketplace; no reemplaza el service-worker.js actual.
+- marketplace-v1/firestore-marketplace.rules.txt: fragmento aditivo de reglas Firestore.
+- marketplace-v1/storage-marketplace.rules.txt: fragmento aditivo de Storage para fotografías de Marketplace.
+- marketplace-v1/functions/: Cloud Functions para checkout, OAuth de vendedores, verificación de pago, inventario reservado, notificaciones y propuestas de rutas.
+- pages/marketplace.html: redirección desde la pantalla Marketplace existente a la nueva carpeta.
+
+2. INSTALAR EN GITHUB
+1) Haz una copia de seguridad del ZIP actual de MOTI GO.
+2) Extrae el contenido de este paquete encima del repositorio conservando la estructura de carpetas. Solo se agrega marketplace-v1/ y se cambia pages/marketplace.html por la redirección incluida.
+3) No reemplaces js/firebase-config.js, firestore.rules, storage.rules, database.rules.json, service-worker.js ni otros archivos del proyecto.
+4) Publica en GitHub Pages. El acceso será /marketplace-v1/ y el enlace antiguo pages/marketplace.html redirigirá a la nueva versión.
+5) La carpeta reutiliza ../js/firebase-config.js para compartir Firebase Authentication y el mismo proyecto, pero escribe en colecciones marketplace*.
+
+3. REGLAS DE FIREBASE — NO REEMPLAZAR LAS ACTUALES
+Las reglas existentes terminan con un catch-all que deniega todo lo no reconocido. Para habilitar Marketplace hay que añadir permisos específicos, pero no reemplazar las reglas actuales.
+
+Firestore:
+- Abre el firestore.rules ACTUAL.
+- Dentro de service cloud.firestore / match /databases/{database}/documents, pega las funciones y bloques de marketplace-v1/firestore-marketplace.rules.txt ANTES del bloque final match /{document=**} { allow read, write: if false; }.
+- No copies dos veces las funciones mpv1... ni los bloques marketplace*.
+- Revisa y publica las reglas conservando el resto del archivo byte por byte siempre que sea posible.
+
+Storage:
+- Dentro de service firebase.storage / match /b/{bucket}/o, pega solo el bloque de marketplace-v1/storage-marketplace.rules.txt ANTES del catch-all final.
+- No reemplaces storage.rules.
+
+La interfaz puede abrir antes de agregar las reglas, pero Firestore/Storage rechazarán las operaciones de Marketplace hasta publicar los bloques aditivos.
+
+4. CREAR EL PRIMER ADMINISTRADOR DE MARKETPLACE
+No se permite que un usuario se convierta a sí mismo en administrador, almacenista o repartidor.
+1) Inicia sesión una vez con la cuenta que será administradora y copia su UID de Firebase Authentication.
+2) En Firestore crea manualmente el documento marketplaceRoles/{UID_ADMIN}:
+   {
+     "rol": "admin",
+     "activo": true,
+     "nombre": "Administrador Marketplace"
+   }
+3) Para cada repartidor de Marketplace crea marketplaceRoles/{UID_REPARTIDOR}:
+   { "rol": "repartidor", "activo": true, "nombre": "Nombre del repartidor" }
+4) Para el encargado del almacén crea marketplaceRoles/{UID_ALMACEN}:
+   { "rol": "almacen", "activo": true, "nombre": "Encargado de almacén" }
+No reutilices automáticamente los roles ni los perfiles del sistema normal de Mandaditos. Una cuenta solo tendrá ambos permisos si tú lo autorizas expresamente.
+
+5. CONFIGURACIÓN OPERATIVA OBLIGATORIA
+Entra con la cuenta admin en Marketplace > Operación > Administración y configura:
+- Zonas autorizadas con el nombre exacto que el cliente deberá seleccionar. Solo se aceptan entregas a esas zonas.
+- Tarifa base de entrega (MXN).
+- Comisión de Marketplace (%).
+- Máximo de paradas por ruta.
+- Plazo máximo de cabecera y de comunidades (1 a 4 días).
+- Coordenadas del almacén (para calcular recorrido completo).
+- Costo operativo por km de recolección/entrega, velocidad promedio y minutos por parada (para estimar tiempo y costo de ruta).
+- Tarifas por zona en JSON, si necesitas importes distintos a la tarifa base.
+El plazo mínimo de entrega se fija en un día después de la compra. El sistema estima entre mañana y 3 días en cabecera o hasta 4 días en zonas extendidas. La fecha real se debe confirmar según preparación, recolección y capacidad de ruta.
+
+No habilites ventas reales hasta decidir los importes de tarifa, comisión y pago a repartidores. La comisión de repartidores aún queda como política operativa por definir; el sistema no inventa ni liquida comisiones de repartidor automáticamente.
+
+6. MERCADO PAGO — PRUEBAS Y LÍMITES IMPORTANTES
+El backend NO guarda credenciales privadas en el navegador. Los vendedores deben vincular su propia cuenta Mercado Pago mediante OAuth; el token queda en marketplaceMPConnections, bloqueado a lecturas del cliente.
+
+Para desplegar Cloud Functions:
+1) Instala Firebase CLI y Node.js 20.
+2) Si ya existe firebase.json en el repositorio, NO lo reemplaces. Combina su sección functions con marketplace-v1/firebase.json.marketplace.example. Si no existe, copia ese ejemplo como firebase.json en la raíz.
+3) En marketplace-v1/functions ejecuta npm install.
+4) Desde la raíz del repositorio, configura secretos:
+   firebase functions:secrets:set MARKETPLACE_MP_CLIENT_ID
+   firebase functions:secrets:set MARKETPLACE_MP_CLIENT_SECRET
+   Introduce las credenciales de la aplicación de Mercado Pago de PRUEBA cuando Firebase las solicite.
+5) Crea marketplace-v1/functions/.env.moti-go-c562c a partir de .env.example y configura:
+   MARKETPLACE_BASE_URL=https://TU-USUARIO.github.io/TU-REPOSITORIO/marketplace-v1
+   MARKETPLACE_OAUTH_REDIRECT_URI=https://us-central1-moti-go-c562c.cloudfunctions.net/marketplaceMpOAuthCallback
+   MARKETPLACE_MP_WEBHOOK_URL=https://us-central1-moti-go-c562c.cloudfunctions.net/marketplaceMpWebhook
+   MP_SPLIT_1N_ENABLED=false
+   MP_TEST_MODE=true
+   Sustituye la URL de GitHub Pages por la URL real. Las URLs de OAuth y webhook deben coincidir con las configuradas en Mercado Pago.
+6) Despliega las funciones de Marketplace con Firebase CLI. Si Firebase requiere plan Blaze para Cloud Functions, habilita el plan antes del despliegue.
+7) En Mercado Pago configura la URL de redirección OAuth y registra el webhook de pagos. Prueba primero con cuentas de prueba de comprador y vendedor.
+
+LIMITACIÓN CRÍTICA DE SPLIT DE PAGOS:
+- Split 1:1 permite dividir el pago entre un vendedor y MOTI GO; cada vendedor debe autorizar a la aplicación por OAuth.
+- El carrito visual admite varias tiendas, pero el backend bloquea el cobro multitienda por seguridad mientras Split 1:N no esté autorizado e integrado. No simula que un solo vendedor recibe el dinero de todas las tiendas.
+- La documentación oficial de Mercado Pago México indica que Split 1:N está disponible únicamente para vendedores de cartera asesorada que estén en contacto con el equipo comercial. Además, esta versión incluye el punto de integración protegido, pero no inventa el endpoint privado/contrato 1:N. Por tanto, no basta con cambiar credenciales: primero hay que solicitar a Mercado Pago la habilitación y especificación técnica de Split 1:N, y luego completar/certificar ese adaptador.
+- Hasta entonces, se pueden probar la navegación, catálogo, publicación, solicitudes de vendedor, recepción, rutas y flujos con datos de prueba, pero no se debe aceptar un pago real multitienda.
+
+Documentación oficial:
+https://www.mercadopago.com.mx/developers/es/docs/split-payments/split-1-1/prerequisites
+https://www.mercadopago.com.mx/developers/es/docs/split-payments/split-1-1/integration-configuration/integrate-marketplace
+
+7. NOTIFICACIONES
+- Las notificaciones internas de Marketplace se guardan en marketplaceNotificaciones y se actualizan en tiempo real cuando la app está abierta.
+- La app solicita permiso para mostrar notificaciones del navegador. El administrador configura la clave pública VAPID desde el panel de operación; el backend envía push a los dispositivos registrados.
+- Para push cuando la app está cerrada, obtén la clave pública Web Push/VAPID en Firebase Console > Cloud Messaging > Web Push certificates y guárdala en Operación Marketplace > Administración > Clave pública Web Push/VAPID. Confirma que mp-sw.js use la configuración pública correcta del proyecto. El service worker de Marketplace es independiente del service-worker.js actual.
+- Las notificaciones de estado las genera el backend. Para que lleguen, hay que desplegar Cloud Functions.
+
+8. FLUJO LOGÍSTICO INCLUIDO
+1) Cliente arma carrito con productos de uno o varios vendedores.
+2) El backend vuelve a validar precios y existencias, reserva inventario y crea checkout solo cuando el pago puede procesarse de forma segura.
+3) El webhook verifica con la API de Mercado Pago el estado, referencia y monto antes de marcar aprobado.
+4) Después del pago, se generan solicitudes separadas por vendedor.
+5) Cada vendedor prepara y marca su solicitud como lista.
+6) El sistema propone rutas de recolección para solicitudes que requieren que MOTI GO las recoja. El repartidor confirma la recolección; el almacén confirma físicamente la recepción.
+7) Cuando todas las solicitudes del pedido están recibidas, el pedido queda listo para ruta a domicilio o listo para recoger en almacén.
+8) El administrador genera propuestas de rutas de entrega, revisa y asigna repartidor. El repartidor inicia la ruta y confirma la entrega con código.
+9) Los clientes pueden consultar el estado y el código de entrega/recogida en sus pedidos.
+
+Las distancias de ruta de esta versión son aproximaciones en línea recta con coordenadas disponibles; no son rutas de carretera ni ETA de tráfico. Para estimar el recorrido completo hay que registrar coordenadas del almacén y de las paradas. Si faltan coordenadas, el sistema no inventa el total y muestra la distancia parcial entre paradas cuando pueda calcularla. El tiempo y costo estimados requieren configurar velocidad promedio, minutos por parada y costos por km/hora. No incluyen todavía una comisión definitiva del repartidor. El administrador debe revisar cada propuesta antes de salir. Para cálculo real de carretera se necesitará integrar un proveedor de mapas/rutas y geocodificación.
+
+9. PRUEBA RECOMENDADA
+1) Despliega primero las reglas aditivas y Cloud Functions.
+2) Configura el documento marketplaceRoles del admin y las zonas/tarifas.
+3) Crea una cuenta vendedora de prueba, completa su perfil y vincula la cuenta de prueba de Mercado Pago.
+4) Publica un producto con una o varias fotografías.
+5) Compra ese producto desde una cuenta de comprador de prueba y paga en el checkout de prueba.
+6) Verifica en Firestore que el pedido y las solicitudes solo existan en colecciones marketplace*.
+7) Marca el producto como preparado, genera/autoriza la recolección, registra la recepción en almacén, genera ruta de entrega, asigna repartidor y confirma entrega con código.
+8) Comprueba las notificaciones y deja una valoración desde el pedido entregado.
+
+No se ejecutó una compra real ni se desplegaron reglas o funciones en tu proyecto Firebase desde este paquete. Primero haz pruebas en modo de prueba y verifica las reglas antes de habilitar ventas reales.

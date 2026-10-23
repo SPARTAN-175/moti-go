@@ -1,0 +1,11 @@
+// MOTI GO MARKETPLACE — REGLAS ADITIVAS DE STORAGE
+// Añadir este match dentro de service firebase.storage / match /b/{bucket}/o,
+// ANTES del catch-all final match /{allPaths=**}. No reemplazar las reglas existentes.
+match /marketplace-productos/{uid}/{archivo} {
+  allow read: if true;
+  allow create, update: if request.auth != null
+    && request.auth.uid == uid
+    && request.resource.size <= 5 * 1024 * 1024
+    && request.resource.contentType.matches('image/(jpeg|png|webp)');
+  allow delete: if request.auth != null && request.auth.uid == uid;
+}

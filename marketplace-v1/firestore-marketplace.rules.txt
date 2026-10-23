@@ -1,0 +1,168 @@
+// MOTI GO MARKETPLACE — REGLAS ADITIVAS
+// NO reemplazar firestore.rules. Integra estos helpers y match ANTES del catch-all
+// final match /{document=**} { allow read, write: if false; }.
+// Estas reglas no modifican pedidos, inventarios, usuarios ni ubicaciones de Mandaditos.
+
+function mpv1SignedIn() { return request.auth != null; }
+function mpv1RoleExists() { return mpv1SignedIn() && exists(/databases/$(database)/documents/marketplaceRoles/$(request.auth.uid)); }
+function mpv1Role() { return get(/databases/$(database)/documents/marketplaceRoles/$(request.auth.uid)).data; }
+function mpv1ActiveRole(r) { return mpv1RoleExists() && mpv1Role().rol == r && mpv1Role().activo == true; }
+function mpv1Admin() { return mpv1ActiveRole('admin'); }
+function mpv1Warehouse() { return mpv1ActiveRole('almacen') || mpv1Admin(); }
+function mpv1Rider() { return mpv1ActiveRole('repartidor'); }
+function mpv1Seller(uid) { return mpv1SignedIn() && request.auth.uid == uid && exists(/databases/$(database)/documents/marketplacePerfiles/$(uid)) && get(/databases/$(database)/documents/marketplacePerfiles/$(uid)).data.activo == true; }
+function mpv1OrderReadable() { return mpv1SignedIn() && (mpv1Admin() || mpv1Warehouse() || resource.data.clienteId == request.auth.uid || (mpv1Rider() && resource.data.repartidorId == request.auth.uid)); }
+
+match /marketplacePerfiles/{uid} {
+  allow get: if mpv1SignedIn() && (request.auth.uid == uid || mpv1Admin());
+  allow list: if mpv1Admin();
+  allow create: if mpv1SignedIn() && request.auth.uid == uid
+    && request.resource.data.uid == uid
+    && request.resource.data.rol == 'vendedor'
+    && request.resource.data.activo == true
+    && request.resource.data.nombre is string
+    && request.resource.data.nombre.size() > 0
+    && request.resource.data.keys().hasOnly(['uid','nombre','email','telefono','tiendaNombre','metodoAbastecimiento','direccionVendedor','zonaVendedor','latitud','longitud','rol','activo','creadoEn','actualizadoEn']);
+  allow update: if mpv1SignedIn() && request.auth.uid == uid
+    && resource.data.rol == 'vendedor' && request.resource.data.rol == 'vendedor'
+    && request.resource.data.uid == uid && request.resource.data.activo == true
+    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nombre','email','telefono','tiendaNombre','metodoAbastecimiento','direccionVendedor','zonaVendedor','latitud','longitud','actualizadoEn']);
+  allow delete: if mpv1Admin();
+}
+
+// Roles operativos: solo administración puede asignar admin/almacén/repartidor.
+match /marketplaceRoles/{uid} {
+  allow get: if mpv1SignedIn() && (request.auth.uid == uid || mpv1Admin());
+  allow list: if mpv1Admin();
+  allow create, update, delete: if mpv1Admin();
+}
+
+match /marketplaceProductos/{productoId} {
+  allow read: if resource.data.activo == true || mpv1Admin() || (mpv1SignedIn() && resource.data.vendedorId == request.auth.uid);
+  allow create: if mpv1Seller(request.auth.uid)
+    && request.resource.data.vendedorId == request.auth.uid
+    && request.resource.data.propietarioId == request.auth.uid
+    && request.resource.data.nombre is string && request.resource.data.nombre.size() > 0
+    && request.resource.data.precio is number && request.resource.data.precio > 0
+    && request.resource.data.stock is int && request.resource.data.stock >= 0
+    && request.resource.data.activo == true
+    && request.resource.data.ratingPromedio == 0 && request.resource.data.totalResenas == 0
+    && (!('reservado' in request.resource.data) || request.resource.data.reservado == 0)
+    && request.resource.data.keys().hasOnly(['nombre','categoria','precio','stock','existencia','descripcion','condicion','imagenes','imagenUrl','vendedorId','propietarioId','vendedorNombre','tiendaNombre','metodoAbastecimiento','activo','creadoEn','actualizadoEn','ratingPromedio','totalResenas','reservado']);
+  allow update: if mpv1Admin()
+    || (mpv1SignedIn() && resource.data.vendedorId == request.auth.uid
+      && request.resource.data.vendedorId == resource.data.vendedorId
+      && request.resource.data.propietarioId == resource.data.propietarioId
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['nombre','categoria','precio','stock','existencia','descripcion','condicion','imagenes','imagenUrl','vendedorNombre','tiendaNombre','metodoAbastecimiento','activo','actualizadoEn'])
+      && request.resource.data.stock is int && request.resource.data.stock >= 0
+      && request.resource.data.precio is number && request.resource.data.precio > 0);
+  allow delete: if mpv1Admin() || (mpv1SignedIn() && resource.data.vendedorId == request.auth.uid);
+}
+
+match /marketplaceFavoritos/{uid}/items/{productoId} {
+  allow read, create, update, delete: if mpv1SignedIn() && request.auth.uid == uid;
+}
+
+// Los pedidos, pagos, folios, snapshots de precio y reservas solo los crea el backend confiable.
+match /marketplacePedidos/{pedidoId} {
+  allow get, list: if mpv1OrderReadable();
+  allow create, delete: if false;
+  allow update: if mpv1Admin()
+    || (mpv1Warehouse() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado','actualizadoEn','recepcionEstado','recepcionEn','programadoEn','rutaId','incidencia','notasInternas']))
+    || (mpv1SignedIn() && resource.data.clienteId == request.auth.uid
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado','cancelacionMotivo','cancelacionSolicitadaEn','actualizadoEn'])
+      && request.resource.data.estado == 'cancelacion_solicitada')
+    || (mpv1Rider() && resource.data.repartidorId == request.auth.uid
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado','entregaResultado','entregadoEn','incidencia','actualizadoEn'])
+      && request.resource.data.estado in ['en_reparto','entregado','incidencia']);
+}
+
+match /marketplaceSolicitudesTienda/{solicitudId} {
+  allow get, list: if mpv1Admin() || mpv1Warehouse() || (mpv1SignedIn() && resource.data.vendedorId == request.auth.uid);
+  allow create, delete: if false;
+  allow update: if mpv1Admin()
+    || (mpv1SignedIn() && resource.data.vendedorId == request.auth.uid
+      && resource.data.estado in ['pendiente_preparacion','en_preparacion']
+      && request.resource.data.estado == 'preparado'
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado','preparadoEn','actualizadoEn']))
+    || (mpv1Warehouse() && request.resource.data.estado in ['recibido_almacen','recepcion_parcial','incidencia']
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado','recibidoPor','recibidoEn','cantidadRecibida','incidencia','actualizadoEn'])
+      && (request.resource.data.estado != 'recibido_almacen' || request.resource.data.recibidoPor == request.auth.uid));
+}
+
+match /marketplaceRecepciones/{recepcionId} {
+  allow read: if mpv1Warehouse();
+  allow create: if mpv1Warehouse()
+    && request.resource.data.recibidoPor == request.auth.uid
+    && request.resource.data.keys().hasOnly(['solicitudId','pedidoId','vendedorId','recibidoPor','estado','cantidades','incidencia','creadoEn']);
+  allow update, delete: if mpv1Admin();
+}
+match /marketplaceAlmacenMovimientos/{movimientoId} {
+  allow read: if mpv1Warehouse();
+  allow create: if mpv1Warehouse() && request.resource.data.responsableId == request.auth.uid;
+  allow update, delete: if mpv1Admin();
+}
+
+match /marketplaceRutas/{rutaId} {
+  allow get, list: if mpv1Admin() || mpv1Warehouse() || (mpv1Rider() && resource.data.repartidorId == request.auth.uid);
+  allow create, delete: if false; // Las rutas se generan mediante Cloud Functions.
+  allow update: if mpv1Admin() || mpv1Warehouse()
+    || (mpv1Rider() && resource.data.repartidorId == request.auth.uid
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado','inicioEn','finalizadaEn','actualizadoEn','paradasCompletadas','incidencias']));
+}
+
+match /marketplaceResenas/{resenaId} {
+  allow read: if true;
+  allow create: if mpv1SignedIn()
+    && resenaId == request.resource.data.pedidoId + '_' + request.resource.data.productoId
+    && request.resource.data.clienteId == request.auth.uid
+    && request.resource.data.calificacion is int
+    && request.resource.data.calificacion >= 1 && request.resource.data.calificacion <= 5
+    && request.resource.data.comentario is string
+    && request.resource.data.comentario.size() <= 1200
+    && exists(/databases/$(database)/documents/marketplacePedidos/$(request.resource.data.pedidoId))
+    && get(/databases/$(database)/documents/marketplacePedidos/$(request.resource.data.pedidoId)).data.clienteId == request.auth.uid
+    && get(/databases/$(database)/documents/marketplacePedidos/$(request.resource.data.pedidoId)).data.estado in ['entregado','recogido_cliente']
+    && get(/databases/$(database)/documents/marketplacePedidos/$(request.resource.data.pedidoId)).data.productoIds.hasAny([request.resource.data.productoId])
+    && request.resource.data.keys().hasOnly(['productoId','productoNombre','clienteId','clienteNombre','pedidoId','calificacion','comentario','creadoEn']);
+  allow update, delete: if mpv1Admin();
+}
+
+match /marketplaceNotificaciones/{notificacionId} {
+  allow get, list: if mpv1Admin() || (mpv1SignedIn() && resource.data.usuarioId == request.auth.uid);
+  allow create, delete: if false;
+  allow update: if mpv1SignedIn() && resource.data.usuarioId == request.auth.uid
+    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['leida','leidaEn'])
+    && request.resource.data.leida is bool;
+}
+match /marketplaceDispositivos/{deviceId} {
+  allow read, update, delete: if mpv1SignedIn() && resource.data.usuarioId == request.auth.uid;
+  allow create: if mpv1SignedIn() && request.resource.data.usuarioId == request.auth.uid;
+}
+match /marketplaceIncidencias/{incidenciaId} {
+  allow create: if mpv1SignedIn()
+    && resenaId == request.resource.data.pedidoId + '_' + request.resource.data.productoId
+    && request.resource.data.clienteId == request.auth.uid
+    && exists(/databases/$(database)/documents/marketplacePedidos/$(request.resource.data.pedidoId))
+    && get(/databases/$(database)/documents/marketplacePedidos/$(request.resource.data.pedidoId)).data.clienteId == request.auth.uid;
+  allow get, list: if mpv1Admin() || mpv1Warehouse() || (mpv1SignedIn() && resource.data.clienteId == request.auth.uid);
+  allow update: if mpv1Admin() || mpv1Warehouse();
+  allow delete: if mpv1Admin();
+}
+match /marketplacePagos/{pagoId} {
+  allow read, write: if false; // Solo backend con Admin SDK.
+}
+match /marketplaceMPConnections/{uid} {
+  allow read, write: if false; // Nunca exponer tokens OAuth a los navegadores.
+}
+match /marketplaceOAuthStates/{stateId} {
+  allow read, write: if false;
+}
+match /marketplaceConfig/{configId} {
+  allow read: if configId == 'operacion';
+  allow write: if mpv1Admin();
+}
+match /marketplaceLiquidaciones/{liquidacionId} {
+  allow read: if mpv1Admin() || (mpv1SignedIn() && resource.data.vendedorId == request.auth.uid);
+  allow write: if false; // Liquidaciones generadas por backend.
+}
