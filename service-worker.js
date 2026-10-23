@@ -1,4 +1,4 @@
-const CACHE_NAME = "moti-go-v3";
+const CACHE_NAME = "moti-go-v4";
 
 const FILES_TO_CACHE = [
 
@@ -116,6 +116,15 @@ self.addEventListener(
 self.addEventListener(
     "fetch",
     (event) => {
+
+        // Las Cloud Functions son APIs dinámicas: nunca deben pasar por la
+        // caché offline ni recibir una respuesta sintética 503 del service worker.
+        // Si la API no responde, el navegador debe mostrar el error real de red.
+        let requestUrl;
+        try { requestUrl = new URL(event.request.url); } catch { return; }
+        if (requestUrl.hostname.endsWith(".cloudfunctions.net")) {
+            return;
+        }
 
         /*
          * Primero buscamos el recurso en caché.
