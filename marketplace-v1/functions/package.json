@@ -2,7 +2,7 @@
   "name": "moti-go-marketplace-functions",
   "private": true,
   "description": "Backend aislado para MOTI GO Marketplace",
-  "engines": { "node": "20" },
+  "engines": { "node": "22" },
   "main": "index.js",
   "type": "module",
   "scripts": { "lint": "node --check index.js" },

@@ -1,0 +1,16 @@
+{
+  "functions": [
+    {
+      "source": "marketplace-v1/functions",
+      "codebase": "marketplace",
+      "runtime": "nodejs22",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        ".env*"
+      ]
+    }
+  ]
+}
