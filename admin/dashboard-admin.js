@@ -608,7 +608,7 @@ if (btnMarketplace) {
         () => {
 
             window.location.href =
-                "./marketplace/dashboard-marketplace.html";
+                "../marketplace-v1/index.html?vista=operacion";
 
         }
     );
