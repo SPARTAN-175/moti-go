@@ -6,3 +6,43 @@
 
 /* Administración de cobertura por localidad y código postal */
 .coverage-zones-editor{display:grid;gap:12px;margin:10px 0}.coverage-zone-row{border:1px solid var(--line,#dce5dd);border-radius:14px;padding:12px;background:var(--surface,#fff)}.coverage-zone-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.coverage-zone-fields label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted,#64748b)}.coverage-zone-fields input,.coverage-zone-fields select{width:100%;min-width:0;padding:10px;border:1px solid var(--line,#dce5dd);border-radius:9px;background:#fff;color:#17251d;font:inherit}.coverage-zone-fields .coverage-active{flex-direction:row;align-items:center;align-self:end;padding:10px}.coverage-zone-fields .coverage-active input{width:auto}.coverage-zone-row .danger{color:#b42318;margin-top:8px}@media(min-width:760px){.coverage-zone-fields{grid-template-columns:2fr 1fr 1fr 1fr 1fr auto}}
+
+
+/* Menú lateral de Marketplace y acceso directo al inicio de Mandaditos */
+.mobile-menu{display:inline-flex;flex-shrink:0;background:#edf5ef}
+.side-menu-overlay{position:fixed;inset:0;background:rgba(5,24,14,.56);z-index:100;opacity:0;transition:opacity .22s}
+.side-menu-overlay.is-open{opacity:1}
+.marketplace-side-menu{position:fixed;z-index:101;inset:0 auto 0 0;width:min(340px,88vw);background:#fff;box-shadow:18px 0 50px rgba(0,0,0,.18);padding:18px 15px;display:flex;flex-direction:column;gap:5px;transform:translateX(-105%);visibility:hidden;transition:transform .24s ease,visibility .24s;overflow-y:auto}
+.marketplace-side-menu.is-open{transform:translateX(0);visibility:visible}
+.side-menu-head{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 18px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.side-menu-label{font-size:9px;font-weight:800;letter-spacing:1.3px;color:#829087;margin:12px 10px 5px}
+.side-menu-link{width:100%;display:flex;align-items:center;gap:12px;padding:12px 11px;border:0;border-radius:10px;background:transparent;color:#304238;text-decoration:none;font:inherit;font-size:13px;font-weight:650;text-align:left;cursor:pointer}
+.side-menu-link:hover,.side-menu-link:focus-visible{background:#eef7f0;color:var(--green);outline:none}
+.side-menu-link .material-symbols-outlined{font-size:21px;color:var(--green)}
+.side-menu-divider{height:1px;background:var(--line);margin:12px 2px 4px}
+.side-menu-home{background:#eaf7ee;color:#075f35;margin-top:3px}
+.side-menu-footnote{font-size:10px;line-height:1.5;color:var(--muted);padding:0 10px;margin:3px 0 12px}
+body.side-menu-active{overflow:hidden}
+
+/* Cobertura agrupada por municipio con búsqueda */
+.coverage-search-row{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:11px;padding:5px 7px 5px 11px;margin:10px 0 13px}
+.coverage-search-row>span{color:var(--muted);font-size:20px}
+.coverage-search-row input{border:0!important;outline:0!important;box-shadow:none!important;min-width:0;flex:1;padding:9px 3px!important;font:inherit;font-size:12px!important}
+.coverage-search-row .secondary-btn{min-height:34px;padding:7px 10px;font-size:10px;white-space:nowrap}
+.coverage-zones-editor{display:grid;gap:12px;margin:10px 0}
+.coverage-municipality{border:1px solid #dce8df;border-radius:13px;background:#fff;overflow:hidden}
+.coverage-municipality>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;background:#f3f8f4;color:#193c28;cursor:pointer;list-style:none;font-size:13px;font-weight:800}
+.coverage-municipality>summary::-webkit-details-marker{display:none}
+.coverage-municipality>summary:after{content:'expand_more';font-family:'Material Symbols Outlined';font-size:20px;color:var(--green)}
+.coverage-municipality[open]>summary:after{content:'expand_less'}
+.coverage-municipality-count{font-size:10px;font-weight:600;color:var(--muted);margin-left:auto}
+.coverage-municipality-items{display:grid;gap:10px;padding:11px}
+.coverage-zone-row{border:1px solid var(--line);border-radius:11px;padding:11px;background:#fff}
+.coverage-zone-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.coverage-zone-fields label{display:flex;flex-direction:column;gap:5px;font-size:11px;color:var(--muted);min-width:0}
+.coverage-zone-fields input,.coverage-zone-fields select{width:100%;min-width:0;padding:9px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font:inherit;font-size:12px}
+.coverage-zone-fields .coverage-active{flex-direction:row;align-items:center;align-self:end;padding:9px}
+.coverage-zone-fields .coverage-active input{width:auto}
+.coverage-zone-row .danger{color:#b42318;margin-top:7px}
+@media(min-width:760px){.coverage-zone-fields{grid-template-columns:1.3fr 1.5fr 1fr .8fr .8fr .8fr auto}}
+@media(max-width:680px){.site-header{gap:7px}.mobile-menu{display:inline-flex}.marketplace-side-menu{width:min(320px,88vw)}.coverage-zone-fields{grid-template-columns:1fr 1fr}.coverage-zone-fields label:first-child,.coverage-zone-fields label:nth-child(2){grid-column:span 1}.coverage-municipality>summary{padding:12px;font-size:12px}}
