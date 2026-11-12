@@ -98,13 +98,18 @@ Documentación oficial:
 https://www.mercadopago.com.mx/developers/es/docs/split-payments/split-1-1/prerequisites
 https://www.mercadopago.com.mx/developers/es/docs/split-payments/split-1-1/integration-configuration/integrate-marketplace
 
-7. NOTIFICACIONES
+7. MERCADO PAGO — IDENTIFICACIÓN DE CUENTA
+- Al terminar OAuth, el backend consulta /users/me para recuperar un nombre público de cuenta (si Mercado Pago lo entrega) y guarda solo ese dato informativo junto al ID de usuario de MP.
+- El panel del vendedor muestra el nombre/ID y el modo configurado por MP_TEST_MODE (PRUEBAS o PRODUCCIÓN). Los tokens continúan privados en marketplaceMPConnections.
+- Para que la etiqueta corresponda a pruebas, usa credenciales de prueba y MP_TEST_MODE=true. Para producción se requieren credenciales de producción y MP_TEST_MODE=false; no cambies ese valor hasta completar las pruebas.
+
+8. NOTIFICACIONES
 - Las notificaciones internas de Marketplace se guardan en marketplaceNotificaciones y se actualizan en tiempo real cuando la app está abierta.
 - La app solicita permiso para mostrar notificaciones del navegador. El administrador configura la clave pública VAPID desde el panel de operación; el backend envía push a los dispositivos registrados.
 - Para push cuando la app está cerrada, obtén la clave pública Web Push/VAPID en Firebase Console > Cloud Messaging > Web Push certificates y guárdala en Operación Marketplace > Administración > Clave pública Web Push/VAPID. Confirma que mp-sw.js use la configuración pública correcta del proyecto. El service worker de Marketplace es independiente del service-worker.js actual.
 - Las notificaciones de estado las genera el backend. Para que lleguen, hay que desplegar Cloud Functions.
 
-8. FLUJO LOGÍSTICO INCLUIDO
+9. FLUJO LOGÍSTICO INCLUIDO
 1) Cliente arma carrito con productos de uno o varios vendedores.
 2) El backend vuelve a validar precios y existencias, reserva inventario y crea checkout solo cuando el pago puede procesarse de forma segura.
 3) El webhook verifica con la API de Mercado Pago el estado, referencia y monto antes de marcar aprobado.
@@ -117,7 +122,7 @@ https://www.mercadopago.com.mx/developers/es/docs/split-payments/split-1-1/integ
 
 Las distancias de ruta de esta versión son aproximaciones en línea recta con coordenadas disponibles; no son rutas de carretera ni ETA de tráfico. Para estimar el recorrido completo hay que registrar coordenadas del almacén y de las paradas. Si faltan coordenadas, el sistema no inventa el total y muestra la distancia parcial entre paradas cuando pueda calcularla. El tiempo y costo estimados requieren configurar velocidad promedio, minutos por parada y costos por km/hora. No incluyen todavía una comisión definitiva del repartidor. El administrador debe revisar cada propuesta antes de salir. Para cálculo real de carretera se necesitará integrar un proveedor de mapas/rutas y geocodificación.
 
-9. PRUEBA RECOMENDADA
+10. PRUEBA RECOMENDADA
 1) Despliega primero las reglas aditivas y Cloud Functions.
 2) Configura el documento marketplaceRoles del admin y las zonas/tarifas.
 3) Crea una cuenta vendedora de prueba, completa su perfil y vincula la cuenta de prueba de Mercado Pago.
@@ -128,3 +133,9 @@ Las distancias de ruta de esta versión son aproximaciones en línea recta con c
 8) Comprueba las notificaciones y deja una valoración desde el pedido entregado.
 
 No se ejecutó una compra real ni se desplegaron reglas o funciones en tu proyecto Firebase desde este paquete. Primero haz pruebas en modo de prueba y verifica las reglas antes de habilitar ventas reales.
+
+
+CAMBIOS DE ESTA ENTREGA
+- Se muestra el nombre público de la cuenta Mercado Pago cuando la API lo proporciona, su ID y el modo de integración configurado.
+- Se valida que la existencia del producto sea un número entero antes de guardar, para evitar rechazos por tipo de dato.
+- Si una dirección guardada pertenece a una localidad fuera de cobertura, se muestra una advertencia y se obliga a seleccionar una localidad activa; no se altera la dirección original guardada.
