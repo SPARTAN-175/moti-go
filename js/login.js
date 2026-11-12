@@ -1,7 +1,8 @@
 import { auth, db } from "./firebase-config.js";
 
 import {
-    signInWithEmailAndPassword
+    signInWithEmailAndPassword,
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
 
 import {
@@ -13,6 +14,24 @@ import {
 
 const btnLogin =
     document.getElementById("btnLogin");
+
+let loginAttemptInProgress = false;
+
+// Si el usuario vuelve accidentalmente a la pantalla de acceso, recuperamos
+// la sesión persistida por Firebase y lo enviamos a su panel.
+onAuthStateChanged(auth, async (user) => {
+    if (!user || loginAttemptInProgress) return;
+    try {
+        const snap = await getDoc(doc(db, "usuarios", user.uid));
+        if (!snap.exists()) return;
+        const perfil = snap.data();
+        if (perfil.passwordTemporal) { window.location.replace("cambiar-password.html"); return; }
+        if (perfil.tipo === "cliente") window.location.replace("dashboard-cliente.html");
+        else if (perfil.tipo === "repartidor") window.location.replace("dashboard-repartidor.html");
+        else if (perfil.tipo === "negocio") window.location.replace("dashboard-negocio.html");
+        else if (perfil.tipo === "admin") window.location.replace("../admin/dashboard-admin.html");
+    } catch (error) { console.warn("No se pudo recuperar el perfil de la sesión:", error); }
+});
 
 
 btnLogin.addEventListener(
@@ -82,6 +101,8 @@ async function iniciarSesion() {
         return;
     }
 
+
+    loginAttemptInProgress = true;
 
     try {
 
@@ -279,6 +300,8 @@ if (
             "No se pudo iniciar sesión. Inténtalo nuevamente."
         );
 
+    } finally {
+        loginAttemptInProgress = false;
     }
 
 }
