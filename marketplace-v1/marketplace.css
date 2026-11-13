@@ -46,3 +46,6 @@ body.side-menu-active{overflow:hidden}
 .coverage-zone-row .danger{color:#b42318;margin-top:7px}
 @media(min-width:760px){.coverage-zone-fields{grid-template-columns:1.3fr 1.5fr 1fr .8fr .8fr .8fr auto}}
 @media(max-width:680px){.site-header{gap:7px}.mobile-menu{display:inline-flex}.marketplace-side-menu{width:min(320px,88vw)}.coverage-zone-fields{grid-template-columns:1fr 1fr}.coverage-zone-fields label:first-child,.coverage-zone-fields label:nth-child(2){grid-column:span 1}.coverage-municipality>summary{padding:12px;font-size:12px}}
+
+/* Entrega 06: acciones de notificación y navegación a pedidos */
+.notification-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:7px}.notification-actions .text-btn{padding:3px 0;font-size:10px}.notification-item{cursor:default}.order-actions{display:flex;gap:7px;flex-wrap:wrap}
