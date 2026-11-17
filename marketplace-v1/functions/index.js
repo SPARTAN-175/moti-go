@@ -111,8 +111,245 @@ export const marketplaceDesconectarMP = onCall({region:REGION},async request=>{c
 
 export const marketplaceMpOAuthCallback = onRequest({region:REGION,secrets:[MP_CLIENT_ID,MP_CLIENT_SECRET]},async(req,res)=>{try{const code=String(req.query.code||''),state=String(req.query.state||'');if(!code||!state)throw new Error('Falta el código o el estado OAuth.');const stateRef=db.doc(`marketplaceOAuthStates/${state}`);const stateSnap=await stateRef.get();if(!stateSnap.exists||stateSnap.data().expiraEn.toDate()<new Date())throw new Error('El enlace de autorización expiró. Intenta de nuevo desde Marketplace.');const uid=stateSnap.data().uid;const resp=await fetch('https://api.mercadopago.com/oauth/token',{method:'POST',headers:{'content-type':'application/json'},body:new URLSearchParams({client_id:MP_CLIENT_ID.value(),client_secret:MP_CLIENT_SECRET.value(),grant_type:'authorization_code',code,redirect_uri:redirectUri()})});const data=await resp.json();if(!resp.ok)throw new Error(data.message||'Mercado Pago rechazó la autorización.');let mpProfile={};try{const profileResp=await fetch('https://api.mercadopago.com/users/me',{headers:{Authorization:`Bearer ${data.access_token}`}});if(profileResp.ok){const profileData=await profileResp.json();mpProfile={cuentaNombreMP:String(profileData.nickname||profileData.first_name||'').trim()||null};}}catch(profileError){console.warn('No se pudo consultar el perfil público de Mercado Pago:',profileError.message||profileError);}await db.doc(`marketplaceMPConnections/${uid}`).set({userId:uid,accessToken:data.access_token,refreshToken:data.refresh_token||null,publicKey:data.public_key||null,userIdMP:data.user_id||null,cuentaNombreMP:mpProfile.cuentaNombreMP||null,entornoMP:testMode()?'pruebas':'produccion',expiresAt:Timestamp.fromMillis(Date.now()+Number(data.expires_in||15552000)*1000),scopes:data.scope||'',actualizadoEn:FieldValue.serverTimestamp()},{merge:true});await stateRef.delete();const url=baseUrl();if(!url)throw new Error('Falta MARKETPLACE_BASE_URL.');res.redirect(`${url}/index.html?vista=vender&mp=conectado`);}catch(e){res.status(400).send(`<h2>No se pudo vincular Mercado Pago</h2><p>${String(e.message||e).replace(/[<>]/g,'')}</p><p>Regresa a MOTI GO Marketplace e inténtalo de nuevo.</p>`);}});
 
-export const marketplaceMpWebhook = onRequest({region:REGION,secrets:[MP_CLIENT_ID,MP_CLIENT_SECRET]},async(req,res)=>{try{if(req.method!=='POST'&&req.method!=='GET'){res.status(405).send('Method not allowed');return;}const pedidoId=String(req.query.pedidoId||req.body?.data?.pedidoId||req.body?.metadata?.pedidoId||'');const paymentId=String(req.body?.data?.id||req.query['data.id']||req.query.id||'');console.info('Marketplace webhook recibido',{pedidoId:pedidoId||null,paymentId:paymentId||null,tipo:String(req.query.type||req.query.topic||req.body?.type||'')});if(!pedidoId||!paymentId){console.warn('Marketplace webhook sin pedidoId o paymentId',{pedidoId:pedidoId||null,paymentId:paymentId||null});res.status(200).send('ignored');return;}const orderRef=db.doc(`marketplacePedidos/${pedidoId}`);const orderSnap=await orderRef.get();if(!orderSnap.exists){res.status(200).send('order-not-found');return;}const order=orderSnap.data();const sellerId=(order.vendedorIds||[])[0];const connection=await sellerToken(sellerId);const resp=await fetch(`https://api.mercadopago.com/v1/payments/${encodeURIComponent(paymentId)}`,{headers:{Authorization:`Bearer ${connection.accessToken}`}});const payment=await resp.json();if(!resp.ok){res.status(200).send('payment-not-available');return;}if(String(payment.external_reference)!==pedidoId||money(payment.transaction_amount)!==money(order.total)){res.status(200).send('verification-mismatch');return;}const paymentRef=db.doc(`marketplacePagos/${paymentId}`);await db.runTransaction(async tx=>{const [existing,liveOrder]=await Promise.all([tx.get(paymentRef),tx.get(orderRef)]);if(existing.exists||!liveOrder.exists)return;const o=liveOrder.data();if(payment.status==='approved'&&['expirado','rejected','cancelled','refunded','charged_back'].includes(o.pagoEstado)){tx.update(orderRef,{estado:'reembolso_pendiente',pagoEstado:'aprobado_posterior_a_expiracion',mpPaymentId:paymentId,mpStatus:payment.status,incidencia:'Pago aprobado después de liberar la reserva; requiere revisión y posible reembolso.',actualizadoEn:FieldValue.serverTimestamp()});tx.set(paymentRef,{pedidoId,paymentId,status:payment.status,amount:payment.transaction_amount,moneda:payment.currency_id,revisionReembolso:true,creadoEn:FieldValue.serverTimestamp()});return;}if(payment.status==='approved'&&o.pagoEstado!=='aprobado'){const productSnaps=[];for(const item of o.items)productSnaps.push(await tx.get(db.doc(`marketplaceProductos/${item.productoId}`)));productSnaps.forEach((snap,i)=>{if(!snap.exists)throw new Error('Producto desaparecido durante la confirmación.');const p=snap.data();tx.update(snap.ref,{stock:Math.max(0,Number(p.stock??p.existencia??0)-o.items[i].cantidad),existencia:Math.max(0,Number(p.stock??p.existencia??0)-o.items[i].cantidad),reservado:Math.max(0,Number(p.reservado||0)-o.items[i].cantidad),actualizadoEn:FieldValue.serverTimestamp()});});tx.update(orderRef,{pagoEstado:'aprobado',estado:'esperando_vendedores',reservaActiva:false,mpPaymentId:paymentId,mpStatus:payment.status,mpStatusDetail:payment.status_detail||'',reservaConfirmadaEn:FieldValue.serverTimestamp(),pagadoEn:FieldValue.serverTimestamp(),actualizadoEn:FieldValue.serverTimestamp()});tx.set(paymentRef,{pedidoId,paymentId,status:payment.status,amount:payment.transaction_amount,moneda:payment.currency_id,creadoEn:FieldValue.serverTimestamp()});}else if(['rejected','cancelled','refunded','charged_back'].includes(payment.status)&&o.pagoEstado!=='aprobado'){if(!o.reservaLiberadaEn&&o.reservaActiva!==false&&o.estado==='pendiente_pago'){const releaseRefs=o.items.map(item=>({item,ref:db.doc(`marketplaceProductos/${item.productoId}`)}));const releaseSnaps=[];for(const row of releaseRefs)releaseSnaps.push(await tx.get(row.ref));releaseSnaps.forEach((ps,i)=>{if(ps.exists)tx.update(ps.ref,{reservado:Math.max(0,Number(ps.data().reservado||0)-releaseRefs[i].item.cantidad),actualizadoEn:FieldValue.serverTimestamp()});});tx.update(orderRef,{pagoEstado:payment.status,estado:'cancelado',reservaActiva:false,mpPaymentId:paymentId,mpStatus:payment.status,reservaLiberadaEn:FieldValue.serverTimestamp(),reservaLiberadaMotivo:`Mercado Pago reportó el pago como ${payment.status}.`,actualizadoEn:FieldValue.serverTimestamp()});}else{tx.update(orderRef,{mpPaymentId:paymentId,mpStatus:payment.status,ultimoEstadoMpEn:FieldValue.serverTimestamp(),actualizadoEn:FieldValue.serverTimestamp()});}tx.set(paymentRef,{pedidoId,paymentId,status:payment.status,amount:payment.transaction_amount,moneda:payment.currency_id,creadoEn:FieldValue.serverTimestamp()});}});;
-  const updated=await orderRef.get();if(updated.data()?.pagoEstado==='aprobado'){await createSellerRequests(orderRef.id,updated.data());}res.status(200).send('ok');}catch(e){console.error('Marketplace webhook error; se solicita reintento de Mercado Pago',e);if(!res.headersSent)res.status(500).send('temporary-error');}});
+export const marketplaceMpWebhook = onRequest(
+  { region: REGION, secrets: [MP_CLIENT_ID, MP_CLIENT_SECRET] },
+  async (req, res) => {
+    try {
+      if (req.method !== 'POST' && req.method !== 'GET') {
+        res.status(405).send('Method not allowed');
+        return;
+      }
+
+      const pedidoId = String(
+        req.query.pedidoId ||
+        req.body?.data?.pedidoId ||
+        req.body?.metadata?.pedidoId ||
+        ''
+      );
+      const paymentId = String(
+        req.body?.data?.id ||
+        req.query['data.id'] ||
+        req.query.id ||
+        ''
+      );
+
+      console.info('Marketplace webhook recibido', {
+        pedidoId: pedidoId || null,
+        paymentId: paymentId || null,
+        tipo: String(req.query.type || req.query.topic || req.body?.type || '')
+      });
+
+      if (!pedidoId || !paymentId) {
+        console.warn('Webhook sin pedidoId o paymentId; no hay operación asociable.', {
+          pedidoId: pedidoId || null,
+          paymentId: paymentId || null
+        });
+        res.status(200).send('ignored');
+        return;
+      }
+
+      const orderRef = db.doc(`marketplacePedidos/${pedidoId}`);
+      const orderSnap = await orderRef.get();
+      if (!orderSnap.exists) {
+        console.warn('Webhook refiere a un pedido inexistente', { pedidoId, paymentId });
+        res.status(200).send('order-not-found');
+        return;
+      }
+
+      const order = orderSnap.data();
+      const sellerId = (order.vendedorIds || [])[0];
+      if (!sellerId) throw new Error(`El pedido ${pedidoId} no tiene vendedor asociado.`);
+
+      const connection = await sellerToken(sellerId);
+      const response = await fetch(
+        `https://api.mercadopago.com/v1/payments/${encodeURIComponent(paymentId)}`,
+        { headers: { Authorization: `Bearer ${connection.accessToken}` } }
+      );
+      const payment = await response.json().catch(() => ({}));
+
+      // Si Mercado Pago aún no permite consultar el pago, devolvemos 500 para que
+      // vuelva a notificar. No confirmamos ni liberamos con información incompleta.
+      if (!response.ok) {
+        throw new Error(payment.message || payment.error || `Mercado Pago HTTP ${response.status}`);
+      }
+
+      if (String(payment.external_reference || '') !== pedidoId ||
+          money(payment.transaction_amount) !== money(order.total)) {
+        console.error('Webhook rechazado por discrepancia de pedido/importe', {
+          pedidoId,
+          paymentId,
+          externalReferenceMatches: String(payment.external_reference || '') === pedidoId,
+          amountMatches: money(payment.transaction_amount) === money(order.total)
+        });
+        res.status(200).send('verification-mismatch');
+        return;
+      }
+
+      const paymentRef = db.doc(`marketplacePagos/${paymentId}`);
+      const status = String(payment.status || '').toLowerCase();
+
+      await db.runTransaction(async tx => {
+        const [paymentSnap, liveOrderSnap] = await Promise.all([
+          tx.get(paymentRef),
+          tx.get(orderRef)
+        ]);
+        if (!liveOrderSnap.exists) return;
+
+        const liveOrder = liveOrderSnap.data();
+        const previousPaymentStatus = paymentSnap.exists
+          ? String(paymentSnap.data()?.status || '').toLowerCase()
+          : '';
+
+        // La misma notificación repetida es idempotente, pero un cambio de estado
+        // del MISMO paymentId (pending -> approved/rejected) sí debe procesarse.
+        if (previousPaymentStatus === status) return;
+
+        const paymentRecord = {
+          pedidoId,
+          paymentId,
+          status,
+          amount: payment.transaction_amount,
+          moneda: payment.currency_id,
+          statusDetail: payment.status_detail || '',
+          actualizadoEn: FieldValue.serverTimestamp()
+        };
+
+        if (status === 'approved') {
+          if (liveOrder.pagoEstado === 'aprobado') {
+            tx.set(paymentRef, paymentRecord, { merge: true });
+            return;
+          }
+
+          // Si la reserva ya fue liberada o venció, jamás vendemos una unidad
+          // que ya pudo quedar disponible para otro comprador.
+          if (liveOrder.reservaActiva === false ||
+              liveOrder.reservaLiberadaEn ||
+              ['expirado', 'rejected', 'cancelled', 'rechazado', 'cancelado'].includes(String(liveOrder.pagoEstado || '').toLowerCase())) {
+            tx.update(orderRef, {
+              estado: 'reembolso_pendiente',
+              pagoEstado: 'aprobado_posterior_a_expiracion',
+              mpPaymentId: paymentId,
+              mpStatus: status,
+              incidencia: 'Mercado Pago aprobó el pago después de liberar la reserva. Requiere revisión y posible reembolso; no se descontó inventario.',
+              actualizadoEn: FieldValue.serverTimestamp()
+            });
+            tx.set(paymentRef, { ...paymentRecord, revisionReembolso: true }, { merge: true });
+            return;
+          }
+
+          const productRows = (liveOrder.items || []).map(item => ({
+            item,
+            ref: db.doc(`marketplaceProductos/${item.productoId}`)
+          }));
+          const productSnaps = [];
+          for (const row of productRows) productSnaps.push(await tx.get(row.ref));
+
+          productRows.forEach((row, i) => {
+            const productSnap = productSnaps[i];
+            if (!productSnap.exists) throw new Error(`Producto ${row.item.productoId} no existe al confirmar el pago.`);
+            const product = productSnap.data();
+            const quantity = Math.max(0, Number(row.item.cantidad || 0));
+            const currentStock = Math.max(0, Number(product.stock ?? product.existencia ?? 0));
+            const currentReserved = Math.max(0, Number(product.reservado || 0));
+
+            // La reserva de este pedido se consume una sola vez junto con la venta.
+            if (currentStock < quantity || currentReserved < quantity) {
+              throw new Error(`Inventario inconsistente al confirmar pedido ${pedidoId}, producto ${row.item.productoId}.`);
+            }
+
+            tx.update(row.ref, {
+              stock: currentStock - quantity,
+              existencia: currentStock - quantity,
+              reservado: currentReserved - quantity,
+              actualizadoEn: FieldValue.serverTimestamp()
+            });
+          });
+
+          tx.update(orderRef, {
+            pagoEstado: 'aprobado',
+            estado: 'esperando_vendedores',
+            reservaActiva: false,
+            mpPaymentId: paymentId,
+            mpStatus: status,
+            mpStatusDetail: payment.status_detail || '',
+            reservaConfirmadaEn: FieldValue.serverTimestamp(),
+            pagadoEn: FieldValue.serverTimestamp(),
+            actualizadoEn: FieldValue.serverTimestamp()
+          });
+          tx.set(paymentRef, paymentRecord, { merge: true });
+          return;
+        }
+
+        if (['rejected', 'cancelled'].includes(status)) {
+          if (liveOrder.pagoEstado !== 'aprobado' &&
+              liveOrder.reservaActiva !== false &&
+              !liveOrder.reservaLiberadaEn &&
+              liveOrder.estado === 'pendiente_pago') {
+            const productRows = (liveOrder.items || []).map(item => ({
+              item,
+              ref: db.doc(`marketplaceProductos/${item.productoId}`)
+            }));
+            const productSnaps = [];
+            for (const row of productRows) productSnaps.push(await tx.get(row.ref));
+
+            productRows.forEach((row, i) => {
+              const productSnap = productSnaps[i];
+              if (!productSnap.exists) return;
+              const product = productSnap.data();
+              const quantity = Math.max(0, Number(row.item.cantidad || 0));
+              const reserved = Math.max(0, Number(product.reservado || 0));
+              tx.update(row.ref, {
+                reservado: Math.max(0, reserved - quantity),
+                actualizadoEn: FieldValue.serverTimestamp()
+              });
+            });
+
+            tx.update(orderRef, {
+              pagoEstado: status,
+              estado: 'cancelado',
+              reservaActiva: false,
+              mpPaymentId: paymentId,
+              mpStatus: status,
+              reservaLiberadaEn: FieldValue.serverTimestamp(),
+              reservaLiberadaMotivo: `Mercado Pago reportó el pago como ${status}.`,
+              actualizadoEn: FieldValue.serverTimestamp()
+            });
+          } else {
+            tx.update(orderRef, {
+              mpPaymentId: paymentId,
+              mpStatus: status,
+              ultimoEstadoMpEn: FieldValue.serverTimestamp(),
+              actualizadoEn: FieldValue.serverTimestamp()
+            });
+          }
+          tx.set(paymentRef, paymentRecord, { merge: true });
+          return;
+        }
+
+        // pending / in_process / authorized: guardar el nuevo estado sin cerrar
+        // el pedido ni liberar su reserva. La siguiente notificación podrá cambiarlo.
+        tx.update(orderRef, {
+          mpPaymentId: paymentId,
+          mpStatus: status,
+          mpStatusDetail: payment.status_detail || '',
+          ultimoEstadoMpEn: FieldValue.serverTimestamp(),
+          actualizadoEn: FieldValue.serverTimestamp()
+        });
+        tx.set(paymentRef, paymentRecord, { merge: true });
+      });
+
+      const updated = await orderRef.get();
+      if (updated.data()?.pagoEstado === 'aprobado') {
+        await createSellerRequests(orderRef.id, updated.data());
+      }
+      res.status(200).send('ok');
+    } catch (error) {
+      console.error('Marketplace webhook error; se solicita reintento de Mercado Pago', error);
+      if (!res.headersSent) res.status(500).send('temporary-error');
+    }
+  }
+);
+
 async function createSellerRequests(orderId,order){const existing=await db.collection('marketplaceSolicitudesTienda').where('pedidoId','==',orderId).get();if(!existing.empty)return;const groups=new Map();for(const item of order.items||[]){if(!groups.has(item.vendedorId))groups.set(item.vendedorId,[]);groups.get(item.vendedorId).push(item);}const batch=db.batch();for(const [sellerId,items] of groups){const profile=(await db.doc(`marketplacePerfiles/${sellerId}`).get()).data()||{};const id=`${orderId}_${sellerId}`;const ref=db.doc(`marketplaceSolicitudesTienda/${id}`);batch.set(ref,{pedidoId:orderId,folio:order.folio,clienteId:order.clienteId,vendedorId:sellerId,vendedorNombre:profile.tiendaNombre||profile.nombre||items[0].vendedorNombre,items,productosResumen:items.map(i=>`${i.nombre} × ${i.cantidad}`).join(', '),estado:'pendiente_preparacion',metodoAbastecimiento:profile.metodoAbastecimiento||items[0].metodoAbastecimiento||'recoleccion_motigo',direccionVendedor:profile.direccionVendedor||'',zonaVendedor:profile.zonaVendedor||'Cabecera municipal',latitud:profile.latitud??null,longitud:profile.longitud??null,creadoEn:FieldValue.serverTimestamp(),actualizadoEn:FieldValue.serverTimestamp()});}await batch.commit();}
 
 export const marketplaceConsultarPagoRegreso = onCall({region:REGION,secrets:[MP_CLIENT_ID,MP_CLIENT_SECRET]},async request=>{
