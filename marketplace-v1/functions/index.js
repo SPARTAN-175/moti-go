@@ -16,6 +16,22 @@ const baseUrl = () => (process.env.MARKETPLACE_BASE_URL || '').replace(/\/$/, ''
 const redirectUri = () => (process.env.MARKETPLACE_OAUTH_REDIRECT_URI || '').trim().replace(/\/+$/, '');
 const split1NEnabled = () => process.env.MP_SPLIT_1N_ENABLED === 'true';
 const testMode = () => process.env.MP_TEST_MODE !== 'false';
+
+// Diagnóstico seguro: nunca registra tokens, secretos, códigos OAuth ni datos de tarjeta.
+function mpDiagnosticError(payload) {
+  const causes = Array.isArray(payload?.cause)
+    ? payload.cause.map(c => ({
+        code: c?.code ?? null,
+        description: c?.description ?? null
+      }))
+    : [];
+  return {
+    error: payload?.error ?? null,
+    message: payload?.message ?? null,
+    status: payload?.status ?? null,
+    causes
+  };
+}
 const money = n => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
 const addDays = (date, days) => { const d = new Date(date); d.setDate(d.getDate() + days); d.setHours(12,0,0,0); return d; };
 const folio = () => `MP-${Date.now().toString().slice(-8)}-${crypto.randomBytes(2).toString('hex').toUpperCase()}`;
@@ -86,7 +102,107 @@ export const marketplaceCrearCheckout = onCall({region:REGION,secrets:[MP_CLIENT
   await db.runTransaction(async tx=>{const snaps=[];for(const item of normalized)snaps.push(await tx.get(db.doc(`marketplaceProductos/${item.productoId}`)));snaps.forEach((snap,i)=>{if(!snap.exists)throw new HttpsError('aborted',`El producto ${normalized[i].nombre} ya no existe. Actualiza el carrito.`);const p=snap.data();const available=Number(p.stock??p.existencia??0)-Number(p.reservado||0);if(p.activo!==true||available<normalized[i].cantidad)throw new HttpsError('aborted',`La existencia de ${normalized[i].nombre} cambió. Actualiza el carrito.`);});snaps.forEach((snap,i)=>tx.update(snap.ref,{reservado:FieldValue.increment(normalized[i].cantidad)}));});
   const backBase=`${base}/index.html?vista=pedidos&pedido=${encodeURIComponent(orderRef.id)}`;
   const preference={items:[...normalized.map(i=>({id:i.productoId,title:i.nombre,quantity:i.cantidad,currency_id:'MXN',unit_price:i.precioSnapshot})),...(deliveryFee>0?[{id:'moti-delivery',title:'Servicio de entrega MOTI GO',quantity:1,currency_id:'MXN',unit_price:deliveryFee}]:[])],external_reference:orderRef.id,metadata:{pedidoId:orderRef.id,folio:orderFolio,marketplace:'MOTI_GO'},marketplace_fee:platformFee,back_urls:{success:`${backBase}&status=success`,failure:`${backBase}&status=failure`,pending:`${backBase}&status=pending`},auto_return:'approved',notification_url:`${webhookUrl}?pedidoId=${encodeURIComponent(orderRef.id)}`,statement_descriptor:'MOTI GO MARKETPLACE',expires:true,expiration_date_from:new Date().toISOString(),expiration_date_to:new Date(Date.now()+30*60*1000).toISOString()};
-  let mpPref;try{const response=await fetch('https://api.mercadopago.com/checkout/preferences',{method:'POST',headers:{Authorization:`Bearer ${connection.accessToken}`,'Content-Type':'application/json','X-Idempotency-Key':crypto.randomUUID()},body:JSON.stringify(preference)});mpPref=await response.json();if(!response.ok)throw new Error(mpPref.message||mpPref.error||`Mercado Pago HTTP ${response.status}`);if(testMode()&&!mpPref.sandbox_init_point)throw new Error('Mercado Pago no devolvió una URL de prueba. No se enviará al checkout real; revisa que la cuenta del vendedor y las credenciales sean de prueba.');}catch(err){await db.runTransaction(async tx=>{const refs=normalized.map(item=>({item,ref:db.doc(`marketplaceProductos/${item.productoId}`)}));const snaps=[];for(const row of refs)snaps.push(await tx.get(row.ref));snaps.forEach((snap,i)=>{if(snap.exists)tx.update(snap.ref,{reservado:Math.max(0,Number(snap.data().reservado||0)-refs[i].item.cantidad)});});});throw new HttpsError('failed-precondition',`Mercado Pago no pudo crear el checkout: ${err.message}`);}
+  let mpPref;
+  try {
+    console.info('MP_CHECKOUT_REQUEST', {
+      entornoConfigurado: testMode() ? 'pruebas' : 'produccion',
+      vendedorFirebaseUid: sellerId,
+      vendedorMercadoPagoId: connection.userIdMP || null,
+      conexionEntornoGuardado: connection.entornoMP || null,
+      tokenPresente: !!connection.accessToken,
+      publicKeyVendedorPresente: !!connection.publicKey,
+      cantidadItems: preference.items.length,
+      moneda: 'MXN',
+      subtotal,
+      total,
+      marketplaceFee: platformFee,
+      webhookConfigurado: !!webhookUrl
+    });
+
+    const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${connection.accessToken}`,
+        'Content-Type': 'application/json',
+        'X-Idempotency-Key': crypto.randomUUID()
+      },
+      body: JSON.stringify(preference)
+    });
+
+    const responseText = await response.text();
+    try {
+      mpPref = responseText ? JSON.parse(responseText) : {};
+    } catch {
+      mpPref = { raw_response: responseText.slice(0, 1000) };
+    }
+
+    const requestId = response.headers.get('x-request-id')
+      || response.headers.get('x-correlation-id')
+      || null;
+
+    console.info('MP_CHECKOUT_RESPONSE', {
+      httpStatus: response.status,
+      ok: response.ok,
+      requestId,
+      preferenceId: mpPref.id || null,
+      initPointPresent: !!mpPref.init_point,
+      sandboxInitPointPresent: !!mpPref.sandbox_init_point,
+      responseError: mpDiagnosticError(mpPref)
+    });
+
+    if (!response.ok) {
+      const mpError = mpDiagnosticError(mpPref);
+      const causeText = mpError.causes
+        .map(c => [c.code, c.description].filter(Boolean).join(': '))
+        .filter(Boolean)
+        .join(' | ');
+      const detail = [
+        `HTTP ${response.status}`,
+        mpError.error,
+        mpError.message,
+        causeText,
+        requestId ? `request-id ${requestId}` : null
+      ].filter(Boolean).join(' — ');
+      throw new Error(detail || 'Mercado Pago rechazó la preferencia sin devolver detalles.');
+    }
+
+    if (testMode() && !mpPref.sandbox_init_point) {
+      const keys = Object.keys(mpPref || {}).filter(k =>
+        !/token|secret|authorization|payer|email/i.test(k)
+      );
+      throw new Error(
+        `La API respondió HTTP ${response.status}, pero no devolvió sandbox_init_point. ` +
+        `Campos recibidos: ${keys.join(', ') || 'ninguno'}. ` +
+        `Vendedor MP: ${connection.userIdMP || 'no informado'}. ` +
+        `Conexión guardada como: ${connection.entornoMP || 'sin dato'}. ` +
+        (requestId ? `request-id ${requestId}.` : '')
+      );
+    }
+  } catch (err) {
+    console.error('MP_CHECKOUT_FAILURE', {
+      message: String(err?.message || err),
+      vendedorFirebaseUid: sellerId,
+      vendedorMercadoPagoId: connection.userIdMP || null,
+      entornoConfigurado: testMode() ? 'pruebas' : 'produccion'
+    });
+    await db.runTransaction(async tx => {
+      const refs = normalized.map(item => ({
+        item,
+        ref: db.doc(`marketplaceProductos/${item.productoId}`)
+      }));
+      const snaps = [];
+      for (const row of refs) snaps.push(await tx.get(row.ref));
+      snaps.forEach((snap, i) => {
+        if (snap.exists) tx.update(snap.ref, {
+          reservado: Math.max(0, Number(snap.data().reservado || 0) - refs[i].item.cantidad)
+        });
+      });
+    });
+    throw new HttpsError(
+      'failed-precondition',
+      `Mercado Pago no pudo crear el checkout: ${err.message}`
+    );
+  }
   const order={folio:orderFolio,clienteId:uid,clienteEmail:request.auth.token.email||'',nombreRecibe:String(input.nombreRecibe).trim(),telefono:String(input.telefono).trim(),direccion:input.modoEntrega==='domicilio'?String(input.direccion||'').trim():'ALMACEN CENTRAL MOTI GO',referencias:String(input.referencias||'').trim(),zona:input.modoEntrega==='almacen'?'Almacén central':String(input.zona).trim(),codigoPostal:input.modoEntrega==='domicilio'?String(input.codigoPostal||'').trim():'',municipio:input.modoEntrega==='almacen'?'Ostuacán':(matchedCoverage?.municipio||String(input.municipio||'Ostuacán').trim()),estadoMunicipio:'Chiapas',modoEntrega:input.modoEntrega,notas:String(input.notas||'').trim(),destinoLat:Number.isFinite(Number(input.destinoLat))&&input.destinoLat!==null?Number(input.destinoLat):null,destinoLng:Number.isFinite(Number(input.destinoLng))&&input.destinoLng!==null?Number(input.destinoLng):null,items:normalized,productoIds:normalized.map(i=>i.productoId),vendedorIds:sellers,subtotal,costoEntrega:deliveryFee,comisionMarketplace:commission,total,pagoEstado:'pendiente',reservaActiva:true,metodoPago:'mercado_pago',mpPreferenceId:mpPref.id,mpInitPoint:mpPref.init_point,mpSandboxInitPoint:mpPref.sandbox_init_point||null,estado:'pendiente_pago',codigoEntrega:code,fechaEstimadaDesde:Timestamp.fromDate(win.desde),fechaEstimadaHasta:Timestamp.fromDate(win.hasta),fechaPreferida:String(input.fechaPreferida||''),creadoEn:FieldValue.serverTimestamp(),actualizadoEn:FieldValue.serverTimestamp(),versionModelo:1};
   try{await orderRef.set(order);}catch(saveError){await db.runTransaction(async tx=>{const refs=normalized.map(item=>({item,ref:db.doc(`marketplaceProductos/${item.productoId}`)}));const snaps=[];for(const row of refs)snaps.push(await tx.get(row.ref));snaps.forEach((snap,i)=>{if(snap.exists)tx.update(snap.ref,{reservado:Math.max(0,Number(snap.data().reservado||0)-refs[i].item.cantidad),actualizadoEn:FieldValue.serverTimestamp()});});});throw new HttpsError('internal','No se pudo registrar el pedido. La reserva de inventario fue revertida; intenta nuevamente.');}return {pedidoId:orderRef.id,folio:orderFolio,checkoutUrl:testMode()?mpPref.sandbox_init_point:mpPref.init_point,fechaEstimadaDesde:win.desde.toISOString(),fechaEstimadaHasta:win.hasta.toISOString()};
 });
@@ -109,7 +225,7 @@ export const marketplaceIniciarOAuth = onCall({region:REGION,secrets:[MP_CLIENT_
 export const marketplaceEstadoConexionMP = onCall({region:REGION},async request=>{const uid=requireAuth(request);const snap=await db.doc(`marketplaceMPConnections/${uid}`).get();const c=snap.exists?snap.data():{};return {connected:!!c.accessToken,usuarioMP:c.userIdMP||null,cuentaNombre:c.cuentaNombreMP||null,entorno:c.entornoMP|| (testMode()?'pruebas':'produccion')};});
 export const marketplaceDesconectarMP = onCall({region:REGION},async request=>{const uid=requireAuth(request);const ref=db.doc(`marketplaceMPConnections/${uid}`);const snap=await ref.get();if(!snap.exists)return {ok:true,connected:false};await ref.delete();return {ok:true,connected:false};});
 
-export const marketplaceMpOAuthCallback = onRequest({region:REGION,secrets:[MP_CLIENT_ID,MP_CLIENT_SECRET]},async(req,res)=>{try{const code=String(req.query.code||''),state=String(req.query.state||'');if(!code||!state)throw new Error('Falta el código o el estado OAuth.');const stateRef=db.doc(`marketplaceOAuthStates/${state}`);const stateSnap=await stateRef.get();if(!stateSnap.exists||stateSnap.data().expiraEn.toDate()<new Date())throw new Error('El enlace de autorización expiró. Intenta de nuevo desde Marketplace.');const uid=stateSnap.data().uid;const resp=await fetch('https://api.mercadopago.com/oauth/token',{method:'POST',headers:{'content-type':'application/json'},body:new URLSearchParams({client_id:MP_CLIENT_ID.value(),client_secret:MP_CLIENT_SECRET.value(),grant_type:'authorization_code',code,redirect_uri:redirectUri()})});const data=await resp.json();if(!resp.ok)throw new Error(data.message||'Mercado Pago rechazó la autorización.');let mpProfile={};try{const profileResp=await fetch('https://api.mercadopago.com/users/me',{headers:{Authorization:`Bearer ${data.access_token}`}});if(profileResp.ok){const profileData=await profileResp.json();mpProfile={cuentaNombreMP:String(profileData.nickname||profileData.first_name||'').trim()||null};}}catch(profileError){console.warn('No se pudo consultar el perfil público de Mercado Pago:',profileError.message||profileError);}await db.doc(`marketplaceMPConnections/${uid}`).set({userId:uid,accessToken:data.access_token,refreshToken:data.refresh_token||null,publicKey:data.public_key||null,userIdMP:data.user_id||null,cuentaNombreMP:mpProfile.cuentaNombreMP||null,entornoMP:testMode()?'pruebas':'produccion',expiresAt:Timestamp.fromMillis(Date.now()+Number(data.expires_in||15552000)*1000),scopes:data.scope||'',actualizadoEn:FieldValue.serverTimestamp()},{merge:true});await stateRef.delete();const url=baseUrl();if(!url)throw new Error('Falta MARKETPLACE_BASE_URL.');res.redirect(`${url}/index.html?vista=vender&mp=conectado`);}catch(e){res.status(400).send(`<h2>No se pudo vincular Mercado Pago</h2><p>${String(e.message||e).replace(/[<>]/g,'')}</p><p>Regresa a MOTI GO Marketplace e inténtalo de nuevo.</p>`);}});
+export const marketplaceMpOAuthCallback = onRequest({region:REGION,secrets:[MP_CLIENT_ID,MP_CLIENT_SECRET]},async(req,res)=>{try{const code=String(req.query.code||''),state=String(req.query.state||'');if(!code||!state)throw new Error('Falta el código o el estado OAuth.');const stateRef=db.doc(`marketplaceOAuthStates/${state}`);const stateSnap=await stateRef.get();if(!stateSnap.exists||stateSnap.data().expiraEn.toDate()<new Date())throw new Error('El enlace de autorización expiró. Intenta de nuevo desde Marketplace.');const uid=stateSnap.data().uid;const resp=await fetch('https://api.mercadopago.com/oauth/token',{method:'POST',headers:{'content-type':'application/json'},body:new URLSearchParams({client_id:MP_CLIENT_ID.value(),client_secret:MP_CLIENT_SECRET.value(),grant_type:'authorization_code',code,redirect_uri:redirectUri()})});const data=await resp.json();if(!resp.ok){const detail=mpDiagnosticError(data);console.error('MP_OAUTH_TOKEN_FAILURE',{httpStatus:resp.status,requestId:resp.headers.get('x-request-id')||null,error:detail});throw new Error(`Mercado Pago OAuth HTTP ${resp.status}: ${detail.message||detail.error||'autorización rechazada'}.`);}console.info('MP_OAUTH_TOKEN_SUCCESS',{userIdMP:data.user_id||null,publicKeyPresente:!!data.public_key,scope:data.scope||null,expiresIn:data.expires_in||null});let mpProfile={};try{const profileResp=await fetch('https://api.mercadopago.com/users/me',{headers:{Authorization:`Bearer ${data.access_token}`}});if(profileResp.ok){const profileData=await profileResp.json();mpProfile={cuentaNombreMP:String(profileData.nickname||profileData.first_name||'').trim()||null};}}catch(profileError){console.warn('No se pudo consultar el perfil público de Mercado Pago:',profileError.message||profileError);}await db.doc(`marketplaceMPConnections/${uid}`).set({userId:uid,accessToken:data.access_token,refreshToken:data.refresh_token||null,publicKey:data.public_key||null,userIdMP:data.user_id||null,cuentaNombreMP:mpProfile.cuentaNombreMP||null,entornoMP:testMode()?'pruebas':'produccion',expiresAt:Timestamp.fromMillis(Date.now()+Number(data.expires_in||15552000)*1000),scopes:data.scope||'',actualizadoEn:FieldValue.serverTimestamp()},{merge:true});await stateRef.delete();const url=baseUrl();if(!url)throw new Error('Falta MARKETPLACE_BASE_URL.');res.redirect(`${url}/index.html?vista=vender&mp=conectado`);}catch(e){console.error('MP_OAUTH_CALLBACK_FAILURE',{message:String(e?.message||e)});res.status(400).send(`<h2>No se pudo vincular Mercado Pago</h2><p>${String(e.message||e).replace(/[<>]/g,'')}</p><p>Regresa a MOTI GO Marketplace e inténtalo de nuevo.</p>`);}});
 
 export const marketplaceMpWebhook = onRequest(
   { region: REGION, secrets: [MP_CLIENT_ID, MP_CLIENT_SECRET] },
